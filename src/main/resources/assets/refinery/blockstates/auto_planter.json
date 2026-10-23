@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,working=false": { "model": "refinery:block/auto_planter" },
+    "facing=north,working=true": { "model": "refinery:block/auto_planter_working" },
+    "facing=south,working=false": { "model": "refinery:block/auto_planter", "y": 180 },
+    "facing=south,working=true": { "model": "refinery:block/auto_planter_working", "y": 180 },
+    "facing=west,working=false": { "model": "refinery:block/auto_planter", "y": 270 },
+    "facing=west,working=true": { "model": "refinery:block/auto_planter_working", "y": 270 },
+    "facing=east,working=false": { "model": "refinery:block/auto_planter", "y": 90 },
+    "facing=east,working=true": { "model": "refinery:block/auto_planter_working", "y": 90 }
+  }
+}

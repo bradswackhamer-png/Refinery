@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="logistics"
+version="0.8.12+mc26.3.neoforge"
+displayName="Logistics"
+description='''
+NeoForge groundwork metadata placeholder for Logistics.
+'''
+authors="Kyle Klaus (@indemnity83)"
+
+[[dependencies.logistics]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.3-beta,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.logistics]]
+modId="minecraft"
+type="required"
+versionRange="[26.3, 26.4)"
+ordering="NONE"
+side="BOTH"

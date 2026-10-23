@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/press_head_front",
+    "up": "refinery:block/press_casing",
+    "down": "refinery:block/press_casing",
+    "north": "refinery:block/press_head_front",
+    "south": "refinery:block/press_head_side",
+    "east": "refinery:block/press_head_side",
+    "west": "refinery:block/press_head_side"
+  }
+}

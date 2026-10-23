@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SIS",
+    "ICI",
+    "SIS"
+  ],
+  "key": {
+    "S": "refinery:steel_ingot",
+    "I": "minecraft:iron_ingot",
+    "C": "minecraft:smooth_stone"
+  },
+  "result": {
+    "id": "refinery:press_casing",
+    "count": 4
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PBP",
+    "BFB",
+    "PBP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "B": "minecraft:iron_bars",
+    "F": "minecraft:blast_furnace"
+  },
+  "result": {
+    "id": "refinery:boiler_firebox",
+    "count": 1
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/boiler_fuel_port" },
+    "facing=south": { "model": "refinery:block/boiler_fuel_port", "y": 180 },
+    "facing=west": { "model": "refinery:block/boiler_fuel_port", "y": 270 },
+    "facing=east": { "model": "refinery:block/boiler_fuel_port", "y": 90 }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/auto_planter_top",
+    "down": "refinery:block/reinforced_casing",
+    "up": "refinery:block/auto_planter_top",
+    "north": "refinery:block/auto_planter_front_on",
+    "south": "refinery:block/machine_side",
+    "east": "refinery:block/machine_side",
+    "west": "refinery:block/machine_side"
+  }
+}

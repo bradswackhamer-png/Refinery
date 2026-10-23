@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PSP",
+    "SIS",
+    "PSP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "S": "refinery:steel_ingot",
+    "I": "minecraft:smooth_stone"
+  },
+  "result": {
+    "id": "refinery:turbine_casing",
+    "count": 4
+  }
+}

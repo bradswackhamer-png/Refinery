@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "RCR",
+    " P "
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "R": "minecraft:redstone_block",
+    "C": "refinery:turbine_casing"
+  },
+  "result": {
+    "id": "refinery:turbine_energy_port",
+    "count": 1
+  }
+}

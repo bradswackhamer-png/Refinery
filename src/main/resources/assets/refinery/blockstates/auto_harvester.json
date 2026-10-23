@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,working=false": { "model": "refinery:block/auto_harvester" },
+    "facing=north,working=true": { "model": "refinery:block/auto_harvester_working" },
+    "facing=south,working=false": { "model": "refinery:block/auto_harvester", "y": 180 },
+    "facing=south,working=true": { "model": "refinery:block/auto_harvester_working", "y": 180 },
+    "facing=west,working=false": { "model": "refinery:block/auto_harvester", "y": 270 },
+    "facing=west,working=true": { "model": "refinery:block/auto_harvester_working", "y": 270 },
+    "facing=east,working=false": { "model": "refinery:block/auto_harvester", "y": 90 },
+    "facing=east,working=true": { "model": "refinery:block/auto_harvester_working", "y": 90 }
+  }
+}

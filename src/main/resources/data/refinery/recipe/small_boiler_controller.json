@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PSP",
+    "RCR",
+    "PSP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "S": "refinery:steel_ingot",
+    "R": "minecraft:redstone",
+    "C": "refinery:steel_boiler_casing"
+  },
+  "result": {
+    "id": "refinery:small_boiler_controller",
+    "count": 1
+  }
+}

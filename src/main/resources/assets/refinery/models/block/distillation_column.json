@@ -1,0 +1,60 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/distillation_column",
+    "column": "refinery:block/distillation_column",
+    "casing": "refinery:block/reinforced_casing"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1],
+      "to": [15, 2, 15],
+      "faces": {
+        "down": { "uv": [1, 1, 15, 15], "texture": "#casing" },
+        "up": { "uv": [1, 1, 15, 15], "texture": "#casing" },
+        "north": { "uv": [1, 14, 15, 16], "texture": "#column" },
+        "south": { "uv": [1, 14, 15, 16], "texture": "#column" },
+        "west": { "uv": [1, 14, 15, 16], "texture": "#column" },
+        "east": { "uv": [1, 14, 15, 16], "texture": "#column" }
+      }
+    },
+    {
+      "from": [3, 2, 3],
+      "to": [13, 14, 13],
+      "faces": {
+        "north": { "uv": [3, 2, 13, 14], "texture": "#column" },
+        "south": { "uv": [3, 2, 13, 14], "texture": "#column" },
+        "west": { "uv": [3, 2, 13, 14], "texture": "#column" },
+        "east": { "uv": [3, 2, 13, 14], "texture": "#column" }
+      }
+    },
+    {
+      "from": [1, 14, 1],
+      "to": [15, 16, 15],
+      "faces": {
+        "down": { "uv": [1, 1, 15, 15], "texture": "#casing" },
+        "up": { "uv": [1, 1, 15, 15], "texture": "#casing" },
+        "north": { "uv": [1, 0, 15, 2], "texture": "#column" },
+        "south": { "uv": [1, 0, 15, 2], "texture": "#column" },
+        "west": { "uv": [1, 0, 15, 2], "texture": "#column" },
+        "east": { "uv": [1, 0, 15, 2], "texture": "#column" }
+      }
+    },
+    {
+      "from": [1, 2, 1], "to": [2.5, 14, 2.5],
+      "faces": { "north": { "texture": "#casing" }, "west": { "texture": "#casing" }, "east": { "texture": "#casing" }, "south": { "texture": "#casing" } }
+    },
+    {
+      "from": [13.5, 2, 1], "to": [15, 14, 2.5],
+      "faces": { "north": { "texture": "#casing" }, "west": { "texture": "#casing" }, "east": { "texture": "#casing" }, "south": { "texture": "#casing" } }
+    },
+    {
+      "from": [1, 2, 13.5], "to": [2.5, 14, 15],
+      "faces": { "north": { "texture": "#casing" }, "west": { "texture": "#casing" }, "east": { "texture": "#casing" }, "south": { "texture": "#casing" } }
+    },
+    {
+      "from": [13.5, 2, 13.5], "to": [15, 14, 15],
+      "faces": { "north": { "texture": "#casing" }, "west": { "texture": "#casing" }, "east": { "texture": "#casing" }, "south": { "texture": "#casing" } }
+    }
+  ]
+}

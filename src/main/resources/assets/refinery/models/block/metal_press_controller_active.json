@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/press_casing",
+    "up": "refinery:block/press_casing",
+    "down": "refinery:block/press_casing",
+    "north": "refinery:block/metal_press_controller_front_active",
+    "south": "refinery:block/press_casing",
+    "east": "refinery:block/press_casing",
+    "west": "refinery:block/press_casing"
+  }
+}

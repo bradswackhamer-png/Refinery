@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "BCB",
+    " P "
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "B": "minecraft:water_bucket",
+    "C": "refinery:steel_boiler_casing"
+  },
+  "result": {
+    "id": "refinery:boiler_water_port",
+    "count": 1
+  }
+}

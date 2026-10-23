@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CRC",
+    "CFC",
+    "CCC"
+  ],
+  "key": {
+    "R": "minecraft:comparator",
+    "F": "minecraft:blast_furnace",
+    "C": "refinery:blast_furnace_casing"
+  },
+  "result": {
+    "id": "refinery:blast_furnace_controller",
+    "count": 1
+  }
+}

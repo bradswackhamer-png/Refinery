@@ -1,0 +1,6 @@
+{
+  "values": [
+    "#c:oil",
+    { "id": "logistics:core/crude_oil", "required": false }
+  ]
+}

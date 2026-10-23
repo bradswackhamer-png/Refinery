@@ -1,0 +1,32 @@
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="Antigravity"
+description='''
+Industrial 3x3 multiblock petroleum refinery for Minecraft 26.3 and Logistics Automation.
+Fractionally distills Crude Oil into Diesel, Gasoline/Gas, Tar, and Sulfur with blueprint projection, dual power (FE/RF and Solid Combustion), and directional I/O ports.
+'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="logistics"
+    type="optional"
+    versionRange="[0.8.0,)"
+    ordering="NONE"
+    side="BOTH"

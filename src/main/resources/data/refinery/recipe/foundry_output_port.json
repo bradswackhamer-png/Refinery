@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "GHG",
+    " C "
+  ],
+  "key": {
+    "C": "refinery:blast_furnace_casing",
+    "H": "minecraft:hopper",
+    "G": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "refinery:foundry_output_port",
+    "count": 1
+  }
+}

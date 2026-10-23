@@ -1,0 +1,298 @@
+# Industrial Refinery — Complete Mod Wiki & Engineering Guide
+*A comprehensive guide to heavy industry, fractional distillation, steam power, metallurgy, and automation for Minecraft 26.3 NeoForge.*
+
+---
+
+## Table of Contents
+1. [Core Progression & Materials](#1-core-progression--materials)
+2. [Essential Tool: The Refinery Wrench](#2-essential-tool-the-refinery-wrench)
+3. [Standalone Agricultural Automation](#3-standalone-agricultural-automation)
+   - [Automated Planter](#automated-planter)
+   - [Automated Harvester](#automated-harvester)
+4. [Heavy Metallurgy](#4-heavy-metallurgy)
+   - [Industrial Blast Smelter (5×5×5 Multiblock)](#industrial-blast-smelter-555)
+   - [Industrial Metal Press (2×2×2 Multiblock)](#industrial-metal-press-222)
+5. [Thermodynamic Steam Power & Closed-Loop Energy](#5-thermodynamic-steam-power--closed-loop-energy)
+   - [Small Steam Boiler (3×3×3 Multiblock)](#small-steam-boiler-333)
+   - [Large Heavy Steam Boiler (5×5×5 Multiblock)](#large-heavy-steam-boiler-555)
+   - [Steam Turbine Generator (3×3×3 Multiblock)](#steam-turbine-generator-333)
+   - [The Closed-Loop Rankine Cycle](#the-closed-loop-rankine-cycle)
+6. [Petroleum Refining & Chemical Byproducts](#6-petroleum-refining--chemical-byproducts)
+   - [Petroleum Refinery (3×3×4 Multiblock)](#petroleum-refinery-334)
+   - [Fuels & Byproducts](#fuels--byproducts)
+7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
+8. [Automation, Pipes, & Interfacing](#8-automation-pipes--interfacing)
+
+---
+
+## 1. Core Progression & Materials
+
+The mod introduces a tiered industrial metallurgy and chemical progression:
+
+```
+[Raw Iron + Coal] ---> (5x5x5 Blast Smelter) ---> [Steel Ingot]
+                                                       |
+                                                       v
+                                            (2x2x2 Metal Press)
+                                                       |
+                                                       v
+                                            [Heavy Steel Plate]
+                                                       |
+       +-----------------------+-----------------------+-----------------------+
+       |                       |                       |                       |
+       v                       v                       v                       v
+[3x3x3 Small Boiler]  [5x5x5 Large Boiler]   [3x3x3 Steam Turbine]   [3x3x4 Refinery]
+```
+
+### Key Materials
+| Item | Source | Purpose |
+| :--- | :--- | :--- |
+| **Steel Ingot** (`refinery:steel_ingot`) | Industrial Blast Smelter | Primary alloy for heavy machine frames, Casings, and Controllers. |
+| **Heavy Steel Plate** (`refinery:steel_plate`) | Industrial Metal Press (or crafting) | Reinforced plating required for high-pressure vessels, boilers, and presses. |
+| **Petroleum Tar** (`refinery:tar`) | Refinery byproduct | Heavy hydrocarbon fuel (burns 1,600 ticks / 8 items) or crafts into torches. |
+| **Sulfur Dust** (`refinery:sulfur_dust`) | Refinery byproduct | Chemical mineral used to craft Gunpowder without creepers. |
+| **Diesel** (`refinery:diesel`) | Refinery fractional distillation | High-yield petroleum distillate. |
+| **Gasoline** (`refinery:gasoline`) | Refinery fractional distillation | Volatile combustible gas distillate. |
+| **High Pressure Steam** (`refinery:steam`) | Steam Boilers | Working fluid for power generation in Steam Turbines. |
+
+---
+
+## 2. Essential Tool: The Refinery Wrench
+
+The **Refinery Wrench** (`refinery:refinery_wrench`) is the ultimate industrial diagnostic tool.
+
+- **Block Reorientation**: Right-click machine blocks, ports, or casings to rotate their horizontal facing.
+- **3D Holographic Blueprint**: Sneak-right-click (or right-click) any **Multiblock Controller** to cast a real-time **3D in-world hologram projection** for 30 seconds.
+  - Missing or incorrect blocks are outlined in color-coded wireframes.
+  - In-world floating 3D labels reveal the exact block name and position up to 10 blocks away.
+  - Validates the structure and automatically forms the multiblock upon completion.
+
+---
+
+## 3. Standalone Agricultural Automation
+
+### Automated Planter
+The **Automated Planter** (`refinery:auto_planter`) manages soil preparation and crop planting over a large farm area.
+
+- **Scan Coverage**: 5 blocks in all horizontal directions (an **11×11 square**, 121 tiles total) up to **2 blocks above** the planter.
+- **Tilling & Planting**: Automatically detects dirt or grass blocks, tills them into farmland, and plants any valid seeds found in its 9-slot inventory.
+- **Energy**: Consumes 1-2 FE/t standby and 10 FE per planting action.
+- **Automation**: Accepts seeds from hoppers, droppers, or item pipes through any face.
+
+### Automated Harvester
+The **Automated Harvester** (`refinery:auto_harvester`) scans mature crops directly in front of it.
+
+- **Scan Coverage**: An **11×11 field** directly in front of the machine (5 blocks to the left, 5 blocks to the right, and 11 blocks forward). Place this unit above ground centered with your farm.
+- **Harvest & Replant**: Detects fully mature crops (Wheat, Carrots, Potatoes, Beetroots, Melon/Pumpkin stems, etc.), harvests the drops, and immediately replants the seed.
+- **Buffer & Ejection**: Internal 9-slot buffer. **Automatically pushes harvested produce into chests or pipes** placed directly **behind** or **below** the harvester!
+- **Energy**: Consumes 2 FE/t standby and 20 FE per harvest.
+
+```
+       [+5 Left] <--- 11 Blocks Wide ---> [+5 Right]
+            . . . . . . . . . . .  ^
+            . . . . . . . . . . .  |
+            . . . . . . . . . . .  | 11 Blocks
+            . . . . . . . . . . .  | Forward
+            . . . . . . . . . . .  v
+                   [ HARVESTER ]
+                   [Output Chest] (Placed Behind or Below)
+```
+
+---
+
+## 4. Heavy Metallurgy
+
+### Industrial Blast Smelter (5×5×5)
+A massive foundry furnace that transforms Raw Iron and Coal into high-grade Steel Ingots.
+
+- **Dimensions**: 5 blocks wide × 5 blocks tall × 5 blocks deep (125 blocks total).
+- **Viewing Window**: The front wall features a 3×3 transparent **Foundry Heat Glass** window where you can watch raw materials drop into the molten chamber and cook into glowing steel!
+- **Recipe**: 1 Raw Iron + 1 Coal/Charcoal -> 1 Steel Ingot (100 ticks).
+- **Buffers**: 4 Iron input slots, 4 Fuel slots, 4 Steel output slots.
+- **Automation**: 
+  - **Foundry Input Port**: Inserts Raw Iron and Coal via pipes/hoppers.
+  - **Foundry Output Port**: Automatically pulls out finished Steel Ingots.
+
+#### Layer-by-Layer Assembly (Local coordinates relative to Controller)
+- **Layer 0 (Foundation)**:
+  - `(0, 0, 0)`: **Blast Smelter Controller** (Front center)
+  - `(-1, 0, 0)`: **Foundry Input Port**
+  - `(1, 0, 0)`: **Foundry Output Port**
+  - Remaining 22 floor positions: **Foundry Refractory Casing**
+- **Layers 1–3 (Smelting Chamber & Viewing Window)**:
+  - Front face x in [-1, 1]: **Foundry Heat Glass** (3×3 window)
+  - Center 3×3 interior (x in [-1, 1], z in [1, 3]): **Air (Hollow chamber)**
+  - Outer side and back walls: **Foundry Refractory Casing**
+- **Layer 4 (Roof)**:
+  - 25 **Foundry Refractory Casing** covering the entire top.
+
+---
+
+### Industrial Metal Press (2×2×2)
+A compact hydraulic mechanical press for stamping ingots into structural plates.
+
+- **Dimensions**: 2 wide × 2 tall × 2 deep (8 blocks total).
+- **Physical 3D Stamping Animation**: Features an in-world animated hydraulic piston ram with a power stroke, heavy anvil impact (`SoundEvents.ANVIL_LAND`), and spark ejection!
+- **Recipe**: 1 Steel Ingot -> 1 Heavy Steel Plate (40 ticks = 2.0s).
+- **Energy**: 50,000 FE buffer; consumes 20 FE/t (800 FE per plate).
+- **Logistics**:
+  - **Top & Sides**: Inserts Steel Ingots into the 2-slot input queue.
+  - **Bottom**: Extracts Heavy Steel Plates from the 2-slot output buffer.
+
+#### Layer-by-Layer Assembly
+```
+Top Layer (y=1):
+  [Press Casing]    [Press Hydraulic Head]
+  [Press Casing]    [Press Casing]
+
+Bottom Layer (y=0):
+  [Press Controller] [Press Anvil Bed]
+  [Press Casing]    [Press Casing]
+```
+
+---
+
+## 5. Thermodynamic Steam Power & Closed-Loop Energy
+
+### Small Steam Boiler (3×3×3)
+A compact thermal generator for small-to-mid tier power generation.
+
+- **Capacity**: 16,000 mB Water, 16,000 mB Steam, 4 Fuel slots.
+- **Performance**: Consumes 50 mB Water -> Produces 100 mB Steam per cycle.
+- **Redstone Requirement**: Requires an active redstone signal to burn fuel.
+- **Meltdown Safety Warning**: If the boiler is fueled and burning but **runs completely out of water**, an internal overheat timer begins ticking. If left uncooled without water for **1 full minute (1,200 ticks)**, the boiler undergoes a catastrophic steam explosion with a **7.0 blast power**, destroying the multiblock!
+
+#### Small Boiler Layer Schematic
+- **Layer 0 (Base)**:
+  - Front: `(-1, 0, 0)` **Boiler Water Port**, `(0, 0, 0)` **Small Boiler Controller**, `(1, 0, 0)` **Boiler Fuel Port**
+  - Center: `(0, 0, 1)` **Boiler Firebox Hearth** (flames ignite when active)
+  - Rear: `(0, 0, 2)` **Boiler Steam Output Port**
+  - Corners: **Steel Boiler Casing**
+- **Layer 1 (Heat Exchanger)**:
+  - Center `(0, 1, 1)`: **Boiler Pressure Pipe**
+  - Surrounding 8 blocks: **Steel Boiler Casing**
+- **Layer 2 (Roof)**:
+  - 9 **Steel Boiler Casing**
+
+---
+
+### Large Heavy Steam Boiler (5×5×5)
+An industrial-grade boiler engineered for massive steam output.
+
+- **Capacity**: 64,000 mB Water, 64,000 mB Steam, 8 Fuel slots.
+- **Performance**: 5× production rate (250 mB Water -> 500 mB Steam per cycle).
+- **Redstone Requirement**: Requires an active redstone signal to burn.
+- **Meltdown Condition**: Running dry for 60 seconds triggers a **massive 10.0 power crater explosion**!
+
+#### Large Boiler Layer Schematic
+- **Layer 0 (Foundation & Hearth)**:
+  - Front: `(-1, 0, 0)` Water Port, `(0, 0, 0)` Large Controller, `(1, 0, 0)` Fuel Port
+  - Rear: `(0, 0, 4)` Steam Port
+  - Center 3×3 hearth (x in [-1, 1], z in [1, 3]): 9 **Boiler Firebox Hearth** blocks
+  - Perimeter: **Steel Boiler Casing**
+- **Layers 1–3 (Core Pressure Piping)**:
+  - Center 3×3×3 core: 27 **Boiler Pressure Pipes** transferring heat
+  - Outer walls: **Steel Boiler Casing**
+- **Layer 4 (Roof)**:
+  - 25 **Steel Boiler Casing** covering the entire top.
+
+---
+
+### Steam Turbine Generator (3×3×3)
+A heavy Rankine-cycle turbine converting High Pressure Steam into Forge Energy and recyclable water.
+
+- **Capacity**: 32,000 mB Steam, 16,000 mB Water, **1,000,000 FE battery**.
+- **Thermodynamic Conversion**:
+  - 1 mB High Pressure Steam -> 20 FE + 0.5 mB Condensed Water.
+  - Consumes up to 50 mB Steam/t -> Generates **1,000 FE/t**.
+  - Output extraction rate: Up to 10,000 FE/t via Energy Port or Controller.
+
+#### Turbine Layer Schematic
+- **Layer 0 (Base & Ports)**:
+  - Front: `(-1, 0, 0)` **Turbine Steam Port**, `(0, 0, 0)` **Turbine Controller**, `(1, 0, 0)` **Turbine Energy Port**
+  - Center `(0, 0, 1)`: **Turbine Rotor Shaft** (Bottom segment)
+  - Rear `(0, 0, 2)`: **Turbine Water Port** (Condensed water drain)
+  - Corners: **Turbine Casing**
+- **Layers 1 & 2 (Rotor Housing)**:
+  - Center `(0, y, 1)`: **Turbine Rotor Shaft** (spinning blades)
+  - Surrounding 8 blocks on each layer: **Turbine Casing**
+
+---
+
+### The Closed-Loop Rankine Cycle
+Connect the **Turbine Water Output Port** back into the **Boiler Water Input Port** using fluid pipes!
+Since the turbine condenses steam back into water at a 2:1 ratio, a closed loop with a modest buffer top-up creates an endless, self-sustaining thermodynamic power plant.
+
+---
+
+## 6. Petroleum Refining & Chemical Byproducts
+
+### Petroleum Refinery (3×3×4)
+A multi-stage fractional distillation column that refines raw Crude Oil into commercial fuels and chemical feedstocks.
+
+- **Dimensions**: 3 wide × 4 tall × 3 deep (36 blocks total).
+- **Operation**: Consumes 200 mB Crude Oil + 40 FE/t over 100 ticks.
+- **Outputs**:
+  - **120 mB Diesel** (drained from Diesel Port)
+  - **60 mB Gasoline** (drained from Gas Port)
+  - **Petroleum Tar** (ejected to Byproduct Port)
+  - **Sulfur Dust** (ejected to Byproduct Port)
+
+#### Refinery Layer Schematic
+- **Layer 0 (Base)**: Controller front center `(0, 0, 0)`, Crude Oil Port `(-1, 0, 0)`, Diesel Port `(1, 0, 0)`, Gas Port `(0, 0, 2)`, Byproduct Port `(1, 0, 1)`. Reinforced Casings fill the rest.
+- **Layer 1 (Furnace)**: Combustion Chambers.
+- **Layer 2 (Distillation)**: Distillation Columns.
+- **Layer 3 (Condenser)**: Heat Exchangers.
+
+---
+
+## 7. Comprehensive Recipe Codex
+
+### Base Materials & Tools
+| Result | Pattern / Ingredients |
+| :--- | :--- |
+| **Refinery Wrench** | Iron Ingot, Copper Ingot, Lever (Shaped) |
+| **Heavy Steel Plate** | 1 Steel Ingot (Shapeless in crafting table or 1 Ingot in Metal Press) |
+| **Gunpowder (from Sulfur)** | 1 Sulfur Dust + 1 Charcoal (Shapeless) |
+| **Torches (from Tar)** | 1 Petroleum Tar + 1 Stick -> 4 Torches (Shapeless) |
+
+### Multiblock Machine Blocks
+| Machine Block | Crafting Ingredients |
+| :--- | :--- |
+| **Press Casing** (x4) | 4 Steel Ingots + 4 Iron Ingots around Smooth Stone |
+| **Press Anvil Bed** | 3 Steel Ingots (top) + 1 Anvil (center) + 3 Steel Plates (bottom) |
+| **Press Hydraulic Head** | 4 Steel Ingots + 2 Steel Plates + 1 Piston + 2 Redstone |
+| **Metal Press Controller** | 4 Steel Ingots + 4 Steel Plates + 2 Redstone Blocks + 1 Comparator |
+| **Steel Boiler Casing** (x4) | 4 Steel Plates + 4 Steel Ingots around 1 Iron Block |
+| **Boiler Firebox Hearth** | 4 Steel Plates + 4 Iron Bars + 1 Blast Furnace |
+| **Boiler Pressure Pipe** (x4) | 4 Steel Plates in diamond ring |
+| **Boiler Water Port** | 1 Steel Boiler Casing + 1 Water Bucket + 2 Steel Plates |
+| **Boiler Steam Port** | 1 Steel Boiler Casing + 2 Boiler Pipes + 2 Steel Plates |
+| **Boiler Fuel Port** | 1 Steel Boiler Casing + 2 Hoppers + 2 Steel Plates |
+| **Small Boiler Controller** | 1 Steel Boiler Casing + 4 Steel Plates + 2 Steel Ingots + 2 Redstone |
+| **Large Boiler Controller** | 1 Small Boiler Controller + 4 Steel Plates + 2 Steel Ingots + 2 Redstone Blocks |
+| **Turbine Casing** (x4) | 4 Steel Plates + 4 Steel Ingots around Smooth Stone |
+| **Turbine Rotor Shaft** (x2) | 4 Steel Plates around 1 Steel Ingot |
+| **Turbine Steam Port** | 1 Turbine Casing + 2 Boiler Pipes + 2 Steel Plates |
+| **Turbine Water Port** | 1 Turbine Casing + 2 Buckets + 2 Steel Plates |
+| **Turbine Energy Port** | 1 Turbine Casing + 2 Redstone Blocks + 2 Steel Plates |
+| **Steam Turbine Controller** | 1 Turbine Rotor + 4 Steel Plates + 2 Steel Ingots + 2 Redstone Blocks |
+
+---
+
+## 8. Automation, Pipes, & Interfacing
+
+All ports and controllers implement native Minecraft and NeoForge capability standards:
+
+- **Fluid Automation (`Capabilities.Fluid.BLOCK`)**:
+  - Connect fluid pipes directly to any Port.
+  - **Water Ports**: Accept fluid insertion.
+  - **Steam Ports**: Fluid extraction (pull out high pressure steam).
+  - **Fuel / Byproduct Ports**: Standard item capability.
+- **Energy Transfer (`Capabilities.Energy.BLOCK`)**:
+  - Connect energy conduits or cables to the **Turbine Energy Port**, **Turbine Controller**, **Refinery Controller**, **Metal Press Controller**, **Auto Planter**, or **Auto Harvester**.
+- **Item Automation (`Capabilities.Item.BLOCK` / `WorldlyContainer`)**:
+  - **Blast Smelter**: Connect pipes/hoppers to **Foundry Input Port** (Iron & Coal) and **Foundry Output Port** (Steel Ingots).
+  - **Metal Press**: Insert into top/sides (Ingots); extract from bottom face (Plates).
+  - **Steam Boilers**: Insert burnable fuel into the **Boiler Fuel Port**.
+  - **Harvester**: Automatically dumps into chests or conduits behind or underneath it.

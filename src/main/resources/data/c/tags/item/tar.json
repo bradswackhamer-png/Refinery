@@ -1,0 +1,7 @@
+{
+  "values": [
+    "refinery:tar",
+    { "id": "logistics:core/tar", "required": false },
+    { "id": "logistics:tar", "required": false }
+  ]
+}

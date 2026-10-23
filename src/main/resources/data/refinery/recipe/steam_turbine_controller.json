@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PSP",
+    "RTR",
+    "PSP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "S": "refinery:steel_ingot",
+    "R": "minecraft:redstone_block",
+    "T": "refinery:turbine_rotor"
+  },
+  "result": {
+    "id": "refinery:steam_turbine_controller",
+    "count": 1
+  }
+}

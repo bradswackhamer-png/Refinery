@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IBI",
+    "BCB",
+    "IBI"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:deepslate_bricks",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "refinery:blast_furnace_casing",
+    "count": 4
+  }
+}

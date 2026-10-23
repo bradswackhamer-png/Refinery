@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/reinforced_casing",
+    "down": "refinery:block/reinforced_casing",
+    "up": "refinery:block/reinforced_casing",
+    "north": "refinery:block/reinforced_casing",
+    "south": "refinery:block/reinforced_casing",
+    "west": "refinery:block/reinforced_casing",
+    "east": "refinery:block/reinforced_casing"
+  }
+}

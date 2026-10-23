@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " I ",
+    "ACA",
+    " I "
+  ],
+  "key": {
+    "C": "refinery:reinforced_casing",
+    "I": "minecraft:hopper",
+    "A": "minecraft:bucket"
+  },
+  "result": {
+    "id": "refinery:crude_oil_port",
+    "count": 1
+  }
+}

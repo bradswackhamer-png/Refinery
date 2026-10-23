@@ -1,0 +1,7 @@
+{
+  "values": [
+    "refinery:sulfur_dust",
+    { "id": "logistics:core/sulfur_dust", "required": false },
+    { "id": "logistics:sulfur_dust", "required": false }
+  ]
+}

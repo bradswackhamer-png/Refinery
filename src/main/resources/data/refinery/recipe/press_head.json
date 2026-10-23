@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SPS",
+    "RPR",
+    "SPS"
+  ],
+  "key": {
+    "S": "refinery:steel_ingot",
+    "P": "minecraft:piston",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "refinery:press_head",
+    "count": 1
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "refinery:block/boiler_firebox" },
+    "lit=true": { "model": "refinery:block/boiler_firebox_lit" }
+  }
+}

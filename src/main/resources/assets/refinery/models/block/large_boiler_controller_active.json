@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/steel_boiler_casing",
+    "down": "refinery:block/steel_boiler_casing",
+    "up": "refinery:block/steel_boiler_casing",
+    "north": "refinery:block/large_boiler_controller_front_active",
+    "south": "refinery:block/steel_boiler_casing",
+    "east": "refinery:block/steel_boiler_casing",
+    "west": "refinery:block/steel_boiler_casing"
+  }
+}

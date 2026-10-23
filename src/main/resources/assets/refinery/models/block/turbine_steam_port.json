@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/turbine_casing",
+    "down": "refinery:block/turbine_casing",
+    "up": "refinery:block/turbine_casing",
+    "north": "refinery:block/turbine_steam_port",
+    "south": "refinery:block/turbine_casing",
+    "east": "refinery:block/turbine_casing",
+    "west": "refinery:block/turbine_casing"
+  }
+}

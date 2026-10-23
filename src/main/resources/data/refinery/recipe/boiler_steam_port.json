@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "TCT",
+    " P "
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "T": "refinery:boiler_pipe",
+    "C": "refinery:steel_boiler_casing"
+  },
+  "result": {
+    "id": "refinery:boiler_steam_port",
+    "count": 1
+  }
+}

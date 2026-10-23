@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IDI",
+    "DCD",
+    "IDI"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "D": "minecraft:deepslate",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "refinery:reinforced_casing",
+    "count": 4
+  }
+}

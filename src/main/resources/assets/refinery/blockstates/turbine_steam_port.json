@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/turbine_steam_port" },
+    "facing=south": { "model": "refinery:block/turbine_steam_port", "y": 180 },
+    "facing=west": { "model": "refinery:block/turbine_steam_port", "y": 270 },
+    "facing=east": { "model": "refinery:block/turbine_steam_port", "y": 90 }
+  }
+}

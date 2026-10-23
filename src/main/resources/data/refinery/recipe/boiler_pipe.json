@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "P P",
+    " P "
+  ],
+  "key": {
+    "P": "refinery:steel_plate"
+  },
+  "result": {
+    "id": "refinery:boiler_pipe",
+    "count": 4
+  }
+}

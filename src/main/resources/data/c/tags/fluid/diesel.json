@@ -1,0 +1,7 @@
+{
+  "values": [
+    "refinery:diesel",
+    "refinery:flowing_diesel",
+    { "id": "logistics:core/fuel_oil", "required": false }
+  ]
+}

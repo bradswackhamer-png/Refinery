@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " I ",
+    "ACA",
+    " I "
+  ],
+  "key": {
+    "C": "refinery:reinforced_casing",
+    "I": "minecraft:copper_ingot",
+    "A": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:gas_port",
+    "count": 1
+  }
+}

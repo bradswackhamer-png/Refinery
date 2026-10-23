@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GRG",
+    "SCS",
+    "SSS"
+  ],
+  "key": {
+    "G": "minecraft:glass",
+    "R": "minecraft:comparator",
+    "S": "refinery:steel_ingot",
+    "C": "refinery:reinforced_casing"
+  },
+  "result": {
+    "id": "refinery:refinery_controller",
+    "count": 1
+  }
+}

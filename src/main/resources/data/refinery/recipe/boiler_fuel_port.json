@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "HCH",
+    " P "
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "H": "minecraft:hopper",
+    "C": "refinery:steel_boiler_casing"
+  },
+  "result": {
+    "id": "refinery:boiler_fuel_port",
+    "count": 1
+  }
+}

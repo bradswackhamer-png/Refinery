@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/heat_exchanger",
+    "down": "refinery:block/reinforced_casing",
+    "up": "refinery:block/reinforced_casing",
+    "north": "refinery:block/heat_exchanger",
+    "south": "refinery:block/heat_exchanger",
+    "west": "refinery:block/heat_exchanger",
+    "east": "refinery:block/heat_exchanger"
+  }
+}
