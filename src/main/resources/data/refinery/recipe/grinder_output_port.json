@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "PHP",
+    "P P"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "H": "minecraft:hopper"
+  },
+  "result": {
+    "id": "refinery:grinder_output_port",
+    "count": 1
+  }
+}

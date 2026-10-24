@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PBP",
+    "G G",
+    "PBP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "B": "minecraft:iron_bars",
+    "G": "refinery:foundry_glass"
+  },
+  "result": {
+    "id": "refinery:grinder_chamber",
+    "count": 1
+  }
+}

@@ -32,6 +32,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.LARGE_BOILER_MENU.get(), LargeBoilerScreen::new);
         event.register((MenuType) RefineryMod.STEAM_TURBINE_MENU.get(), SteamTurbineScreen::new);
         event.register((MenuType) RefineryMod.METAL_PRESS_MENU.get(), MetalPressScreen::new);
+        event.register((MenuType) RefineryMod.INDUSTRIAL_GRINDER_MENU.get(), IndustrialGrinderScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -41,6 +42,7 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.LARGE_BOILER_CONTROLLER_BE.get(), LargeBoilerControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.STEAM_TURBINE_CONTROLLER_BE.get(), SteamTurbineControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.METAL_PRESS_CONTROLLER_BE.get(), MetalPressControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER_BE.get(), IndustrialGrinderControllerRenderer::new);
     }
 
     private void registerClientExtensions(RegisterClientExtensionsEvent event) {

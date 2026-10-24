@@ -185,7 +185,34 @@ public class RefineryMod {
             MetalPressControllerBlock::new);
     public static final DeferredItem<BlockItem> METAL_PRESS_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("metal_press_controller", METAL_PRESS_CONTROLLER);
 
+    // === Industrial Grinder (2x3x3) Multiblock ===
+    public static final DeferredBlock<IndustrialGrinderControllerBlock> INDUSTRIAL_GRINDER_CONTROLLER = BLOCKS.registerBlock("industrial_grinder_controller",
+            IndustrialGrinderControllerBlock::new);
+    public static final DeferredItem<BlockItem> INDUSTRIAL_GRINDER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("industrial_grinder_controller", INDUSTRIAL_GRINDER_CONTROLLER);
+
+    public static final DeferredBlock<GrinderCasingBlock> GRINDER_CASING = BLOCKS.registerBlock("grinder_casing",
+            GrinderCasingBlock::new);
+    public static final DeferredItem<BlockItem> GRINDER_CASING_ITEM = ITEMS.registerSimpleBlockItem("grinder_casing", GRINDER_CASING);
+
+    public static final DeferredBlock<GrinderChamberBlock> GRINDER_CHAMBER = BLOCKS.registerBlock("grinder_chamber",
+            GrinderChamberBlock::new);
+    public static final DeferredItem<BlockItem> GRINDER_CHAMBER_ITEM = ITEMS.registerSimpleBlockItem("grinder_chamber", GRINDER_CHAMBER);
+
+    public static final DeferredBlock<GrinderPortBlock> GRINDER_INPUT_PORT = BLOCKS.registerBlock("grinder_input_port",
+            p -> new GrinderPortBlock(GrinderPortBlock.PortType.INPUT, p));
+    public static final DeferredItem<BlockItem> GRINDER_INPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("grinder_input_port", GRINDER_INPUT_PORT);
+
+    public static final DeferredBlock<GrinderPortBlock> GRINDER_OUTPUT_PORT = BLOCKS.registerBlock("grinder_output_port",
+            p -> new GrinderPortBlock(GrinderPortBlock.PortType.OUTPUT, p));
+    public static final DeferredItem<BlockItem> GRINDER_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("grinder_output_port", GRINDER_OUTPUT_PORT);
+
     // === Items ===
+    public static final DeferredItem<IronDustItem> IRON_DUST = ITEMS.registerItem("iron_dust",
+            IronDustItem::new, Item.Properties::new);
+    public static final DeferredItem<GoldDustItem> GOLD_DUST = ITEMS.registerItem("gold_dust",
+            GoldDustItem::new, Item.Properties::new);
+    public static final DeferredItem<CopperDustItem> COPPER_DUST = ITEMS.registerItem("copper_dust",
+            CopperDustItem::new, Item.Properties::new);
     public static final DeferredItem<SteelIngotItem> STEEL_INGOT = ITEMS.registerItem("steel_ingot",
             SteelIngotItem::new, Item.Properties::new);
     public static final DeferredItem<SteelPlateItem> STEEL_PLATE = ITEMS.registerItem("steel_plate",
@@ -251,6 +278,15 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("metal_press_controller",
                     () -> new BlockEntityType<>(MetalPressControllerBlockEntity::new, METAL_PRESS_CONTROLLER.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<IndustrialGrinderControllerBlockEntity>> INDUSTRIAL_GRINDER_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("industrial_grinder_controller",
+                    () -> new BlockEntityType<>(IndustrialGrinderControllerBlockEntity::new, INDUSTRIAL_GRINDER_CONTROLLER.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GrinderPortBlockEntity>> GRINDER_PORT_BE =
+            BLOCK_ENTITY_TYPES.register("grinder_port",
+                    () -> new BlockEntityType<>(GrinderPortBlockEntity::new,
+                            GRINDER_INPUT_PORT.get(), GRINDER_OUTPUT_PORT.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -275,6 +311,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<MetalPressMenu>> METAL_PRESS_MENU =
             MENUS.register("metal_press", () -> new MenuType<>(MetalPressMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<IndustrialGrinderMenu>> INDUSTRIAL_GRINDER_MENU =
+            MENUS.register("industrial_grinder", () -> new MenuType<>(IndustrialGrinderMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
@@ -316,6 +355,14 @@ public class RefineryMod {
                         output.accept(PRESS_BED_ITEM.get());
                         output.accept(PRESS_HEAD_ITEM.get());
                         output.accept(PRESS_CASING_ITEM.get());
+                        output.accept(INDUSTRIAL_GRINDER_CONTROLLER_ITEM.get());
+                        output.accept(GRINDER_CASING_ITEM.get());
+                        output.accept(GRINDER_CHAMBER_ITEM.get());
+                        output.accept(GRINDER_INPUT_PORT_ITEM.get());
+                        output.accept(GRINDER_OUTPUT_PORT_ITEM.get());
+                        output.accept(IRON_DUST.get());
+                        output.accept(GOLD_DUST.get());
+                        output.accept(COPPER_DUST.get());
                         output.accept(STEEL_INGOT.get());
                         output.accept(STEEL_PLATE.get());
                         output.accept(REFINERY_WRENCH.get());
@@ -483,5 +530,19 @@ public class RefineryMod {
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, METAL_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
+
+        // Capabilities on Industrial Grinder Controller & Ports
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, INDUSTRIAL_GRINDER_CONTROLLER_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, INDUSTRIAL_GRINDER_CONTROLLER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, GRINDER_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null) return null;
+                    return VanillaContainerWrapper.of(be);
+                });
     }
 }

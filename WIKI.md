@@ -246,6 +246,38 @@ A multi-stage fractional distillation column that refines raw Crude Oil into com
 
 ---
 
+### Industrial Grinder & Pulverizer (2×3×3)
+A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields and processes geological strata.
+
+- **Dimensions**: 2 wide × 3 tall × 3 deep (18 blocks total).
+- **Core Functionality**:
+  - **Ore Doubling**: Pulverizes Raw Iron, Raw Gold, and Raw Copper (or ore blocks) into **2x Dust** (`refinery:iron_dust`, `gold_dust`, `copper_dust`). Smelting these dusts produces 2 ingots per raw ore!
+  - **Stone Crushing**: Crushes Stone, Cobblestone, Deepslate, Andesite, Diorite, and Granite into **1x Gravel**.
+  - **Sand Pulverizing**: Crushes Gravel into **1x Sand**.
+  - **Ingot Grinding**: Converts Ingots into **1x Dust** for metallurgy and chemistry.
+- **Animated Mechanical Crushing**: Features twin physical counter-rotating grinding drums with intermeshing fluted tungsten teeth visible through the front reinforced viewing window! The rollers spin smoothly in idle mode and accelerate rapidly with grinding sound effects and sparks during active cycles.
+- **Specs**:
+  - Energy Storage: 50,000 FE
+  - Energy Consumption: 30 FE/t while grinding
+  - Process Duration: 60 ticks (3.0 seconds) per batch
+  - Internal Buffer: 4 Input slots + 4 Output slots
+
+#### Grinder Layer Schematic (Local Coordinates)
+- **Layer 0 (Foundation & Output)**:
+  - `(0, 0, 0)`: **Industrial Grinder Controller** (Front Left)
+  - `(1, 0, 0)`: **Grinder Discharge Port (Output)** (Front Right)
+  - `(0, 0, 1)`, `(1, 0, 1)`, `(0, 0, 2)`, `(1, 0, 2)`: **Grinder Structural Casing**
+- **Layer 1 (Crushing Chamber & Rollers)**:
+  - `(0, 1, 0)`: **Grinder Structural Casing**
+  - `(1, 1, 0)`: **Grinder Crushing Chamber** (Front Viewing Window into animated rollers)
+  - `(0, 1, 1)`, `(1, 1, 1)`, `(0, 1, 2)`, `(1, 1, 2)`: **Grinder Structural Casing**
+- **Layer 2 (Feed Chute & Input)**:
+  - `(0, 2, 0)`: **Grinder Structural Casing**
+  - `(1, 2, 0)`: **Grinder Feed Port (Input)** (Front Right Top)
+  - `(0, 2, 1)`, `(1, 2, 1)`, `(0, 2, 2)`, `(1, 2, 2)`: **Grinder Structural Casing**
+
+---
+
 ## 7. Comprehensive Recipe Codex
 
 ### Base Materials & Tools
@@ -259,6 +291,11 @@ A multi-stage fractional distillation column that refines raw Crude Oil into com
 ### Multiblock Machine Blocks
 | Machine Block | Crafting Ingredients |
 | :--- | :--- |
+| **Grinder Casing** (x4) | 4 Steel Plates + 4 Steel Ingots (Shaped ring) |
+| **Grinder Controller** | 1 Grinder Casing + 4 Steel Plates + 2 Redstone Blocks + 1 Comparator + 1 Steel Ingot |
+| **Grinder Chamber** | 4 Steel Plates + 2 Iron Bars + 2 Foundry Heat Glass |
+| **Grinder Input Port** | 4 Steel Plates + 1 Hopper (Top funnel configuration) |
+| **Grinder Output Port** | 4 Steel Plates + 1 Hopper (Bottom discharge configuration) |
 | **Press Casing** (x4) | 4 Steel Ingots + 4 Iron Ingots around Smooth Stone |
 | **Press Anvil Bed** | 3 Steel Ingots (top) + 1 Anvil (center) + 3 Steel Plates (bottom) |
 | **Press Hydraulic Head** | 4 Steel Ingots + 2 Steel Plates + 1 Piston + 2 Redstone |
@@ -278,6 +315,17 @@ A multi-stage fractional distillation column that refines raw Crude Oil into com
 | **Turbine Energy Port** | 1 Turbine Casing + 2 Redstone Blocks + 2 Steel Plates |
 | **Steam Turbine Controller** | 1 Turbine Rotor + 4 Steel Plates + 2 Steel Ingots + 2 Redstone Blocks |
 
+### Mineral Pulverizing & Smelting
+| Input | Machine / Process | Output |
+| :--- | :--- | :--- |
+| **Raw Iron / Iron Ore / Deepslate Iron Ore** | Industrial Grinder | **2x Iron Dust** (Ore Doubling!) |
+| **Raw Gold / Gold Ore / Deepslate Gold Ore** | Industrial Grinder | **2x Gold Dust** (Ore Doubling!) |
+| **Raw Copper / Copper Ore / Deepslate Copper Ore** | Industrial Grinder | **2x Copper Dust** (Ore Doubling!) |
+| **Stone / Cobblestone / Deepslate / Andesite / Diorite / Granite** | Industrial Grinder | **1x Gravel** |
+| **Gravel** | Industrial Grinder | **1x Sand** |
+| **Iron / Gold / Copper Ingot** | Industrial Grinder | **1x Respective Dust** |
+| **Iron / Gold / Copper Dust** | Furnace / Blast Furnace | **1x Respective Ingot** |
+
 ---
 
 ## 8. Automation, Pipes, & Interfacing
@@ -290,8 +338,9 @@ All ports and controllers implement native Minecraft and NeoForge capability sta
   - **Steam Ports**: Fluid extraction (pull out high pressure steam).
   - **Fuel / Byproduct Ports**: Standard item capability.
 - **Energy Transfer (`Capabilities.Energy.BLOCK`)**:
-  - Connect energy conduits or cables to the **Turbine Energy Port**, **Turbine Controller**, **Refinery Controller**, **Metal Press Controller**, **Auto Planter**, or **Auto Harvester**.
+  - Connect energy conduits or cables to the **Turbine Energy Port**, **Turbine Controller**, **Refinery Controller**, **Metal Press Controller**, **Industrial Grinder Controller**, **Auto Planter**, or **Auto Harvester**.
 - **Item Automation (`Capabilities.Item.BLOCK` / `WorldlyContainer`)**:
+  - **Industrial Grinder**: Connect pipes/hoppers to **Grinder Input Port** (Layer 2) to supply ores or stone, and **Grinder Output Port** (Layer 0) to extract dusts, gravel, and sand automatically.
   - **Blast Smelter**: Connect pipes/hoppers to **Foundry Input Port** (Iron & Coal) and **Foundry Output Port** (Steel Ingots).
   - **Metal Press**: Insert into top/sides (Ingots); extract from bottom face (Plates).
   - **Steam Boilers**: Insert burnable fuel into the **Boiler Fuel Port**.

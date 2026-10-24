@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/grinder_casing",
+    "up": "refinery:block/grinder_casing",
+    "down": "refinery:block/grinder_casing",
+    "north": "refinery:block/industrial_grinder_controller_front",
+    "south": "refinery:block/grinder_casing",
+    "east": "refinery:block/grinder_casing",
+    "west": "refinery:block/grinder_casing"
+  }
+}

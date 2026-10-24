@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PSP",
+    "S S",
+    "PSP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "S": "refinery:steel_ingot"
+  },
+  "result": {
+    "id": "refinery:grinder_casing",
+    "count": 4
+  }
+}

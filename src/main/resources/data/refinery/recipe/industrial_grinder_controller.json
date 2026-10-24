@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PCP",
+    "RMR",
+    "PSP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "C": "minecraft:comparator",
+    "R": "minecraft:redstone_block",
+    "M": "refinery:grinder_casing",
+    "S": "refinery:steel_ingot"
+  },
+  "result": {
+    "id": "refinery:industrial_grinder_controller",
+    "count": 1
+  }
+}
