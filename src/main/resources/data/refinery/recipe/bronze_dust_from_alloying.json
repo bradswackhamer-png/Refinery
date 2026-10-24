@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:dusts/copper",
+    "#c:dusts/copper",
+    "#c:dusts/copper",
+    "#c:dusts/tin"
+  ],
+  "result": {
+    "id": "refinery:bronze_dust",
+    "count": 4
+  }
+}

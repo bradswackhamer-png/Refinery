@@ -47,6 +47,15 @@ public class RefineryPortBlockEntity extends BlockEntity {
                 }
             }
         }
+        if (this.level != null) {
+            for (BlockPos p : BlockPos.betweenClosed(this.worldPosition.offset(-3, -3, -3), this.worldPosition.offset(3, 3, 3))) {
+                if (this.level.getBlockEntity(p) instanceof RefineryControllerBlockEntity c && c.isAssembled()) {
+                    this.controllerPos = p.immutable();
+                    setChanged();
+                    return c;
+                }
+            }
+        }
         return null;
     }
 

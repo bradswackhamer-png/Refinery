@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "refinery:iron_dust",
+    { "id": "logistics:core/iron_dust", "required": false },
+    { "id": "energizedpower:iron_dust", "required": false }
+  ]
+}

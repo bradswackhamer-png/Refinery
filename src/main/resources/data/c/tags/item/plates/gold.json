@@ -1,0 +1,6 @@
+{
+  "values": [
+    "refinery:gold_plate",
+    {"id": "energizedpower:gold_plate", "required": false}
+  ]
+}

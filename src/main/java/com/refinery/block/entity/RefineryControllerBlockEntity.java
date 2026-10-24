@@ -128,6 +128,21 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     public int getGasoline() { return this.gasoline; }
     public int getStoredEnergy() { return this.energy; }
 
+    public void setCrudeOil(int amt) {
+        this.crudeOil = Math.clamp(amt, 0, TANK_CAPACITY);
+        setChanged();
+    }
+
+    public void setDiesel(int amt) {
+        this.diesel = Math.clamp(amt, 0, TANK_CAPACITY);
+        setChanged();
+    }
+
+    public void setGasoline(int amt) {
+        this.gasoline = Math.clamp(amt, 0, TANK_CAPACITY);
+        setChanged();
+    }
+
     public int fillCrudeOil(int amount) {
         int space = TANK_CAPACITY - this.crudeOil;
         int filled = Math.min(space, amount);

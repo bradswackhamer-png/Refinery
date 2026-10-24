@@ -1,0 +1,7 @@
+{
+  "values": [
+    "refinery:tin_dust",
+    {"id": "energizedpower:tin_dust", "required": false},
+    {"id": "logistics:core/tin_dust", "required": false}
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "values": [
+    "refinery:bronze_ingot",
+    {"id": "logistics:core/bronze_ingot", "required": false}
+  ]
+}

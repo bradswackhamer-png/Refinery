@@ -127,6 +127,18 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     }
 
     @Override
+    public void setSteamAmount(int amt) {
+        this.steamAmount = Math.clamp(amt, 0, STEAM_CAPACITY);
+        setChanged();
+    }
+
+    @Override
+    public void setWaterAmount(int amt) {
+        this.waterAmount = Math.clamp(amt, 0, WATER_CAPACITY);
+        setChanged();
+    }
+
+    @Override
     public int fillSteam(int amount) {
         int space = STEAM_CAPACITY - this.steamAmount;
         int toAdd = Math.min(space, amount);

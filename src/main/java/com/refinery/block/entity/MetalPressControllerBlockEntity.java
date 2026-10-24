@@ -7,10 +7,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -19,7 +23,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -163,7 +169,8 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
         // Check if we can stamp
         int inputSlot = getValidInputSlot();
-        boolean hasRecipe = inputSlot != -1 && canFitOutput();
+        ItemStack resultStack = inputSlot != -1 ? getPressResult(this.items.get(inputSlot)) : ItemStack.EMPTY;
+        boolean hasRecipe = !resultStack.isEmpty() && canFitOutput(resultStack);
 
         if (hasRecipe && this.energy >= ENERGY_PER_TICK) {
             isActive = true;
@@ -180,8 +187,11 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             if (this.progress == 20) {
                 // Consume 1 ingot & produce 1 plate
                 ItemStack inputStack = this.items.get(inputSlot);
-                inputStack.shrink(1);
-                addOutput(new ItemStack(RefineryMod.STEEL_PLATE.get()));
+                ItemStack result = getPressResult(inputStack);
+                if (!result.isEmpty()) {
+                    inputStack.shrink(1);
+                    addOutput(result.copy());
+                }
 
                 // Heavy anvil impact sound
                 Direction facing = state.getValue(MetalPressControllerBlock.FACING);
@@ -220,21 +230,63 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         }
     }
 
+    public static final TagKey<Item> INGOTS_STEEL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/steel"));
+    public static final TagKey<Item> INGOTS_IRON = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/iron"));
+    public static final TagKey<Item> INGOTS_COPPER = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/copper"));
+    public static final TagKey<Item> INGOTS_GOLD = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/gold"));
+    public static final TagKey<Item> INGOTS_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/tin"));
+    public static final TagKey<Item> INGOTS_BRONZE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/bronze"));
+
+    public static ItemStack getPressResult(ItemStack input) {
+        if (input.isEmpty()) return ItemStack.EMPTY;
+
+        Identifier id = BuiltInRegistries.ITEM.getKey(input.getItem());
+        String path = id != null ? id.getPath() : "";
+
+        // Steel Ingot -> Steel Plate
+        if (input.is(RefineryMod.STEEL_INGOT.get()) || input.is(INGOTS_STEEL) || path.equals("steel_ingot")) {
+            return new ItemStack(RefineryMod.STEEL_PLATE.get(), 1);
+        }
+        // Iron Ingot -> Iron Plate
+        if (input.is(Items.IRON_INGOT) || input.is(INGOTS_IRON) || path.equals("iron_ingot")) {
+            return new ItemStack(RefineryMod.IRON_PLATE.get(), 1);
+        }
+        // Copper Ingot -> Copper Plate
+        if (input.is(Items.COPPER_INGOT) || input.is(INGOTS_COPPER) || path.equals("copper_ingot")) {
+            return new ItemStack(RefineryMod.COPPER_PLATE.get(), 1);
+        }
+        // Gold Ingot -> Gold Plate
+        if (input.is(Items.GOLD_INGOT) || input.is(INGOTS_GOLD) || path.equals("gold_ingot")) {
+            return new ItemStack(RefineryMod.GOLD_PLATE.get(), 1);
+        }
+        // Tin Ingot -> Tin Plate
+        if (input.is(RefineryMod.TIN_INGOT.get()) || input.is(INGOTS_TIN) || path.equals("tin_ingot")) {
+            return new ItemStack(RefineryMod.TIN_PLATE.get(), 1);
+        }
+        // Bronze Ingot -> Bronze Plate
+        if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(INGOTS_BRONZE) || path.equals("bronze_ingot")) {
+            return new ItemStack(RefineryMod.BRONZE_PLATE.get(), 1);
+        }
+
+        return ItemStack.EMPTY;
+    }
+
     private int getValidInputSlot() {
         for (int i = 0; i < 2; i++) {
             ItemStack stack = this.items.get(i);
-            if (!stack.isEmpty() && stack.is(RefineryMod.STEEL_INGOT.get())) {
+            if (!stack.isEmpty() && !getPressResult(stack).isEmpty()) {
                 return i;
             }
         }
         return -1;
     }
 
-    private boolean canFitOutput() {
+    private boolean canFitOutput(ItemStack result) {
+        if (result.isEmpty()) return false;
         for (int i = 2; i < 4; i++) {
             ItemStack stack = this.items.get(i);
             if (stack.isEmpty()) return true;
-            if (stack.is(RefineryMod.STEEL_PLATE.get()) && stack.getCount() < stack.getMaxStackSize()) {
+            if (ItemStack.isSameItemSameComponents(stack, result) && stack.getCount() + result.getCount() <= stack.getMaxStackSize()) {
                 return true;
             }
         }
@@ -248,7 +300,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                 this.items.set(i, result);
                 setChanged();
                 return;
-            } else if (ItemStack.isSameItemSameComponents(stack, result) && stack.getCount() < stack.getMaxStackSize()) {
+            } else if (ItemStack.isSameItemSameComponents(stack, result) && stack.getCount() + result.getCount() <= stack.getMaxStackSize()) {
                 stack.grow(result.getCount());
                 setChanged();
                 return;

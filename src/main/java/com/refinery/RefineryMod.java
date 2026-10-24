@@ -3,14 +3,21 @@ package com.refinery;
 import com.mojang.logging.LogUtils;
 import com.refinery.block.*;
 import com.refinery.block.entity.*;
+import com.refinery.entity.PipeGateEntity;
+import com.refinery.entity.PipeWireEntity;
+import com.refinery.fluid.MultiFluidHandler;
 import com.refinery.fluid.RefineryFluids;
+import com.refinery.fluid.SingleFluidHandler;
 import com.refinery.gate.GateTier;
+import com.refinery.gate.PipeWireColor;
 import com.refinery.item.*;
 import com.refinery.menu.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -41,6 +48,23 @@ public class RefineryMod {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, MODID);
     public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, MODID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PipeGateEntity>> PIPE_GATE_ENTITY =
+            ENTITY_TYPES.register("pipe_gate",
+                    id -> EntityType.Builder.<PipeGateEntity>of(PipeGateEntity::new, MobCategory.MISC)
+                            .sized(0.5f, 0.5f)
+                            .clientTrackingRange(10)
+                            .updateInterval(1)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PipeWireEntity>> PIPE_WIRE_ENTITY =
+            ENTITY_TYPES.register("pipe_wire",
+                    id -> EntityType.Builder.<PipeWireEntity>of(PipeWireEntity::new, MobCategory.MISC)
+                            .sized(0.5f, 0.5f)
+                            .clientTrackingRange(10)
+                            .updateInterval(1)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
 
     // === Blocks ===
     public static final DeferredBlock<RefineryControllerBlock> REFINERY_CONTROLLER = BLOCKS.registerBlock("refinery_controller",
@@ -214,47 +238,55 @@ public class RefineryMod {
     // === Pipe Gates ===
     public static final DeferredBlock<PipeGateBlock> BASIC_GATE = BLOCKS.registerBlock("basic_gate",
             p -> new PipeGateBlock(GateTier.BASIC, false, p.strength(0.5f).noOcclusion()));
-    public static final DeferredItem<BlockItem> BASIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("basic_gate", BASIC_GATE);
+    public static final DeferredItem<PipeGateItem> BASIC_GATE_ITEM = ITEMS.registerItem("basic_gate",
+            p -> new PipeGateItem(BASIC_GATE.get(), GateTier.BASIC, false, p));
 
     public static final DeferredBlock<PipeGateBlock> IRON_GATE = BLOCKS.registerBlock("iron_gate",
             p -> new PipeGateBlock(GateTier.IRON, false, p.strength(0.8f).noOcclusion()));
-    public static final DeferredItem<BlockItem> IRON_GATE_ITEM = ITEMS.registerSimpleBlockItem("iron_gate", IRON_GATE);
+    public static final DeferredItem<PipeGateItem> IRON_GATE_ITEM = ITEMS.registerItem("iron_gate",
+            p -> new PipeGateItem(IRON_GATE.get(), GateTier.IRON, false, p));
 
     public static final DeferredBlock<PipeGateBlock> GOLD_GATE = BLOCKS.registerBlock("gold_gate",
             p -> new PipeGateBlock(GateTier.GOLD, false, p.strength(0.8f).noOcclusion()));
-    public static final DeferredItem<BlockItem> GOLD_GATE_ITEM = ITEMS.registerSimpleBlockItem("gold_gate", GOLD_GATE);
+    public static final DeferredItem<PipeGateItem> GOLD_GATE_ITEM = ITEMS.registerItem("gold_gate",
+            p -> new PipeGateItem(GOLD_GATE.get(), GateTier.GOLD, false, p));
 
     public static final DeferredBlock<PipeGateBlock> DIAMOND_GATE = BLOCKS.registerBlock("diamond_gate",
             p -> new PipeGateBlock(GateTier.DIAMOND, false, p.strength(1.0f).noOcclusion()));
-    public static final DeferredItem<BlockItem> DIAMOND_GATE_ITEM = ITEMS.registerSimpleBlockItem("diamond_gate", DIAMOND_GATE);
+    public static final DeferredItem<PipeGateItem> DIAMOND_GATE_ITEM = ITEMS.registerItem("diamond_gate",
+            p -> new PipeGateItem(DIAMOND_GATE.get(), GateTier.DIAMOND, false, p));
 
     public static final DeferredBlock<PipeGateBlock> BASIC_AUTARCHIC_GATE = BLOCKS.registerBlock("basic_autarchic_gate",
             p -> new PipeGateBlock(GateTier.BASIC, true, p.strength(0.5f).noOcclusion()));
-    public static final DeferredItem<BlockItem> BASIC_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("basic_autarchic_gate", BASIC_AUTARCHIC_GATE);
+    public static final DeferredItem<PipeGateItem> BASIC_AUTARCHIC_GATE_ITEM = ITEMS.registerItem("basic_autarchic_gate",
+            p -> new PipeGateItem(BASIC_AUTARCHIC_GATE.get(), GateTier.BASIC, true, p));
 
     public static final DeferredBlock<PipeGateBlock> IRON_AUTARCHIC_GATE = BLOCKS.registerBlock("iron_autarchic_gate",
             p -> new PipeGateBlock(GateTier.IRON, true, p.strength(0.8f).noOcclusion()));
-    public static final DeferredItem<BlockItem> IRON_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("iron_autarchic_gate", IRON_AUTARCHIC_GATE);
+    public static final DeferredItem<PipeGateItem> IRON_AUTARCHIC_GATE_ITEM = ITEMS.registerItem("iron_autarchic_gate",
+            p -> new PipeGateItem(IRON_AUTARCHIC_GATE.get(), GateTier.IRON, true, p));
 
     public static final DeferredBlock<PipeGateBlock> GOLD_AUTARCHIC_GATE = BLOCKS.registerBlock("gold_autarchic_gate",
             p -> new PipeGateBlock(GateTier.GOLD, true, p.strength(0.8f).noOcclusion()));
-    public static final DeferredItem<BlockItem> GOLD_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("gold_autarchic_gate", GOLD_AUTARCHIC_GATE);
+    public static final DeferredItem<PipeGateItem> GOLD_AUTARCHIC_GATE_ITEM = ITEMS.registerItem("gold_autarchic_gate",
+            p -> new PipeGateItem(GOLD_AUTARCHIC_GATE.get(), GateTier.GOLD, true, p));
 
     public static final DeferredBlock<PipeGateBlock> DIAMOND_AUTARCHIC_GATE = BLOCKS.registerBlock("diamond_autarchic_gate",
             p -> new PipeGateBlock(GateTier.DIAMOND, true, p.strength(1.0f).noOcclusion()));
-    public static final DeferredItem<BlockItem> DIAMOND_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("diamond_autarchic_gate", DIAMOND_AUTARCHIC_GATE);
+    public static final DeferredItem<PipeGateItem> DIAMOND_AUTARCHIC_GATE_ITEM = ITEMS.registerItem("diamond_autarchic_gate",
+            p -> new PipeGateItem(DIAMOND_AUTARCHIC_GATE.get(), GateTier.DIAMOND, true, p));
 
     // === Gate Upgrades & Wires ===
     public static final DeferredItem<Item> AUTARCHIC_CHIPSET = ITEMS.registerItem("autarchic_chipset",
             Item::new, Item.Properties::new);
-    public static final DeferredItem<Item> PIPE_WIRE_RED = ITEMS.registerItem("pipe_wire_red",
-            Item::new, Item.Properties::new);
-    public static final DeferredItem<Item> PIPE_WIRE_BLUE = ITEMS.registerItem("pipe_wire_blue",
-            Item::new, Item.Properties::new);
-    public static final DeferredItem<Item> PIPE_WIRE_GREEN = ITEMS.registerItem("pipe_wire_green",
-            Item::new, Item.Properties::new);
-    public static final DeferredItem<Item> PIPE_WIRE_YELLOW = ITEMS.registerItem("pipe_wire_yellow",
-            Item::new, Item.Properties::new);
+    public static final DeferredItem<PipeWireItem> PIPE_WIRE_RED = ITEMS.registerItem("pipe_wire_red",
+            props -> new PipeWireItem(PipeWireColor.RED, props), Item.Properties::new);
+    public static final DeferredItem<PipeWireItem> PIPE_WIRE_BLUE = ITEMS.registerItem("pipe_wire_blue",
+            props -> new PipeWireItem(PipeWireColor.BLUE, props), Item.Properties::new);
+    public static final DeferredItem<PipeWireItem> PIPE_WIRE_GREEN = ITEMS.registerItem("pipe_wire_green",
+            props -> new PipeWireItem(PipeWireColor.GREEN, props), Item.Properties::new);
+    public static final DeferredItem<PipeWireItem> PIPE_WIRE_YELLOW = ITEMS.registerItem("pipe_wire_yellow",
+            props -> new PipeWireItem(PipeWireColor.YELLOW, props), Item.Properties::new);
 
     // === Items ===
     public static final DeferredItem<IronDustItem> IRON_DUST = ITEMS.registerItem("iron_dust",
@@ -277,6 +309,28 @@ public class RefineryMod {
 
     public static final DeferredItem<RefineryWrenchItem> REFINERY_WRENCH = ITEMS.registerItem("refinery_wrench",
             RefineryWrenchItem::new, Item.Properties::new);
+
+    // === New Modded Materials ===
+    public static final DeferredItem<MaterialItem> TIN_DUST = ITEMS.registerItem("tin_dust",
+            p -> new MaterialItem(p, "tooltip.refinery.tin_dust.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> TIN_INGOT = ITEMS.registerItem("tin_ingot",
+            p -> new MaterialItem(p, "tooltip.refinery.tin_ingot.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> TIN_PLATE = ITEMS.registerItem("tin_plate",
+            p -> new MaterialItem(p, "tooltip.refinery.tin_plate.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> BRONZE_DUST = ITEMS.registerItem("bronze_dust",
+            p -> new MaterialItem(p, "tooltip.refinery.bronze_dust.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> BRONZE_INGOT = ITEMS.registerItem("bronze_ingot",
+            p -> new MaterialItem(p, "tooltip.refinery.bronze_ingot.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> BRONZE_PLATE = ITEMS.registerItem("bronze_plate",
+            p -> new MaterialItem(p, "tooltip.refinery.bronze_plate.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> COAL_DUST = ITEMS.registerItem("coal_dust",
+            p -> new MaterialItem(p, "tooltip.refinery.coal_dust.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> IRON_PLATE = ITEMS.registerItem("iron_plate",
+            p -> new MaterialItem(p, "tooltip.refinery.iron_plate.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> COPPER_PLATE = ITEMS.registerItem("copper_plate",
+            p -> new MaterialItem(p, "tooltip.refinery.copper_plate.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> GOLD_PLATE = ITEMS.registerItem("gold_plate",
+            p -> new MaterialItem(p, "tooltip.refinery.gold_plate.desc"), Item.Properties::new);
 
     // === Block Entity Types ===
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RefineryControllerBlockEntity>> REFINERY_CONTROLLER_BE =
@@ -444,6 +498,16 @@ public class RefineryMod {
                         output.accept(REFINERY_WRENCH.get());
                         output.accept(TAR_ITEM.get());
                         output.accept(SULFUR_DUST_ITEM.get());
+                        output.accept(TIN_DUST.get());
+                        output.accept(TIN_INGOT.get());
+                        output.accept(TIN_PLATE.get());
+                        output.accept(BRONZE_DUST.get());
+                        output.accept(BRONZE_INGOT.get());
+                        output.accept(BRONZE_PLATE.get());
+                        output.accept(COAL_DUST.get());
+                        output.accept(IRON_PLATE.get());
+                        output.accept(COPPER_PLATE.get());
+                        output.accept(GOLD_PLATE.get());
                         output.accept(RefineryFluids.CRUDE_OIL_BUCKET.get());
                         output.accept(RefineryFluids.DIESEL_BUCKET.get());
                         output.accept(RefineryFluids.GASOLINE_BUCKET.get());
@@ -462,6 +526,7 @@ public class RefineryMod {
         CREATIVE_MODE_TABS.register(modEventBus);
         FLUID_TYPES.register(modEventBus);
         FLUIDS.register(modEventBus);
+        ENTITY_TYPES.register(modEventBus);
 
         RefineryFluids.init();
 
@@ -485,26 +550,37 @@ public class RefineryMod {
                     var controller = be.getController();
                     if (controller == null) return null;
                     return switch (be.getPortType()) {
-                        case CRUDE_OIL_IN -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, RefineryControllerBlockEntity.TANK_CAPACITY) {
-                            @Override
-                            public int insert(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.fillCrudeOil(amount);
-                            }
-                        };
-                        case DIESEL_OUT -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, RefineryControllerBlockEntity.TANK_CAPACITY) {
-                            @Override
-                            public int extract(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.drainDiesel(amount);
-                            }
-                        };
-                        case GAS_OUT -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, RefineryControllerBlockEntity.TANK_CAPACITY) {
-                            @Override
-                            public int extract(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.drainGasoline(amount);
-                            }
-                        };
+                        case CRUDE_OIL_IN -> new SingleFluidHandler(
+                                RefineryFluids.CRUDE_OIL_SOURCE::get,
+                                controller::getCrudeOil,
+                                controller::setCrudeOil,
+                                RefineryControllerBlockEntity.TANK_CAPACITY,
+                                true, false, controller::setChanged);
+                        case DIESEL_OUT -> new SingleFluidHandler(
+                                RefineryFluids.DIESEL_SOURCE::get,
+                                controller::getDiesel,
+                                controller::setDiesel,
+                                RefineryControllerBlockEntity.TANK_CAPACITY,
+                                false, true, controller::setChanged);
+                        case GAS_OUT -> new SingleFluidHandler(
+                                RefineryFluids.GASOLINE_SOURCE::get,
+                                controller::getGasoline,
+                                controller::setGasoline,
+                                RefineryControllerBlockEntity.TANK_CAPACITY,
+                                false, true, controller::setChanged);
                         default -> null;
                     };
+                });
+
+        // Fluid capability directly on Refinery Controller (exposes all 3 tanks!)
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, REFINERY_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(RefineryFluids.CRUDE_OIL_SOURCE::get, be::getCrudeOil, be::setCrudeOil, RefineryControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.DIESEL_SOURCE::get, be::getDiesel, be::setDiesel, RefineryControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.GASOLINE_SOURCE::get, be::getGasoline, be::setGasoline, RefineryControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged)
+                    );
                 });
 
         // Item capability on Byproduct Port
@@ -555,20 +631,38 @@ public class RefineryMod {
                     var controller = be.getController();
                     if (controller == null) return null;
                     return switch (be.getPortType()) {
-                        case WATER_IN -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, SmallBoilerControllerBlockEntity.TANK_CAPACITY) {
-                            @Override
-                            public int insert(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.fillWater(amount);
-                            }
-                        };
-                        case STEAM_OUT -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, SmallBoilerControllerBlockEntity.TANK_CAPACITY) {
-                            @Override
-                            public int extract(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.drainSteam(amount);
-                            }
-                        };
+                        case WATER_IN -> new SingleFluidHandler(
+                                () -> net.minecraft.world.level.material.Fluids.WATER,
+                                controller::getWaterAmount,
+                                controller::setWaterAmount,
+                                SmallBoilerControllerBlockEntity.TANK_CAPACITY,
+                                true, false, () -> {});
+                        case STEAM_OUT -> new SingleFluidHandler(
+                                RefineryFluids.STEAM_SOURCE::get,
+                                controller::getSteamAmount,
+                                controller::setSteamAmount,
+                                SmallBoilerControllerBlockEntity.TANK_CAPACITY,
+                                false, true, () -> {});
                         default -> null;
                     };
+                });
+
+        // Capabilities on Boiler Controllers (Expose Water & Steam to Gates / Pipes)
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, SMALL_BOILER_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(() -> net.minecraft.world.level.material.Fluids.WATER, be::getWaterAmount, be::setWaterAmount, SmallBoilerControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.STEAM_SOURCE::get, be::getSteamAmount, be::setSteamAmount, SmallBoilerControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged)
+                    );
+                });
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, LARGE_BOILER_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(() -> net.minecraft.world.level.material.Fluids.WATER, be::getWaterAmount, be::setWaterAmount, LargeBoilerControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.STEAM_SOURCE::get, be::getSteamAmount, be::setSteamAmount, LargeBoilerControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged)
+                    );
                 });
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_PORT_BE.get(),
@@ -592,20 +686,30 @@ public class RefineryMod {
                     var controller = be.getController();
                     if (controller == null) return null;
                     return switch (be.getPortType()) {
-                        case STEAM_IN -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, SteamTurbineControllerBlockEntity.STEAM_CAPACITY) {
-                            @Override
-                            public int insert(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.fillSteam(amount);
-                            }
-                        };
-                        case WATER_OUT -> new net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler(1, SteamTurbineControllerBlockEntity.WATER_CAPACITY) {
-                            @Override
-                            public int extract(int index, net.neoforged.neoforge.transfer.fluid.FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-                                return controller.drainWater(amount);
-                            }
-                        };
+                        case STEAM_IN -> new SingleFluidHandler(
+                                RefineryFluids.STEAM_SOURCE::get,
+                                controller::getSteamAmount,
+                                controller::setSteamAmount,
+                                SteamTurbineControllerBlockEntity.STEAM_CAPACITY,
+                                true, false, () -> {});
+                        case WATER_OUT -> new SingleFluidHandler(
+                                () -> net.minecraft.world.level.material.Fluids.WATER,
+                                controller::getWaterAmount,
+                                controller::setWaterAmount,
+                                SteamTurbineControllerBlockEntity.WATER_CAPACITY,
+                                false, true, () -> {});
                         default -> null;
                     };
+                });
+
+        // Capabilities directly on Steam Turbine Controller
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_TURBINE_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(RefineryFluids.STEAM_SOURCE::get, be::getSteamAmount, be::setSteamAmount, SteamTurbineControllerBlockEntity.STEAM_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(() -> net.minecraft.world.level.material.Fluids.WATER, be::getWaterAmount, be::setWaterAmount, SteamTurbineControllerBlockEntity.WATER_CAPACITY, false, true, be::setChanged)
+                    );
                 });
 
         // Capabilities on Metal Press Controller (Energy & Item Container)

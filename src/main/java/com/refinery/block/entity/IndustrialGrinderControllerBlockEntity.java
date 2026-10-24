@@ -239,10 +239,19 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         }
     }
 
+    public static final TagKey<Item> ORES_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ores/tin"));
+    public static final TagKey<Item> RAW_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "raw_materials/tin"));
+    public static final TagKey<Item> INGOTS_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/tin"));
+    public static final TagKey<Item> INGOTS_BRONZE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/bronze"));
+    public static final TagKey<Item> ORES_APATITE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ores/apatite"));
+
     public static ItemStack getGrindResult(ItemStack input) {
         if (input.isEmpty()) return ItemStack.EMPTY;
 
-        // 1. Raw Ores (2x Dust)
+        Identifier id = BuiltInRegistries.ITEM.getKey(input.getItem());
+        String path = id != null ? id.getPath() : "";
+
+        // 1. Raw Ores & Ores (2x Dust / Ore Doubling)
         if (input.is(Items.RAW_IRON) || input.is(Items.IRON_ORE) || input.is(Items.DEEPSLATE_IRON_ORE)) {
             return new ItemStack(RefineryMod.IRON_DUST.get(), 2);
         }
@@ -252,20 +261,46 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         if (input.is(Items.RAW_COPPER) || input.is(Items.COPPER_ORE) || input.is(Items.DEEPSLATE_COPPER_ORE)) {
             return new ItemStack(RefineryMod.COPPER_DUST.get(), 2);
         }
-
-        // 2. Stone / Cobblestone variants -> Gravel
-        if (input.is(Items.COBBLESTONE) || input.is(Items.STONE) ||
-            input.is(Items.COBBLED_DEEPSLATE) || input.is(Items.DEEPSLATE) ||
-            input.is(Items.ANDESITE) || input.is(Items.DIORITE) || input.is(Items.GRANITE)) {
-            return new ItemStack(Items.GRAVEL, 1);
+        if (input.is(ORES_TIN) || input.is(RAW_TIN) || path.contains("tin_ore") || path.contains("raw_tin")) {
+            return new ItemStack(RefineryMod.TIN_DUST.get(), 2);
+        }
+        if (input.is(Items.COAL_ORE) || input.is(Items.DEEPSLATE_COAL_ORE)) {
+            return new ItemStack(RefineryMod.COAL_DUST.get(), 2);
+        }
+        if (input.is(Items.DIAMOND_ORE) || input.is(Items.DEEPSLATE_DIAMOND_ORE)) {
+            ItemStack gemDust = getModDust("diamond_dust", 2);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.EMERALD_ORE) || input.is(Items.DEEPSLATE_EMERALD_ORE)) {
+            ItemStack gemDust = getModDust("emerald_dust", 2);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.LAPIS_ORE) || input.is(Items.DEEPSLATE_LAPIS_ORE)) {
+            ItemStack gemDust = getModDust("lapis_dust", 4);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.NETHER_QUARTZ_ORE)) {
+            ItemStack gemDust = getModDust("quartz_dust", 2);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(ORES_APATITE) || path.contains("apatite_ore") || path.contains("raw_apatite")) {
+            ItemStack apatiteDust = getModDust("apatite_dust", 2);
+            if (!apatiteDust.isEmpty()) return apatiteDust;
+        }
+        if (path.contains("caterium_ore") || path.contains("raw_caterium")) {
+            ItemStack dust = getModDust("caterium_dust", 2);
+            if (!dust.isEmpty()) return dust;
+        }
+        if (path.contains("echonite_ore") || path.contains("raw_echonite")) {
+            ItemStack dust = getModDust("echonite_dust", 2);
+            if (!dust.isEmpty()) return dust;
+        }
+        if (path.contains("lumenite_ore") || path.contains("raw_lumenite")) {
+            ItemStack dust = getModDust("lumenite_dust", 2);
+            if (!dust.isEmpty()) return dust;
         }
 
-        // 3. Gravel -> Sand
-        if (input.is(Items.GRAVEL)) {
-            return new ItemStack(Items.SAND, 1);
-        }
-
-        // 4. Ingots -> 1x Dust
+        // 2. Ingots & Materials -> 1x Dust
         if (input.is(Items.IRON_INGOT)) {
             return new ItemStack(RefineryMod.IRON_DUST.get(), 1);
         }
@@ -275,12 +310,115 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         if (input.is(Items.COPPER_INGOT)) {
             return new ItemStack(RefineryMod.COPPER_DUST.get(), 1);
         }
+        if (input.is(INGOTS_TIN) || path.equals("tin_ingot")) {
+            return new ItemStack(RefineryMod.TIN_DUST.get(), 1);
+        }
+        if (input.is(INGOTS_BRONZE) || path.equals("bronze_ingot")) {
+            return new ItemStack(RefineryMod.BRONZE_DUST.get(), 1);
+        }
+        if (path.equals("caterium_ingot")) {
+            ItemStack dust = getModDust("caterium_dust", 1);
+            if (!dust.isEmpty()) return dust;
+        }
+        if (path.equals("echonite_ingot")) {
+            ItemStack dust = getModDust("echonite_dust", 1);
+            if (!dust.isEmpty()) return dust;
+        }
+        if (path.equals("lumenite_ingot")) {
+            ItemStack dust = getModDust("lumenite_dust", 1);
+            if (!dust.isEmpty()) return dust;
+        }
 
-        // 5. Oil Sand (Refinery or Logistics mod: oil_sand, oil_red_sand, oil_shale) -> 3x Bitumen (+ 50% chance for 1x Tar)
+        // 3. Coal & Charcoal
+        if (input.is(Items.COAL)) {
+            return new ItemStack(RefineryMod.COAL_DUST.get(), 1);
+        }
+        if (input.is(Items.COAL_BLOCK)) {
+            return new ItemStack(RefineryMod.COAL_DUST.get(), 9);
+        }
+        if (input.is(Items.CHARCOAL)) {
+            Optional<Item> epCharcoal = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("energizedpower", "charcoal_dust"));
+            return epCharcoal.map(item -> new ItemStack(item, 1)).orElseGet(() -> new ItemStack(RefineryMod.COAL_DUST.get(), 1));
+        }
+
+        // 4. Gems & Special Crystals -> Dust
+        if (input.is(Items.DIAMOND)) {
+            ItemStack gemDust = getModDust("diamond_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.EMERALD)) {
+            ItemStack gemDust = getModDust("emerald_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.LAPIS_LAZULI)) {
+            ItemStack gemDust = getModDust("lapis_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.QUARTZ)) {
+            ItemStack gemDust = getModDust("quartz_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.AMETHYST_SHARD)) {
+            ItemStack gemDust = getModDust("amethyst_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.AMETHYST_BLOCK)) {
+            ItemStack gemDust = getModDust("amethyst_dust", 4);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.OBSIDIAN)) {
+            ItemStack gemDust = getModDust("obsidian_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.ENDER_PEARL)) {
+            ItemStack gemDust = getModDust("ender_pearl_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.PRISMARINE_SHARD) || input.is(Items.PRISMARINE_CRYSTALS)) {
+            ItemStack gemDust = getModDust("prismarine_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+        if (input.is(Items.ECHO_SHARD)) {
+            ItemStack gemDust = getModDust("echo_dust", 1);
+            if (!gemDust.isEmpty()) return gemDust;
+        }
+
+        // 5. Stone / Cobblestone variants -> Gravel
+        if (input.is(Items.COBBLESTONE) || input.is(Items.STONE) ||
+            input.is(Items.COBBLED_DEEPSLATE) || input.is(Items.DEEPSLATE) ||
+            input.is(Items.ANDESITE) || input.is(Items.DIORITE) || input.is(Items.GRANITE)) {
+            return new ItemStack(Items.GRAVEL, 1);
+        }
+
+        // 6. Gravel -> Sand
+        if (input.is(Items.GRAVEL)) {
+            return new ItemStack(Items.SAND, 1);
+        }
+
+        // 7. Oil Sand (Refinery or Logistics mod: oil_sand, oil_red_sand, oil_shale) -> 3x Bitumen (+ 50% chance for 1x Tar)
         if (isOilSand(input)) {
             return new ItemStack(getPreferredBitumenItem(), 3);
         }
 
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getModDust(String dustName, int count) {
+        // Try logistics:core/<dustName>
+        Optional<Item> logItem = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("logistics", "core/" + dustName));
+        if (logItem.isPresent()) {
+            return new ItemStack(logItem.get(), count);
+        }
+        // Try logistics:<dustName>
+        Optional<Item> logItem2 = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("logistics", dustName));
+        if (logItem2.isPresent()) {
+            return new ItemStack(logItem2.get(), count);
+        }
+        // Try energizedpower:<dustName>
+        Optional<Item> epItem = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("energizedpower", dustName));
+        if (epItem.isPresent()) {
+            return new ItemStack(epItem.get(), count);
+        }
         return ItemStack.EMPTY;
     }
 

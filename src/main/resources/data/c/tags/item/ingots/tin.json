@@ -1,0 +1,7 @@
+{
+  "values": [
+    "refinery:tin_ingot",
+    {"id": "energizedpower:tin_ingot", "required": false},
+    {"id": "logistics:core/tin_ingot", "required": false}
+  ]
+}

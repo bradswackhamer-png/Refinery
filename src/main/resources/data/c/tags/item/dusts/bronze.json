@@ -1,0 +1,6 @@
+{
+  "values": [
+    "refinery:bronze_dust",
+    {"id": "logistics:core/bronze_dust", "required": false}
+  ]
+}

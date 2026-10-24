@@ -1,0 +1,6 @@
+{
+  "values": [
+    "refinery:tin_plate",
+    {"id": "energizedpower:tin_plate", "required": false}
+  ]
+}

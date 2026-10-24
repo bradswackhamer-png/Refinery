@@ -3,6 +3,8 @@ package com.refinery.client;
 import com.refinery.RefineryMod;
 import com.refinery.client.gui.*;
 import com.refinery.client.renderer.*;
+import com.refinery.client.renderer.entity.PipeGateEntityRenderer;
+import com.refinery.client.renderer.entity.PipeWireEntityRenderer;
 import com.refinery.fluid.RefineryFluids;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.api.distmarker.Dist;
@@ -44,6 +46,8 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.STEAM_TURBINE_CONTROLLER_BE.get(), SteamTurbineControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.METAL_PRESS_CONTROLLER_BE.get(), MetalPressControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER_BE.get(), IndustrialGrinderControllerRenderer::new);
+        event.registerEntityRenderer(RefineryMod.PIPE_GATE_ENTITY.get(), PipeGateEntityRenderer::new);
+        event.registerEntityRenderer(RefineryMod.PIPE_WIRE_ENTITY.get(), PipeWireEntityRenderer::new);
     }
 
     private void registerClientExtensions(RegisterClientExtensionsEvent event) {

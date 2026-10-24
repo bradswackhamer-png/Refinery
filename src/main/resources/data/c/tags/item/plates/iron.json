@@ -1,0 +1,6 @@
+{
+  "values": [
+    "refinery:iron_plate",
+    {"id": "energizedpower:iron_plate", "required": false}
+  ]
+}

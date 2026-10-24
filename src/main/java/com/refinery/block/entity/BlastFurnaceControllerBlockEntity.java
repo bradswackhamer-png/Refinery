@@ -15,7 +15,11 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -24,6 +28,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -275,8 +280,15 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
         }
     }
 
+    public static final TagKey<Item> DUSTS_IRON = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dusts/iron"));
+    public static final TagKey<Item> DUSTS_COAL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dusts/coal"));
+    public static final TagKey<Item> DUSTS_CHARCOAL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dusts/charcoal"));
+
     public static boolean isIronSource(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        if (stack.is(RefineryMod.IRON_DUST.get()) || stack.is(DUSTS_IRON)) return true;
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (id != null && id.getPath().contains("iron_dust")) return true;
         return stack.is(Items.RAW_IRON) || stack.is(Items.IRON_INGOT)
                 || stack.is(Items.IRON_ORE) || stack.is(Items.DEEPSLATE_IRON_ORE)
                 || stack.is(Items.RAW_IRON_BLOCK);
@@ -284,12 +296,13 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
 
     public static boolean isFuelSource(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        if (stack.is(RefineryMod.COAL_DUST.get()) || stack.is(DUSTS_COAL) || stack.is(DUSTS_CHARCOAL)) return true;
         if (stack.is(ItemTags.COALS) || stack.is(Items.COAL_BLOCK)
                 || stack.is(RefineryMod.TAR_ITEM.get()) || stack.is(RefineryMod.BITUMEN.get()) || stack.is(Items.CHARCOAL)) {
             return true;
         }
-        net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"));
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen") || id.getPath().contains("coal_dust") || id.getPath().contains("charcoal_dust"));
     }
 
     private void tryExportOutput(ServerLevel level) {

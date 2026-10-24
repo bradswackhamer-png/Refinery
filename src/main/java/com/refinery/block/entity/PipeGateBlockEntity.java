@@ -4,6 +4,7 @@ import com.refinery.RefineryMod;
 import com.refinery.block.PipeGateBlock;
 import com.refinery.compat.LogisticsPipeCompat;
 import com.refinery.gate.GateAction;
+import com.refinery.gate.GateHost;
 import com.refinery.gate.GateTier;
 import com.refinery.gate.GateTrigger;
 import com.refinery.gate.PipeWireColor;
@@ -38,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
+public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, GateHost {
     public static final int MAX_SLOTS = 8;
     public static final int DATA_COUNT = 20;
 
@@ -105,6 +106,11 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
             return DATA_COUNT;
         }
     };
+
+    @Override
+    public ContainerData getDataAccess() {
+        return this.dataAccess;
+    }
 
     public PipeGateBlockEntity(BlockPos pos, BlockState state) {
         this(pos, state, GateTier.BASIC, false);
@@ -270,6 +276,7 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
                 }
                 if (itemHandler == null) {
                     itemHandler = level.getCapability(Capabilities.Item.BLOCK, nPos, dir.getOpposite());
+                    if (itemHandler == null) itemHandler = level.getCapability(Capabilities.Item.BLOCK, nPos, null);
                     if (itemHandler != null && containerPos == null) {
                         containerPos = nPos;
                         containerDir = dir.getOpposite();
@@ -277,6 +284,7 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
                 }
                 if (fluidHandler == null) {
                     fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, nPos, dir.getOpposite());
+                    if (fluidHandler == null) fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, nPos, null);
                     if (fluidHandler != null && containerPos == null) {
                         containerPos = nPos;
                         containerDir = dir.getOpposite();
@@ -289,7 +297,11 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
                 container = c;
             }
             itemHandler = level.getCapability(Capabilities.Item.BLOCK, attachedPos, facing.getOpposite());
+            if (itemHandler == null) itemHandler = level.getCapability(Capabilities.Item.BLOCK, attachedPos, null);
+
             fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, attachedPos, facing.getOpposite());
+            if (fluidHandler == null) fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, attachedPos, null);
+
             containerPos = attachedPos;
             containerDir = facing.getOpposite();
         }
@@ -405,19 +417,25 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
                 if (fluidHandler == null) yield false;
                 for (int t = 0; t < fluidHandler.size(); t++) {
                     long amt = fluidHandler.getAmountAsLong(t);
+                    if (amt == 0) yield true; // An empty tank always has space!
                     long cap = fluidHandler.getCapacityAsLong(t, fluidHandler.getResource(t));
-                    if (amt < cap) yield true;
+                    if (cap <= 0) cap = fluidHandler.getCapacityAsLong(t, net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER));
+                    if (cap > 0 && amt < cap) yield true;
                 }
                 yield false;
             }
             case TANK_FULL -> {
                 if (fluidHandler == null) yield false;
+                boolean hasAnyTank = false;
                 for (int t = 0; t < fluidHandler.size(); t++) {
+                    hasAnyTank = true;
                     long amt = fluidHandler.getAmountAsLong(t);
+                    if (amt == 0) yield false; // An empty tank is not full!
                     long cap = fluidHandler.getCapacityAsLong(t, fluidHandler.getResource(t));
-                    if (amt < cap) yield false;
+                    if (cap <= 0) cap = fluidHandler.getCapacityAsLong(t, net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER));
+                    if (cap > 0 && amt < cap) yield false;
                 }
-                yield true;
+                yield hasAnyTank;
             }
             case PIPE_EMPTY -> {
                 if (isPipe && attachedBe != null) {
@@ -514,6 +532,7 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
                             return;
                         }
                         ResourceHandler<ItemResource> pipeHandler = level.getCapability(Capabilities.Item.BLOCK, attachedPos, dir);
+                        if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, attachedPos, null);
                         if (pipeHandler != null) {
                             try (Transaction tx = Transaction.openRoot()) {
                                 int ins = pipeHandler.insert(res, 1, tx);
@@ -531,7 +550,10 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider {
 
             // Fluid Pump Action
             ResourceHandler<FluidResource> sourceFluid = level.getCapability(Capabilities.Fluid.BLOCK, nPos, dir.getOpposite());
+            if (sourceFluid == null) sourceFluid = level.getCapability(Capabilities.Fluid.BLOCK, nPos, null);
+
             ResourceHandler<FluidResource> pipeFluid = level.getCapability(Capabilities.Fluid.BLOCK, attachedPos, dir);
+            if (pipeFluid == null) pipeFluid = level.getCapability(Capabilities.Fluid.BLOCK, attachedPos, null);
             if (sourceFluid != null && pipeFluid != null) {
                 for (int t = 0; t < sourceFluid.size(); t++) {
                     FluidResource res = sourceFluid.getResource(t);

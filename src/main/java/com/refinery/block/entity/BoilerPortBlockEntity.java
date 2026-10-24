@@ -52,6 +52,15 @@ public class BoilerPortBlockEntity extends BlockEntity implements WorldlyContain
                 }
             }
         }
+        if (this.level != null) {
+            for (BlockPos p : BlockPos.betweenClosed(this.worldPosition.offset(-3, -3, -3), this.worldPosition.offset(3, 3, 3))) {
+                if (this.level.getBlockEntity(p) instanceof IBoilerController b && b.isAssembled()) {
+                    this.controllerPos = p.immutable();
+                    setChanged();
+                    return b;
+                }
+            }
+        }
         return null;
     }
 

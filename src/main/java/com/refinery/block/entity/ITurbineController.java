@@ -11,6 +11,8 @@ public interface ITurbineController {
     EnergyHandler getEnergyHandler();
     int getSteamAmount();
     int getWaterAmount();
+    void setSteamAmount(int amt);
+    void setWaterAmount(int amt);
     int getEnergyStored();
     int getMaxEnergyStored();
 }

@@ -63,7 +63,17 @@ The mod introduces a tiered industrial metallurgy and chemical progression:
 | :--- | :--- | :--- |
 | **Steel Ingot** (`refinery:steel_ingot`) | Industrial Blast Smelter | Primary alloy for heavy machine frames, Casings, and Controllers. |
 | **Heavy Steel Plate** (`refinery:steel_plate`) | Industrial Metal Press (or crafting) | Reinforced plating required for high-pressure vessels, boilers, and presses. |
-| **Petroleum Tar** (`refinery:tar`) | Refinery byproduct | Heavy hydrocarbon fuel (burns 1,600 ticks / 8 items) or crafts into torches. |
+| **Tin Ingot** (`refinery:tin_ingot`) | Smelting Tin Dust / Ores | Malleable industrial metal used for bronze alloying and plating. |
+| **Tin Dust** (`refinery:tin_dust`) | Grinding Tin Ores or Raw Tin (x2) | Pulverized tin mineral used for smelting or alloy blending. |
+| **Tin Plate** (`refinery:tin_plate`) | Metal Press (Tin Ingot) | Stamped tin plate used in circuitry and engineering. |
+| **Bronze Ingot** (`refinery:bronze_ingot`) | Alloying 3 Copper + 1 Tin | Durable copper-tin alloy ingot for machinery and tools. |
+| **Bronze Dust** (`refinery:bronze_dust`) | Grinding Bronze Ingot or blending dusts | Alloy dust that smelts directly into Bronze Ingots. |
+| **Bronze Plate** (`refinery:bronze_plate`) | Metal Press (Bronze Ingot) | Heavy-duty stamped bronze structural plate. |
+| **Coal Dust** (`refinery:coal_dust`) | Grinding Coal or Coal Blocks | Finely pulverized coal fuel for Blast Smelters and boilers. |
+| **Iron Plate** (`refinery:iron_plate`) | Metal Press (Iron Ingot) | Standard industrial stamped iron plate. |
+| **Copper Plate** (`refinery:copper_plate`) | Metal Press (Copper Ingot) | Highly conductive stamped plate for electrical piping and components. |
+| **Gold Plate** (`refinery:gold_plate`) | Metal Press (Gold Ingot) | Corrosion-resistant stamped plate for advanced logic chips and gates. |
+| **Petroleum Tar** (`refinery:tar`) | Refinery byproduct / Oil Sand grinding | Heavy hydrocarbon fuel (burns 1,600 ticks / 8 items) or crafts into torches/pipes. |
 | **Sulfur Dust** (`refinery:sulfur_dust`) | Refinery byproduct | Chemical mineral used to craft Gunpowder without creepers. |
 | **Diesel** (`refinery:diesel`) | Refinery fractional distillation | High-yield petroleum distillate. |
 | **Gasoline** (`refinery:gasoline`) | Refinery fractional distillation | Volatile combustible gas distillate. |
@@ -136,14 +146,17 @@ The **Automated Harvester** (`refinery:auto_harvester`) scans mature crops direc
 ## 4. Heavy Metallurgy
 
 ### Industrial Blast Smelter (5×5×5)
-A massive foundry furnace that transforms Raw Iron and Coal into high-grade Steel Ingots.
+A massive foundry furnace that transforms iron sources and carbon fuels into high-grade Steel Ingots.
 
 - **Dimensions**: 5 blocks wide × 5 blocks tall × 5 blocks deep (125 blocks total).
 - **Viewing Window**: The front wall features a 3×3 transparent **Foundry Heat Glass** window where you can watch raw materials drop into the molten chamber and cook into glowing steel!
-- **Recipe**: 1 Raw Iron + 1 Coal/Charcoal -> 1 Steel Ingot (100 ticks).
+- **Universal Ingredients**:
+  - **Iron Sources**: Raw Iron, Iron Ingot, Iron Ore, Deepslate Iron Ore, Raw Iron Block, or **Iron Dust** (`#c:dusts/iron`).
+  - **Fuel Sources**: Coal, Charcoal, Coal Block, Petroleum Tar, Bitumen, or **Coal Dust / Charcoal Dust** (`#c:dusts/coal`, `#c:dusts/charcoal`).
+- **Recipe**: 1 Iron Source + 1 Fuel Source -> 1 Steel Ingot (100 ticks).
 - **Buffers**: 4 Iron input slots, 4 Fuel slots, 4 Steel output slots.
 - **Automation**: 
-  - **Foundry Input Port**: Inserts Raw Iron and Coal via pipes/hoppers.
+  - **Foundry Input Port**: Inserts Iron and Fuel via pipes/hoppers.
   - **Foundry Output Port**: Automatically pulls out finished Steel Ingots.
 
 #### Layer-by-Layer Assembly (Local coordinates relative to Controller)
@@ -162,15 +175,21 @@ A massive foundry furnace that transforms Raw Iron and Coal into high-grade Stee
 ---
 
 ### Industrial Metal Press (2×2×2)
-A compact hydraulic mechanical press for stamping ingots into structural plates.
+A universal hydraulic mechanical press for stamping various metal ingots into structural plates.
 
 - **Dimensions**: 2 wide × 2 tall × 2 deep (8 blocks total).
 - **Physical 3D Stamping Animation**: Features an in-world animated hydraulic piston ram with a power stroke, heavy anvil impact (`SoundEvents.ANVIL_LAND`), and spark ejection!
-- **Recipe**: 1 Steel Ingot -> 1 Heavy Steel Plate (40 ticks = 2.0s).
+- **Supported Stamping Stamping Recipes** (40 ticks = 2.0s per plate):
+  - **Steel Ingot** -> **Heavy Steel Plate**
+  - **Iron Ingot** -> **Iron Plate**
+  - **Copper Ingot** -> **Copper Plate**
+  - **Gold Ingot** -> **Gold Plate**
+  - **Tin Ingot** -> **Tin Plate**
+  - **Bronze Ingot** -> **Bronze Plate**
 - **Energy**: 50,000 FE buffer; consumes 20 FE/t (800 FE per plate).
 - **Logistics**:
-  - **Top & Sides**: Inserts Steel Ingots into the 2-slot input queue.
-  - **Bottom**: Extracts Heavy Steel Plates from the 2-slot output buffer.
+  - **Top & Sides**: Inserts Ingots into the 2-slot input queue.
+  - **Bottom**: Extracts Finished Plates from the 2-slot output buffer.
 
 #### Layer-by-Layer Assembly
 ```
@@ -349,7 +368,7 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | **Turbine Energy Port** | 1 Turbine Casing + 2 Redstone Blocks + 2 Steel Plates |
 | **Steam Turbine Controller** | 1 Turbine Rotor + 4 Steel Plates + 2 Steel Ingots + 2 Redstone Blocks |
 
-### Mineral Pulverizing & Smelting
+### Mineral Pulverizing, Alloying & Smelting
 | Input | Machine / Process | Output |
 | :--- | :--- | :--- |
 | **Bituminous Oil Sand** (`refinery:oil_sand` or `logistics:core/oil_sand`, `oil_red_sand`, `oil_shale`) | Industrial Grinder | **3x Bitumen** (+ 50% chance for **1x Tar**) |
@@ -357,10 +376,29 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | **Raw Iron / Iron Ore / Deepslate Iron Ore** | Industrial Grinder | **2x Iron Dust** (Ore Doubling!) |
 | **Raw Gold / Gold Ore / Deepslate Gold Ore** | Industrial Grinder | **2x Gold Dust** (Ore Doubling!) |
 | **Raw Copper / Copper Ore / Deepslate Copper Ore** | Industrial Grinder | **2x Copper Dust** (Ore Doubling!) |
+| **Tin Ore / Deepslate Tin / Raw Tin** (`#c:ores/tin`, `#c:raw_materials/tin`) | Industrial Grinder | **2x Tin Dust** (Ore Doubling!) |
+| **Coal Ore / Deepslate Coal Ore** | Industrial Grinder | **2x Coal Dust** |
+| **Coal** (`Items.COAL` or `#c:coals`) | Industrial Grinder | **1x Coal Dust** |
+| **Block of Coal** | Industrial Grinder | **9x Coal Dust** |
+| **Charcoal** | Industrial Grinder | **1x Charcoal Dust** |
+| **Diamond / Diamond Ore** | Industrial Grinder | **1x / 2x Diamond Dust** |
+| **Emerald / Emerald Ore** | Industrial Grinder | **1x / 2x Emerald Dust** |
+| **Lapis Lazuli / Lapis Ore** | Industrial Grinder | **1x / 4x Lapis Dust** |
+| **Nether Quartz / Quartz Ore** | Industrial Grinder | **1x / 2x Quartz Dust** |
+| **Amethyst Shard / Block** | Industrial Grinder | **1x / 4x Amethyst Dust** |
+| **Obsidian** | Industrial Grinder | **1x Obsidian Dust** |
+| **Ender Pearl** | Industrial Grinder | **1x Ender Pearl Dust** |
+| **Caterium / Echonite / Lumenite Ores or Raw** | Industrial Grinder | **2x Respective Dust** |
+| **Caterium / Echonite / Lumenite Ingots** | Industrial Grinder | **1x Respective Dust** |
 | **Stone / Cobblestone / Deepslate / Andesite / Diorite / Granite** | Industrial Grinder | **1x Gravel** |
 | **Gravel** | Industrial Grinder | **1x Sand** |
 | **Iron / Gold / Copper Ingot** | Industrial Grinder | **1x Respective Dust** |
-| **Iron / Gold / Copper Dust** | Furnace / Blast Furnace | **1x Respective Ingot** |
+| **Tin Ingot** | Industrial Grinder | **1x Tin Dust** |
+| **Bronze Ingot** | Industrial Grinder | **1x Bronze Dust** |
+| **Iron / Gold / Copper / Tin / Bronze Dust** | Furnace / Blast Furnace | **1x Respective Ingot** |
+| **3 Copper Ingots + 1 Tin Ingot** | Crafting Table (Shapeless) | **4x Bronze Ingot** |
+| **3 Copper Dust + 1 Tin Dust** | Crafting Table (Shapeless) | **4x Bronze Dust** |
+| **Any Ingot (Steel, Iron, Copper, Gold, Tin, Bronze)** | Industrial Metal Press | **1x Respective Plate** |
 
 ### Logistics Mod Cross-Compatibility & Tar Recipes
 *(These recipes activate dynamically when the Logistics mod is detected with zero hard dependencies)*
@@ -463,14 +501,19 @@ Gates are slim, directional logic controllers that can be attached to **any face
 ---
 
 ### Overview & Pipe Attachment
-- **Placement**: Right-click any face (North, South, East, West, Up, Down) of a pipe or container while holding a Gate.
-  - The gate forms a sleek 3-pixel-thick metallic bezel plate adhering to the pipe arm.
-  - Gate hitboxes allow players and entities to walk freely without catching or snagging.
+- **1x1x1 In-Space Snapping (Zero Neighbor Footprint)**: Right-clicking any face (North, South, East, West, Up, Down) of a pipe or container snaps the gate directly onto that collar **within the exact same 1x1x1 block space** as the pipe!
+  - The adjacent block coordinate remains 100% completely open air, allowing players to walk through freely, lay parallel pipelines directly adjacent, or place nearby machines with zero obstruction.
+  - The gate forms a sleek 3-pixel-thick metallic bezel plate adhering snugly to the pipe collar.
+  - If the supporting pipe or block is broken, the attached gate automatically pops off and drops its item.
 - **Programming GUI**: Right-click any placed gate with an empty hand to open its industrial programming console.
   - **Left-Click** a Trigger or Action to cycle forward.
   - **Right-Click** a Trigger or Action to cycle backward.
   - An animated **Status LED** glows green whenever the condition is actively satisfied in the world.
-- **Redstone Output**: When an active pair fires the `Emit Redstone` action, the gate becomes a full redstone power source (emitting power 15) to adjacent redstone dust, repeaters, pistons, and doors.
+- **Dismantling & Upgrades**:
+  - Right-click with a **Refinery Wrench** to instantly dismantle the gate without tools.
+  - Right-click with an **Autarchic Chipset** to instantly upgrade any standard gate into an Autarchic Gate in place!
+  - Right-click with a **Pipe Wire** to connect or toggle wires.
+- **Redstone Output**: When an active pair fires the `Emit Redstone` action, the gate emits strong redstone power (signal 15) to adjacent redstone dust, repeaters, pistons, and doors.
 
 ---
 
@@ -505,10 +548,24 @@ One of the most celebrated features of classic BuildCraft:
 
 ### Pipe Wire Networks (Red, Blue, Green, Yellow)
 Gates can communicate across long distances without bulky redstone dust lines:
-- **Colored Pipe Wires**: Red, Blue, Green, and Yellow.
-- **Action (`Emit Wire`)**: Broadcasts that wire's logic state along contiguous pipe networks up to 24 blocks.
-- **Trigger (`Wire ON` / `Wire OFF`)**: Reads the active wire broadcast from any other gate on that pipe network.
-- **Wire HUD**: The gate GUI displays real-time glowing status dots for all supported pipe wire channels.
+- **Placing Wires on Pipes**: Right-click any pipe segment directly while holding a **Red, Blue, Green, or Yellow Pipe Wire** to string that wire along the pipe!
+  - Multiple wire colors can be attached to the exact same pipe simultaneously (visible as distinct colored conductors along the pipe corners).
+  - Right-click with a **Refinery Wrench** to pop off and retrieve all attached wires.
+  - If the pipe block is broken, all attached pipe wires automatically drop as items.
+- **Action (`Emit Wire`)**: Broadcasts that wire's logic state along contiguous pipe networks up to 32 blocks.
+- **Trigger (`Wire ON` / `Wire OFF`)**: Reads the active wire broadcast from any other gate or wire on that pipe network.
+- **Wire HUD**: The gate GUI displays real-time glowing status dots for all supported pipe wire channels. When an active signal is pulsing, the wires on the pipe illuminate brightly!
+
+---
+
+### Machine & Mod Interoperability
+- **Logistics Mod & Pipe Systems**: All multiblock ports (Refinery Diesel, Gas, Crude Oil, Boiler Water, Boiler Steam, Turbine Steam, Turbine Water) and Controllers feature full NeoForge Transfer API `ResourceHandler<FluidResource>` implementations with transaction support. Logistics fluid extraction pipes, pumps, wooden/redstone engines, and gates seamlessly drain and fill tanks.
+- **Track & Trains Mod Compatibility**: Machines with hybrid item and fluid inventories (such as the Track & Trains Fluid Loader and Unloader) are fully supported. Gates automatically discover both fluid and item capabilities simultaneously on any face.
+- **Accurate Liquid Detection**:
+  - `Tank Empty`: Triggers when the tank has 0 mB.
+  - `Has Fluid`: Triggers when the tank contains at least 1 mB.
+  - `Space in Tank`: Accurately triggers whenever the tank has room for more fluid (including empty tanks).
+  - `Tank Full`: Triggers when the fluid volume reaches maximum capacity.
 
 ---
 

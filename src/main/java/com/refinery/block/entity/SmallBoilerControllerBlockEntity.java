@@ -110,6 +110,18 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
     }
 
     @Override
+    public void setWaterAmount(int amt) {
+        this.waterAmount = Math.clamp(amt, 0, TANK_CAPACITY);
+        setChanged();
+    }
+
+    @Override
+    public void setSteamAmount(int amt) {
+        this.steamAmount = Math.clamp(amt, 0, TANK_CAPACITY);
+        setChanged();
+    }
+
+    @Override
     public int fillWater(int amount) {
         int space = TANK_CAPACITY - this.waterAmount;
         int toAdd = Math.min(space, amount);

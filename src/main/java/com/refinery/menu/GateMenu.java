@@ -3,6 +3,7 @@ package com.refinery.menu;
 import com.refinery.RefineryMod;
 import com.refinery.block.entity.PipeGateBlockEntity;
 import com.refinery.gate.GateAction;
+import com.refinery.gate.GateHost;
 import com.refinery.gate.GateTier;
 import com.refinery.gate.GateTrigger;
 import com.refinery.gate.PipeWireColor;
@@ -17,17 +18,17 @@ import net.minecraft.world.item.ItemStack;
 public class GateMenu extends AbstractContainerMenu {
     public static final int DATA_COUNT = PipeGateBlockEntity.DATA_COUNT;
 
-    private final PipeGateBlockEntity gateEntity;
+    private final GateHost gateHost;
     private final ContainerData data;
 
     public GateMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, null, new SimpleContainerData(DATA_COUNT));
     }
 
-    public GateMenu(int containerId, Inventory playerInventory, PipeGateBlockEntity gateEntity, ContainerData data) {
+    public GateMenu(int containerId, Inventory playerInventory, GateHost gateHost, ContainerData data) {
         super(RefineryMod.GATE_MENU.get(), containerId);
         checkContainerDataCount(data, DATA_COUNT);
-        this.gateEntity = gateEntity;
+        this.gateHost = gateHost;
         this.data = data;
 
         // Player Inventory (3 rows of 9 at y: 134)
@@ -92,12 +93,12 @@ public class GateMenu extends AbstractContainerMenu {
         int slot = id / 4;
         int actionType = id % 4;
 
-        if (gateEntity != null && slot >= 0 && slot < gateEntity.getTier().getSlots()) {
+        if (gateHost != null && slot >= 0 && slot < gateHost.getTier().getSlots()) {
             switch (actionType) {
-                case 0 -> gateEntity.cycleTrigger(slot, true);
-                case 1 -> gateEntity.cycleTrigger(slot, false);
-                case 2 -> gateEntity.cycleAction(slot, true);
-                case 3 -> gateEntity.cycleAction(slot, false);
+                case 0 -> gateHost.cycleTrigger(slot, true);
+                case 1 -> gateHost.cycleTrigger(slot, false);
+                case 2 -> gateHost.cycleAction(slot, true);
+                case 3 -> gateHost.cycleAction(slot, false);
             }
             return true;
         }
