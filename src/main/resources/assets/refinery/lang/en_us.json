@@ -43,12 +43,14 @@
   "block.refinery.grinder_chamber": "Grinder Crushing Chamber",
   "block.refinery.grinder_input_port": "Grinder Feed Port (Input)",
   "block.refinery.grinder_output_port": "Grinder Discharge Port (Output)",
+  "block.refinery.oil_sand": "Bituminous Oil Sand",
 
   "item.refinery.steel_ingot": "Steel Ingot",
   "item.refinery.steel_plate": "Heavy Steel Plate",
   "item.refinery.iron_dust": "Iron Dust",
   "item.refinery.gold_dust": "Gold Dust",
   "item.refinery.copper_dust": "Copper Dust",
+  "item.refinery.bitumen": "Bitumen",
   "item.refinery.refinery_wrench": "Refinery Wrench",
   "item.refinery.tar": "Petroleum Tar",
   "item.refinery.sulfur_dust": "Sulfur Dust",
@@ -56,9 +58,12 @@
   "item.refinery.gasoline_bucket": "Gasoline Bucket",
   "item.refinery.steam_bucket": "High Pressure Steam Bucket",
 
+  "block.refinery.crude_oil": "Crude Oil",
+  "fluid.refinery.crude_oil": "Crude Oil",
   "fluid.refinery.diesel": "Diesel",
   "fluid.refinery.gasoline": "Gasoline / Petroleum Gas",
   "fluid.refinery.steam": "High Pressure Steam",
+  "item.refinery.crude_oil_bucket": "Crude Oil Bucket",
 
   "container.refinery.controller": "Industrial Petroleum Refinery",
   "container.refinery.auto_planter": "Automated Planter",
@@ -72,6 +77,7 @@
 
   "tooltip.refinery.wrench.desc_1": "§7Right-click blocks to rotate facing.",
   "tooltip.refinery.wrench.desc_2": "§6Right-click Controller to toggle 3D Blueprint Projection!",
+  "tooltip.refinery.wrench.desc_3": "§eShift + Right-Click to instantly dismantle & pick up any machine block.",
   "tooltip.refinery.steel_ingot.desc": "§7High-strength refined alloy. Used for heavy industrial machines.",
   "tooltip.refinery.steel_plate.desc": "§7Heavy structural steel plate. Essential for boilers and pressure vessels.",
   "tooltip.refinery.iron_dust.desc": "§7Pulverized mineral dust. Smelts into 1 Iron Ingot.",
@@ -84,5 +90,7 @@
   "tooltip.refinery.auto_harvester.desc_2": "§6Auto-harvests mature crops and replants.",
   "tooltip.refinery.auto_harvester.desc_3": "§aRequires power. Auto-ejects into chests & pipes behind/below.",
   "tooltip.refinery.tar.desc": "§7Viscous petroleum residue. Burns as fuel or crafts torches.",
-  "tooltip.refinery.sulfur_dust.desc": "§eRefined mineral byproduct. Used in gunpowder and chemistry."
+  "tooltip.refinery.sulfur_dust.desc": "§eRefined mineral byproduct. Used in gunpowder and chemistry.",
+  "tooltip.refinery.oil_sand.desc": "§7Petroleum-rich sand. Grind into 3 Bitumen (+50% chance for Tar).",
+  "tooltip.refinery.bitumen.desc": "§8Heavy asphalt pitch. High-energy furnace & boiler fuel (burns 1,600t)."
 }

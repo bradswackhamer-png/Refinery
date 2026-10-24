@@ -101,6 +101,34 @@ public class RefineryFluids {
             .block(STEAM_BLOCK)
             .bucket(STEAM_BUCKET);
 
+    // === CRUDE OIL ===
+    public static final DeferredHolder<FluidType, FluidType> CRUDE_OIL_TYPE = RefineryMod.FLUID_TYPES.register("crude_oil",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(950)
+                    .viscosity(3000)
+                    .temperature(300)
+                    .descriptionId("fluid.refinery.crude_oil")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> CRUDE_OIL_SOURCE = RefineryMod.FLUIDS.register("crude_oil",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.CRUDE_OIL_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> CRUDE_OIL_FLOWING = RefineryMod.FLUIDS.register("flowing_crude_oil",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.CRUDE_OIL_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> CRUDE_OIL_BLOCK = RefineryMod.BLOCKS.registerBlock("crude_oil",
+            p -> new LiquidBlock(CRUDE_OIL_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f));
+
+    public static final DeferredItem<BucketItem> CRUDE_OIL_BUCKET = RefineryMod.ITEMS.registerItem("crude_oil_bucket",
+            p -> new BucketItem(CRUDE_OIL_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties CRUDE_OIL_PROPERTIES = new BaseFlowingFluid.Properties(
+            CRUDE_OIL_TYPE, CRUDE_OIL_SOURCE, CRUDE_OIL_FLOWING)
+            .slopeFindDistance(3)
+            .levelDecreasePerBlock(2)
+            .block(CRUDE_OIL_BLOCK)
+            .bucket(CRUDE_OIL_BUCKET);
+
     public static void init() {
     }
 }

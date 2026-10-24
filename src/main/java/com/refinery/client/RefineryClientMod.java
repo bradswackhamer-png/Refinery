@@ -49,5 +49,6 @@ public class RefineryClientMod {
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.DIESEL_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.GASOLINE_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.STEAM_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.CRUDE_OIL_TYPE.get());
     }
 }

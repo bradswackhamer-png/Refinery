@@ -303,6 +303,7 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
         if (stack.is(Items.LAVA_BUCKET)) return 20000;
         if (stack.is(Items.BLAZE_ROD)) return 2400;
         if (stack.is(RefineryMod.TAR_ITEM.get())) return 1600;
+        if (stack.is(RefineryMod.BITUMEN.get())) return 1600;
         if (stack.is(ItemTags.LOGS) || stack.is(ItemTags.PLANKS)) return 300;
         return 0;
     }

@@ -20,8 +20,15 @@
 6. [Petroleum Refining & Chemical Byproducts](#6-petroleum-refining--chemical-byproducts)
    - [Petroleum Refinery (3×3×4 Multiblock)](#petroleum-refinery-334)
    - [Fuels & Byproducts](#fuels--byproducts)
+   - [Industrial Grinder & Pulverizer (2×3×3 Multiblock)](#industrial-grinder--pulverizer-2x3x3)
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Pipes, & Interfacing](#8-automation-pipes--interfacing)
+9. [Crude Oil World Generation & Retrogen](#9-crude-oil-world-generation--retrogen)
+   - [In-World Fluid Crude Oil](#in-world-fluid-crude-oil)
+   - [Deposit Structures & Capacities](#deposit-structures--capacities)
+   - [Configuration (`config/refinery.toml`)](#configuration-configrefinerytoml)
+   - [Retrogen Persistence (No Re-Gen Once Mined)](#retrogen-persistence-no-re-gen-once-mined)
+   - [Administrative Commands](#administrative-commands)
 
 ---
 
@@ -63,9 +70,28 @@ The **Refinery Wrench** (`refinery:refinery_wrench`) is the ultimate industrial 
 
 - **Block Reorientation**: Right-click machine blocks, ports, or casings to rotate their horizontal facing.
 - **3D Holographic Blueprint**: Sneak-right-click (or right-click) any **Multiblock Controller** to cast a real-time **3D in-world hologram projection** for 30 seconds.
-  - Missing or incorrect blocks are outlined in color-coded wireframes.
-  - In-world floating 3D labels reveal the exact block name and position up to 10 blocks away.
-  - Validates the structure and automatically forms the multiblock upon completion.
+  - **Color-Coded Block Labels**: Each block type now displays bold, high-contrast text in a distinct signature color:
+    - **Controllers**: Vivid Emerald Green (`#22C55E`)
+    - **Crude Oil Input Port**: Petroleum Amber Gold (`#F59E0B`)
+    - **Diesel Output Port**: Radiant Canary Yellow (`#FACC15`)
+    - **Gasoline / Gas Port**: Electric Cyan (`#06B6D4`)
+    - **Steam Ports**: Frost Sky Blue (`#38BDF8`)
+    - **Water Ports**: Royal Ocean Blue (`#3B82F6`)
+    - **Fuel Ports**: Flame Orange (`#FB923C`)
+    - **Energy Ports**: Neon Lime (`#A3E635`)
+    - **Byproduct Ports**: Vivid Fuchsia Pink (`#EC4899`)
+    - **Foundry / Grinder Input Ports**: Mint Green (`#4ADE80`)
+    - **Foundry / Grinder Output Ports**: Tangerine Orange (`#FB923C`)
+    - **Combustion Chamber & Firebox**: Fiery Crimson Red (`#EF4444`)
+    - **Heat Exchanger & Crushing Chamber**: Coral / Ruby (`#FB7185` / `#F43F5E`)
+    - **Distillation Column**: Aquamarine Ice (`#67E8F9`)
+    - **Foundry Glass Window**: Amethyst Purple (`#C084FC`)
+    - **Boiler Pressure Pipes**: Copper Bronze (`#FDBA74`)
+    - **Turbine Rotor Shaft**: Bright Electric Teal (`#2DD4BF`)
+    - **Press Hydraulic Head**: Rich Violet (`#A855F7`)
+    - **Press Anvil Bed**: Cobalt Indigo (`#818CF8`)
+    - **Casings**: Clean metallic tones (Platinum Slate, Steel Blue, Industrial Brass, Titanium, Periwinkle, Hazard Yellow).
+  - Both the 3D wireframe outline and floating text match their block type's signature color, making complex structures instantly readable from any angle.
 
 ---
 
@@ -285,6 +311,7 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | :--- | :--- |
 | **Refinery Wrench** | Iron Ingot, Copper Ingot, Lever (Shaped) |
 | **Heavy Steel Plate** | 1 Steel Ingot (Shapeless in crafting table or 1 Ingot in Metal Press) |
+| **Bituminous Oil Sand** (x2) | 1 Sand + 1 Petroleum Tar (Shapeless) |
 | **Gunpowder (from Sulfur)** | 1 Sulfur Dust + 1 Charcoal (Shapeless) |
 | **Torches (from Tar)** | 1 Petroleum Tar + 1 Stick -> 4 Torches (Shapeless) |
 
@@ -318,6 +345,8 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 ### Mineral Pulverizing & Smelting
 | Input | Machine / Process | Output |
 | :--- | :--- | :--- |
+| **Bituminous Oil Sand** | Industrial Grinder | **3x Bitumen** (+ 50% chance for **1x Tar**) |
+| **Bitumen** | Furnace / Blast Furnace | **1x Petroleum Tar** |
 | **Raw Iron / Iron Ore / Deepslate Iron Ore** | Industrial Grinder | **2x Iron Dust** (Ore Doubling!) |
 | **Raw Gold / Gold Ore / Deepslate Gold Ore** | Industrial Grinder | **2x Gold Dust** (Ore Doubling!) |
 | **Raw Copper / Copper Ore / Deepslate Copper Ore** | Industrial Grinder | **2x Copper Dust** (Ore Doubling!) |
@@ -345,3 +374,46 @@ All ports and controllers implement native Minecraft and NeoForge capability sta
   - **Metal Press**: Insert into top/sides (Ingots); extract from bottom face (Plates).
   - **Steam Boilers**: Insert burnable fuel into the **Boiler Fuel Port**.
   - **Harvester**: Automatically dumps into chests or conduits behind or underneath it.
+
+
+---
+
+## 9. Crude Oil World Generation & Retrogen
+
+### In-World Fluid Crude Oil
+Crude Oil is a heavy, dark liquid naturally present in subterranean geologic traps:
+- **Liquid Blocks**: `refinery:crude_oil` (source) and `refinery:flowing_crude_oil`.
+- **Handling**: Can be collected using standard Buckets to obtain **Crude Oil Buckets** (`refinery:crude_oil_bucket`), pumped via fluid extraction pipes, or manually right-clicked onto a Refinery **Crude Oil Input Port**.
+- **Port Bucket Interaction**: Right-clicking the **Crude Oil Input Port** with a Crude Oil Bucket empties it into the refinery (+1,000 mB). Right-clicking the **Diesel Port** or **Gas Port** with an empty bucket collects refined fuel (-1,000 mB).
+
+### Deposit Structures & Capacities
+1. **Standard Oil Pit (300,000 mB – 500,000 mB)**:
+   - **Surface Crater**: A natural dark petroleum lake with shoreline beaches of **Bituminous Oil Sand** (`refinery:oil_sand`).
+   - **Feeder Conduit**: A vertical cylindrical conduit dropping through the earth.
+   - **Subterranean Reservoir**: A massive subterranean cavern embedded in the deep stone crust, filled with hundreds of source blocks and encased in an oil sand stratum.
+   - **Yield**: Provides 300 to 500 buckets (300k to 500k mB) of pumpable crude oil, plus dozens of mineable oil sand blocks.
+2. **Rare Super-Geyser (1,000,000 mB)**:
+   - A rare high-pressure geologic anomaly (default 20% of spawned oil pits).
+   - Features an active towering geyser fountain erupting above the surface lake, fed by an immense subterranean reservoir dome holding **1,000 crude oil source blocks** (1,000,000 mB).
+
+### Configuration (`config/refinery.toml`)
+All generation parameters are fully customizable:
+- `enableOilRetrogen` (default: `true`): Enables automatic generation in existing explored chunks.
+- `oilPitSpawnChance` (default: `0.04`): ~4% chance per chunk in allowed biomes.
+- `minChunkDistanceBetweenWells` (default: `4`): Minimum chunk distance between oil deposits to space out wells and prevent clustering.
+- `rareGeyserChance` (default: `0.20`): 20% chance for a spawned pit to be a 1,000k mB super-geyser.
+- `minOilVolumeMb` / `maxOilVolumeMb` (default: `300000` / `500000`): Standard pit capacity range.
+- `geyserOilVolumeMb` (default: `1000000`): Super-geyser oil capacity.
+- `allowedBiomes`: Configurable list of biome IDs or tags. By default includes `#minecraft:is_ocean`, `#minecraft:is_deep_ocean`, `#minecraft:is_desert`, `#minecraft:is_badlands`, all ocean types, deserts, and badlands/mesas. Compatible with modded biomes!
+
+### Retrogen Persistence (No Re-Gen Once Mined)
+- The retrogen manager uses a robust `RecordCodecBuilder` CompoundTag system to record all evaluated and generated chunk coordinates to `<world>/data/oil_retrogen.dat`.
+- Once a chunk has had its oil generated (or evaluated), it is permanently registered. **It will never regenerate oil even after being mined, drilled, or pumped dry.**
+
+### Administrative Commands
+Commands can be issued via `/admin` or `/refinery`:
+- `/admin spawn_oil_pit [true|false]` or `/admin spawn_oil [true|false]`: Spawns a standard pit (`false`) or super-geyser (`true`) at your position and registers the location.
+- `/admin spawn_geyser`: Shortcut to spawn a 1,000,000 mB super-geyser.
+- `/admin oil_stats`: Displays scanned chunks and total generated oil wells.
+- `/admin reset_oil_retrogen`: Resets retrogen history for the world.
+- *(Also mirrored under `/refinery spawn_oil_pit`, `/refinery spawn_geyser`, `/refinery stats`)*

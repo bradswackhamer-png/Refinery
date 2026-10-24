@@ -1,0 +1,18 @@
+{
+    "pools":  [
+                  {
+                      "entries":  [
+                                      {
+                                          "name":  "refinery:metal_press_controller",
+                                          "type":  "minecraft:item"
+                                      }
+                                  ],
+                      "condition":  {
+                                        "type":  "minecraft:survives_explosion"
+                                    },
+                      "rolls":  1
+                  }
+              ],
+    "type":  "minecraft:block",
+    "random_sequence":  "refinery:blocks/metal_press_controller"
+}

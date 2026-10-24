@@ -206,6 +206,10 @@ public class RefineryMod {
             p -> new GrinderPortBlock(GrinderPortBlock.PortType.OUTPUT, p));
     public static final DeferredItem<BlockItem> GRINDER_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("grinder_output_port", GRINDER_OUTPUT_PORT);
 
+    public static final DeferredBlock<OilSandBlock> OIL_SAND = BLOCKS.registerBlock("oil_sand",
+            OilSandBlock::new);
+    public static final DeferredItem<BlockItem> OIL_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_sand", OIL_SAND);
+
     // === Items ===
     public static final DeferredItem<IronDustItem> IRON_DUST = ITEMS.registerItem("iron_dust",
             IronDustItem::new, Item.Properties::new);
@@ -213,6 +217,8 @@ public class RefineryMod {
             GoldDustItem::new, Item.Properties::new);
     public static final DeferredItem<CopperDustItem> COPPER_DUST = ITEMS.registerItem("copper_dust",
             CopperDustItem::new, Item.Properties::new);
+    public static final DeferredItem<BitumenItem> BITUMEN = ITEMS.registerItem("bitumen",
+            BitumenItem::new, Item.Properties::new);
     public static final DeferredItem<SteelIngotItem> STEEL_INGOT = ITEMS.registerItem("steel_ingot",
             SteelIngotItem::new, Item.Properties::new);
     public static final DeferredItem<SteelPlateItem> STEEL_PLATE = ITEMS.registerItem("steel_plate",
@@ -360,6 +366,8 @@ public class RefineryMod {
                         output.accept(GRINDER_CHAMBER_ITEM.get());
                         output.accept(GRINDER_INPUT_PORT_ITEM.get());
                         output.accept(GRINDER_OUTPUT_PORT_ITEM.get());
+                        output.accept(OIL_SAND_ITEM.get());
+                        output.accept(BITUMEN.get());
                         output.accept(IRON_DUST.get());
                         output.accept(GOLD_DUST.get());
                         output.accept(COPPER_DUST.get());
@@ -368,6 +376,7 @@ public class RefineryMod {
                         output.accept(REFINERY_WRENCH.get());
                         output.accept(TAR_ITEM.get());
                         output.accept(SULFUR_DUST_ITEM.get());
+                        output.accept(RefineryFluids.CRUDE_OIL_BUCKET.get());
                         output.accept(RefineryFluids.DIESEL_BUCKET.get());
                         output.accept(RefineryFluids.GASOLINE_BUCKET.get());
                         output.accept(RefineryFluids.STEAM_BUCKET.get());
@@ -375,6 +384,9 @@ public class RefineryMod {
                     .build());
 
     public RefineryMod(IEventBus modEventBus, ModContainer modContainer) {
+        // Register configuration specification
+        modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.LOCAL, com.refinery.config.RefineryConfig.SPEC, "refinery.toml");
+
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITY_TYPES.register(modEventBus);
@@ -386,6 +398,10 @@ public class RefineryMod {
         RefineryFluids.init();
 
         modEventBus.addListener(this::registerCapabilities);
+
+        // Register game event bus listeners (Retrogen & Commands)
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.worldgen.OilRetrogenHandler::onChunkLoad);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.command.RefineryCommands::registerCommands);
 
         LOGGER.info("Industrial Refinery Mod initialized for Minecraft 26.3 NeoForge 26.3.0.48!");
     }

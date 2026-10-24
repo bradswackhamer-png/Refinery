@@ -1,0 +1,18 @@
+{
+    "pools":  [
+                  {
+                      "entries":  [
+                                      {
+                                          "name":  "refinery:turbine_steam_port",
+                                          "type":  "minecraft:item"
+                                      }
+                                  ],
+                      "condition":  {
+                                        "type":  "minecraft:survives_explosion"
+                                    },
+                      "rolls":  1
+                  }
+              ],
+    "type":  "minecraft:block",
+    "random_sequence":  "refinery:blocks/turbine_steam_port"
+}

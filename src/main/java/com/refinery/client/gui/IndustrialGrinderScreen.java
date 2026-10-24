@@ -104,6 +104,7 @@ public class IndustrialGrinderScreen extends AbstractContainerScreen<IndustrialG
                     Component.literal("Industrial Grinder & Pulverizer").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
                     Component.literal("Raw Ores -> 2x Dust (Ore Doubling)").withStyle(ChatFormatting.GOLD),
                     Component.literal("Stone / Cobble -> Gravel -> Sand").withStyle(ChatFormatting.AQUA),
+                    Component.literal("Oil Sand -> 3 Bitumen (+50% Tar)").withStyle(ChatFormatting.DARK_GREEN),
                     Component.literal(this.menu.isGrinding() ? ("Grinding Progress: " + pct + "%") : "Status: Idle").withStyle(ChatFormatting.YELLOW)
             ), mouseX, mouseY);
         }

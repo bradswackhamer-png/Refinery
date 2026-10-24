@@ -39,9 +39,9 @@ public class BoilerPortBlock extends Block implements EntityBlock {
     private final PortType portType;
 
     public BoilerPortBlock(PortType portType, Properties properties) {
-        super(properties.strength(4.5f, 9.0f)
+        super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
-                .requiresCorrectToolForDrops());
+                );
         this.portType = portType;
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }

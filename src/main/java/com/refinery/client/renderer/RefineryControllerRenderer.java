@@ -70,26 +70,37 @@ public class RefineryControllerRenderer implements BlockEntityRenderer<RefineryC
             poseStack.pushPose();
             poseStack.translate(dx, dy, dz);
 
+            int outlineColor = BlueprintColors.getOutlineColor(comp.name(), comp.color());
+            Component formattedName = BlueprintColors.formatName(comp.name(), comp.color());
+
             // 1. Render 3D Wireframe Glowing Box
             submitNodeCollector.submitShapeOutline(
                     poseStack,
                     Shapes.block(),
                     RenderTypes.lines(),
-                    comp.color(),
+                    outlineColor,
                     3.0f,
                     false
             );
 
             // 2. Render 3D Floating Name Tag BillBoard
-            submitNodeCollector.submitNameTag(
-                    poseStack,
-                    new Vec3(0.5, 0.5, 0.5),
-                    0,
-                    Component.literal(comp.name()),
-                    true,
-                    0xF000F0,
-                    camera
-            );
+            double distSq = (dx * dx) + (dy * dy) + (dz * dz);
+            if (distSq < 144.0) {
+                poseStack.pushPose();
+                poseStack.translate(0.5, 0.5, 0.5);
+
+                submitNodeCollector.submitNameTag(
+                        poseStack,
+                        Vec3.ZERO,
+                        0,
+                        formattedName,
+                        false,
+                        15728880,
+                        camera
+                );
+
+                poseStack.popPose();
+            }
 
             poseStack.popPose();
         }

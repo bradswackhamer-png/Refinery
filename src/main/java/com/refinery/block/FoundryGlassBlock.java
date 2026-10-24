@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class FoundryGlassBlock extends HalfTransparentBlock {
     public FoundryGlassBlock(Properties properties) {
-        super(properties.strength(2.0f, 6.0f)
+        super(properties.strength(1.2f, 4.0f)
                 .sound(SoundType.GLASS)
                 .noOcclusion());
     }

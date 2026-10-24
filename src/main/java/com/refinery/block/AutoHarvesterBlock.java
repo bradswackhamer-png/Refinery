@@ -30,9 +30,9 @@ public class AutoHarvesterBlock extends Block implements EntityBlock {
     public static final BooleanProperty WORKING = BooleanProperty.create("working");
 
     public AutoHarvesterBlock(Properties properties) {
-        super(properties.strength(3.0f, 6.0f)
+        super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
-                .requiresCorrectToolForDrops());
+                );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(WORKING, false));

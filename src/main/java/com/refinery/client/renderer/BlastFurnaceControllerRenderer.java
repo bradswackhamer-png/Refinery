@@ -34,6 +34,8 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
 
         var blockState = be.getBlockState();
         state.isBlueprintActive = blockState.hasProperty(BlastFurnaceControllerBlock.BLUEPRINT) && blockState.getValue(BlastFurnaceControllerBlock.BLUEPRINT);
+        state.isAssembled = be.isAssembled();
+        state.isActive = blockState.hasProperty(BlastFurnaceControllerBlock.ACTIVE) && blockState.getValue(BlastFurnaceControllerBlock.ACTIVE);
         state.facing = blockState.getValue(BlastFurnaceControllerBlock.FACING);
         state.controllerPos = be.getBlockPos();
         state.missingComponents.clear();
@@ -57,12 +59,43 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
 
     @Override
     public void submit(BlastFurnaceControllerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+        Direction right = state.facing.getClockWise();
+        Direction back = state.facing.getOpposite();
+
+        // 1. Single Large Panoramic Window Bezel (when assembled)
+        if (state.isAssembled) {
+            poseStack.pushPose();
+            poseStack.translate(0.5, 0.0, 0.5);
+            poseStack.rotateDegrees(com.mojang.math.Axis.YP, -state.facing.toYRot());
+            poseStack.translate(-0.5, 0.0, -0.5);
+
+            // Single unified heavy steel border around the 3x3 panoramic window
+            submitNodeCollector.submitShapeOutline(
+                    poseStack,
+                    Shapes.box(-1.002, 0.998, -0.003, 2.002, 4.002, 0.003),
+                    RenderTypes.lines(),
+                    0xFF1E293B,
+                    3.0f,
+                    false
+            );
+
+            // Inner chamfer highlight around the 3x3 window frame
+            submitNodeCollector.submitShapeOutline(
+                    poseStack,
+                    Shapes.box(-0.99, 1.01, -0.002, 1.99, 3.99, 0.002),
+                    RenderTypes.lines(),
+                    state.isActive ? 0xFFF59E0B : 0xFF64748B,
+                    1.5f,
+                    false
+            );
+
+            poseStack.popPose();
+        }
+
+        // 2. 3D Blueprint Projection (when unformed)
         if (!state.isBlueprintActive || state.missingComponents.isEmpty()) {
             return;
         }
-
-        Direction right = state.facing.getClockWise();
-        Direction back = state.facing.getOpposite();
 
         for (var comp : state.missingComponents) {
             int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
@@ -72,11 +105,14 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
             poseStack.pushPose();
             poseStack.translate(dx, dy, dz);
 
+            int outlineColor = BlueprintColors.getOutlineColor(comp.name(), comp.color());
+            Component formattedName = BlueprintColors.formatName(comp.name(), comp.color());
+
             submitNodeCollector.submitShapeOutline(
                     poseStack,
                     Shapes.block(),
                     RenderTypes.lines(),
-                    comp.color(),
+                    outlineColor,
                     2.5f,
                     false
             );
@@ -91,7 +127,7 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
                         poseStack,
                         Vec3.ZERO,
                         0,
-                        Component.literal(comp.name()),
+                        formattedName,
                         false,
                         15728880,
                         camera

@@ -74,11 +74,14 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
                 poseStack.pushPose();
                 poseStack.translate(dx, dy, dz);
 
+                int outlineColor = BlueprintColors.getOutlineColor(comp.name(), comp.color());
+                Component formattedName = BlueprintColors.formatName(comp.name(), comp.color());
+
                 submitNodeCollector.submitShapeOutline(
                         poseStack,
                         Shapes.block(),
                         RenderTypes.lines(),
-                        comp.color(),
+                        outlineColor,
                         2.5f,
                         false
                 );
@@ -92,7 +95,7 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
                             poseStack,
                             Vec3.ZERO,
                             0,
-                            Component.literal(comp.name()),
+                            formattedName,
                             false,
                             15728880,
                             camera

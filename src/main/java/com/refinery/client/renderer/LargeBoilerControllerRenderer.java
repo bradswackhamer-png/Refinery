@@ -71,11 +71,14 @@ public class LargeBoilerControllerRenderer implements BlockEntityRenderer<LargeB
             poseStack.pushPose();
             poseStack.translate(dx, dy, dz);
 
+            int outlineColor = BlueprintColors.getOutlineColor(comp.name(), comp.color());
+            Component formattedName = BlueprintColors.formatName(comp.name(), comp.color());
+
             submitNodeCollector.submitShapeOutline(
                     poseStack,
                     Shapes.block(),
                     RenderTypes.lines(),
-                    comp.color(),
+                    outlineColor,
                     2.5f,
                     false
             );
@@ -90,7 +93,7 @@ public class LargeBoilerControllerRenderer implements BlockEntityRenderer<LargeB
                         poseStack,
                         Vec3.ZERO,
                         0,
-                        Component.literal(comp.name()),
+                        formattedName,
                         false,
                         15728880,
                         camera

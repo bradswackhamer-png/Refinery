@@ -10,9 +10,9 @@ public class BoilerFireboxBlock extends Block {
     public static final BooleanProperty LIT = BooleanProperty.create("lit");
 
     public BoilerFireboxBlock(Properties properties) {
-        super(properties.strength(4.5f, 9.0f)
+        super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
-                .requiresCorrectToolForDrops());
+                );
         this.registerDefaultState(this.stateDefinition.any().setValue(LIT, false));
     }
 

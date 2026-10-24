@@ -194,8 +194,17 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
 
                 if (this.progress >= PROCESS_TIME) {
                     this.progress = 0;
+                    boolean isOilSand = input.is(RefineryMod.OIL_SAND_ITEM.get());
                     input.shrink(1);
                     addOutput(output.copy());
+
+                    // Oil Sand has 50% chance to yield 1 Petroleum Tar
+                    if (isOilSand && serverLevel.getRandom().nextFloat() < 0.50f) {
+                        ItemStack tar = new ItemStack(RefineryMod.TAR_ITEM.get(), 1);
+                        if (canFitOutput(tar)) {
+                            addOutput(tar);
+                        }
+                    }
 
                     // Ejection sound
                     Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
@@ -259,6 +268,11 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         }
         if (input.is(Items.COPPER_INGOT)) {
             return new ItemStack(RefineryMod.COPPER_DUST.get(), 1);
+        }
+
+        // 5. Oil Sand -> 3x Bitumen (+ 50% chance for 1x Tar)
+        if (input.is(RefineryMod.OIL_SAND_ITEM.get())) {
+            return new ItemStack(RefineryMod.BITUMEN.get(), 3);
         }
 
         return ItemStack.EMPTY;

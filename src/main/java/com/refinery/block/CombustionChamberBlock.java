@@ -16,9 +16,9 @@ public class CombustionChamberBlock extends Block {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
     public CombustionChamberBlock(Properties properties) {
-        super(properties.strength(3.5f, 6.0f)
+        super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
-                .requiresCorrectToolForDrops()
+                
                 .lightLevel(state -> state.getValue(LIT) ? 13 : 0));
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)

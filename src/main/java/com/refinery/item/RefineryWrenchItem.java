@@ -1,8 +1,10 @@
 package com.refinery.item;
 
-import com.refinery.block.RefineryControllerBlock;
-import com.refinery.block.entity.RefineryControllerBlockEntity;
+import com.refinery.RefineryMod;
+import com.refinery.block.*;
+import com.refinery.block.entity.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -32,12 +34,65 @@ public class RefineryWrenchItem extends Item {
         Player player = context.getPlayer();
         BlockState state = level.getBlockState(pos);
 
-        if (state.getBlock() instanceof RefineryControllerBlock) {
-            if (!level.isClientSide()) {
-                if (level.getBlockEntity(pos) instanceof RefineryControllerBlockEntity controllerBE) {
-                    controllerBE.toggleBlueprintProjection(player);
-                    level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+        // Shift + Right-Click: Instant dismantle & pickup for any Refinery block
+        if (player != null && player.isShiftKeyDown()) {
+            var key = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+            if (key != null && key.getNamespace().equals(RefineryMod.MODID)) {
+                if (!level.isClientSide()) {
+                    level.destroyBlock(pos, true, player);
+                    level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.3f);
                 }
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        // Multiblock Controllers: Toggle 3D Blueprint Projection
+        if (state.getBlock() instanceof RefineryControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof RefineryControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof BlastFurnaceControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BlastFurnaceControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof SmallBoilerControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof SmallBoilerControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof LargeBoilerControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof LargeBoilerControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof SteamTurbineControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof SteamTurbineControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof MetalPressControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MetalPressControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof IndustrialGrinderControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof IndustrialGrinderControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
             }
             return InteractionResult.SUCCESS;
         }
@@ -60,6 +115,7 @@ public class RefineryWrenchItem extends Item {
     public void appendHoverText(ItemStack itemStack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
         builder.accept(Component.translatable("tooltip.refinery.wrench.desc_1"));
         builder.accept(Component.translatable("tooltip.refinery.wrench.desc_2"));
+        builder.accept(Component.translatable("tooltip.refinery.wrench.desc_3"));
         super.appendHoverText(itemStack, context, display, builder, tooltipFlag);
     }
 }

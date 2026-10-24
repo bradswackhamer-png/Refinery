@@ -32,9 +32,9 @@ public class RefineryControllerBlock extends Block implements EntityBlock {
     public static final BooleanProperty BLUEPRINT = BooleanProperty.create("blueprint");
 
     public RefineryControllerBlock(Properties properties) {
-        super(properties.strength(3.5f, 6.0f)
+        super(properties.strength(2.5f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
-                .requiresCorrectToolForDrops());
+                );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(ASSEMBLED, false)

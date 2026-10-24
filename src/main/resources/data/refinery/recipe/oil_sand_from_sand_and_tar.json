@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:sand",
+    "refinery:tar"
+  ],
+  "result": {
+    "id": "refinery:oil_sand",
+    "count": 2
+  }
+}
