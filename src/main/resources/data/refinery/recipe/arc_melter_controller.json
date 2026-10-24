@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "minecraft:redstone",
+    "C": "refinery:melter_casing",
+    "G": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    "RGR",
+    "GCG",
+    "RGR"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:arc_melter_controller"
+  }
+}

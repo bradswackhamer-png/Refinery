@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "refinery:block/casting_chamber",
+    "up": "refinery:block/casting_casing",
+    "down": "refinery:block/casting_casing",
+    "north": "refinery:block/casting_chamber",
+    "south": "refinery:block/casting_chamber",
+    "east": "refinery:block/casting_casing",
+    "west": "refinery:block/casting_casing"
+  }
+}

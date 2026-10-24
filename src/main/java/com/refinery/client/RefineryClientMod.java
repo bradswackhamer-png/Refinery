@@ -36,6 +36,8 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.METAL_PRESS_MENU.get(), MetalPressScreen::new);
         event.register((MenuType) RefineryMod.INDUSTRIAL_GRINDER_MENU.get(), IndustrialGrinderScreen::new);
         event.register((MenuType) RefineryMod.GATE_MENU.get(), GateScreen::new);
+        event.register((MenuType) RefineryMod.ARC_MELTER_MENU.get(), ArcMelterScreen::new);
+        event.register((MenuType) RefineryMod.CASTING_PRESS_MENU.get(), CastingPressScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -46,6 +48,9 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.STEAM_TURBINE_CONTROLLER_BE.get(), SteamTurbineControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.METAL_PRESS_CONTROLLER_BE.get(), MetalPressControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER_BE.get(), IndustrialGrinderControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.ARC_MELTER_CONTROLLER_BE.get(), ArcMelterControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.CASTING_CHANNEL_BE.get(), CastingChannelRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.CASTING_PRESS_CONTROLLER_BE.get(), CastingPressControllerRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_GATE_ENTITY.get(), PipeGateEntityRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_WIRE_ENTITY.get(), PipeWireEntityRenderer::new);
     }
@@ -55,5 +60,11 @@ public class RefineryClientMod {
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.GASOLINE_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.STEAM_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.CRUDE_OIL_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_IRON_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GOLD_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_COPPER_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_TIN_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_BRONZE_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GLASS_TYPE.get());
     }
 }

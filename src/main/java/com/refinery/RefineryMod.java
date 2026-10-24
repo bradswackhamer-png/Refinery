@@ -231,6 +231,57 @@ public class RefineryMod {
             p -> new GrinderPortBlock(GrinderPortBlock.PortType.OUTPUT, p));
     public static final DeferredItem<BlockItem> GRINDER_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("grinder_output_port", GRINDER_OUTPUT_PORT);
 
+    // === Electric Arc Melter Multiblock ===
+    public static final DeferredBlock<ArcMelterControllerBlock> ARC_MELTER_CONTROLLER = BLOCKS.registerBlock("arc_melter_controller",
+            ArcMelterControllerBlock::new);
+    public static final DeferredItem<BlockItem> ARC_MELTER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("arc_melter_controller", ARC_MELTER_CONTROLLER);
+
+    public static final DeferredBlock<MelterCasingBlock> MELTER_CASING = BLOCKS.registerBlock("melter_casing",
+            MelterCasingBlock::new);
+    public static final DeferredItem<BlockItem> MELTER_CASING_ITEM = ITEMS.registerSimpleBlockItem("melter_casing", MELTER_CASING);
+
+    public static final DeferredBlock<MelterChamberBlock> MELTER_CHAMBER = BLOCKS.registerBlock("melter_chamber",
+            MelterChamberBlock::new);
+    public static final DeferredItem<BlockItem> MELTER_CHAMBER_ITEM = ITEMS.registerSimpleBlockItem("melter_chamber", MELTER_CHAMBER);
+
+    public static final DeferredBlock<MelterPortBlock> MELTER_INPUT_PORT = BLOCKS.registerBlock("melter_input_port",
+            p -> new MelterPortBlock(MelterPortBlock.PortType.INPUT, p));
+    public static final DeferredItem<BlockItem> MELTER_INPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("melter_input_port", MELTER_INPUT_PORT);
+
+    public static final DeferredBlock<MelterPortBlock> MELTER_OUTPUT_PORT = BLOCKS.registerBlock("melter_output_port",
+            p -> new MelterPortBlock(MelterPortBlock.PortType.OUTPUT, p));
+    public static final DeferredItem<BlockItem> MELTER_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("melter_output_port", MELTER_OUTPUT_PORT);
+
+    // === Casting Channel ===
+    public static final DeferredBlock<CastingChannelBlock> CASTING_CHANNEL = BLOCKS.registerBlock("casting_channel",
+            CastingChannelBlock::new);
+    public static final DeferredItem<BlockItem> CASTING_CHANNEL_ITEM = ITEMS.registerSimpleBlockItem("casting_channel", CASTING_CHANNEL);
+
+    // === Continuous Casting Press Multiblock ===
+    public static final DeferredBlock<CastingPressControllerBlock> CASTING_PRESS_CONTROLLER = BLOCKS.registerBlock("casting_press_controller",
+            CastingPressControllerBlock::new);
+    public static final DeferredItem<BlockItem> CASTING_PRESS_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("casting_press_controller", CASTING_PRESS_CONTROLLER);
+
+    public static final DeferredBlock<CastingCasingBlock> CASTING_CASING = BLOCKS.registerBlock("casting_casing",
+            CastingCasingBlock::new);
+    public static final DeferredItem<BlockItem> CASTING_CASING_ITEM = ITEMS.registerSimpleBlockItem("casting_casing", CASTING_CASING);
+
+    public static final DeferredBlock<CastingBasinBlock> CASTING_BASIN = BLOCKS.registerBlock("casting_basin",
+            CastingBasinBlock::new);
+    public static final DeferredItem<BlockItem> CASTING_BASIN_ITEM = ITEMS.registerSimpleBlockItem("casting_basin", CASTING_BASIN);
+
+    public static final DeferredBlock<CastingChamberBlock> CASTING_CHAMBER = BLOCKS.registerBlock("casting_chamber",
+            CastingChamberBlock::new);
+    public static final DeferredItem<BlockItem> CASTING_CHAMBER_ITEM = ITEMS.registerSimpleBlockItem("casting_chamber", CASTING_CHAMBER);
+
+    public static final DeferredBlock<CastingPortBlock> CASTING_INPUT_PORT = BLOCKS.registerBlock("casting_input_port",
+            p -> new CastingPortBlock(CastingPortBlock.PortType.INPUT, p));
+    public static final DeferredItem<BlockItem> CASTING_INPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("casting_input_port", CASTING_INPUT_PORT);
+
+    public static final DeferredBlock<CastingPortBlock> CASTING_OUTPUT_PORT = BLOCKS.registerBlock("casting_output_port",
+            p -> new CastingPortBlock(CastingPortBlock.PortType.OUTPUT, p));
+    public static final DeferredItem<BlockItem> CASTING_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("casting_output_port", CASTING_OUTPUT_PORT);
+
     public static final DeferredBlock<OilSandBlock> OIL_SAND = BLOCKS.registerBlock("oil_sand",
             OilSandBlock::new);
     public static final DeferredItem<BlockItem> OIL_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_sand", OIL_SAND);
@@ -399,6 +450,28 @@ public class RefineryMod {
                             BASIC_GATE.get(), IRON_GATE.get(), GOLD_GATE.get(), DIAMOND_GATE.get(),
                             BASIC_AUTARCHIC_GATE.get(), IRON_AUTARCHIC_GATE.get(), GOLD_AUTARCHIC_GATE.get(), DIAMOND_AUTARCHIC_GATE.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArcMelterControllerBlockEntity>> ARC_MELTER_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("arc_melter_controller",
+                    () -> new BlockEntityType<>(ArcMelterControllerBlockEntity::new, ARC_MELTER_CONTROLLER.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MelterPortBlockEntity>> MELTER_PORT_BE =
+            BLOCK_ENTITY_TYPES.register("melter_port",
+                    () -> new BlockEntityType<>(MelterPortBlockEntity::new,
+                            MELTER_INPUT_PORT.get(), MELTER_OUTPUT_PORT.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CastingChannelBlockEntity>> CASTING_CHANNEL_BE =
+            BLOCK_ENTITY_TYPES.register("casting_channel",
+                    () -> new BlockEntityType<>(CastingChannelBlockEntity::new, CASTING_CHANNEL.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CastingPressControllerBlockEntity>> CASTING_PRESS_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("casting_press_controller",
+                    () -> new BlockEntityType<>(CastingPressControllerBlockEntity::new, CASTING_PRESS_CONTROLLER.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CastingPortBlockEntity>> CASTING_PORT_BE =
+            BLOCK_ENTITY_TYPES.register("casting_port",
+                    () -> new BlockEntityType<>(CastingPortBlockEntity::new,
+                            CASTING_INPUT_PORT.get(), CASTING_OUTPUT_PORT.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -426,6 +499,12 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<IndustrialGrinderMenu>> INDUSTRIAL_GRINDER_MENU =
             MENUS.register("industrial_grinder", () -> new MenuType<>(IndustrialGrinderMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ArcMelterMenu>> ARC_MELTER_MENU =
+            MENUS.register("arc_melter", () -> new MenuType<>(ArcMelterMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<CastingPressMenu>> CASTING_PRESS_MENU =
+            MENUS.register("casting_press", () -> new MenuType<>(CastingPressMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     public static final DeferredHolder<MenuType<?>, MenuType<GateMenu>> GATE_MENU =
             MENUS.register("gate_menu", () -> new MenuType<>(GateMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -475,6 +554,18 @@ public class RefineryMod {
                         output.accept(GRINDER_CHAMBER_ITEM.get());
                         output.accept(GRINDER_INPUT_PORT_ITEM.get());
                         output.accept(GRINDER_OUTPUT_PORT_ITEM.get());
+                        output.accept(ARC_MELTER_CONTROLLER_ITEM.get());
+                        output.accept(MELTER_CASING_ITEM.get());
+                        output.accept(MELTER_CHAMBER_ITEM.get());
+                        output.accept(MELTER_INPUT_PORT_ITEM.get());
+                        output.accept(MELTER_OUTPUT_PORT_ITEM.get());
+                        output.accept(CASTING_CHANNEL_ITEM.get());
+                        output.accept(CASTING_PRESS_CONTROLLER_ITEM.get());
+                        output.accept(CASTING_CASING_ITEM.get());
+                        output.accept(CASTING_BASIN_ITEM.get());
+                        output.accept(CASTING_CHAMBER_ITEM.get());
+                        output.accept(CASTING_INPUT_PORT_ITEM.get());
+                        output.accept(CASTING_OUTPUT_PORT_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
                         output.accept(BASIC_GATE_ITEM.get());
                         output.accept(IRON_GATE_ITEM.get());
@@ -512,6 +603,12 @@ public class RefineryMod {
                         output.accept(RefineryFluids.DIESEL_BUCKET.get());
                         output.accept(RefineryFluids.GASOLINE_BUCKET.get());
                         output.accept(RefineryFluids.STEAM_BUCKET.get());
+                        output.accept(RefineryFluids.MOLTEN_IRON_BUCKET.get());
+                        output.accept(RefineryFluids.MOLTEN_GOLD_BUCKET.get());
+                        output.accept(RefineryFluids.MOLTEN_COPPER_BUCKET.get());
+                        output.accept(RefineryFluids.MOLTEN_TIN_BUCKET.get());
+                        output.accept(RefineryFluids.MOLTEN_BRONZE_BUCKET.get());
+                        output.accept(RefineryFluids.MOLTEN_GLASS_BUCKET.get());
                     })
                     .build());
 
@@ -731,6 +828,84 @@ public class RefineryMod {
                     var controller = be.getController();
                     if (controller == null) return null;
                     return VanillaContainerWrapper.of(be);
+                });
+
+        // Capabilities on Electric Arc Melter
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new SingleFluidHandler(
+                            be::getMoltenFluid,
+                            be::getMoltenAmount,
+                            be::setMoltenAmount,
+                            ArcMelterControllerBlockEntity.TANK_CAPACITY,
+                            false, true, be::setChanged);
+                });
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, MELTER_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null || be.getPortType() != MelterPortBlock.PortType.INPUT) return null;
+                    return VanillaContainerWrapper.of(be);
+                });
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, MELTER_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null || be.getPortType() != MelterPortBlock.PortType.OUTPUT) return null;
+                    return new SingleFluidHandler(
+                            controller::getMoltenFluid,
+                            controller::getMoltenAmount,
+                            controller::setMoltenAmount,
+                            ArcMelterControllerBlockEntity.TANK_CAPACITY,
+                            false, true, controller::setChanged);
+                });
+
+        // Capabilities on Casting Channel
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_CHANNEL_BE.get(),
+                (be, side) -> be.fluidHandler);
+
+        // Capabilities on Continuous Casting Press
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new SingleFluidHandler(
+                            be::getMoltenFluid,
+                            be::getMoltenAmount,
+                            be::setMoltenAmount,
+                            CastingPressControllerBlockEntity.TANK_CAPACITY,
+                            true, false, be::setChanged);
+                });
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, CASTING_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null || be.getPortType() != CastingPortBlock.PortType.OUTPUT) return null;
+                    return VanillaContainerWrapper.of(be);
+                });
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null || be.getPortType() != CastingPortBlock.PortType.INPUT) return null;
+                    return new SingleFluidHandler(
+                            controller::getMoltenFluid,
+                            controller::getMoltenAmount,
+                            controller::setMoltenAmount,
+                            CastingPressControllerBlockEntity.TANK_CAPACITY,
+                            true, false, controller::setChanged);
                 });
     }
 }

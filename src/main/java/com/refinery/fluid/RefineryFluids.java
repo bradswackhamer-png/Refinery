@@ -129,6 +129,180 @@ public class RefineryFluids {
             .block(CRUDE_OIL_BLOCK)
             .bucket(CRUDE_OIL_BUCKET);
 
+    // === MOLTEN IRON ===
+    public static final DeferredHolder<FluidType, FluidType> MOLTEN_IRON_TYPE = RefineryMod.FLUID_TYPES.register("molten_iron",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(7000)
+                    .viscosity(3000)
+                    .temperature(1800)
+                    .lightLevel(15)
+                    .descriptionId("fluid.refinery.molten_iron")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_IRON_SOURCE = RefineryMod.FLUIDS.register("molten_iron",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_IRON_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_IRON_FLOWING = RefineryMod.FLUIDS.register("flowing_molten_iron",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.MOLTEN_IRON_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> MOLTEN_IRON_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_iron",
+            p -> new LiquidBlock(MOLTEN_IRON_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+
+    public static final DeferredItem<BucketItem> MOLTEN_IRON_BUCKET = RefineryMod.ITEMS.registerItem("molten_iron_bucket",
+            p -> new BucketItem(MOLTEN_IRON_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties MOLTEN_IRON_PROPERTIES = new BaseFlowingFluid.Properties(
+            MOLTEN_IRON_TYPE, MOLTEN_IRON_SOURCE, MOLTEN_IRON_FLOWING)
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .block(MOLTEN_IRON_BLOCK)
+            .bucket(MOLTEN_IRON_BUCKET);
+
+    // === MOLTEN GOLD ===
+    public static final DeferredHolder<FluidType, FluidType> MOLTEN_GOLD_TYPE = RefineryMod.FLUID_TYPES.register("molten_gold",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(17000)
+                    .viscosity(2500)
+                    .temperature(1350)
+                    .lightLevel(15)
+                    .descriptionId("fluid.refinery.molten_gold")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_GOLD_SOURCE = RefineryMod.FLUIDS.register("molten_gold",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_GOLD_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_GOLD_FLOWING = RefineryMod.FLUIDS.register("flowing_molten_gold",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.MOLTEN_GOLD_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> MOLTEN_GOLD_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_gold",
+            p -> new LiquidBlock(MOLTEN_GOLD_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+
+    public static final DeferredItem<BucketItem> MOLTEN_GOLD_BUCKET = RefineryMod.ITEMS.registerItem("molten_gold_bucket",
+            p -> new BucketItem(MOLTEN_GOLD_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties MOLTEN_GOLD_PROPERTIES = new BaseFlowingFluid.Properties(
+            MOLTEN_GOLD_TYPE, MOLTEN_GOLD_SOURCE, MOLTEN_GOLD_FLOWING)
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .block(MOLTEN_GOLD_BLOCK)
+            .bucket(MOLTEN_GOLD_BUCKET);
+
+    // === MOLTEN COPPER ===
+    public static final DeferredHolder<FluidType, FluidType> MOLTEN_COPPER_TYPE = RefineryMod.FLUID_TYPES.register("molten_copper",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(8000)
+                    .viscosity(2800)
+                    .temperature(1350)
+                    .lightLevel(15)
+                    .descriptionId("fluid.refinery.molten_copper")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_COPPER_SOURCE = RefineryMod.FLUIDS.register("molten_copper",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_COPPER_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_COPPER_FLOWING = RefineryMod.FLUIDS.register("flowing_molten_copper",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.MOLTEN_COPPER_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> MOLTEN_COPPER_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_copper",
+            p -> new LiquidBlock(MOLTEN_COPPER_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+
+    public static final DeferredItem<BucketItem> MOLTEN_COPPER_BUCKET = RefineryMod.ITEMS.registerItem("molten_copper_bucket",
+            p -> new BucketItem(MOLTEN_COPPER_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties MOLTEN_COPPER_PROPERTIES = new BaseFlowingFluid.Properties(
+            MOLTEN_COPPER_TYPE, MOLTEN_COPPER_SOURCE, MOLTEN_COPPER_FLOWING)
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .block(MOLTEN_COPPER_BLOCK)
+            .bucket(MOLTEN_COPPER_BUCKET);
+
+    // === MOLTEN TIN ===
+    public static final DeferredHolder<FluidType, FluidType> MOLTEN_TIN_TYPE = RefineryMod.FLUID_TYPES.register("molten_tin",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(6500)
+                    .viscosity(2000)
+                    .temperature(800)
+                    .lightLevel(13)
+                    .descriptionId("fluid.refinery.molten_tin")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_TIN_SOURCE = RefineryMod.FLUIDS.register("molten_tin",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_TIN_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_TIN_FLOWING = RefineryMod.FLUIDS.register("flowing_molten_tin",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.MOLTEN_TIN_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> MOLTEN_TIN_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_tin",
+            p -> new LiquidBlock(MOLTEN_TIN_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f).lightLevel(s -> 13));
+
+    public static final DeferredItem<BucketItem> MOLTEN_TIN_BUCKET = RefineryMod.ITEMS.registerItem("molten_tin_bucket",
+            p -> new BucketItem(MOLTEN_TIN_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties MOLTEN_TIN_PROPERTIES = new BaseFlowingFluid.Properties(
+            MOLTEN_TIN_TYPE, MOLTEN_TIN_SOURCE, MOLTEN_TIN_FLOWING)
+            .slopeFindDistance(3)
+            .levelDecreasePerBlock(2)
+            .block(MOLTEN_TIN_BLOCK)
+            .bucket(MOLTEN_TIN_BUCKET);
+
+    // === MOLTEN BRONZE ===
+    public static final DeferredHolder<FluidType, FluidType> MOLTEN_BRONZE_TYPE = RefineryMod.FLUID_TYPES.register("molten_bronze",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(8000)
+                    .viscosity(2700)
+                    .temperature(1200)
+                    .lightLevel(14)
+                    .descriptionId("fluid.refinery.molten_bronze")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_BRONZE_SOURCE = RefineryMod.FLUIDS.register("molten_bronze",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_BRONZE_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_BRONZE_FLOWING = RefineryMod.FLUIDS.register("flowing_molten_bronze",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.MOLTEN_BRONZE_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> MOLTEN_BRONZE_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_bronze",
+            p -> new LiquidBlock(MOLTEN_BRONZE_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f).lightLevel(s -> 14));
+
+    public static final DeferredItem<BucketItem> MOLTEN_BRONZE_BUCKET = RefineryMod.ITEMS.registerItem("molten_bronze_bucket",
+            p -> new BucketItem(MOLTEN_BRONZE_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties MOLTEN_BRONZE_PROPERTIES = new BaseFlowingFluid.Properties(
+            MOLTEN_BRONZE_TYPE, MOLTEN_BRONZE_SOURCE, MOLTEN_BRONZE_FLOWING)
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .block(MOLTEN_BRONZE_BLOCK)
+            .bucket(MOLTEN_BRONZE_BUCKET);
+
+    // === MOLTEN GLASS ===
+    public static final DeferredHolder<FluidType, FluidType> MOLTEN_GLASS_TYPE = RefineryMod.FLUID_TYPES.register("molten_glass",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(2500)
+                    .viscosity(6000)
+                    .temperature(1700)
+                    .lightLevel(15)
+                    .descriptionId("fluid.refinery.molten_glass")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_GLASS_SOURCE = RefineryMod.FLUIDS.register("molten_glass",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_GLASS_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_GLASS_FLOWING = RefineryMod.FLUIDS.register("flowing_molten_glass",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.MOLTEN_GLASS_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> MOLTEN_GLASS_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_glass",
+            p -> new LiquidBlock(MOLTEN_GLASS_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+
+    public static final DeferredItem<BucketItem> MOLTEN_GLASS_BUCKET = RefineryMod.ITEMS.registerItem("molten_glass_bucket",
+            p -> new BucketItem(MOLTEN_GLASS_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties MOLTEN_GLASS_PROPERTIES = new BaseFlowingFluid.Properties(
+            MOLTEN_GLASS_TYPE, MOLTEN_GLASS_SOURCE, MOLTEN_GLASS_FLOWING)
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .block(MOLTEN_GLASS_BLOCK)
+            .bucket(MOLTEN_GLASS_BUCKET);
+
     public static void init() {
     }
 }

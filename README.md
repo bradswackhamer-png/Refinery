@@ -36,6 +36,12 @@
    - [Pipe Wire Networks (Red, Blue, Green, Yellow)](#pipe-wire-networks-red-blue-green-yellow)
    - [Trigger & Action Codex](#trigger--action-codex)
    - [Crafting & In-World Upgrades](#crafting--in-world-upgrades)
+11. [Continuous Molten Metallurgy & Ingot Casting Suite](#11-continuous-molten-metallurgy--ingot-casting-suite)
+   - [Molten Fluids & Thermochemistry](#molten-fluids--thermochemistry)
+   - [Electric Arc Melter (3×3×3 Multiblock)](#electric-arc-melter-333-multiblock)
+   - [Open Casting Channel (Refractory Trough)](#open-casting-channel-refractory-trough)
+   - [Continuous Casting Press (3×3×3 Multiblock)](#continuous-casting-press-333-multiblock)
+   - [Melting & Stamping Recipe Codex](#melting--stamping-recipe-codex)
 
 ---
 
@@ -616,4 +622,117 @@ Hold an **Autarchic Chipset** and right-click any placed in-world Gate. It insta
   - Any Gate + 1x `Autarchic Chipset` (shapeless) $\rightarrow$ Autarchic Gate variant.
 - **Pipe Wires (4x per craft)**:
   - `String` + `Redstone Dust` + `Dye` (Red, Blue, Green, or Yellow) $\rightarrow$ 4x Pipe Wire.
+
+---
+
+## 11. Continuous Molten Metallurgy & Ingot Casting Suite
+
+The Continuous Molten Metallurgy suite introduces an automated, visually stunning foundry pipeline:
+```
+[Mineral Dusts / Ores / Sand]
+             |
+             v
++-------------------------------+
+|  Electric Arc Melter (3x3x3)  |  <--- 40 FE/t, Electrodes & Arc Flash Animation
++-------------------------------+
+             | (1,000 mB Molten Liquid)
+             v
++-------------------------------+
+|   Open Casting Channel (3D)   |  <--- Visible Glowing Liquid Flow Trough
++-------------------------------+
+             |
+             v
++-------------------------------+
+| Continuous Casting Press(3x3) |  <--- Hydraulic Ram Quench & Stamping Animation
++-------------------------------+
+             |
+             v
+[Finished Ingots / Glass Blocks]
+```
+
+### Molten Fluids & Thermochemistry
+
+Six high-temperature molten fluids can be held in buckets, pumped through fluid pipes, carried via open refractory casting channels, or stored in tanks:
+
+| Fluid | Source Items | Molten Color | Stamping Result |
+| :--- | :--- | :--- | :--- |
+| **Molten Iron** (`refinery:molten_iron`) | Iron Dust (`refinery:iron_dust`), Raw Iron | Radiant Orange-Gold (`#E76F51`) | 1 Iron Ingot |
+| **Molten Gold** (`refinery:molten_gold`) | Gold Dust (`refinery:gold_dust`), Raw Gold | Blazing Solar Yellow (`#F4A261`) | 1 Gold Ingot |
+| **Molten Copper** (`refinery:molten_copper`) | Copper Dust (`refinery:copper_dust`), Raw Copper | Glowing Ember Rust (`#E63946`) | 1 Copper Ingot |
+| **Molten Tin** (`refinery:molten_tin`) | Tin Dust (`refinery:tin_dust`), Raw Tin | Molten Silver-Cyan (`#A8DADC`) | 1 Tin Ingot |
+| **Molten Bronze** (`refinery:molten_bronze`) | Bronze Dust (`refinery:bronze_dust`) | Rich Golden Amber (`#D4A373`) | 1 Bronze Ingot |
+| **Molten Glass** (`refinery:molten_glass`) | Sand, Red Sand, Quartz | Luminescent White-Gold (`#FFF3B0`) | 1 Glass Block |
+
+*Note: All molten fluids emit light (level 15) and cause fire damage to entities contacting in-world fluid blocks.*
+
+---
+
+### Electric Arc Melter (3×3×3 Multiblock)
+
+The **Electric Arc Melter** superheats mineral dusts and raw ores into liquid molten baths using high-energy graphite electrodes.
+
+#### Multiblock Structure & Blueprint:
+- **Dimensions**: 3 blocks wide $\times$ 3 blocks tall $\times$ 3 blocks deep (27 blocks total).
+- **Core Requirements**:
+  - 1x **Electric Arc Melter Controller** (`refinery:arc_melter_controller`) — front face, center-bottom.
+  - 22x **Arc Melter Casing** (`refinery:melter_casing`) — heavy heat-dissipating refractory outer framing.
+  - 2x **Arc Melter Observation Chamber** (`refinery:melter_chamber`) — tinted safety glass viewports.
+  - 1x **Arc Melter Input Port** (`refinery:melter_input_port`) — top or side funnel hopper. Accepts dusts & raw ores from hoppers and item pipes.
+  - 1x **Arc Melter Output Port** (`refinery:melter_output_port`) — bottom or side molten spout. Automatically pushes molten liquid to adjacent Casting Channels, fluid pipes, or tanks!
+- **Hologram Support**: Right-click the Controller with a **Refinery Wrench** to project the full color-coded 3D holographic blueprint.
+
+#### Operation & Animated Renderer:
+- **Power Consumption**: 40 FE/t while melting.
+- **Process Speed**: 40 ticks (2 seconds) per item.
+- **Fluid Yield**: 1 Dust / Raw Ore / Sand $\rightarrow$ 1,000 mB of Molten Fluid.
+- **Internal Tank**: 8,000 mB capacity with auto-drain through the Output Port.
+- **3D Animation**: While active, dual carbon electrodes descend inside the central chamber and discharge energetic electric arcs with dynamic sparks and particle bursts.
+
+---
+
+### Open Casting Channel (Refractory Trough)
+
+The **Casting Channel** (`refinery:casting_channel`) is an open refractory ceramic trough that carries molten liquids between machines or directly into casting molds.
+
+- **Seamless 3D Geometry**: Dynamically connects north, south, east, and west, extending side walls while retaining open channels for gravity flow.
+- **Down Spouts**: Automatically extends a pouring spout beneath when placed above another channel, pipe, or the input port of a Continuous Casting Press.
+- **Dynamic Fluid Render**: The molten fluid visibly glows and flows along the channel bed, reflecting the true color of the liquid inside!
+- **Fluid Transfer**: Handles 250 mB/t transfer rate with full NeoForge Fluid Transfer capability integration.
+
+---
+
+### Continuous Casting Press (3×3×3 Multiblock)
+
+The **Continuous Casting Press** receives molten liquids and uses a heavy overhead hydraulic press and water-quenching die to stamp them into solidified ingots and glass blocks.
+
+#### Multiblock Structure & Blueprint:
+- **Dimensions**: 3 blocks wide $\times$ 3 blocks tall $\times$ 3 blocks deep (27 blocks total).
+- **Core Requirements**:
+  - 1x **Continuous Casting Press Controller** (`refinery:casting_press_controller`) — front face, center-bottom.
+  - 20x **Casting Press Casing** (`refinery:casting_casing`) — heavy hydraulic frame with safety hazard striping.
+  - 2x **Casting Mold Basin** (`refinery:casting_basin`) — ceramic mold bed at the base where liquid pools.
+  - 2x **Casting Safety Chamber** (`refinery:casting_chamber`) — wire-reinforced safety viewing windows.
+  - 1x **Casting Press Input Port** (`refinery:casting_input_port`) — top or side intake. Connects directly to Casting Channels or fluid pipes.
+  - 1x **Casting Press Output Port** (`refinery:casting_output_port`) — bottom or side exit conveyor chute. Automatically ejects finished ingots and blocks into hoppers, chests, or transport pipes!
+
+#### Operation & Animated Renderer:
+- **Power Consumption**: 40 FE/t while stamping.
+- **Process Speed**: 40 ticks (2 seconds) per stroke.
+- **Input Requirement**: 1,000 mB of Molten Fluid per ingot/block.
+- **Hydraulic Stamping Animation**: When a 1,000 mB charge fills the mold bed, the heavy overhead stamping die descends under high pressure, accompanied by hydraulic piston sounds, steam hisses, and quenching effects!
+- **Auto-Ejection**: Ejects finished ingots and blocks through the Output Port immediately upon solidification.
+
+---
+
+### Melting & Stamping Recipe Codex
+
+| Raw Input Item | Melter Output (1,000 mB) | Press Output (Solid) | Energy Cost |
+| :--- | :--- | :--- | :--- |
+| **Iron Dust** / Raw Iron | Molten Iron | **Iron Ingot** (1x) | 1,600 FE total |
+| **Gold Dust** / Raw Gold | Molten Gold | **Gold Ingot** (1x) | 1,600 FE total |
+| **Copper Dust** / Raw Copper | Molten Copper | **Copper Ingot** (1x) | 1,600 FE total |
+| **Tin Dust** / Raw Tin | Molten Tin | **Tin Ingot** (1x) | 1,600 FE total |
+| **Bronze Dust** | Molten Bronze | **Bronze Ingot** (1x) | 1,600 FE total |
+| **Sand** / Red Sand / Quartz | Molten Glass | **Glass Block** (1x) | 1,600 FE total |
+
 

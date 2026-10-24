@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:smooth_stone",
+    "P": "minecraft:piston"
+  },
+  "pattern": [
+    "ISI",
+    "SPS",
+    "ISI"
+  ],
+  "result": {
+    "count": 4,
+    "id": "refinery:casting_casing"
+  }
+}

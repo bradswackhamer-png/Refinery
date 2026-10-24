@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "refinery:item/casting_press_controller"
+  }
+}

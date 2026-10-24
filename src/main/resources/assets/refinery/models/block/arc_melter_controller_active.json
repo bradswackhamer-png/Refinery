@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/melter_casing",
+    "up": "refinery:block/melter_casing",
+    "down": "refinery:block/melter_casing",
+    "north": "refinery:block/arc_melter_controller_front_active",
+    "south": "refinery:block/melter_casing",
+    "east": "refinery:block/melter_casing",
+    "west": "refinery:block/melter_casing"
+  }
+}

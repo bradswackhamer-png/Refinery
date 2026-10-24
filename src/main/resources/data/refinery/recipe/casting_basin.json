@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "refinery:casting_casing",
+    "K": "minecraft:cauldron"
+  },
+  "pattern": [
+    "   ",
+    " K ",
+    " C "
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:casting_basin"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/casting_channel",
+    "channel": "refinery:block/casting_channel"
+  },
+  "elements": [
+    {
+      "from": [5, 0, 5],
+      "to": [11, 4, 11],
+      "faces": {
+        "down":  { "texture": "#channel", "cullface": "down" },
+        "north": { "texture": "#channel" },
+        "south": { "texture": "#channel" },
+        "west":  { "texture": "#channel" },
+        "east":  { "texture": "#channel" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/melter_input_port" },
+    "facing=south": { "model": "refinery:block/melter_input_port", "y": 180 },
+    "facing=west":  { "model": "refinery:block/melter_input_port", "y": 270 },
+    "facing=east":  { "model": "refinery:block/melter_input_port", "y": 90 },
+    "facing=up":    { "model": "refinery:block/melter_input_port", "x": 270 },
+    "facing=down":  { "model": "refinery:block/melter_input_port", "x": 90 }
+  }
+}

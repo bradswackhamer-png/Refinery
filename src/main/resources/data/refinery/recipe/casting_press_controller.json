@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "minecraft:redstone",
+    "C": "refinery:casting_casing",
+    "I": "minecraft:iron_block"
+  },
+  "pattern": [
+    "RIR",
+    "ICI",
+    "RIR"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:casting_press_controller"
+  }
+}

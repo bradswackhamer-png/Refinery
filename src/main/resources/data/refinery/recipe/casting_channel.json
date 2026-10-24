@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "T": "minecraft:terracotta",
+    "C": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    "T T",
+    "TCT",
+    "   "
+  ],
+  "result": {
+    "count": 4,
+    "id": "refinery:casting_channel"
+  }
+}

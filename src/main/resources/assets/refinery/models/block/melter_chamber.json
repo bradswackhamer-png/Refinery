@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "refinery:block/melter_chamber",
+    "up": "refinery:block/melter_casing",
+    "down": "refinery:block/melter_casing",
+    "north": "refinery:block/melter_chamber",
+    "south": "refinery:block/melter_chamber",
+    "east": "refinery:block/melter_casing",
+    "west": "refinery:block/melter_casing"
+  }
+}

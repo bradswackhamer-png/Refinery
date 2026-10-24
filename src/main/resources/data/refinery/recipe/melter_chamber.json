@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "refinery:melter_casing",
+    "G": "minecraft:tinted_glass"
+  },
+  "pattern": [
+    "C",
+    "G",
+    "C"
+  ],
+  "result": {
+    "count": 2,
+    "id": "refinery:melter_chamber"
+  }
+}

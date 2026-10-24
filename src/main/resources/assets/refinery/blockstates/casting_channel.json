@@ -1,0 +1,14 @@
+{
+  "multipart": [
+    { "apply": { "model": "refinery:block/casting_channel_center" } },
+    { "when": { "north": "false" }, "apply": { "model": "refinery:block/casting_channel_wall_north" } },
+    { "when": { "south": "false" }, "apply": { "model": "refinery:block/casting_channel_wall_south" } },
+    { "when": { "west": "false" }, "apply": { "model": "refinery:block/casting_channel_wall_west" } },
+    { "when": { "east": "false" }, "apply": { "model": "refinery:block/casting_channel_wall_east" } },
+    { "when": { "north": "true" }, "apply": { "model": "refinery:block/casting_channel_side" } },
+    { "when": { "south": "true" }, "apply": { "model": "refinery:block/casting_channel_side", "y": 180 } },
+    { "when": { "west": "true" }, "apply": { "model": "refinery:block/casting_channel_side", "y": 270 } },
+    { "when": { "east": "true" }, "apply": { "model": "refinery:block/casting_channel_side", "y": 90 } },
+    { "when": { "down": "true" }, "apply": { "model": "refinery:block/casting_channel_down" } }
+  ]
+}

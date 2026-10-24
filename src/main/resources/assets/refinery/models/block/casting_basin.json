@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/casting_basin_side",
+    "up": "refinery:block/casting_basin_top",
+    "down": "refinery:block/casting_basin_side",
+    "north": "refinery:block/casting_basin_side",
+    "south": "refinery:block/casting_basin_side",
+    "east": "refinery:block/casting_basin_side",
+    "west": "refinery:block/casting_basin_side"
+  }
+}
