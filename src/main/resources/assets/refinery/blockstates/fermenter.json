@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,active=false": { "model": "refinery:block/fermenter" },
+    "facing=north,active=true":  { "model": "refinery:block/fermenter_active" },
+    "facing=south,active=false": { "model": "refinery:block/fermenter", "y": 180 },
+    "facing=south,active=true":  { "model": "refinery:block/fermenter_active", "y": 180 },
+    "facing=west,active=false":  { "model": "refinery:block/fermenter", "y": 270 },
+    "facing=west,active=true":   { "model": "refinery:block/fermenter_active", "y": 270 },
+    "facing=east,active=false":  { "model": "refinery:block/fermenter", "y": 90 },
+    "facing=east,active=true":   { "model": "refinery:block/fermenter_active", "y": 90 }
+  }
+}

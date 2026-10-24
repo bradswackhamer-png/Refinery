@@ -38,6 +38,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.GATE_MENU.get(), GateScreen::new);
         event.register((MenuType) RefineryMod.ARC_MELTER_MENU.get(), ArcMelterScreen::new);
         event.register((MenuType) RefineryMod.CASTING_PRESS_MENU.get(), CastingPressScreen::new);
+        event.register((MenuType) RefineryMod.FERMENTER_MENU.get(), FermenterScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -66,5 +67,6 @@ public class RefineryClientMod {
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_TIN_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_BRONZE_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GLASS_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.ETHANOL_TYPE.get());
     }
 }

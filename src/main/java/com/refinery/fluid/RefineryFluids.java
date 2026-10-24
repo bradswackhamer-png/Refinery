@@ -303,6 +303,34 @@ public class RefineryFluids {
             .block(MOLTEN_GLASS_BLOCK)
             .bucket(MOLTEN_GLASS_BUCKET);
 
+    // === ETHANOL (BIOFUEL) ===
+    public static final DeferredHolder<FluidType, FluidType> ETHANOL_TYPE = RefineryMod.FLUID_TYPES.register("ethanol",
+            () -> new FluidType(FluidType.Properties.create()
+                    .density(789)
+                    .viscosity(800)
+                    .temperature(300)
+                    .descriptionId("fluid.refinery.ethanol")));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> ETHANOL_SOURCE = RefineryMod.FLUIDS.register("ethanol",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.ETHANOL_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> ETHANOL_FLOWING = RefineryMod.FLUIDS.register("flowing_ethanol",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.ETHANOL_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> ETHANOL_BLOCK = RefineryMod.BLOCKS.registerBlock("ethanol",
+            p -> new LiquidBlock(ETHANOL_SOURCE.get(), p),
+            p -> p.noCollision().strength(100.0f));
+
+    public static final DeferredItem<BucketItem> ETHANOL_BUCKET = RefineryMod.ITEMS.registerItem("ethanol_bucket",
+            p -> new BucketItem(ETHANOL_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties ETHANOL_PROPERTIES = new BaseFlowingFluid.Properties(
+            ETHANOL_TYPE, ETHANOL_SOURCE, ETHANOL_FLOWING)
+            .slopeFindDistance(4)
+            .levelDecreasePerBlock(1)
+            .block(ETHANOL_BLOCK)
+            .bucket(ETHANOL_BUCKET);
+
     public static void init() {
     }
 }

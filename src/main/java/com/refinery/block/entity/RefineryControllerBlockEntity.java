@@ -4,6 +4,7 @@ import com.refinery.RefineryMod;
 import com.refinery.block.CombustionChamberBlock;
 import com.refinery.block.RefineryControllerBlock;
 import com.refinery.block.RefineryPortBlock;
+import com.refinery.fluid.RefineryFluids;
 import com.refinery.menu.RefineryMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +21,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -40,7 +42,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RefineryControllerBlockEntity extends BlockEntity implements MenuProvider, Container {
+public class RefineryControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int TANK_CAPACITY = 16_000;
     public static final int ENERGY_CAPACITY = 100_000;
     public static final int ENERGY_PER_TICK = 40;
@@ -48,6 +50,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     public static final int DIESEL_PER_RECIPE = 120;
     public static final int GAS_PER_RECIPE = 60;
     public static final int RECIPE_TICKS = 100;
+    public static final int OIL_SAND_TICKS = 60;
 
     private boolean assembled = false;
     private int crudeOil = 0;
@@ -57,6 +60,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     private int burnTime = 0;
     private int maxBurnTime = 0;
     private int progress = 0;
+    private int oilSandProgress = 0;
 
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
@@ -92,6 +96,8 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 case 6 -> RefineryControllerBlockEntity.this.diesel;
                 case 7 -> RefineryControllerBlockEntity.this.gasoline;
                 case 8 -> RefineryControllerBlockEntity.this.assembled ? 1 : 0;
+                case 9 -> RefineryControllerBlockEntity.this.oilSandProgress;
+                case 10 -> OIL_SAND_TICKS;
                 default -> 0;
             };
         }
@@ -106,6 +112,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 case 6 -> RefineryControllerBlockEntity.this.diesel = value;
                 case 7 -> RefineryControllerBlockEntity.this.gasoline = value;
                 case 8 -> RefineryControllerBlockEntity.this.assembled = (value != 0);
+                case 9 -> RefineryControllerBlockEntity.this.oilSandProgress = value;
             }
         }
 
@@ -246,6 +253,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         updateCombustionChamberState(serverLevel, this.burnTime > 0);
 
         // Distillation Refining Process
+        // 1. Distillation Refining Process (Crude Oil -> Diesel + Gasoline + Byproducts)
         boolean canRefine = this.crudeOil >= OIL_PER_RECIPE
                 && (TANK_CAPACITY - this.diesel) >= DIESEL_PER_RECIPE
                 && (TANK_CAPACITY - this.gasoline) >= GAS_PER_RECIPE
@@ -292,6 +300,47 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
             }
         }
 
+        // 2. Oil Sand Feedstock Extraction Process (Oil Sand -> 200 mB Crude Oil + 100% Sand + 40% Tar)
+        ItemStack feedstock = this.items.get(1);
+        boolean isOilSandFeed = isOilSand(feedstock);
+        if (isOilSandFeed && (TANK_CAPACITY - this.crudeOil) >= 200 && (this.energy >= 20 || this.burnTime > 0) && canInsertByproducts()) {
+            isActive = true;
+            if (this.energy >= 20) {
+                this.energy -= 20;
+                this.energyStorage.set(this.energy);
+            }
+            this.oilSandProgress++;
+
+            if (level.getRandom().nextInt(4) == 0) {
+                Direction facing = state.getValue(RefineryControllerBlock.FACING);
+                BlockPos portPos = getRelativePos(-1, 0, 1, facing);
+                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                        portPos.getX() + 0.5, portPos.getY() + 0.9, portPos.getZ() + 0.5,
+                        1, 0.05, 0.05, 0.05, 0.01);
+            }
+
+            if (this.oilSandProgress >= OIL_SAND_TICKS) {
+                this.oilSandProgress = 0;
+                feedstock.shrink(1);
+                this.crudeOil = Math.min(TANK_CAPACITY, this.crudeOil + 200);
+
+                // 100% chance for 1 Sand
+                insertByproduct(new ItemStack(Items.SAND, 1));
+
+                // 40% chance for Tar
+                if (level.getRandom().nextFloat() < 0.40f) {
+                    insertByproduct(new ItemStack(getPreferredTarItem(), 1));
+                }
+
+                serverLevel.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.7f, 1.0f);
+                setChanged();
+            }
+        } else {
+            if (this.oilSandProgress > 0) {
+                this.oilSandProgress = Math.max(0, this.oilSandProgress - 2);
+            }
+        }
+
         if (wasActive != isActive) {
             BlockState latest = getBlockState();
             if (latest.getBlock() instanceof RefineryControllerBlock) {
@@ -334,7 +383,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     }
 
     private boolean canInsertByproducts() {
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 2; i <= 5; i++) {
             ItemStack stack = this.items.get(i);
             if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
                 return true;
@@ -344,16 +393,27 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     }
 
     private void insertByproduct(ItemStack byproduct) {
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 2; i <= 5; i++) {
             ItemStack current = this.items.get(i);
             if (current.isEmpty()) {
                 this.items.set(i, byproduct);
                 return;
-            } else if (ItemStack.isSameItemSameComponents(current, byproduct) && current.getCount() < current.getMaxStackSize()) {
+            } else if (ItemStack.isSameItemSameComponents(current, byproduct) && current.getCount() + byproduct.getCount() <= current.getMaxStackSize()) {
                 current.grow(byproduct.getCount());
                 return;
             }
         }
+    }
+
+    public static boolean isOilSand(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        if (stack.is(RefineryMod.OIL_SAND_ITEM.get())) return true;
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (id != null) {
+            String path = id.getPath();
+            if (path.contains("oil_sand") || path.contains("oilsand")) return true;
+        }
+        return false;
     }
 
     public static int getFuelBurnDuration(ItemStack stack) {
@@ -364,6 +424,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         if (stack.is(Items.BLAZE_ROD)) return 2400;
         if (stack.is(RefineryMod.TAR_ITEM.get())) return 1600;
         if (stack.is(RefineryMod.BITUMEN.get())) return 1600;
+        if (stack.is(RefineryFluids.ETHANOL_BUCKET.get())) return 4000;
         net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"))) return 1600;
         if (stack.has(DataComponents.COOKING_FUEL)) return 1600;
@@ -512,6 +573,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         output.putInt("burnTime", this.burnTime);
         output.putInt("maxBurnTime", this.maxBurnTime);
         output.putInt("progress", this.progress);
+        output.putInt("oilSandProgress", this.oilSandProgress);
 
         ContainerHelper.saveAllItems(output, this.items);
     }
@@ -528,8 +590,42 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         this.burnTime = input.getIntOr("burnTime", 0);
         this.maxBurnTime = input.getIntOr("maxBurnTime", 0);
         this.progress = input.getIntOr("progress", 0);
+        this.oilSandProgress = input.getIntOr("oilSandProgress", 0);
 
         ContainerHelper.loadAllItems(input, this.items);
+    }
+
+    // === WorldlyContainer Implementation ===
+    private static final int[] SLOTS_DOWN = new int[]{2, 3, 4, 5};
+    private static final int[] SLOTS_UP = new int[]{1};
+    private static final int[] SLOTS_SIDES = new int[]{0, 1};
+
+    @Override
+    public int[] getSlotsForFace(Direction side) {
+        if (side == Direction.DOWN) {
+            return SLOTS_DOWN;
+        }
+        if (side == Direction.UP) {
+            return SLOTS_UP;
+        }
+        return SLOTS_SIDES;
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+        return canPlaceItem(slot, stack);
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+        return slot >= 2;
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (slot == 0) return getFuelBurnDuration(stack) > 0;
+        if (slot == 1) return isOilSand(stack);
+        return false;
     }
 
     // === Container Implementation ===

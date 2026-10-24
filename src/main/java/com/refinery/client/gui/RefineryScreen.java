@@ -43,6 +43,18 @@ public class RefineryScreen extends AbstractContainerScreen<RefineryMenu> {
         // Base GUI background
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo, yo, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
 
+        // Feedstock Slot Frame (x: 43, y: 16, w: 18, h: 18)
+        graphics.fill(RenderPipelines.GUI, xo + 43, yo + 16, xo + 61, yo + 34, 0xFF374151);
+        graphics.fill(RenderPipelines.GUI, xo + 44, yo + 17, xo + 60, yo + 33, 0xFF18181B);
+
+        // Oil Sand Cracking Progress Bar (x: 44, y: 35, w: 16, h: 2)
+        int sandProg = this.menu.getOilSandProgress();
+        int maxSandProg = this.menu.getMaxOilSandProgress();
+        if (sandProg > 0 && maxSandProg > 0) {
+            int fillW = Math.min(16, (int) (((float) sandProg / maxSandProg) * 16));
+            graphics.fill(RenderPipelines.GUI, xo + 44, yo + 35, xo + 44 + fillW, yo + 37, 0xFFF59E0B);
+        }
+
         // Crude Oil Tank Gauge (x: 18, y: 20, w: 16, h: 52)
         int crudeOil = this.menu.getCrudeOil();
         if (crudeOil > 0) {
@@ -95,8 +107,18 @@ public class RefineryScreen extends AbstractContainerScreen<RefineryMenu> {
         int xo = this.leftPos;
         int yo = this.topPos;
 
+        // Feedstock Slot Hover (x: 43..61, y: 16..34)
+        if (mouseX >= xo + 43 && mouseX <= xo + 61 && mouseY >= yo + 16 && mouseY <= yo + 34) {
+            graphics.setComponentTooltipForNextFrame(this.font, List.of(
+                    Component.literal("Feedstock Slot (Oil Sand)").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                    Component.literal("Cracks Oil Sand into:").withStyle(ChatFormatting.GRAY),
+                    Component.literal(" - +200 mB Crude Oil").withStyle(ChatFormatting.YELLOW),
+                    Component.literal(" - 1 Sand (100% yield)").withStyle(ChatFormatting.WHITE),
+                    Component.literal(" - Tar Byproduct (40% yield)").withStyle(ChatFormatting.DARK_GRAY)
+            ), mouseX, mouseY);
+        }
         // Crude Oil Tank Hover (x: 17..35, y: 19..73)
-        if (mouseX >= xo + 17 && mouseX <= xo + 35 && mouseY >= yo + 19 && mouseY <= yo + 73) {
+        else if (mouseX >= xo + 17 && mouseX <= xo + 35 && mouseY >= yo + 19 && mouseY <= yo + 73) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Crude Oil Tank").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
                     Component.literal(String.format("%,d / 16,000 mB", this.menu.getCrudeOil())).withStyle(ChatFormatting.GRAY)

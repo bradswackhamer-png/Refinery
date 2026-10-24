@@ -147,7 +147,9 @@
 
   "container.refinery.arc_melter": "Electric Arc Melter",
   "container.refinery.casting_press": "Continuous Casting Press",
+  "container.refinery.fermenter": "Industrial Fermenter",
 
+  "block.refinery.fermenter": "Industrial Fermenter",
   "block.refinery.arc_melter_controller": "Electric Arc Melter Controller",
   "block.refinery.melter_casing": "Arc Melter Casing",
   "block.refinery.melter_chamber": "Arc Melter Observation Chamber",
@@ -167,6 +169,7 @@
   "fluid.refinery.molten_tin": "Molten Tin",
   "fluid.refinery.molten_bronze": "Molten Bronze",
   "fluid.refinery.molten_glass": "Molten Glass",
+  "fluid.refinery.ethanol": "Ethanol",
 
   "item.refinery.molten_iron_bucket": "Molten Iron Bucket",
   "item.refinery.molten_gold_bucket": "Molten Gold Bucket",
@@ -174,8 +177,10 @@
   "item.refinery.molten_tin_bucket": "Molten Tin Bucket",
   "item.refinery.molten_bronze_bucket": "Molten Bronze Bucket",
   "item.refinery.molten_glass_bucket": "Molten Glass Bucket",
+  "item.refinery.ethanol_bucket": "Ethanol Bucket",
 
   "tooltip.refinery.arc_melter_controller.desc": "§7Heart of the 3x3x3 Electric Arc Melter. Melts dusts into glowing molten liquid.",
   "tooltip.refinery.casting_channel.desc": "§6Refractory casting trough. Carries glowing molten liquid between melters and presses.",
-  "tooltip.refinery.casting_press_controller.desc": "§7Controls the 3x3x3 Continuous Casting Press. Quenches and stamps molten metal into ingots and glass blocks."
+  "tooltip.refinery.casting_press_controller.desc": "§7Controls the 3x3x3 Continuous Casting Press. Quenches and stamps molten metal into ingots and glass blocks.",
+  "tooltip.refinery.fermenter.desc": "§7Ferments agricultural crops (Wheat, Potatoes, etc.) into pure Ethanol biofuel."
 }

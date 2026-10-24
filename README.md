@@ -19,6 +19,7 @@
    - [The Closed-Loop Rankine Cycle](#the-closed-loop-rankine-cycle)
 6. [Petroleum Refining & Chemical Byproducts](#6-petroleum-refining--chemical-byproducts)
    - [Petroleum Refinery (3×3×4 Multiblock)](#petroleum-refinery-334)
+   - [Oil Sand Cracking & Extraction](#oil-sand-cracking--extraction)
    - [Fuels & Byproducts](#fuels--byproducts)
    - [Industrial Grinder & Pulverizer (3×3×3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
@@ -42,6 +43,9 @@
    - [Open Casting Channel (Refractory Trough)](#open-casting-channel-refractory-trough)
    - [Continuous Casting Press (3×3×3 Multiblock)](#continuous-casting-press-333-multiblock)
    - [Melting & Stamping Recipe Codex](#melting--stamping-recipe-codex)
+12. [Biofuel Production & Industrial Fermentation](#12-biofuel-production--industrial-fermentation)
+   - [Industrial Fermenter](#industrial-fermenter)
+   - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 
 ---
 
@@ -301,6 +305,20 @@ A multi-stage fractional distillation column that refines raw Crude Oil into com
 - **Layer 1 (Furnace)**: Combustion Chambers.
 - **Layer 2 (Distillation)**: Distillation Columns.
 - **Layer 3 (Condenser)**: Heat Exchangers.
+
+---
+
+### Oil Sand Cracking & Extraction
+
+The Petroleum Refinery features a dedicated high-pressure **Feedstock Input Slot** directly above the burner slot in its interface:
+
+- **Compatible Inputs**: Accepts `refinery:oil_sand` as well as any geological Oil Sand from mods such as the *Logistics* mod.
+- **Automated Input**: Hoppers and item transport pipes can push Oil Sand directly into the **Crude Oil Port** or the top of the **Refinery Controller**.
+- **Cracking Process**: Consumes 20 FE/t (or active burner flame) over 60 ticks (3 seconds) per block:
+  - **+200 mB Crude Oil**: Injected directly into the internal Crude Oil tank!
+  - **1 Sand (100% Guaranteed Yield)**: Ejected to the Byproduct output slots / Byproduct Port.
+  - **Petroleum Tar (40% Chance)**: Ejected to the Byproduct output slots / Byproduct Port.
+- **Full Automation**: Feeding Oil Sand into the Crude Oil Port generates Crude Oil on-site and refines it into Diesel and Gasoline in a single closed-loop industrial facility!
 
 ---
 
@@ -734,5 +752,51 @@ The **Continuous Casting Press** receives molten liquids and uses a heavy overhe
 | **Tin Dust** / Raw Tin | Molten Tin | **Tin Ingot** (1x) | 1,600 FE total |
 | **Bronze Dust** | Molten Bronze | **Bronze Ingot** (1x) | 1,600 FE total |
 | **Sand** / Red Sand / Quartz | Molten Glass | **Glass Block** (1x) | 1,600 FE total |
+
+---
+
+## 12. Biofuel Production & Industrial Fermentation
+
+The **Industrial Fermenter** bridges the agricultural progression (Automated Planters & Harvesters) with thermodynamic power generation:
+
+```
+[Wheat / Potatoes / Sugar Cane]
+              |
+              v
++-------------------------------+
+|  Industrial Fermenter (1-Blk) |  <--- 15 FE/t, Bubbling Mash Chamber
++-------------------------------+
+              | (200 mB Ethanol + 20% Seeds)
+              v
+[Ethanol Biofuel Tank / Buckets]
+              |
+              v
+[Boilers / Combustion Chambers / Engines] (4,000 Burn Ticks)
+```
+
+### Industrial Fermenter
+
+- **Block**: [`FermenterBlock`](file:///c:/Users/swack/Desktop/refinery/src/main/java/com/refinery/block/FermenterBlock.java) (`refinery:fermenter`)
+- **Dimensions**: Single-block standalone industrial machine.
+- **Power Buffer**: 20,000 FE capacity, consuming 15 FE/t while fermenting.
+- **Internal Tank**: 8,000 mB **Ethanol** storage with automatic fluid push to adjacent fluid pipes, tanks, or boilers (250 mB/t).
+- **Manual Bucket Port**: Includes Bucket In & Bucket Out slots for easy manual filling of Ethanol Buckets.
+- **Wrench Support**: Right-click with a Refinery Wrench to rotate horizontal facing; Sneak + Right-Click to instantly dismantle.
+
+---
+
+### Ethanol Biofuel & Crop Fermentation Codex
+
+**Ethanol** (`refinery:ethanol`) is a renewable liquid biofuel. When held in buckets (`refinery:ethanol_bucket`), it serves as high-efficiency burner fuel in Boilers and Combustion Chambers (burning for 4,000 ticks / 20 items per bucket).
+
+| Feedstock Crop | Ethanol Yield | Byproduct Yield | Ferment Time | Energy Cost |
+| :--- | :--- | :--- | :--- | :--- |
+| **Wheat** (`minecraft:wheat`) | **200 mB** (5 Wheat = 1 Bucket) | **Wheat Seeds (20% bonus)** | 60 ticks (3s) | 900 FE |
+| **Potato** (`minecraft:potato`) | **150 mB** | Poisonous Potato (10%) | 60 ticks (3s) | 900 FE |
+| **Sugar Cane** (`minecraft:sugar_cane`) | **100 mB** | Sugar (15%) | 60 ticks (3s) | 900 FE |
+| **Beetroot** (`minecraft:beetroot`) | **100 mB** | Beetroot Seeds (20%) | 60 ticks (3s) | 900 FE |
+| **Apple** (`minecraft:apple`) | **150 mB** | None | 60 ticks (3s) | 900 FE |
+| **Sweet Berries** (`minecraft:sweet_berries`) | **100 mB** | None | 60 ticks (3s) | 900 FE |
+
 
 

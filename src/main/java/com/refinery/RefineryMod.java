@@ -286,6 +286,10 @@ public class RefineryMod {
             OilSandBlock::new);
     public static final DeferredItem<BlockItem> OIL_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_sand", OIL_SAND);
 
+    public static final DeferredBlock<FermenterBlock> FERMENTER = BLOCKS.registerBlock("fermenter",
+            FermenterBlock::new);
+    public static final DeferredItem<BlockItem> FERMENTER_ITEM = ITEMS.registerSimpleBlockItem("fermenter", FERMENTER);
+
     // === Pipe Gates ===
     public static final DeferredBlock<PipeGateBlock> BASIC_GATE = BLOCKS.registerBlock("basic_gate",
             p -> new PipeGateBlock(GateTier.BASIC, false, p.strength(0.5f).noOcclusion()));
@@ -472,6 +476,10 @@ public class RefineryMod {
                     () -> new BlockEntityType<>(CastingPortBlockEntity::new,
                             CASTING_INPUT_PORT.get(), CASTING_OUTPUT_PORT.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FermenterBlockEntity>> FERMENTER_BE =
+            BLOCK_ENTITY_TYPES.register("fermenter",
+                    () -> new BlockEntityType<>(FermenterBlockEntity::new, FERMENTER.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -508,6 +516,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<GateMenu>> GATE_MENU =
             MENUS.register("gate_menu", () -> new MenuType<>(GateMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<FermenterMenu>> FERMENTER_MENU =
+            MENUS.register("fermenter", () -> new MenuType<>(FermenterMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
@@ -566,6 +577,7 @@ public class RefineryMod {
                         output.accept(CASTING_CHAMBER_ITEM.get());
                         output.accept(CASTING_INPUT_PORT_ITEM.get());
                         output.accept(CASTING_OUTPUT_PORT_ITEM.get());
+                        output.accept(FERMENTER_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
                         output.accept(BASIC_GATE_ITEM.get());
                         output.accept(IRON_GATE_ITEM.get());
@@ -609,6 +621,7 @@ public class RefineryMod {
                         output.accept(RefineryFluids.MOLTEN_TIN_BUCKET.get());
                         output.accept(RefineryFluids.MOLTEN_BRONZE_BUCKET.get());
                         output.accept(RefineryFluids.MOLTEN_GLASS_BUCKET.get());
+                        output.accept(RefineryFluids.ETHANOL_BUCKET.get());
                     })
                     .build());
 
@@ -680,11 +693,11 @@ public class RefineryMod {
                     );
                 });
 
-        // Item capability on Byproduct Port
+        // Item capability on Ports (Crude Oil Port accepts Oil Sand, Byproduct Port outputs Sand/Tar/Sulfur)
         event.registerBlockEntity(Capabilities.Item.BLOCK, REFINERY_PORT_BE.get(),
                 (be, side) -> {
                     var controller = be.getController();
-                    if (controller != null && be.getPortType() == RefineryPortBlock.PortType.BYPRODUCT_OUT) {
+                    if (controller != null && (be.getPortType() == RefineryPortBlock.PortType.BYPRODUCT_OUT || be.getPortType() == RefineryPortBlock.PortType.CRUDE_OIL_IN)) {
                         return VanillaContainerWrapper.of(controller);
                     }
                     return null;
@@ -907,5 +920,15 @@ public class RefineryMod {
                             CastingPressControllerBlockEntity.TANK_CAPACITY,
                             true, false, controller::setChanged);
                 });
+
+        // Capabilities on Industrial Fermenter (Energy, Fluid Ethanol, Items)
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, FERMENTER_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, FERMENTER_BE.get(),
+                (be, side) -> be.fluidHandler);
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, FERMENTER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
     }
 }
