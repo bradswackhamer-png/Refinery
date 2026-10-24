@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " I ",
+    "RBR",
+    " I "
+  ],
+  "key": {
+    "B": "refinery:basic_gate",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "count": 1,
+    "id": "refinery:iron_gate"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " D ",
+    "RGR",
+    " D "
+  ],
+  "key": {
+    "G": "refinery:gold_gate",
+    "D": "minecraft:diamond",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "count": 1,
+    "id": "refinery:diamond_gate"
+  }
+}

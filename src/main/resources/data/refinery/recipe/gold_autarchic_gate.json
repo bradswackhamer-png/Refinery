@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "refinery:gold_gate",
+    "refinery:autarchic_chipset"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:gold_autarchic_gate"
+  }
+}

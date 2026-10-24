@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " R ",
+    "ITI",
+    " R "
+  ],
+  "key": {
+    "R": "minecraft:redstone",
+    "I": "minecraft:iron_ingot",
+    "T": "minecraft:redstone_torch"
+  },
+  "result": {
+    "count": 1,
+    "id": "refinery:basic_gate"
+  }
+}

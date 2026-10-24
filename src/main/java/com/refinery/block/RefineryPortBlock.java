@@ -6,6 +6,7 @@ import com.refinery.block.entity.RefineryPortBlockEntity;
 import com.refinery.fluid.RefineryFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
@@ -82,38 +83,75 @@ public class RefineryPortBlock extends Block implements EntityBlock {
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof RefineryPortBlockEntity portBE) {
             RefineryControllerBlockEntity controller = portBE.getController();
-            if (controller != null && controller.isAssembled()) {
-                if (portType == PortType.CRUDE_OIL_IN) {
-                    if (stack.is(RefineryFluids.CRUDE_OIL_BUCKET.get())) {
-                        if (controller.getCrudeOil() + 1000 <= RefineryControllerBlockEntity.TANK_CAPACITY) {
-                            if (!level.isClientSide()) {
-                                controller.fillCrudeOil(1000);
-                                if (!player.getAbilities().instabuild) {
-                                    player.setItemInHand(hand, new ItemStack(Items.BUCKET));
-                                }
-                                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
-                            }
-                            return InteractionResult.SUCCESS;
-                        }
+
+            // Prevent filled fuel buckets from accidentally placing liquid source blocks when clicking output ports
+            if (portType == PortType.DIESEL_OUT || portType == PortType.GAS_OUT) {
+                if (stack.is(RefineryFluids.DIESEL_BUCKET.get()) || stack.is(RefineryFluids.GASOLINE_BUCKET.get())) {
+                    if (!level.isClientSide()) {
+                        player.sendSystemMessage(Component.literal("§eThis port is for output only. Liquid cannot be inserted here."));
                     }
-                } else if (portType == PortType.DIESEL_OUT) {
-                    if (stack.is(Items.BUCKET) && controller.getDiesel() >= 1000) {
-                        if (!level.isClientSide()) {
-                            controller.drainDiesel(1000);
-                            ItemStack filled = new ItemStack(RefineryFluids.DIESEL_BUCKET.get());
-                            player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(stack, player, filled));
-                            level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
-                        }
+                    return InteractionResult.SUCCESS;
+                }
+            }
+
+            // Empty Bucket on Output Ports (Fill bucket with Diesel or Gasoline)
+            if (stack.is(Items.BUCKET)) {
+                if (portType == PortType.DIESEL_OUT || portType == PortType.GAS_OUT) {
+                    if (level.isClientSide()) {
+                        // Immediately return SUCCESS on client so Minecraft does not fall through to item.use()
                         return InteractionResult.SUCCESS;
                     }
-                } else if (portType == PortType.GAS_OUT) {
-                    if (stack.is(Items.BUCKET) && controller.getGasoline() >= 1000) {
-                        if (!level.isClientSide()) {
-                            controller.drainGasoline(1000);
-                            ItemStack filled = new ItemStack(RefineryFluids.GASOLINE_BUCKET.get());
-                            player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(stack, player, filled));
-                            level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
+                    if (controller != null && controller.isAssembled()) {
+                        if (portType == PortType.DIESEL_OUT) {
+                            if (controller.getDiesel() >= 1000) {
+                                controller.drainDiesel(1000);
+                                ItemStack filled = new ItemStack(RefineryFluids.DIESEL_BUCKET.get());
+                                player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(stack, player, filled));
+                                level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
+                                return InteractionResult.SUCCESS;
+                            } else {
+                                player.sendSystemMessage(Component.literal("§cNot enough Diesel in refinery (needs 1,000 mB, has " + controller.getDiesel() + " mB)."));
+                                return InteractionResult.SUCCESS;
+                            }
+                        } else if (portType == PortType.GAS_OUT) {
+                            if (controller.getGasoline() >= 1000) {
+                                controller.drainGasoline(1000);
+                                ItemStack filled = new ItemStack(RefineryFluids.GASOLINE_BUCKET.get());
+                                player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(stack, player, filled));
+                                level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
+                                return InteractionResult.SUCCESS;
+                            } else {
+                                player.sendSystemMessage(Component.literal("§cNot enough Gasoline in refinery (needs 1,000 mB, has " + controller.getGasoline() + " mB)."));
+                                return InteractionResult.SUCCESS;
+                            }
                         }
+                    } else {
+                        player.sendSystemMessage(Component.literal("§cRefinery is unformed or controller missing."));
+                        return InteractionResult.SUCCESS;
+                    }
+                }
+            }
+
+            // Crude Oil Bucket on Input Port (Empty crude oil bucket into refinery)
+            if (portType == PortType.CRUDE_OIL_IN) {
+                if (stack.is(RefineryFluids.CRUDE_OIL_BUCKET.get())) {
+                    if (level.isClientSide()) {
+                        return InteractionResult.SUCCESS;
+                    }
+                    if (controller != null && controller.isAssembled()) {
+                        if (controller.getCrudeOil() + 1000 <= RefineryControllerBlockEntity.TANK_CAPACITY) {
+                            controller.fillCrudeOil(1000);
+                            if (!player.getAbilities().instabuild) {
+                                player.setItemInHand(hand, new ItemStack(Items.BUCKET));
+                            }
+                            level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+                            return InteractionResult.SUCCESS;
+                        } else {
+                            player.sendSystemMessage(Component.literal("§cCrude oil tank is full (10,000 mB)."));
+                            return InteractionResult.SUCCESS;
+                        }
+                    } else {
+                        player.sendSystemMessage(Component.literal("§cRefinery is unformed or controller missing."));
                         return InteractionResult.SUCCESS;
                     }
                 }

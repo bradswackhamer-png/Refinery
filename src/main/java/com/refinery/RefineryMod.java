@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.refinery.block.*;
 import com.refinery.block.entity.*;
 import com.refinery.fluid.RefineryFluids;
+import com.refinery.gate.GateTier;
 import com.refinery.item.*;
 import com.refinery.menu.*;
 import net.minecraft.core.registries.Registries;
@@ -210,6 +211,51 @@ public class RefineryMod {
             OilSandBlock::new);
     public static final DeferredItem<BlockItem> OIL_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_sand", OIL_SAND);
 
+    // === Pipe Gates ===
+    public static final DeferredBlock<PipeGateBlock> BASIC_GATE = BLOCKS.registerBlock("basic_gate",
+            p -> new PipeGateBlock(GateTier.BASIC, false, p.strength(0.5f).noOcclusion()));
+    public static final DeferredItem<BlockItem> BASIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("basic_gate", BASIC_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> IRON_GATE = BLOCKS.registerBlock("iron_gate",
+            p -> new PipeGateBlock(GateTier.IRON, false, p.strength(0.8f).noOcclusion()));
+    public static final DeferredItem<BlockItem> IRON_GATE_ITEM = ITEMS.registerSimpleBlockItem("iron_gate", IRON_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> GOLD_GATE = BLOCKS.registerBlock("gold_gate",
+            p -> new PipeGateBlock(GateTier.GOLD, false, p.strength(0.8f).noOcclusion()));
+    public static final DeferredItem<BlockItem> GOLD_GATE_ITEM = ITEMS.registerSimpleBlockItem("gold_gate", GOLD_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> DIAMOND_GATE = BLOCKS.registerBlock("diamond_gate",
+            p -> new PipeGateBlock(GateTier.DIAMOND, false, p.strength(1.0f).noOcclusion()));
+    public static final DeferredItem<BlockItem> DIAMOND_GATE_ITEM = ITEMS.registerSimpleBlockItem("diamond_gate", DIAMOND_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> BASIC_AUTARCHIC_GATE = BLOCKS.registerBlock("basic_autarchic_gate",
+            p -> new PipeGateBlock(GateTier.BASIC, true, p.strength(0.5f).noOcclusion()));
+    public static final DeferredItem<BlockItem> BASIC_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("basic_autarchic_gate", BASIC_AUTARCHIC_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> IRON_AUTARCHIC_GATE = BLOCKS.registerBlock("iron_autarchic_gate",
+            p -> new PipeGateBlock(GateTier.IRON, true, p.strength(0.8f).noOcclusion()));
+    public static final DeferredItem<BlockItem> IRON_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("iron_autarchic_gate", IRON_AUTARCHIC_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> GOLD_AUTARCHIC_GATE = BLOCKS.registerBlock("gold_autarchic_gate",
+            p -> new PipeGateBlock(GateTier.GOLD, true, p.strength(0.8f).noOcclusion()));
+    public static final DeferredItem<BlockItem> GOLD_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("gold_autarchic_gate", GOLD_AUTARCHIC_GATE);
+
+    public static final DeferredBlock<PipeGateBlock> DIAMOND_AUTARCHIC_GATE = BLOCKS.registerBlock("diamond_autarchic_gate",
+            p -> new PipeGateBlock(GateTier.DIAMOND, true, p.strength(1.0f).noOcclusion()));
+    public static final DeferredItem<BlockItem> DIAMOND_AUTARCHIC_GATE_ITEM = ITEMS.registerSimpleBlockItem("diamond_autarchic_gate", DIAMOND_AUTARCHIC_GATE);
+
+    // === Gate Upgrades & Wires ===
+    public static final DeferredItem<Item> AUTARCHIC_CHIPSET = ITEMS.registerItem("autarchic_chipset",
+            Item::new, Item.Properties::new);
+    public static final DeferredItem<Item> PIPE_WIRE_RED = ITEMS.registerItem("pipe_wire_red",
+            Item::new, Item.Properties::new);
+    public static final DeferredItem<Item> PIPE_WIRE_BLUE = ITEMS.registerItem("pipe_wire_blue",
+            Item::new, Item.Properties::new);
+    public static final DeferredItem<Item> PIPE_WIRE_GREEN = ITEMS.registerItem("pipe_wire_green",
+            Item::new, Item.Properties::new);
+    public static final DeferredItem<Item> PIPE_WIRE_YELLOW = ITEMS.registerItem("pipe_wire_yellow",
+            Item::new, Item.Properties::new);
+
     // === Items ===
     public static final DeferredItem<IronDustItem> IRON_DUST = ITEMS.registerItem("iron_dust",
             IronDustItem::new, Item.Properties::new);
@@ -293,6 +339,12 @@ public class RefineryMod {
                     () -> new BlockEntityType<>(GrinderPortBlockEntity::new,
                             GRINDER_INPUT_PORT.get(), GRINDER_OUTPUT_PORT.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PipeGateBlockEntity>> PIPE_GATE_BE =
+            BLOCK_ENTITY_TYPES.register("pipe_gate",
+                    () -> new BlockEntityType<>(PipeGateBlockEntity::new,
+                            BASIC_GATE.get(), IRON_GATE.get(), GOLD_GATE.get(), DIAMOND_GATE.get(),
+                            BASIC_AUTARCHIC_GATE.get(), IRON_AUTARCHIC_GATE.get(), GOLD_AUTARCHIC_GATE.get(), DIAMOND_AUTARCHIC_GATE.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -320,6 +372,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<IndustrialGrinderMenu>> INDUSTRIAL_GRINDER_MENU =
             MENUS.register("industrial_grinder", () -> new MenuType<>(IndustrialGrinderMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<GateMenu>> GATE_MENU =
+            MENUS.register("gate_menu", () -> new MenuType<>(GateMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
@@ -367,6 +422,19 @@ public class RefineryMod {
                         output.accept(GRINDER_INPUT_PORT_ITEM.get());
                         output.accept(GRINDER_OUTPUT_PORT_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
+                        output.accept(BASIC_GATE_ITEM.get());
+                        output.accept(IRON_GATE_ITEM.get());
+                        output.accept(GOLD_GATE_ITEM.get());
+                        output.accept(DIAMOND_GATE_ITEM.get());
+                        output.accept(BASIC_AUTARCHIC_GATE_ITEM.get());
+                        output.accept(IRON_AUTARCHIC_GATE_ITEM.get());
+                        output.accept(GOLD_AUTARCHIC_GATE_ITEM.get());
+                        output.accept(DIAMOND_AUTARCHIC_GATE_ITEM.get());
+                        output.accept(AUTARCHIC_CHIPSET.get());
+                        output.accept(PIPE_WIRE_RED.get());
+                        output.accept(PIPE_WIRE_BLUE.get());
+                        output.accept(PIPE_WIRE_GREEN.get());
+                        output.accept(PIPE_WIRE_YELLOW.get());
                         output.accept(BITUMEN.get());
                         output.accept(IRON_DUST.get());
                         output.accept(GOLD_DUST.get());

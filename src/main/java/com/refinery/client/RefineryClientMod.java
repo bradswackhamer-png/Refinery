@@ -33,6 +33,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.STEAM_TURBINE_MENU.get(), SteamTurbineScreen::new);
         event.register((MenuType) RefineryMod.METAL_PRESS_MENU.get(), MetalPressScreen::new);
         event.register((MenuType) RefineryMod.INDUSTRIAL_GRINDER_MENU.get(), IndustrialGrinderScreen::new);
+        event.register((MenuType) RefineryMod.GATE_MENU.get(), GateScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {

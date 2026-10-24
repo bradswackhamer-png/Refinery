@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:redstone",
+    "minecraft:blue_dye"
+  ],
+  "result": {
+    "count": 4,
+    "id": "refinery:pipe_wire_blue"
+  }
+}

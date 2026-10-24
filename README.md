@@ -29,6 +29,13 @@
    - [Configuration (`config/refinery.toml`)](#configuration-configrefinerytoml)
    - [Retrogen Persistence (No Re-Gen Once Mined)](#retrogen-persistence-no-re-gen-once-mined)
    - [Administrative Commands](#administrative-commands)
+10. [BuildCraft-Style Pipe Logic Gates & Wires](#10-buildcraft-style-pipe-logic-gates--wires)
+   - [Overview & Pipe Attachment](#overview--pipe-attachment)
+   - [Gate Tiers](#gate-tiers)
+   - [Autarchic Pulsar (Automated Extraction)](#autarchic-pulsar-automated-extraction)
+   - [Pipe Wire Networks (Red, Blue, Green, Yellow)](#pipe-wire-networks-red-blue-green-yellow)
+   - [Trigger & Action Codex](#trigger--action-codex)
+   - [Crafting & In-World Upgrades](#crafting--in-world-upgrades)
 
 ---
 
@@ -355,6 +362,26 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | **Iron / Gold / Copper Ingot** | Industrial Grinder | **1x Respective Dust** |
 | **Iron / Gold / Copper Dust** | Furnace / Blast Furnace | **1x Respective Ingot** |
 
+### Logistics Mod Cross-Compatibility & Tar Recipes
+*(These recipes activate dynamically when the Logistics mod is detected with zero hard dependencies)*
+- **Smart Stacking Byproducts**: When Logistics is installed, the Industrial Grinder and Refinery automatically output native `logistics:core/tar` and `logistics:core/bitumen` so they immediately stack with your existing pipes and storage. If standalone, it gracefully outputs `refinery:tar` and `refinery:bitumen`.
+- **Crafting Logistics Fluid Pipes**: `refinery:tar` can be crafted directly with any transport pipe:
+  - `refinery:tar` + `copper_transport_pipe` -> `copper_fluid_pipe`
+  - `refinery:tar` + `stone_transport_pipe` -> `stone_fluid_pipe`
+  - `refinery:tar` + `gold_transport_pipe` -> `gold_fluid_pipe`
+  - `refinery:tar` + `item_passthrough_pipe` -> `bypass_fluid_pipe`
+  - `refinery:tar` + `item_extractor_pipe` -> `fluid_extractor_pipe`
+  - `refinery:tar` + `item_insertion_pipe` -> `insertion_fluid_pipe`
+  - `refinery:tar` + `item_merger_pipe` -> `merger_fluid_pipe`
+  - `refinery:tar` + `item_void_pipe` -> `void_fluid_pipe`
+- **Polymer & Utility Crafting**:
+  - `refinery:tar` + Coal Dust -> `synthetic_polymer`
+  - `refinery:tar` + Piston -> `sticky_piston`
+  - `refinery:tar` + 3 String -> 2 `lead`
+- **Instant 1:1 Interchangeability**:
+  - 1 `refinery:tar` <=> 1 `logistics:core/tar` (shapeless crafting)
+  - 1 `refinery:bitumen` <=> 1 `logistics:core/bitumen` (shapeless crafting)
+
 ---
 
 ## 8. Automation, Pipes, & Interfacing
@@ -417,3 +444,118 @@ Commands can be issued via `/admin` or `/refinery`:
 - `/admin oil_stats`: Displays scanned chunks and total generated oil wells.
 - `/admin reset_oil_retrogen`: Resets retrogen history for the world.
 - *(Also mirrored under `/refinery spawn_oil_pit`, `/refinery spawn_geyser`, `/refinery stats`)*
+
+---
+
+## 10. BuildCraft-Style Pipe Logic Gates & Wires
+
+Industrial Refinery brings back the classic, beloved **BuildCraft Pipe Logic Gate** automation system — fully re-engineered for Minecraft 26.3 NeoForge!
+
+Gates are slim, directional logic controllers that can be attached to **any face of a pipe** (including Logistics mod Item & Fluid pipes, Refinery multiblock ports, vanilla containers, or any modded pipes/machines).
+
+```
+   [Chest / Tank] <--- (Pipe Arm) ---> [Pipe Block] === [Gate Plate] ---> (Redstone / Wire Signal)
+                                             |
+                                    [Autarchic Pulsar]
+                               (Extracts items / fluids)
+```
+
+---
+
+### Overview & Pipe Attachment
+- **Placement**: Right-click any face (North, South, East, West, Up, Down) of a pipe or container while holding a Gate.
+  - The gate forms a sleek 3-pixel-thick metallic bezel plate adhering to the pipe arm.
+  - Gate hitboxes allow players and entities to walk freely without catching or snagging.
+- **Programming GUI**: Right-click any placed gate with an empty hand to open its industrial programming console.
+  - **Left-Click** a Trigger or Action to cycle forward.
+  - **Right-Click** a Trigger or Action to cycle backward.
+  - An animated **Status LED** glows green whenever the condition is actively satisfied in the world.
+- **Redstone Output**: When an active pair fires the `Emit Redstone` action, the gate becomes a full redstone power source (emitting power 15) to adjacent redstone dust, repeaters, pistons, and doors.
+
+---
+
+### Gate Tiers
+
+| Gate Tier | Logic Slots | Pipe Wires | Pulsar Capable? | Signature Bezel |
+| :--- | :---: | :---: | :---: | :--- |
+| **Basic Gate** | 1 Pair | None | With Autarchic Upgrade | Dark Industrial Slate & Riveted Steel |
+| **Iron Gate** | 2 Pairs | Red, Blue | With Autarchic Upgrade | Polished Silver Iron Trim |
+| **Gold Gate** | 4 Pairs | Red, Blue, Green, Yellow | With Autarchic Upgrade | Radiant Lustrous Gold |
+| **Diamond Gate** | 8 Pairs | Red, Blue, Green, Yellow | With Autarchic Upgrade | Crystalline Brilliant Cyan Diamond |
+
+Each gate also has a dedicated **Autarchic** variant:
+- **Basic Autarchic Gate**
+- **Iron Autarchic Gate**
+- **Gold Autarchic Gate**
+- **Diamond Autarchic Gate**
+
+---
+
+### Autarchic Pulsar (Automated Extraction)
+One of the most celebrated features of classic BuildCraft:
+- Gates equipped with an **Autarchic Chipset** unlock the `Autarchic Pulse (Item)` and `Autarchic Pulse (Fluid)` actions.
+- When its condition is met, the gate pulses every 20 ticks (1 second) and **automatically pulls 1 item** from the connected chest/machine directly into the pipe, or **pumps 250 mB of fluid** into the fluid pipe!
+- **No external engines, redstone clocks, or wooden pumps required**!
+- Native seamless support for:
+  - **Logistics Mod Item Pipes & Fluid Pipes** (inserts traveling item packets into pipe network).
+  - **NeoForge Item & Fluid Transfer Handlers** (works on all chests, barrels, droppers, and modded machines).
+  - **Refinery Multiblock Ports** (Crude Oil Port, Diesel Port, Boiler Ports, Byproduct Ports).
+
+---
+
+### Pipe Wire Networks (Red, Blue, Green, Yellow)
+Gates can communicate across long distances without bulky redstone dust lines:
+- **Colored Pipe Wires**: Red, Blue, Green, and Yellow.
+- **Action (`Emit Wire`)**: Broadcasts that wire's logic state along contiguous pipe networks up to 24 blocks.
+- **Trigger (`Wire ON` / `Wire OFF`)**: Reads the active wire broadcast from any other gate on that pipe network.
+- **Wire HUD**: The gate GUI displays real-time glowing status dots for all supported pipe wire channels.
+
+---
+
+### Trigger & Action Codex
+
+#### Triggers (Conditions):
+- `Redstone ON` / `Redstone OFF`: Evaluates adjacent redstone power.
+- `Inventory Empty`: Connected container has 0 items.
+- `Has Items`: Connected container has at least 1 item.
+- `Space in Inventory`: Container has free space or incomplete item stacks.
+- `Inventory Full`: Container has zero free slots or capacity.
+- `Tank Empty`: Connected fluid tank has 0 mB.
+- `Has Fluid`: Connected fluid tank contains fluid.
+- `Space in Tank`: Connected fluid tank has room for more fluid.
+- `Tank Full`: Connected fluid tank is 100% full.
+- `Pipe Empty`: Attached pipe currently has no traveling items or fluids.
+- `Pipe Flowing`: Attached pipe has items or fluids traversing it.
+- `Machine Active` / `Machine Idle`: Evaluates whether connected furnace, boiler, or machine is burning or operating.
+- `Red / Blue / Green / Yellow Wire ON` & `OFF`: Evaluates pipe network wire signals.
+
+#### Actions (Outputs):
+- `Emit Redstone`: Constant redstone signal (power 15).
+- `Redstone Pulse`: Pulses redstone on and off every 1 second (ideal for clocks).
+- `Autarchic Pulse (Item)`: Extracts 1 item from adjacent container into pipe.
+- `Autarchic Pulse (Fluid)`: Pumps 250 mB from adjacent tank into fluid pipe.
+- `Emit Red / Blue / Green / Yellow Wire`: Broadcasts logic signal to other gates along connected pipes.
+
+---
+
+### Crafting & In-World Upgrades
+
+#### 1. In-World Upgrade with Autarchic Chipset
+Hold an **Autarchic Chipset** and right-click any placed in-world Gate. It instantly upgrades into its Autarchic variant with a sound effect and cyan particle flare!
+
+#### 2. Crafting Recipes:
+- **Basic Gate**:
+  - `Redstone Dust` (top/bottom) + `Iron Ingot` (left/right) + `Redstone Torch` (center) $\rightarrow$ 1x Basic Gate.
+- **Iron Gate**:
+  - `Basic Gate` (center) + 2x `Iron Ingot` + 2x `Redstone Dust` $\rightarrow$ 1x Iron Gate.
+- **Gold Gate**:
+  - `Iron Gate` (center) + 2x `Gold Ingot` + 2x `Redstone Dust` $\rightarrow$ 1x Gold Gate.
+- **Diamond Gate**:
+  - `Gold Gate` (center) + 2x `Diamond` + 2x `Redstone Dust` $\rightarrow$ 1x Diamond Gate.
+- **Autarchic Chipset**:
+  - `Ender Pearl` (center) + 2x `Redstone Dust` + 2x `Gold Nugget` $\rightarrow$ 1x Autarchic Chipset.
+- **Autarchic Gates (Crafting Grid)**:
+  - Any Gate + 1x `Autarchic Chipset` (shapeless) $\rightarrow$ Autarchic Gate variant.
+- **Pipe Wires (4x per craft)**:
+  - `String` + `Redstone Dust` + `Dye` (Red, Blue, Green, or Yellow) $\rightarrow$ 4x Pipe Wire.
+

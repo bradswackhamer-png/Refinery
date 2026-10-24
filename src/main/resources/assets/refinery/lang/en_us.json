@@ -92,5 +92,24 @@
   "tooltip.refinery.tar.desc": "§7Viscous petroleum residue. Burns as fuel or crafts torches.",
   "tooltip.refinery.sulfur_dust.desc": "§eRefined mineral byproduct. Used in gunpowder and chemistry.",
   "tooltip.refinery.oil_sand.desc": "§7Petroleum-rich sand. Grind into 3 Bitumen (+50% chance for Tar).",
-  "tooltip.refinery.bitumen.desc": "§8Heavy asphalt pitch. High-energy furnace & boiler fuel (burns 1,600t)."
+  "tooltip.refinery.bitumen.desc": "§8Heavy asphalt pitch. High-energy furnace & boiler fuel (burns 1,600t).",
+
+  "block.refinery.basic_gate": "Basic Gate",
+  "block.refinery.iron_gate": "Iron Gate",
+  "block.refinery.gold_gate": "Gold Gate",
+  "block.refinery.diamond_gate": "Diamond Gate",
+  "block.refinery.basic_autarchic_gate": "Basic Autarchic Gate",
+  "block.refinery.iron_autarchic_gate": "Iron Autarchic Gate",
+  "block.refinery.gold_autarchic_gate": "Gold Autarchic Gate",
+  "block.refinery.diamond_autarchic_gate": "Diamond Autarchic Gate",
+  "item.refinery.autarchic_chipset": "Autarchic Chipset",
+  "item.refinery.pipe_wire_red": "Red Pipe Wire",
+  "item.refinery.pipe_wire_blue": "Blue Pipe Wire",
+  "item.refinery.pipe_wire_green": "Green Pipe Wire",
+  "item.refinery.pipe_wire_yellow": "Yellow Pipe Wire",
+  "gui.refinery.gate": "Pipe Logic Gate",
+  "tooltip.refinery.gate.desc_1": "§7Attach to any face of a pipe or machine.",
+  "tooltip.refinery.gate.desc_2": "§6Right-click to program conditional Triggers and Actions.",
+  "tooltip.refinery.autarchic_chipset.desc": "§bRight-click placed Gate or craft together to upgrade with Autarchic Pulsar.",
+  "tooltip.refinery.pipe_wire.desc": "§eConnects logic signals between gates along pipe networks."
 }
