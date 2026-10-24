@@ -34,13 +34,13 @@ public class MetalPressMenu extends AbstractContainerMenu {
         this.addSlot(new Slot(container, 0, 44, 34) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(RefineryMod.STEEL_INGOT.get());
+                return !com.refinery.block.entity.MetalPressControllerBlockEntity.getPressResult(stack).isEmpty();
             }
         });
         this.addSlot(new Slot(container, 1, 62, 34) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(RefineryMod.STEEL_INGOT.get());
+                return !com.refinery.block.entity.MetalPressControllerBlockEntity.getPressResult(stack).isEmpty();
             }
         });
 
@@ -108,7 +108,7 @@ public class MetalPressMenu extends AbstractContainerMenu {
                 }
             } else {
                 // From player to input slots
-                if (slotStack.is(RefineryMod.STEEL_INGOT.get())) {
+                if (!com.refinery.block.entity.MetalPressControllerBlockEntity.getPressResult(slotStack).isEmpty()) {
                     if (!this.moveItemStackTo(slotStack, 0, 2, false)) {
                         return ItemStack.EMPTY;
                     }

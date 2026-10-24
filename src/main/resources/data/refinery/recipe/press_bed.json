@@ -1,17 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "pattern": [
     "SSS",
     " A ",
-    "PPP"
+    "III"
   ],
   "key": {
     "S": "refinery:steel_ingot",
     "A": "minecraft:anvil",
-    "P": "refinery:steel_plate"
+    "I": "minecraft:iron_block"
   },
   "result": {
-    "id": "refinery:press_bed",
-    "count": 1
+    "count": 1,
+    "id": "refinery:press_bed"
   }
 }

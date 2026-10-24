@@ -1,18 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "pattern": [
-    "PSP",
+    "ISI",
     "RCR",
-    "PSP"
+    "ISI"
   ],
   "key": {
-    "P": "refinery:steel_plate",
+    "I": "minecraft:iron_ingot",
     "S": "refinery:steel_ingot",
     "R": "minecraft:redstone_block",
     "C": "minecraft:comparator"
   },
   "result": {
-    "id": "refinery:metal_press_controller",
-    "count": 1
+    "count": 1,
+    "id": "refinery:metal_press_controller"
   }
 }

@@ -47,6 +47,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.4.1 (Progression Balancing & Steel Plate Exclusivity)](#version-141-progression-balancing--steel-plate-exclusivity)
    - [Version 1.4.0 (Biofuel & Oil Sand Cracking)](#version-140-biofuel--oil-sand-cracking)
    - [Version 1.3.0 (Continuous Molten Metallurgy)](#version-130-continuous-molten-metallurgy)
    - [Version 1.2.0 (Grinder Overhaul & Logic Gates)](#version-120-grinder-overhaul--logic-gates)
@@ -78,7 +79,7 @@ The mod introduces a tiered industrial metallurgy and chemical progression:
 | Item | Source | Purpose |
 | :--- | :--- | :--- |
 | **Steel Ingot** (`refinery:steel_ingot`) | Industrial Blast Smelter | Primary alloy for heavy machine frames, Casings, and Controllers. |
-| **Heavy Steel Plate** (`refinery:steel_plate`) | Industrial Metal Press (or crafting) | Reinforced plating required for high-pressure vessels, boilers, and presses. |
+| **Heavy Steel Plate** (`refinery:steel_plate`) | Industrial Metal Press (exclusive) | Reinforced plating stamped exclusively in the Metal Press; required for high-pressure boilers and turbines. |
 | **Tin Ingot** (`refinery:tin_ingot`) | Smelting Tin Dust / Ores | Malleable industrial metal used for bronze alloying and plating. |
 | **Tin Dust** (`refinery:tin_dust`) | Grinding Tin Ores or Raw Tin (x2) | Pulverized tin mineral used for smelting or alloy blending. |
 | **Tin Plate** (`refinery:tin_plate`) | Metal Press (Tin Ingot) | Stamped tin plate used in circuitry and engineering. |
@@ -367,7 +368,7 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | Result | Pattern / Ingredients |
 | :--- | :--- |
 | **Refinery Wrench** | Iron Ingot, Copper Ingot, Lever (Shaped) |
-| **Heavy Steel Plate** | 1 Steel Ingot (Shapeless in crafting table or 1 Ingot in Metal Press) |
+| **Heavy Steel Plate** | 1 Steel Ingot (Exclusively stamped in Industrial Metal Press) |
 | **Bituminous Oil Sand** (x2) | 1 Sand + 1 Petroleum Tar (Shapeless) |
 | **Gunpowder (from Sulfur)** | 1 Sulfur Dust + 1 Charcoal (Shapeless) |
 | **Torches (from Tar)** | 1 Petroleum Tar + 1 Stick -> 4 Torches (Shapeless) |
@@ -381,9 +382,9 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | **Grinder Input Port** | 4 Steel Plates + 1 Hopper (Top funnel configuration) |
 | **Grinder Output Port** | 4 Steel Plates + 1 Hopper (Bottom discharge configuration) |
 | **Press Casing** (x4) | 4 Steel Ingots + 4 Iron Ingots around Smooth Stone |
-| **Press Anvil Bed** | 3 Steel Ingots (top) + 1 Anvil (center) + 3 Steel Plates (bottom) |
-| **Press Hydraulic Head** | 4 Steel Ingots + 2 Steel Plates + 1 Piston + 2 Redstone |
-| **Metal Press Controller** | 4 Steel Ingots + 4 Steel Plates + 2 Redstone Blocks + 1 Comparator |
+| **Press Anvil Bed** | 3 Steel Ingots (top) + 1 Anvil (center) + 3 Iron Blocks (bottom) |
+| **Press Hydraulic Head** | 4 Steel Ingots + 2 Pistons + 2 Redstone |
+| **Metal Press Controller** | 4 Iron Ingots + 2 Steel Ingots + 2 Redstone Blocks + 1 Comparator |
 | **Steel Boiler Casing** (x4) | 4 Steel Plates + 4 Steel Ingots around 1 Iron Block |
 | **Boiler Firebox Hearth** | 4 Steel Plates + 4 Iron Bars + 1 Blast Furnace |
 | **Boiler Pressure Pipe** (x4) | 4 Steel Plates in diamond ring |
@@ -807,6 +808,15 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.4.1 (Progression Balancing & Steel Plate Exclusivity)
+- **Steel Plate Exclusivity**:
+  - Removed crafting table recipe for Heavy Steel Plate (`refinery:steel_plate`). Steel plates are now **exclusively** produced via the Industrial Metal Press.
+  - Replaced steel plate ingredients in the **Metal Press Controller** and **Press Anvil Bed** crafting recipes with Iron Ingots and Iron Blocks to eliminate circular dependencies.
+  - Verified linear metallurgy progression: Blast Smelter $\rightarrow$ Steel Ingots $\rightarrow$ Metal Press $\rightarrow$ Steel Plates $\rightarrow$ Boilers & Advanced Machinery.
+  - Enabled automated hopper/pipe insertion of all valid ingots (Steel, Iron, Copper, Gold, Tin, Bronze) into the Metal Press.
+
+---
 
 ### Version 1.4.0 (Biofuel & Oil Sand Cracking)
 - **Refinery Oil Sand Cracking**:

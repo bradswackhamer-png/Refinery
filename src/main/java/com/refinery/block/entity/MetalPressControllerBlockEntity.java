@@ -464,7 +464,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
     @Override
     public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
-        return slot < 2 && stack.is(RefineryMod.STEEL_INGOT.get());
+        return slot < 2 && !getPressResult(stack).isEmpty();
     }
 
     @Override
@@ -511,7 +511,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot < 2 && stack.is(RefineryMod.STEEL_INGOT.get());
+        return slot < 2 && !getPressResult(stack).isEmpty();
     }
 
     @Override
