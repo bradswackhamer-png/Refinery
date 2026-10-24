@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" B ", "SMS", "GCG"],
+  "key": {
+    "B": "minecraft:bucket",
+    "S": "minecraft:glass",
+    "M": "logistics:core/machine_core",
+    "G": "#c:gears/copper",
+    "C": "logistics:core/redstone_reception_coil"
+  },
+  "result": { "id": "logistics:automation/transposer", "count": 1 }
+}

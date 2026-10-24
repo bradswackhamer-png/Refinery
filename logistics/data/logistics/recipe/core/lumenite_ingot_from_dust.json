@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "#c:dusts/lumenite",
+  "result": {
+    "id": "logistics:core/lumenite_ingot"
+  },
+  "cookingtime": 200
+}

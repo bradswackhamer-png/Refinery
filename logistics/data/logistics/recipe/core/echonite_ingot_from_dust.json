@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "#c:dusts/echonite",
+  "result": {
+    "id": "logistics:core/echonite_ingot"
+  },
+  "cookingtime": 200
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["L", "S"],
+  "key": {
+    "L": "#c:dusts/lapis",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "logistics:core/marker",
+    "count": 1
+  }
+}

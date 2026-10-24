@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PRP",
+    "PRP",
+    "PNP"
+  ],
+  "key": {
+    "P": "minecraft:paper",
+    "R": "minecraft:redstone",
+    "N": "#c:nuggets/copper"
+  },
+  "result": {
+    "count": 1,
+    "id": "logistics:pipe/blank_module"
+  }
+}

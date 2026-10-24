@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" A ", "LML", "GCG"],
+  "key": {
+    "A": "minecraft:iron_axe",
+    "L": "#minecraft:planks",
+    "M": "logistics:core/machine_core",
+    "G": "#c:gears/copper",
+    "C": "logistics:core/redstone_reception_coil"
+  },
+  "result": { "id": "logistics:automation/sawmill", "count": 1 }
+}

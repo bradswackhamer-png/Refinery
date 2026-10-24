@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "#c:dusts/caterium",
+  "result": {
+    "id": "logistics:core/caterium_ingot"
+  },
+  "cookingtime": 200
+}

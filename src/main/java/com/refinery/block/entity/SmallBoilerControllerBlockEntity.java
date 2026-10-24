@@ -304,6 +304,8 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
         if (stack.is(Items.BLAZE_ROD)) return 2400;
         if (stack.is(RefineryMod.TAR_ITEM.get())) return 1600;
         if (stack.is(RefineryMod.BITUMEN.get())) return 1600;
+        net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"))) return 1600;
         if (stack.is(ItemTags.LOGS) || stack.is(ItemTags.PLANKS)) return 300;
         return 0;
     }

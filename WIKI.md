@@ -345,8 +345,8 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 ### Mineral Pulverizing & Smelting
 | Input | Machine / Process | Output |
 | :--- | :--- | :--- |
-| **Bituminous Oil Sand** | Industrial Grinder | **3x Bitumen** (+ 50% chance for **1x Tar**) |
-| **Bitumen** | Furnace / Blast Furnace | **1x Petroleum Tar** |
+| **Bituminous Oil Sand** (`refinery:oil_sand` or `logistics:core/oil_sand`, `oil_red_sand`, `oil_shale`) | Industrial Grinder | **3x Bitumen** (+ 50% chance for **1x Tar**) |
+| **Bitumen** (Refinery or Logistics) | Furnace / Blast Furnace | **1x Petroleum Tar** |
 | **Raw Iron / Iron Ore / Deepslate Iron Ore** | Industrial Grinder | **2x Iron Dust** (Ore Doubling!) |
 | **Raw Gold / Gold Ore / Deepslate Gold Ore** | Industrial Grinder | **2x Gold Dust** (Ore Doubling!) |
 | **Raw Copper / Copper Ore / Deepslate Copper Ore** | Industrial Grinder | **2x Copper Dust** (Ore Doubling!) |

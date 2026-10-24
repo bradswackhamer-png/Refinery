@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "logistics"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "logistics:pipe/gold_transport_pipe",
+    "refinery:tar"
+  ],
+  "result": {
+    "id": "logistics:pipe/gold_fluid_pipe",
+    "count": 1
+  }
+}

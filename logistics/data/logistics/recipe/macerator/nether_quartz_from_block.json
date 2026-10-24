@@ -1,0 +1,9 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:quartz_block",
+  "result": {
+    "id": "minecraft:quartz",
+    "count": 4
+  },
+  "energy": 2000
+}

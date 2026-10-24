@@ -1,0 +1,9 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "#minecraft:logs",
+  "result": {
+    "id": "logistics:core/sawdust",
+    "count": 8
+  },
+  "energy": 2000
+}

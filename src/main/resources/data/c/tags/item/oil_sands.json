@@ -1,0 +1,8 @@
+{
+  "values": [
+    "refinery:oil_sand",
+    { "id": "logistics:core/oil_sand", "required": false },
+    { "id": "logistics:core/oil_red_sand", "required": false },
+    { "id": "logistics:core/oil_shale", "required": false }
+  ]
+}

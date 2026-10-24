@@ -1,0 +1,10 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:diamond_ore",
+  "result": {
+    "id": "logistics:core/diamond_dust",
+    "count": 2
+  },
+  "energy": 2000,
+  "experience": 1.0
+}

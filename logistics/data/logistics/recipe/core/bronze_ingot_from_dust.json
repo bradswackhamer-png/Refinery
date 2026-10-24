@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "#c:dusts/bronze",
+  "result": {
+    "id": "logistics:core/bronze_ingot"
+  },
+  "cookingtime": 200
+}

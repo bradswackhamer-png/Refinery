@@ -1,0 +1,11 @@
+{
+  "client": ["client.FogRendererMixin"],
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8",
+  "mixins": [],
+  "package": "com.logistics.mixin",
+  "required": true
+}

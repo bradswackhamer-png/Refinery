@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" N ", "OMO", "GCG"],
+  "key": {
+    "N": "#c:gears/netherite",
+    "O": "minecraft:obsidian",
+    "M": "logistics:core/machine_core",
+    "G": "#c:gears/copper",
+    "C": "logistics:core/redstone_reception_coil"
+  },
+  "result": { "id": "logistics:automation/sequential_fabricator", "count": 1 }
+}

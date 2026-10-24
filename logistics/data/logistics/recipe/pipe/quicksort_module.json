@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ACA"
+  ],
+  "key": {
+    "A": "minecraft:light_blue_dye",
+    "B": "#c:gears/diamond",
+    "C": "minecraft:redstone",
+    "D": "logistics:pipe/blank_module"
+  },
+  "result": {
+    "id": "logistics:pipe/quicksort_module"
+  }
+}

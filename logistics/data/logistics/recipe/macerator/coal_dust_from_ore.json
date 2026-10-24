@@ -1,0 +1,10 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:coal_ore",
+  "result": {
+    "id": "logistics:core/coal_dust",
+    "count": 2
+  },
+  "energy": 2000,
+  "experience": 0.1
+}

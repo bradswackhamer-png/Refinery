@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#c:ingots/tin",
+    "#c:ingots/bronze",
+    "#c:ingots/caterium",
+    "#c:ingots/lumenite",
+    "#c:ingots/echonite",
+    "#c:ingots/rubber"
+  ]
+}

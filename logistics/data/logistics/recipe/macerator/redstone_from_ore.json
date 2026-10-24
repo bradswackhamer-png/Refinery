@@ -1,0 +1,14 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:redstone_ore",
+  "result": {
+    "id": "minecraft:redstone",
+    "count": 2
+  },
+  "energy": 2000,
+  "experience": 0.7,
+  "byproduct": {
+    "id": "logistics:core/quicksilver",
+    "chance": 0.25
+  }
+}

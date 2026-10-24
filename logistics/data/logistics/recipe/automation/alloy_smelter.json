@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" D ", "SMS", "GCG"],
+  "key": {
+    "D": "#c:gears/diamond",
+    "S": ["minecraft:sand", "minecraft:red_sand"],
+    "M": "logistics:core/machine_core",
+    "G": "#c:gears/copper",
+    "C": "logistics:core/redstone_reception_coil"
+  },
+  "result": { "id": "logistics:automation/alloy_smelter", "count": 1 }
+}

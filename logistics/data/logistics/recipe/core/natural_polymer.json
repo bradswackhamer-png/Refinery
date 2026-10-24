@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:slime_ball",
+    "#c:dusts/coal"
+  ],
+  "result": {
+    "id": "logistics:core/natural_polymer",
+    "count": 1
+  }
+}

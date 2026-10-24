@@ -8,10 +8,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -20,8 +24,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import java.util.Optional;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -194,13 +200,13 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
 
                 if (this.progress >= PROCESS_TIME) {
                     this.progress = 0;
-                    boolean isOilSand = input.is(RefineryMod.OIL_SAND_ITEM.get());
+                    boolean isOilSand = isOilSand(input);
                     input.shrink(1);
                     addOutput(output.copy());
 
                     // Oil Sand has 50% chance to yield 1 Petroleum Tar
                     if (isOilSand && serverLevel.getRandom().nextFloat() < 0.50f) {
-                        ItemStack tar = new ItemStack(RefineryMod.TAR_ITEM.get(), 1);
+                        ItemStack tar = new ItemStack(getPreferredTarItem(), 1);
                         if (canFitOutput(tar)) {
                             addOutput(tar);
                         }
@@ -270,12 +276,45 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             return new ItemStack(RefineryMod.COPPER_DUST.get(), 1);
         }
 
-        // 5. Oil Sand -> 3x Bitumen (+ 50% chance for 1x Tar)
-        if (input.is(RefineryMod.OIL_SAND_ITEM.get())) {
-            return new ItemStack(RefineryMod.BITUMEN.get(), 3);
+        // 5. Oil Sand (Refinery or Logistics mod: oil_sand, oil_red_sand, oil_shale) -> 3x Bitumen (+ 50% chance for 1x Tar)
+        if (isOilSand(input)) {
+            return new ItemStack(getPreferredBitumenItem(), 3);
         }
 
         return ItemStack.EMPTY;
+    }
+
+    public static Item getPreferredTarItem() {
+        Optional<Item> logTar = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("logistics", "core/tar"));
+        return logTar.orElseGet(RefineryMod.TAR_ITEM::get);
+    }
+
+    public static Item getPreferredBitumenItem() {
+        Optional<Item> logBitumen = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("logistics", "core/bitumen"));
+        return logBitumen.orElseGet(RefineryMod.BITUMEN::get);
+    }
+
+    public static final TagKey<Item> OIL_SANDS_TAG = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "oil_sands"));
+
+    public static boolean isOilSand(ItemStack input) {
+        if (input.isEmpty()) return false;
+        if (input.is(RefineryMod.OIL_SAND_ITEM.get())) return true;
+        if (input.is(OIL_SANDS_TAG)) return true;
+
+        // Logistics mod compatibility (logistics:core/oil_sand, logistics:core/oil_red_sand, logistics:core/oil_shale)
+        Identifier id = BuiltInRegistries.ITEM.getKey(input.getItem());
+        if (id != null) {
+            String path = id.getPath();
+            String namespace = id.getNamespace();
+            if (namespace.equals("logistics")) {
+                if (path.contains("oil_sand") || path.contains("oil_red_sand") || path.contains("oil_shale")) {
+                    return true;
+                }
+            } else if (path.equals("oil_sand") || path.equals("oil_red_sand") || path.equals("oil_shale")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int getFirstGrindableSlot() {

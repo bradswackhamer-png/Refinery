@@ -284,8 +284,12 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
 
     public static boolean isFuelSource(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        return stack.is(ItemTags.COALS) || stack.is(Items.COAL_BLOCK)
-                || stack.is(RefineryMod.TAR_ITEM.get()) || stack.is(Items.CHARCOAL);
+        if (stack.is(ItemTags.COALS) || stack.is(Items.COAL_BLOCK)
+                || stack.is(RefineryMod.TAR_ITEM.get()) || stack.is(RefineryMod.BITUMEN.get()) || stack.is(Items.CHARCOAL)) {
+            return true;
+        }
+        net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"));
     }
 
     private void tryExportOutput(ServerLevel level) {

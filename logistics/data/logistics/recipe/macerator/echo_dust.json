@@ -1,0 +1,9 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:echo_shard",
+  "result": {
+    "id": "logistics:core/echo_dust",
+    "count": 1
+  },
+  "energy": 2000
+}

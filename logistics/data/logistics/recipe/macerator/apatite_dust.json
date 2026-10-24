@@ -1,0 +1,10 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "#c:ores/apatite",
+  "result": {
+    "id": "logistics:core/apatite_dust",
+    "count": 6
+  },
+  "energy": 2000,
+  "experience": 1.0
+}

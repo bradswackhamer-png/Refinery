@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CCC", " G ", "gpg"],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:glass",
+    "g": "#c:gears/bronze",
+    "p": "minecraft:piston"
+  },
+  "result": {
+    "id": "logistics:power/steam_engine",
+    "count": 1
+  }
+}

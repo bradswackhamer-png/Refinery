@@ -1,0 +1,9 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:wither_rose",
+  "result": {
+    "id": "minecraft:black_dye",
+    "count": 2
+  },
+  "energy": 2000
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCB"
+  ],
+  "key": {
+    "A": "#c:gears/iron",
+    "B": "#c:dusts/amethyst",
+    "C": "logistics:pipe/basic_logistics_pipe"
+  },
+  "result": {
+    "id": "logistics:pipe/crafting_logistics_pipe"
+  }
+}

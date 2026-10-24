@@ -1,0 +1,28 @@
+{
+  "jars": [
+    {
+      "identifier": {
+        "group": "io.sentry",
+        "artifact": "sentry"
+      },
+      "version": {
+        "range": "[8.59.0,9.0.0)",
+        "artifactVersion": "8.59.0"
+      },
+      "path": "META-INF/jarjar/sentry-8.59.0.jar",
+      "isObfuscated": false
+    },
+    {
+      "identifier": {
+        "group": "maven.modrinth",
+        "artifact": "configory"
+      },
+      "version": {
+        "range": "[0.2.0,)",
+        "artifactVersion": "0.2.0"
+      },
+      "path": "META-INF/jarjar/configory-0.2.0.jar",
+      "isObfuscated": false
+    }
+  ]
+}

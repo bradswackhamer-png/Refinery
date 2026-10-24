@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "logistics"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "logistics:pipe/item_extractor_pipe",
+    "refinery:tar"
+  ],
+  "result": {
+    "id": "logistics:pipe/fluid_extractor_pipe",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:copper_ore",
+  "result": {
+    "id": "logistics:core/copper_dust",
+    "count": 2
+  },
+  "energy": 2000,
+  "experience": 0.7,
+  "byproduct": {
+    "id": "logistics:core/gold_dust",
+    "chance": 0.1
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "logistics:macerator",
+  "ingredient": "minecraft:amethyst_shard",
+  "result": {
+    "id": "logistics:core/amethyst_dust",
+    "count": 1
+  },
+  "energy": 2000
+}

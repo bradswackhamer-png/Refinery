@@ -10,7 +10,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,8 +24,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import java.util.Optional;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -258,7 +262,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
 
                 // Byproducts: Tar (40%) and Sulfur (30%)
                 if (level.getRandom().nextFloat() < 0.40f) {
-                    insertByproduct(new ItemStack(RefineryMod.TAR_ITEM.get(), 1));
+                    insertByproduct(new ItemStack(getPreferredTarItem(), 1));
                 }
                 if (level.getRandom().nextFloat() < 0.30f) {
                     insertByproduct(new ItemStack(RefineryMod.SULFUR_DUST_ITEM.get(), 1));
@@ -344,8 +348,16 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         if (stack.is(Items.LAVA_BUCKET)) return 20000;
         if (stack.is(Items.BLAZE_ROD)) return 2400;
         if (stack.is(RefineryMod.TAR_ITEM.get())) return 1600;
+        if (stack.is(RefineryMod.BITUMEN.get())) return 1600;
+        net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"))) return 1600;
         if (stack.has(DataComponents.COOKING_FUEL)) return 1600;
         return 0;
+    }
+
+    public static Item getPreferredTarItem() {
+        Optional<Item> logTar = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("logistics", "core/tar"));
+        return logTar.orElseGet(RefineryMod.TAR_ITEM::get);
     }
 
     public void toggleBlueprintProjection(@Nullable Player player) {
