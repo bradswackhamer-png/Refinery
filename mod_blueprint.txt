@@ -1,0 +1,100 @@
+# COMPRESSED TECHNICAL BLUEPRINT: INDUSTRIAL REFINERY (Minecraft 26.3 NeoForge)
+
+## 1. Project Metadata & Environment
+- **Mod ID**: `refinery` (Version: 1.0.0)
+- **Target Platform**: Minecraft 26.3 | NeoForge 26.3.0.48-beta | Java 25 (Java 21+ compatible)
+- **Workspace Directory**: `c:\Users\swack\Desktop\refinery`
+- **Output Jar**: `build/libs/refinery-1.0.0.jar`
+- **CurseForge Instance Target**: `C:\Users\swack\curseforge\minecraft\Instances\26.3\mods\refinery-1.0.0.jar`
+- **External Linked Mod**: `logistics` (Decompiled jar located at `c:\Users\swack\Desktop\refinery\logistics`).
+  - Rule: Zero hard compile-time/runtime dependencies on `logistics`.
+  - Compatibility via cached reflection / MethodHandles (`LogisticsPipeCompat.java`) and NeoForge Transfer API.
+- **Documentation Policy**: `README.md` must ALWAYS be an exact copy of `WIKI.md`.
+
+---
+
+## 2. Core Architecture & Package Layout
+- `com.refinery.RefineryMod`: Central registration (Blocks, Items, BlockEntities, Menus, Fluids, Configs, Creative Tab, Capabilities).
+- `com.refinery.client.RefineryClientMod`: Client initialization (Screen registration for Menus, BER BlockEntityRenderers, Fluid client extensions).
+- `com.refinery.client.renderer.BlueprintColors`: Centralized high-contrast signature color palette for 3D holographic projection of all 7 multiblocks.
+- `com.refinery.config.RefineryConfig`: Configuration specification loaded from `config/refinery.toml`.
+- `com.refinery.world.OilRetrogenSavedData`: World-saved data persisted to `<world>/data/oil_retrogen.dat` via `RecordCodecBuilder` CompoundTag.
+- `com.refinery.world.OilRetrogenHandler`: Subterranean oil pits and surface lakes generation with chunk distance spacing and retrogen.
+- `com.refinery.command.RefineryCommands`: Admin commands under `/admin` and `/refinery`.
+- `com.refinery.compat.LogisticsPipeCompat`: Zero-dependency reflection bridge for Logistics item/fluid pipes.
+- `com.refinery.gate`: BuildCraft-style logic gates, triggers, actions, and pipe wires.
+
+---
+
+## 3. Technology Systems & Machines
+
+### A. Multiblock Machines (All support Wrench 3D Blueprint Hologram Projection)
+1. **Petroleum Refinery (3x3x4)**:
+   - Distills 1,000 mB Crude Oil into 500 mB Diesel + 300 mB Gasoline + 1x Bitumen + 1x Sulfur Dust.
+   - Ports: Crude Oil In, Diesel Out, Gas Out, Byproduct Out.
+   - Bucket Interaction: Right-clicking Crude Oil In with Crude Oil Bucket empties it. Right-clicking Diesel Out or Gas Out with empty bucket fills it. Accidental world fluid placement explicitly blocked.
+2. **Industrial Blast Smelter (5x5x5)**:
+   - High-temperature metallurgical furnace with a single massive 3x3 Foundry Glass window on the front.
+   - Converts Raw Iron + Coal/Coke into Steel Ingots (1:1).
+3. **Small Steam Boiler (3x3x3)** & **Large Heavy Steam Boiler (5x5x5)**:
+   - Consumes Water + Solid/Liquid Fuel to produce pressurized Steam. Features overheat mechanics.
+4. **Steam Turbine Generator (3x3x3)**:
+   - Consumes Steam to generate 250 FE/t, condensing Steam back into Water (Closed-Loop Rankine Cycle).
+5. **Industrial Metal Press (2x2x2)**:
+   - Shapes Ingots into Plates, Rods, and Gears with animated mechanical press head.
+6. **Industrial Grinder & Pulverizer (2x3x3)**:
+   - Raw Ores -> 2x Mineral Dust (Doubling).
+   - Stone / Cobblestone -> Gravel -> Sand.
+   - Oil Sand (`refinery:oil_sand`, `logistics:core/oil_sand`, `logistics:core/oil_red_sand`, `logistics:core/oil_shale`) -> 3x Bitumen + 50% chance for Tar. Automatically outputs Logistics native tar/bitumen if Logistics mod is loaded.
+
+### B. Standalone Agricultural Automation
+- **Auto Planter**: 5-block radius, auto-tills dirt into farmland and plants seeds from inventory/hopper/pipe.
+- **Auto Harvester**: 11-block forward sweep (5 left, 5 right), harvests mature crops and replants, auto-ejecting drops behind or into chests.
+
+### C. BuildCraft-Style Pipe Logic Gates & Wires
+- **Attachment**: Directional 3px plate (`PipeGateBlock`) attachable to any face of Logistics pipes, Refinery ports, chests, or modded machines. Hitbox is non-solid (`Shapes.empty()`).
+- **Tiers**:
+  - `Basic Gate`: 1 logic slot pair (`Trigger -> Action`).
+  - `Iron Gate`: 2 logic pairs. Adds Red & Blue wire integration.
+  - `Gold Gate`: 4 logic pairs. Adds Green & Yellow wire integration (all 4 wires).
+  - `Diamond Gate`: 8 logic pairs across a 2-column industrial dashboard.
+  - `Autarchic Gate Variants`: Basic, Iron, Gold, Diamond Autarchic Gates.
+  - `Autarchic Chipset`: Crafting item or in-world right-click upgrade that unlocks the Autarchic Pulsar.
+- **Autarchic Pulsar**:
+  - Automatically pulses every 20 ticks (1 sec) to pull 1 item from adjacent containers into the pipe (`LogisticsPipeCompat.addItemToPipe` or NeoForge Transfer API), or pump 250 mB fluid into fluid pipes. No redstone engines or wooden pipes required.
+- **Pipe Wires**: Red, Blue, Green, Yellow wires broadcast logic signals across connected pipes up to 24 blocks.
+- **Triggers**: Redstone ON/OFF, Inventory Empty/Has Items/Space/Full, Tank Empty/Has Fluid/Space/Full, Pipe Empty/Flowing, Machine Active/Idle, Wire ON/OFF.
+- **Actions**: Emit Redstone (power 15), Redstone Pulse (1 sec blinker), Autarchic Pulse (Item), Autarchic Pulse (Fluid), Emit Red/Blue/Green/Yellow Wire.
+- **GUI Console**: `GateScreen` with interactive left/right-click cycling, real-time glowing green LEDs, wire HUD status dots, and tooltips.
+
+### D. Crude Oil World Generation & Retrogen
+- **World Features**: Subterranean caverns and surface lakes with oil sand shores.
+  - Standard Oil Pit: 300,000 mB to 500,000 mB.
+  - Rare Super-Geyser (20% chance): Towering fountain with 1,000,000 mB reservoir.
+- **Spacing Limit**: Configurable `minChunkDistanceBetweenWells` (default: 4 chunks) prevents clustering.
+- **Retrogen Persistence**: Evaluated chunk long coordinates are saved to `<world>/data/oil_retrogen.dat`. Mined or drilled deposits never regenerate.
+- **Admin Commands**:
+  - `/admin spawn_oil_pit [true|false]` or `/admin spawn_oil`
+  - `/admin spawn_geyser`
+  - `/admin oil_stats`
+  - `/admin reset_oil_retrogen`
+  - *(Mirrored under `/refinery ...`)*
+
+### E. Refinery Wrench (`refinery:refinery_wrench`)
+- Right-click blocks: Rotates facing direction.
+- Right-click Multiblock Controller: Toggles 3D holographic projection blueprint with color-coded block types.
+- Shift + Right-Click: Instantly dismantles & picks up any machine block into player inventory.
+
+### F. Logistics Mod Interoperability
+- Tar & Bitumen 1:1 interchange recipes.
+- 8 Logistics fluid pipes craftable using `refinery:tar`.
+- Grinder accepts all Logistics oil sand variants.
+- Gates attach to and operate Logistics item/fluid pipes natively.
+
+---
+
+## 4. Key Registries & Capabilities Summary
+- Capabilities used: NeoForge Transfer API (`Capabilities.Item.BLOCK` -> `ResourceHandler<ItemResource>`, `Capabilities.Fluid.BLOCK` -> `ResourceHandler<FluidResource>`, `Capabilities.Energy.BLOCK` -> `IEnergyStorage`).
+- Block entity serialization: Minecraft 26.3 uses `saveAdditional(ValueOutput output)` and `loadAdditional(ValueInput input)`.
+- Client GUI rendering: Minecraft 26.3 uses `extractBackground`, `extractLabels`, `extractTooltip` with `GuiGraphicsExtractor`, `RenderPipelines.GUI`, and `MouseButtonEvent`.
+- Ports prevent liquid spill: Client returns `InteractionResult.SUCCESS` immediately to prevent fallthrough to `item.use(...)`.
