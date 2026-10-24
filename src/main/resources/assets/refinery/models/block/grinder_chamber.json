@@ -1,12 +1,13 @@
 {
   "parent": "minecraft:block/cube",
+  "render_type": "minecraft:cutout",
   "textures": {
     "particle": "refinery:block/grinder_chamber_front",
-    "up": "refinery:block/grinder_chamber_side",
-    "down": "refinery:block/grinder_chamber_side",
+    "up": "refinery:block/grinder_casing",
+    "down": "refinery:block/grinder_casing",
     "north": "refinery:block/grinder_chamber_front",
     "south": "refinery:block/grinder_chamber_front",
-    "east": "refinery:block/grinder_chamber_side",
-    "west": "refinery:block/grinder_chamber_side"
+    "east": "refinery:block/grinder_casing",
+    "west": "refinery:block/grinder_casing"
   }
 }

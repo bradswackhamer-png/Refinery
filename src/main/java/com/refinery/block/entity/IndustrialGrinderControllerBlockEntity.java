@@ -7,6 +7,7 @@ import com.refinery.menu.IndustrialGrinderMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -185,17 +186,17 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                 // Grinding rumble & crunch sounds
                 if (this.progress % 12 == 1) {
                     Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
-                    BlockPos chamberPos = getRelativePos(1, 1, 0, facing);
+                    BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
                     serverLevel.playSound(null, chamberPos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.7f, 0.9f);
                     serverLevel.playSound(null, chamberPos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.5f, 0.8f);
 
                     // Sparks & pulverizing dust particles in chamber
+                    serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, input.getItem()),
+                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
+                            6, 0.15, 0.1, 0.15, 0.05);
                     serverLevel.sendParticles(ParticleTypes.CRIT,
-                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.5, chamberPos.getZ() + 0.5,
-                            4, 0.2, 0.2, 0.2, 0.05);
-                    serverLevel.sendParticles(ParticleTypes.SMOKE,
-                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.5, chamberPos.getZ() + 0.5,
-                            2, 0.1, 0.1, 0.1, 0.02);
+                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
+                            4, 0.15, 0.1, 0.15, 0.05);
                 }
 
                 if (this.progress >= PROCESS_TIME) {
@@ -550,7 +551,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                 }
             }
             if (player != null) {
-                player.sendSystemMessage(Component.literal("§6[Industrial Grinder]§r 2x3x3 Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
+                player.sendSystemMessage(Component.literal("§6[Industrial Grinder]§r 3x3x3 Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
             }
         }
         setChanged();
@@ -559,36 +560,51 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
 
     public List<BlueprintRequirement> getRequirements() {
-        List<BlueprintRequirement> list = new ArrayList<>(18);
+        List<BlueprintRequirement> list = new ArrayList<>(27);
         Block controller = RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get();
         Block inputPort = RefineryMod.GRINDER_INPUT_PORT.get();
         Block outputPort = RefineryMod.GRINDER_OUTPUT_PORT.get();
         Block chamber = RefineryMod.GRINDER_CHAMBER.get();
         Block casing = RefineryMod.GRINDER_CASING.get();
 
+        // 3x3x3 Multiblock:
+        // Local coordinates:
+        // X: -1 (left), 0 (center), 1 (right)
+        // Y: 0 (foundation), 1 (crushing zone), 2 (feed chute)
+        // Z: 0 (front), 1 (middle), 2 (back)
+
         // Layer 0: Foundation & Discharge
-        list.add(new BlueprintRequirement(0, 0, 0, controller, "Grinder Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement(1, 0, 0, outputPort, "Grinder Output Port", 0xFF38BDF8));
-        list.add(new BlueprintRequirement(0, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(0, 0, 2, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 0, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Grinder Controller", 0xFF10B981));
+        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Grinder Output Port", 0xFF38BDF8));
+        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Grinder Structural Casing", 0xFF64748B));
 
         // Layer 1: Crushing Chamber
-        list.add(new BlueprintRequirement(0, 1, 0, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 1, 0, chamber, "Grinder Crushing Chamber", 0xFFF59E0B));
-        list.add(new BlueprintRequirement(0, 1, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 1, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(0, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Grinder Chamber Window", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Grinder Crushing Chamber (or Hollow)", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
 
-        // Layer 2: Feed Chute
-        list.add(new BlueprintRequirement(0, 2, 0, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 2, 0, inputPort, "Grinder Input Port", 0xFFEA580C));
-        list.add(new BlueprintRequirement(0, 2, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 2, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(0, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        // Layer 2: Feed Chute & Hopper
+        list.add(new BlueprintRequirement(-1, 2, 0, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 0, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 0, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 1, inputPort, "Grinder Input Port", 0xFFEA580C));
+        list.add(new BlueprintRequirement( 1, 2, 1, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));
 
         return list;
     }
@@ -607,19 +623,40 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         if (this.level == null) return false;
         Direction facing = getBlockState().getValue(IndustrialGrinderControllerBlock.FACING);
         List<BlueprintRequirement> reqs = getRequirements();
+        Block chamberBlock = RefineryMod.GRINDER_CHAMBER.get();
+
         int matched = 0;
         List<String> missing = new ArrayList<>();
 
         for (BlueprintRequirement req : reqs) {
             BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
             BlockState state = this.level.getBlockState(targetPos);
-            if (state.is(req.expectedBlock)) {
+
+            if (req.x == 0 && req.y == 1 && req.z == 1) {
+                // Hollow crushing chamber interior can be chamber block OR air
+                if (state.is(chamberBlock) || state.isAir()) {
+                    matched++;
+                } else {
+                    if (missing.size() < 4) {
+                        missing.add("Layer " + req.y + ": " + req.name + " at [" + targetPos.toShortString() + "]");
+                    }
+                }
+            } else if (state.is(req.expectedBlock)) {
                 matched++;
             } else {
                 if (missing.size() < 4) {
                     missing.add("Layer " + req.y + ": " + req.name + " at [" + targetPos.toShortString() + "]");
                 }
             }
+        }
+
+        if (matched == reqs.size()) {
+            return true;
+        }
+
+        // Flexible structure check: allows ports or window on alternate faces within 3x3x3
+        if (checkFlexibleStructure()) {
+            return true;
         }
 
         if (notifyPlayer && player != null) {
@@ -632,16 +669,57 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             }
         }
 
-        return matched == reqs.size();
+        return false;
+    }
+
+    private boolean checkFlexibleStructure() {
+        if (this.level == null) return false;
+        Direction facing = getBlockState().getValue(IndustrialGrinderControllerBlock.FACING);
+        Block controller = RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get();
+        Block inputPort = RefineryMod.GRINDER_INPUT_PORT.get();
+        Block outputPort = RefineryMod.GRINDER_OUTPUT_PORT.get();
+        Block chamber = RefineryMod.GRINDER_CHAMBER.get();
+        Block casing = RefineryMod.GRINDER_CASING.get();
+
+        int inPorts = 0;
+        int outPorts = 0;
+        int chambers = 0;
+
+        for (int y = 0; y < 3; y++) {
+            for (int z = 0; z < 3; z++) {
+                for (int x = -1; x <= 1; x++) {
+                    BlockPos targetPos = getRelativePos(x, y, z, facing);
+                    BlockState state = this.level.getBlockState(targetPos);
+
+                    if (x == 0 && y == 0 && z == 0) {
+                        if (!state.is(controller)) return false;
+                        continue;
+                    }
+                    if (x == 0 && y == 1 && z == 1 && state.isAir()) {
+                        continue;
+                    }
+                    if (state.is(inputPort)) inPorts++;
+                    else if (state.is(outputPort)) outPorts++;
+                    else if (state.is(chamber)) chambers++;
+                    else if (!state.is(casing)) return false;
+                }
+            }
+        }
+
+        return inPorts >= 1 && outPorts >= 1 && chambers >= 1;
     }
 
     private void linkPorts() {
         if (this.level == null) return;
         Direction facing = getBlockState().getValue(IndustrialGrinderControllerBlock.FACING);
-        for (BlueprintRequirement req : getRequirements()) {
-            BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
-            if (this.level.getBlockEntity(targetPos) instanceof GrinderPortBlockEntity portBE) {
-                portBE.setControllerPos(this.worldPosition);
+        for (int y = 0; y < 3; y++) {
+            for (int z = 0; z < 3; z++) {
+                for (int x = -1; x <= 1; x++) {
+                    BlockPos targetPos = getRelativePos(x, y, z, facing);
+                    if (this.level.getBlockEntity(targetPos) instanceof GrinderPortBlockEntity portBE) {
+                        portBE.setControllerPos(this.worldPosition);
+                    }
+                }
             }
         }
     }
@@ -749,5 +827,10 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         return new IndustrialGrinderMenu(containerId, playerInventory, this, this.dataAccess);
+    }
+
+    @Override
+    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 }

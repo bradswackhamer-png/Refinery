@@ -1,16 +1,24 @@
 package com.refinery.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.refinery.block.IndustrialGrinderControllerBlock;
 import com.refinery.block.entity.IndustrialGrinderControllerBlockEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Unit;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
@@ -18,8 +26,14 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<IndustrialGrinderControllerBlockEntity, IndustrialGrinderControllerRenderState> {
+    private final ItemModelResolver itemModelResolver;
+    private final CrusherDrumModel drum1Model;
+    private final CrusherDrumModel drum2Model;
 
     public IndustrialGrinderControllerRenderer(BlockEntityRendererProvider.Context context) {
+        this.itemModelResolver = context.itemModelResolver();
+        this.drum1Model = new CrusherDrumModel(CrusherDrumModel.createDrumLayer(true).bakeRoot());
+        this.drum2Model = new CrusherDrumModel(CrusherDrumModel.createDrumLayer(false).bakeRoot());
     }
 
     @Override
@@ -28,8 +42,8 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
     }
 
     @Override
-    public void extractRenderState(IndustrialGrinderControllerBlockEntity be, IndustrialGrinderControllerRenderState state, float partialTicks, Vec3 cameraPosition, net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay breakProgress) {
-        net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState.extractBase(be, state, breakProgress);
+    public void extractRenderState(IndustrialGrinderControllerBlockEntity be, IndustrialGrinderControllerRenderState state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
 
         var blockState = be.getBlockState();
         state.isBlueprintActive = blockState.hasProperty(IndustrialGrinderControllerBlock.BLUEPRINT) && blockState.getValue(IndustrialGrinderControllerBlock.BLUEPRINT);
@@ -42,11 +56,30 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
         state.partialTicks = partialTicks;
         state.missingComponents.clear();
 
+        // Extract active crushing item if machine is assembled and processing
+        state.hasActiveItem = false;
+        if (state.isAssembled && be.getLevel() != null) {
+            ItemStack processingItem = ItemStack.EMPTY;
+            for (int i = 0; i < 4; i++) {
+                ItemStack s = be.getItem(i);
+                if (!s.isEmpty()) {
+                    processingItem = s;
+                    break;
+                }
+            }
+            if (!processingItem.isEmpty()) {
+                this.itemModelResolver.updateForTopItem(state.activeItemState, processingItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+                state.hasActiveItem = true;
+            }
+        }
+
+        // Blueprint diagnostic hologram
         if (state.isBlueprintActive && be.getLevel() != null) {
             for (var req : be.getRequirements()) {
                 BlockPos targetPos = be.getRelativePos(req.x(), req.y(), req.z(), state.facing);
                 var targetState = be.getLevel().getBlockState(targetPos);
-                boolean matches = req.expectedBlock() != null && targetState.is(req.expectedBlock());
+                boolean matches = (req.x() == 0 && req.y() == 1 && req.z() == 1 && targetState.isAir())
+                        || (req.expectedBlock() != null && targetState.is(req.expectedBlock()));
 
                 if (!matches) {
                     state.missingComponents.add(new IndustrialGrinderControllerRenderState.MissingComponent(
@@ -64,7 +97,7 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
         Direction right = state.facing.getClockWise();
         Direction back = state.facing.getOpposite();
 
-        // 1. Blueprint Outline Rendering (when unformed / wrench mode)
+        // 1. Blueprint Hologram Wireframe Rendering
         if (state.isBlueprintActive && !state.missingComponents.isEmpty()) {
             for (var comp : state.missingComponents) {
                 int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
@@ -108,112 +141,65 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
             }
         }
 
-        // 2. Animated Counter-Rotating Grinding Rollers (inside crushing chamber at local 1, 1, 0)
+        // 2. Animated Heavy Crusher Drums & Crushing Block (Center chamber at local X: 0, Y: 1, Z: 1)
         if (state.isAssembled) {
-            int chamberDx = right.getStepX();
-            int chamberDz = right.getStepZ();
+            int chamberDx = back.getStepX();
+            int chamberDy = 1;
+            int chamberDz = back.getStepZ();
 
             poseStack.pushPose();
-            // Move to center of crushing chamber block (local 1, 1, 0)
-            poseStack.translate(chamberDx + 0.5, 1.5, chamberDz + 0.5);
-            // Rotate to match multiblock facing orientation
-            poseStack.rotateDegrees(com.mojang.math.Axis.YP, -state.facing.toYRot());
+            // Move into the center of the hollow crushing chamber
+            poseStack.translate(chamberDx + 0.5, chamberDy + 0.5, chamberDz + 0.5);
+            // Orient along multiblock facing direction
+            poseStack.rotateDegrees(Axis.YP, -state.facing.toYRot());
 
-            // Determine rotation angle
+            // Rotation speed: rapid heavy crushing when active, slow industrial hum when idle
             float angle;
             if (state.isActive) {
-                angle = (state.gameTime + state.partialTicks) * 22.0f;
+                angle = (state.gameTime + state.partialTicks) * 16.0f;
             } else {
-                angle = (state.gameTime + state.partialTicks) * 1.5f; // Slow idle hum
+                angle = (state.gameTime + state.partialTicks) * 1.5f;
             }
 
-            // Left Roller (at local X = -0.22, spinning clockwise inwards)
-            renderRoller(poseStack, submitNodeCollector, -0.22f, angle, 0.0f);
-
-            // Right Roller (at local X = +0.22, spinning counter-clockwise inwards, offset by 45 deg to intermesh)
-            renderRoller(poseStack, submitNodeCollector, 0.22f, -angle, 45.0f);
-
-            poseStack.popPose();
-        }
-    }
-
-    private void renderRoller(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, float localX, float baseAngle, float phaseOffset) {
-        poseStack.pushPose();
-        poseStack.translate(localX, 0.0, 0.0);
-        poseStack.rotateDegrees(com.mojang.math.Axis.ZP, baseAngle + phaseOffset);
-
-        // 1. Central Axle Core (dark hardened carbon steel)
-        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.debugFilledBox(), (pose, vc) -> {
-            drawBox(pose, vc, -0.09f, -0.09f, -0.38f, 0.09f, 0.09f, 0.38f, 0x33, 0x41, 0x55, 0xFF);
-        });
-
-        // 2. 4 sets of crushing teeth / fluted blades spaced evenly at 90 degrees
-        for (int i = 0; i < 4; i++) {
+            // A. Left Spiked Crusher Drum (local X = -0.23, spins clockwise inward)
             poseStack.pushPose();
-            poseStack.rotateDegrees(com.mojang.math.Axis.ZP, i * 90.0f);
+            poseStack.translate(-0.23, 0.0, 0.0);
+            poseStack.rotateDegrees(Axis.ZP, angle);
+            submitNodeCollector.submitModel(this.drum1Model, Unit.INSTANCE, poseStack, CrusherDrumModel.TEXTURE, state.lightCoords, OverlayTexture.NO_OVERLAY, -1);
+            poseStack.popPose();
 
-            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.debugFilledBox(), (pose, vc) -> {
-                // Fluted blade tooth
-                drawBox(pose, vc, -0.035f, 0.07f, -0.36f, 0.035f, 0.19f, 0.36f, 0x64, 0x74, 0x8B, 0xFF);
-            });
+            // B. Right Spiked Crusher Drum (local X = +0.23, spins counter-clockwise inward, 22.5 deg offset)
+            poseStack.pushPose();
+            poseStack.translate(0.23, 0.0, 0.0);
+            poseStack.rotateDegrees(Axis.ZP, -angle + 22.5f);
+            submitNodeCollector.submitModel(this.drum2Model, Unit.INSTANCE, poseStack, CrusherDrumModel.TEXTURE, state.lightCoords, OverlayTexture.NO_OVERLAY, -1);
+            poseStack.popPose();
 
-            // Crisp mechanical wireframe outline on blade edges
-            submitNodeCollector.submitShapeOutline(
-                    poseStack,
-                    Shapes.box(-0.035f, 0.07f, -0.36f, 0.035f, 0.19f, 0.36f),
-                    RenderTypes.lines(),
-                    0xFFCBD5E1,
-                    1.2f,
-                    false
-            );
+            // C. Crushed Block / Ore Kinetic Animation
+            if (state.hasActiveItem && (state.isActive || state.progress > 0)) {
+                poseStack.pushPose();
+
+                float progressRatio = Math.min(1.0f, (float) state.progress / 100.0f);
+                float shakeX = (float) Math.sin((state.gameTime + state.partialTicks) * 3.2f) * 0.035f;
+                float shakeY = (float) Math.cos((state.gameTime + state.partialTicks) * 3.8f) * 0.025f;
+                float shakeRot = (float) Math.sin((state.gameTime + state.partialTicks) * 5.5f) * 8.0f;
+
+                // Suspended right in the nip between the spiked drums, drawn downwards as crushed
+                float posY = 0.14f - (progressRatio * 0.18f) + shakeY;
+                poseStack.translate(shakeX, posY, shakeX * 0.5f);
+                poseStack.rotateDegrees(Axis.YP, shakeRot);
+                poseStack.rotateDegrees(Axis.ZP, shakeX * 50.0f);
+
+                // Pulverization scale down
+                float scale = 0.45f * (1.0f - (progressRatio * 0.35f));
+                poseStack.scale(scale, scale, scale);
+
+                state.activeItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+
+                poseStack.popPose();
+            }
 
             poseStack.popPose();
         }
-
-        poseStack.popPose();
-    }
-
-    private static void drawBox(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer vc,
-                                float x1, float y1, float z1, float x2, float y2, float z2,
-                                int r, int g, int b, int a) {
-        // Top face (+Y)
-        int tr = Math.min(255, (int)(r * 1.15f)), tg = Math.min(255, (int)(g * 1.15f)), tb = Math.min(255, (int)(b * 1.15f));
-        vc.addVertex(pose, x1, y2, z1).setColor(tr, tg, tb, a);
-        vc.addVertex(pose, x1, y2, z2).setColor(tr, tg, tb, a);
-        vc.addVertex(pose, x2, y2, z2).setColor(tr, tg, tb, a);
-        vc.addVertex(pose, x2, y2, z1).setColor(tr, tg, tb, a);
-
-        // Bottom face (-Y)
-        int br = (int)(r * 0.6f), bg = (int)(g * 0.6f), bb = (int)(b * 0.6f);
-        vc.addVertex(pose, x1, y1, z1).setColor(br, bg, bb, a);
-        vc.addVertex(pose, x2, y1, z1).setColor(br, bg, bb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(br, bg, bb, a);
-        vc.addVertex(pose, x1, y1, z2).setColor(br, bg, bb, a);
-
-        // North face (-Z)
-        int nr = (int)(r * 0.8f), ng = (int)(g * 0.8f), nb = (int)(b * 0.8f);
-        vc.addVertex(pose, x1, y1, z1).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x1, y2, z1).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y2, z1).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y1, z1).setColor(nr, ng, nb, a);
-
-        // South face (+Z)
-        vc.addVertex(pose, x1, y1, z2).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y2, z2).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x1, y2, z2).setColor(nr, ng, nb, a);
-
-        // West face (-X)
-        int wr = (int)(r * 0.9f), wg = (int)(g * 0.9f), wb = (int)(b * 0.9f);
-        vc.addVertex(pose, x1, y1, z1).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x1, y1, z2).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y1, z1).setColor(wr, wg, wb, a);
-
-        // East face (+X)
-        vc.addVertex(pose, x2, y1, z1).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y2, z1).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y2, z2).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(wr, wg, wb, a);
     }
 }

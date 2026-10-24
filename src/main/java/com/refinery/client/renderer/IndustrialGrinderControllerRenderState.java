@@ -1,6 +1,7 @@
 package com.refinery.client.renderer;
 
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
@@ -16,6 +17,9 @@ public class IndustrialGrinderControllerRenderState extends BlockEntityRenderSta
     public int progress = 0;
     public long gameTime = 0;
     public float partialTicks = 0.0f;
+
+    public final ItemStackRenderState activeItemState = new ItemStackRenderState();
+    public boolean hasActiveItem = false;
 
     public record MissingComponent(
             int relX, int relY, int relZ,

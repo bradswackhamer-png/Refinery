@@ -20,7 +20,7 @@
 6. [Petroleum Refining & Chemical Byproducts](#6-petroleum-refining--chemical-byproducts)
    - [Petroleum Refinery (3×3×4 Multiblock)](#petroleum-refinery-334)
    - [Fuels & Byproducts](#fuels--byproducts)
-   - [Industrial Grinder & Pulverizer (2×3×3 Multiblock)](#industrial-grinder--pulverizer-2x3x3)
+   - [Industrial Grinder & Pulverizer (3×3×3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Pipes, & Interfacing](#8-automation-pipes--interfacing)
 9. [Crude Oil World Generation & Retrogen](#9-crude-oil-world-generation--retrogen)
@@ -298,16 +298,16 @@ A multi-stage fractional distillation column that refines raw Crude Oil into com
 
 ---
 
-### Industrial Grinder & Pulverizer (2×3×3)
+### Industrial Grinder & Pulverizer (3×3×3)
 A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields and processes geological strata.
 
-- **Dimensions**: 2 wide × 3 tall × 3 deep (18 blocks total).
+- **Dimensions**: 3 wide × 3 tall × 3 deep (27 blocks total, matching the Refinery, Boilers, and Blast Smelter).
 - **Core Functionality**:
   - **Ore Doubling**: Pulverizes Raw Iron, Raw Gold, and Raw Copper (or ore blocks) into **2x Dust** (`refinery:iron_dust`, `gold_dust`, `copper_dust`). Smelting these dusts produces 2 ingots per raw ore!
   - **Stone Crushing**: Crushes Stone, Cobblestone, Deepslate, Andesite, Diorite, and Granite into **1x Gravel**.
   - **Sand Pulverizing**: Crushes Gravel into **1x Sand**.
   - **Ingot Grinding**: Converts Ingots into **1x Dust** for metallurgy and chemistry.
-- **Animated Mechanical Crushing**: Features twin physical counter-rotating grinding drums with intermeshing fluted tungsten teeth visible through the front reinforced viewing window! The rollers spin smoothly in idle mode and accelerate rapidly with grinding sound effects and sparks during active cycles.
+- **Animated Mechanical Spiked Drums & Pulverizing Block**: Features twin physical cylindrical counter-rotating crusher drums with protruding intermeshing steel spikes visible through the reinforced front viewing window (`refinery:grinder_chamber`). When actively processing, the block/ore being pulverized vibrates violently in the center nip and is drawn downwards into the spinning teeth with rich crunching sound effects and pulverized dust particles.
 - **Specs**:
   - Energy Storage: 50,000 FE
   - Energy Consumption: 30 FE/t while grinding
@@ -316,17 +316,18 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 
 #### Grinder Layer Schematic (Local Coordinates)
 - **Layer 0 (Foundation & Output)**:
-  - `(0, 0, 0)`: **Industrial Grinder Controller** (Front Left)
-  - `(1, 0, 0)`: **Grinder Discharge Port (Output)** (Front Right)
-  - `(0, 0, 1)`, `(1, 0, 1)`, `(0, 0, 2)`, `(1, 0, 2)`: **Grinder Structural Casing**
-- **Layer 1 (Crushing Chamber & Rollers)**:
-  - `(0, 1, 0)`: **Grinder Structural Casing**
-  - `(1, 1, 0)`: **Grinder Crushing Chamber** (Front Viewing Window into animated rollers)
-  - `(0, 1, 1)`, `(1, 1, 1)`, `(0, 1, 2)`, `(1, 1, 2)`: **Grinder Structural Casing**
-- **Layer 2 (Feed Chute & Input)**:
-  - `(0, 2, 0)`: **Grinder Structural Casing**
-  - `(1, 2, 0)`: **Grinder Feed Port (Input)** (Front Right Top)
-  - `(0, 2, 1)`, `(1, 2, 1)`, `(0, 2, 2)`, `(1, 2, 2)`: **Grinder Structural Casing**
+  - `(0, 0, 0)`: **Industrial Grinder Controller** (Bottom Center Front)
+  - `(1, 0, 0)`: **Grinder Discharge Port (Output)** (Bottom Front Right)
+  - `(-1, 0, 0)`, `(-1, 0, 1)`, `(0, 0, 1)`, `(1, 0, 1)`, `(-1, 0, 2)`, `(0, 0, 2)`, `(1, 0, 2)`: **Grinder Structural Casing**
+- **Layer 1 (Crushing Chamber & Spiked Drums)**:
+  - `(0, 1, 0)`: **Grinder Chamber Window** (Front Center Viewing Grille)
+  - `(0, 1, 1)`: **Grinder Crushing Chamber** (Hollow Air or Chamber Block containing the counter-rotating spiked drums)
+  - `(-1, 1, 0)`, `(1, 1, 0)`, `(-1, 1, 1)`, `(1, 1, 1)`, `(-1, 1, 2)`, `(0, 1, 2)`, `(1, 1, 2)`: **Grinder Structural Casing**
+- **Layer 2 (Feed Hopper & Input)**:
+  - `(0, 2, 1)`: **Grinder Feed Port (Input)** (Top Center Hopper Chute)
+  - All other 8 positions: **Grinder Structural Casing**
+
+*(Note: Flexible port placement is supported—input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
 
 ---
 
