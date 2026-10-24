@@ -46,6 +46,12 @@
 12. [Biofuel Production & Industrial Fermentation](#12-biofuel-production--industrial-fermentation)
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
+13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.4.0 (Biofuel & Oil Sand Cracking)](#version-140-biofuel--oil-sand-cracking)
+   - [Version 1.3.0 (Continuous Molten Metallurgy)](#version-130-continuous-molten-metallurgy)
+   - [Version 1.2.0 (Grinder Overhaul & Logic Gates)](#version-120-grinder-overhaul--logic-gates)
+   - [Version 1.1.0 (Oil Geysers & Retrogen)](#version-110-oil-geysers--retrogen)
+   - [Version 1.0.0 (Foundational Release)](#version-100-foundational-release)
 
 ---
 
@@ -797,6 +803,66 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 | **Beetroot** (`minecraft:beetroot`) | **100 mB** | Beetroot Seeds (20%) | 60 ticks (3s) | 900 FE |
 | **Apple** (`minecraft:apple`) | **150 mB** | None | 60 ticks (3s) | 900 FE |
 | **Sweet Berries** (`minecraft:sweet_berries`) | **100 mB** | None | 60 ticks (3s) | 900 FE |
+
+---
+
+## 13. Engineering Changelog & Version History
+
+### Version 1.4.0 (Biofuel & Oil Sand Cracking)
+- **Refinery Oil Sand Cracking**:
+  - Integrated high-pressure feedstock slot in the Petroleum Refinery interface.
+  - Universal compatibility with `refinery:oil_sand` and external mod oil sands (e.g. *Logistics* mod).
+  - Yields: **+200 mB Crude Oil**, **100% Sand byproduct**, and **40% Petroleum Tar**.
+  - Direct automation via Crude Oil Port intake and Byproduct Port output.
+- **Industrial Fermenter**:
+  - Standalone single-block agricultural fermentation machine (`refinery:fermenter`).
+  - Converts Wheat into **200 mB Ethanol** + **20% bonus Wheat Seeds**.
+  - Also processes Potatoes, Sugar Cane, Beetroots, Apples, and Sweet Berries.
+  - 8,000 mB internal storage with auto-push to fluid pipes and manual bucket filling.
+- **Ethanol Biofuel**:
+  - Registered `refinery:ethanol` fluid and bucket items.
+  - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.3.0 (Continuous Molten Metallurgy)
+- **Molten Foundry Suite**:
+  - Registered 6 molten fluids (Molten Iron, Gold, Copper, Tin, Bronze, Glass) with buckets, light emission, and in-world interaction.
+- **Electric Arc Melter (3×3×3 Multiblock)**:
+  - High-temperature induction melting with 3D animated descending carbon electrodes and dynamic electric arc discharges.
+- **Open Refractory Casting Channel**:
+  - Seamless 3D trough geometry with directional side extensions, down-spouts, and glowing flowing molten liquid rendering.
+- **Continuous Casting Press (3×3×3 Multiblock)**:
+  - Overhead hydraulic stamping ram with water-quenching steam clouds, mechanical piston sound effects, and ingot/block stamping.
+
+---
+
+### Version 1.2.0 (Grinder Overhaul & Logic Gates)
+- **Industrial Grinder 3×3×3 Multiblock**:
+  - Expanded into a full 3×3×3 multiblock with 3D physical counter-rotating spiked crushing drums.
+- **In-Space Logic Gates**:
+  - BuildCraft-style logic gates now snap directly to pipe faces, occupying the same block space.
+  - Pipe wires rendered seamlessly along pipe paths.
+- **Multi-Mod Material Integration**:
+  - Added Tin, Bronze, and Coal dusts, ingots, and plates.
+
+---
+
+### Version 1.1.0 (Oil Geysers & Retrogen)
+- **Crude Oil World Generation**:
+  - Surface oil pits and subterranean pressurized oil geysers.
+  - Retrogen persistence system preventing mined deposits from regenerating.
+  - Administrative `/refinery` and `/admin` commands.
+
+---
+
+### Version 1.0.0 (Foundational Release)
+- **Petroleum Distillation Refinery (3×3×4 Multiblock)**
+- **Industrial Blast Smelter (5×5×5 Multiblock)** & **Industrial Metal Press (2×2×2 Multiblock)**
+- **Thermodynamic Steam Power Suite**: Small Boiler (3×3×3), Large Boiler (5×5×5), Steam Turbine (3×3×3) with Rankine cycle.
+- **Agricultural Automation**: Automated Planter and Automated Harvester.
+- **Refinery Wrench**: 3D holographic blueprints and instant block dismantle.
+
 
 
 
