@@ -12,6 +12,7 @@
 4. [Heavy Metallurgy](#4-heavy-metallurgy)
    - [Industrial Blast Smelter (5×5×5 Multiblock)](#industrial-blast-smelter-555)
    - [Industrial Metal Press (2×2×2 Multiblock)](#industrial-metal-press-222)
+   - [Industrial Multi-Smelter (5×4×3 Heavy Smelter Array)](#industrial-multi-smelter-543)
 5. [Thermodynamic Steam Power & Closed-Loop Energy](#5-thermodynamic-steam-power--closed-loop-energy)
    - [Small Steam Boiler (3×3×3 Multiblock)](#small-steam-boiler-333)
    - [Large Heavy Steam Boiler (5×5×5 Multiblock)](#large-heavy-steam-boiler-555)
@@ -218,6 +219,61 @@ Bottom Layer (y=0):
   [Press Controller] [Press Anvil Bed]
   [Press Casing]    [Press Casing]
 ```
+
+---
+
+### Industrial Multi-Smelter (5×4×3)
+An early-to-midgame high-throughput industrial smelting array that unifies **8 independent furnaces into a single automated multiblock machine**. 
+
+- **Dimensions**: 5 wide × 4 high × 3 deep (60 blocks total volume).
+- **Hollow Core & 3D In-World Animation**:
+  - The interior 3 wide × 2 high × 1 deep core (`X` in [-1, 1], `Y` in [1, 2], `Z` = 1) is a **6-block hollow air combustion chamber**.
+  - The front face (`Z` = 0) features a 3×2 array of **Smelter Chamber Glass** viewing windows so players can peer directly into the active furnace interior.
+  - **Dynamic In-World 3D Visuals**:
+    - **Solid Fuel Combustion**: When burning solid fuel, a glowing fiery red-orange charcoal ember bed and flame grate pulse on the chamber floor.
+    - **Electric RF Induction**: When running on RF/FE, 3 glowing orange electric induction coils illuminate the chamber.
+    - **Live Cooking Items**: All items actively being smelted float inside the chamber in an organized 4×2 floating matrix, gently bobbing and spinning smoothly in the heat haze!
+    - Emits server-side flame particles, smoke trails, and realistic furnace crackle audio.
+- **8 Parallel Smelting Slots**:
+  - Contains **8 Input Slots** (slots 0..7), **8 Output Slots** (slots 8..15), and **1 Solid Fuel Slot** (slot 16).
+  - Automatically identifies and smelts any valid Minecraft or modded smelting recipe in parallel.
+  - Smelting speed: **100 ticks (5.0 seconds)** per item (standard blast furnace speed).
+- **Dual-Power System (Solid Fuel OR RF/FE)**:
+  - **Burnt Material / Solid Fuel Mode**: Powers all 8 parallel smelting slots simultaneously from a single piece of fuel. Accepts Coal, Charcoal (1,600t), Coal Blocks (16,000t), Lava Buckets (20,000t), Blaze Rods (2,400t), Logs/Planks (300t), Sticks (100t), Petroleum Tar (1,600t), Bitumen (1,600t), or Ethanol Buckets (4,000t). 1 piece of Coal can smelt up to 16 items when all 8 slots are active!
+  - **Electric / RF Mode**: Integrated 50,000 FE energy storage buffer. Consumes **30 FE/t** total while cooking items without burning any solid fuel.
+- **Early-Game Accessible (NO Steel Required!)**:
+  - Engineered specifically for early game automation prior to obtaining steel.
+  - Crafted entirely from **Iron Ingots, Copper Ingots, Clay Bricks, Smooth Stone, Furnaces, Glass, Hoppers, and Droppers**. Absolutely no Steel Plates or Steel Ingots are needed!
+- **Automation & Sided Interfacing**:
+  - **Smelter Input Port**: Automatically routes items from hoppers/pipes into the 8 input slots.
+  - **Smelter Output Port**: Automatically extracts completed items from the 8 output slots.
+  - **Smelter Fuel/Energy Port**: Accepts solid fuel into the fuel slot and connects directly to external RF energy cables or power generators.
+  - **Refinery Wrench Support**: Right-clicking the controller with a wrench projects a full 60-block 3D holographic blueprint with labeled block requirements.
+
+#### Layer-by-Layer Multi-Smelter Schematic
+Local coordinates relative to the controller facing North:
+```
+Layer 3 (Roof, Y=3):
+  [Casing] [Casing] [Casing] [Casing] [Casing]
+  [Casing] [Casing] [Casing] [Casing] [Casing]
+  [Casing] [Casing] [Casing] [Casing] [Casing]
+
+Layer 2 (Upper Smelting Chamber, Y=2):
+  [Casing] [Window] [Window] [Window] [Casing]  <- Front
+  [Casing] [ AIR  ] [ AIR  ] [ AIR  ] [Casing]  <- Hollow Core
+  [Casing] [Casing] [Casing] [Casing] [Casing]  <- Back
+
+Layer 1 (Lower Smelting Chamber, Y=1):
+  [Casing] [Window] [Window] [Window] [Casing]  <- Front
+  [Casing] [ AIR  ] [ AIR  ] [ AIR  ] [Casing]  <- Hollow Core
+  [Casing] [Casing] [Casing] [Casing] [Casing]  <- Back
+
+Layer 0 (Foundation & Ports, Y=0):
+  [InPort] [Casing] [Controller] [Casing] [OutPort] <- Front
+  [Casing] [Casing] [  Casing  ] [Casing] [Casing ] <- Middle
+  [Casing] [Casing] [ FuelPort ] [Casing] [Casing ] <- Back
+```
+*(Note: Ports can be placed interchangeably in place of any Smelter Casing block for layout customization.)*
 
 ---
 
@@ -808,6 +864,17 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.5.0 (Industrial Multi-Smelter Array)
+- **Industrial Multi-Smelter (5×4×3 Multiblock)**:
+  - 8-in-1 parallel furnace array multiblock acting as an industrial super-smelter.
+  - 6-block hollow air combustion chamber with front viewing windows and live 3D BER rendering.
+  - Dual-power: runs on solid fuel (coal, wood, tar, bitumen, ethanol) OR electric RF (50,000 FE buffer, 30 FE/t).
+  - Dynamic 3D in-world animations: glowing embers/fire grate or electric induction coils, plus 8 floating rotating cooking items.
+  - 100% early-game accessible: crafts using Iron, Copper, Bricks, Smooth Stone, Furnaces, and Glass. Absolutely NO Steel required.
+  - Full automation support via dedicated Input, Output, and Fuel/Energy ports, plus 3D wrench holographic blueprint projection.
+
+---
 
 ### Version 1.4.1 (Progression Balancing & Steel Plate Exclusivity)
 - **Steel Plate Exclusivity**:

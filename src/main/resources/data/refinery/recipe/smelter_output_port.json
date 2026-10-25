@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ICI",
+    " D "
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:dropper"
+    },
+    "C": {
+      "item": "refinery:smelter_casing"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "refinery:smelter_output_port"
+  }
+}

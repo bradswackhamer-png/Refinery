@@ -4,6 +4,37 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [v1.5.0] - 2026-10-24
+
+### Added
+- **Industrial Multi-Smelter (5x4x3 Heavy Smelter Array)**:
+  - New early-to-midgame furnace array multiblock acting as an 8-in-1 super smelter.
+  - **Structure (5 Wide × 4 High × 3 Deep = 60 Blocks)**:
+    - **Controller** (`refinery:multi_smelter_controller`): Placed at front bottom center (0, 0, 0).
+    - **Smelter Structural Casings** (`refinery:smelter_casing`): Built from firebricks, smooth stone, and iron ingots.
+    - **Smelter Chamber Glass** (`refinery:smelter_chamber`): Heat-resistant viewing windows across the front 3x2 section to showcase the interior.
+    - **Input Port** (`refinery:smelter_input_port`), **Output Port** (`refinery:smelter_output_port`), and **Fuel/Energy Port** (`refinery:smelter_fuel_port`).
+    - **Hollow Combustion & Smelting Interior**: The 3 wide × 2 high × 1 deep core (6 blocks) is hollow air, where live dynamic 3D smelting animations render.
+  - **8 Parallel Smelting Slots**:
+    - Automatically processes any vanilla or modded smelting recipe in up to 8 slots simultaneously (100 ticks / 5 seconds per item).
+    - Dedicated 8 Input Slots, 8 Output Slots, and 1 Solid Fuel Slot.
+  - **Dual-Power System**:
+    - **Solid Fuel / Burnt Material Version**: Accepts Coal, Charcoal, Coal Blocks, Lava Buckets, Blaze Rods, Tar, Bitumen, Ethanol, Logs, and Planks. 1 coal powers all 8 parallel slots concurrently!
+    - **Electric / RF Version**: Integrated 50,000 FE buffer. Consumes 30 FE/t when running without requiring coal.
+  - **Dynamic In-World 3D Animations**:
+    - Burning solid fuel renders a pulsing fiery ember bed and glowing firebox grate.
+    - Electric RF operation renders 3 glowing orange induction heating coils.
+    - All cooking items actively float, rotate, and shimmer in heat haze inside the hollow chamber in an organized 4x2 matrix.
+    - Server-side crackle sounds, smoke, and flame particles emit from the chamber.
+  - **Early-Game Accessible (NO Steel Required)**:
+    - Entire machine crafts using Iron Ingots, Copper Ingots, Bricks, Furnaces, Smooth Stone, Glass, Hoppers, and Droppers.
+    - Can be constructed immediately upon discovering basic copper and iron.
+  - **Full Automation & Pipe Support**:
+    - Sided WorldlyContainer and NeoForge Item/Energy capabilities allow hoppers and item pipes to feed inputs, extract outputs, and inject fuel/energy.
+    - Holographic blueprint projection toggleable via Refinery Wrench for effortless structure construction.
+
+---
+
 ## [v1.4.1] - 2026-10-24
 
 ### Changed & Balanced

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/smelter_chamber" },
+    "facing=south": { "model": "refinery:block/smelter_chamber", "y": 180 },
+    "facing=west": { "model": "refinery:block/smelter_chamber", "y": 270 },
+    "facing=east": { "model": "refinery:block/smelter_chamber", "y": 90 }
+  }
+}

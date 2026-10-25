@@ -290,6 +290,31 @@ public class RefineryMod {
             FermenterBlock::new);
     public static final DeferredItem<BlockItem> FERMENTER_ITEM = ITEMS.registerSimpleBlockItem("fermenter", FERMENTER);
 
+    // === Industrial Multi-Smelter (5x4x3) Multiblock ===
+    public static final DeferredBlock<MultiSmelterControllerBlock> MULTI_SMELTER_CONTROLLER = BLOCKS.registerBlock("multi_smelter_controller",
+            MultiSmelterControllerBlock::new);
+    public static final DeferredItem<BlockItem> MULTI_SMELTER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("multi_smelter_controller", MULTI_SMELTER_CONTROLLER);
+
+    public static final DeferredBlock<SmelterCasingBlock> SMELTER_CASING = BLOCKS.registerBlock("smelter_casing",
+            SmelterCasingBlock::new);
+    public static final DeferredItem<BlockItem> SMELTER_CASING_ITEM = ITEMS.registerSimpleBlockItem("smelter_casing", SMELTER_CASING);
+
+    public static final DeferredBlock<SmelterChamberBlock> SMELTER_CHAMBER = BLOCKS.registerBlock("smelter_chamber",
+            SmelterChamberBlock::new);
+    public static final DeferredItem<BlockItem> SMELTER_CHAMBER_ITEM = ITEMS.registerSimpleBlockItem("smelter_chamber", SMELTER_CHAMBER);
+
+    public static final DeferredBlock<SmelterPortBlock> SMELTER_INPUT_PORT = BLOCKS.registerBlock("smelter_input_port",
+            p -> new SmelterPortBlock(SmelterPortBlock.PortType.INPUT, p));
+    public static final DeferredItem<BlockItem> SMELTER_INPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("smelter_input_port", SMELTER_INPUT_PORT);
+
+    public static final DeferredBlock<SmelterPortBlock> SMELTER_OUTPUT_PORT = BLOCKS.registerBlock("smelter_output_port",
+            p -> new SmelterPortBlock(SmelterPortBlock.PortType.OUTPUT, p));
+    public static final DeferredItem<BlockItem> SMELTER_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("smelter_output_port", SMELTER_OUTPUT_PORT);
+
+    public static final DeferredBlock<SmelterPortBlock> SMELTER_FUEL_PORT = BLOCKS.registerBlock("smelter_fuel_port",
+            p -> new SmelterPortBlock(SmelterPortBlock.PortType.ENERGY_FUEL, p));
+    public static final DeferredItem<BlockItem> SMELTER_FUEL_PORT_ITEM = ITEMS.registerSimpleBlockItem("smelter_fuel_port", SMELTER_FUEL_PORT);
+
     // === Pipe Gates ===
     public static final DeferredBlock<PipeGateBlock> BASIC_GATE = BLOCKS.registerBlock("basic_gate",
             p -> new PipeGateBlock(GateTier.BASIC, false, p.strength(0.5f).noOcclusion()));
@@ -480,6 +505,15 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("fermenter",
                     () -> new BlockEntityType<>(FermenterBlockEntity::new, FERMENTER.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiSmelterControllerBlockEntity>> MULTI_SMELTER_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("multi_smelter_controller",
+                    () -> new BlockEntityType<>(MultiSmelterControllerBlockEntity::new, MULTI_SMELTER_CONTROLLER.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmelterPortBlockEntity>> SMELTER_PORT_BE =
+            BLOCK_ENTITY_TYPES.register("smelter_port",
+                    () -> new BlockEntityType<>(SmelterPortBlockEntity::new,
+                            SMELTER_INPUT_PORT.get(), SMELTER_OUTPUT_PORT.get(), SMELTER_FUEL_PORT.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -519,6 +553,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<FermenterMenu>> FERMENTER_MENU =
             MENUS.register("fermenter", () -> new MenuType<>(FermenterMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<MultiSmelterMenu>> MULTI_SMELTER_MENU =
+            MENUS.register("multi_smelter", () -> new MenuType<>(MultiSmelterMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
@@ -578,6 +615,12 @@ public class RefineryMod {
                         output.accept(CASTING_INPUT_PORT_ITEM.get());
                         output.accept(CASTING_OUTPUT_PORT_ITEM.get());
                         output.accept(FERMENTER_ITEM.get());
+                        output.accept(MULTI_SMELTER_CONTROLLER_ITEM.get());
+                        output.accept(SMELTER_CASING_ITEM.get());
+                        output.accept(SMELTER_CHAMBER_ITEM.get());
+                        output.accept(SMELTER_INPUT_PORT_ITEM.get());
+                        output.accept(SMELTER_OUTPUT_PORT_ITEM.get());
+                        output.accept(SMELTER_FUEL_PORT_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
                         output.accept(BASIC_GATE_ITEM.get());
                         output.accept(IRON_GATE_ITEM.get());
@@ -930,5 +973,26 @@ public class RefineryMod {
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, FERMENTER_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
+
+        // Capabilities on Industrial Multi-Smelter Controller & Ports
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, MULTI_SMELTER_CONTROLLER_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, MULTI_SMELTER_CONTROLLER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, SMELTER_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null) return null;
+                    return VanillaContainerWrapper.of(be);
+                });
+
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, SMELTER_PORT_BE.get(),
+                (be, side) -> {
+                    var controller = be.getController();
+                    if (controller == null || be.getPortType() != SmelterPortBlock.PortType.ENERGY_FUEL) return null;
+                    return controller.energyStorage;
+                });
     }
 }

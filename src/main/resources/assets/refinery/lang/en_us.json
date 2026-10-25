@@ -182,5 +182,14 @@
   "tooltip.refinery.arc_melter_controller.desc": "§7Heart of the 3x3x3 Electric Arc Melter. Melts dusts into glowing molten liquid.",
   "tooltip.refinery.casting_channel.desc": "§6Refractory casting trough. Carries glowing molten liquid between melters and presses.",
   "tooltip.refinery.casting_press_controller.desc": "§7Controls the 3x3x3 Continuous Casting Press. Quenches and stamps molten metal into ingots and glass blocks.",
-  "tooltip.refinery.fermenter.desc": "§7Ferments agricultural crops (Wheat, Potatoes, etc.) into pure Ethanol biofuel."
+  "tooltip.refinery.fermenter.desc": "§7Ferments agricultural crops (Wheat, Potatoes, etc.) into pure Ethanol biofuel.",
+
+  "container.refinery.multi_smelter": "Industrial Multi-Smelter",
+  "block.refinery.multi_smelter_controller": "Industrial Multi-Smelter Controller",
+  "block.refinery.smelter_casing": "Smelter Structural Casing",
+  "block.refinery.smelter_chamber": "Smelter Chamber Glass",
+  "block.refinery.smelter_input_port": "Smelter Input Port",
+  "block.refinery.smelter_output_port": "Smelter Output Port",
+  "block.refinery.smelter_fuel_port": "Smelter Fuel/Energy Port",
+  "tooltip.refinery.multi_smelter_controller.desc": "§7Heart of the 5x4x3 Heavy Smelter Array. Smelts 8 items in parallel using solid fuel or RF/FE."
 }
