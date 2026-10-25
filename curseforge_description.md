@@ -129,10 +129,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.1.jar`
+`refinery-1.5.2.jar`
 
 ### Display Name
-`Industrial Refinery 1.5.1 (NeoForge 26.3)`
+`Industrial Refinery 1.5.2 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -148,23 +148,18 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.1
+# Industrial Refinery v1.5.2
 
-### 🚀 What's New in v1.5.1:
-- **Crude Oil Spacing & Generation Balancing**:
-  - Balanced default spawn rate to `0.005` (~1 in 200 chunks in valid biomes).
-  - Enforced a minimum distance of **320 blocks (20 chunks)** between oil wells/pits, eliminating clumped surface lakes on both initial world generation and chunk retrogen.
-- **Industrial Multi-Smelter (5x4x3 Multiblock)**:
-  - 8-in-1 early-to-midgame furnace array with dual-power operation (Solid Fuel / Burnt Material or 30 FE/t RF).
-  - 6-block hollow combustion chamber with live 3D floating rotating cooking items and animated ember bed / induction coils.
-  - Fully early-game accessible (NO Steel required).
-  - Fixed 26.3 inventory and hand-held item icons for all 6 multi-smelter block components.
-- **Clear Frosted Ethanol Biofuel**:
-  - Overhauled Ethanol fluid and bucket textures to an authentic frosted clearish-white aesthetic with custom client underwater fog.
-- **Complete Visual Redo of Pipe Attachments**:
-  - **Pipe Wires** (Red, Blue, Green, Yellow): Completely redesigned into detailed industrial wire spools with metallic center spindles, coiled insulation, and stripped wire leads with copper/silver tips.
-  - **Pipe Gates** (Basic, Iron, Gold, Diamond — Normal and Autarchic): Redesigned into 14x14 beveled industrial attachment plates with tier-specific metallic bezels, corner mounting bolts, dark recessed circuit bays, and glowing logic cores.
-  - **Autarchic Chipset**: Redesigned into a dual-in-line IC microchip with gold pins, beveled dark ceramic packaging, and a glowing ruby energy core.
-- **Full Industrial Machine Suite**:
-  - 10 complete multiblocks including Petroleum Refinery, Blast Smelter, Metal Press, Industrial Grinder (with counter-rotating spiked drums), Arc Melter, Casting Press, Boilers, and Steam Turbines.
+### 🚀 What's New in v1.5.2:
+- **Ocean Generation Balancing & Spacing**:
+  - Added `oceanSpawnChanceMultiplier` (default `0.20`), reducing oil spawn density in oceans by 80% to keep vast deep oceans balanced.
+  - Expanded `minChunkDistanceBetweenWells` maximum range in config from `64` to `512` chunks (up to 8,192 blocks). Default increased to `40` chunks (640 blocks).
+- **Chunk-Loading Cascade Bug Fix**:
+  - Fixed race condition where placing blocks near chunk borders synchronously loaded neighbor chunks before the generating well was recorded, preventing touching or duplicate oil wells.
+  - Fixed sea-level water detection at Y=62/63 so ocean wells correctly anchor to the ocean floor.
+- **Previous v1.5.1 Highlights**:
+  - Industrial Multi-Smelter (5x4x3 Multiblock) 8-in-1 parallel furnace array with dual fuel/RF power.
+  - Fixed Multi-Smelter item definitions and icons in 26.3.
+  - Frosted clearish-white Ethanol fluid and bucket overhaul.
+  - Complete HD redo of Pipe Wires, Pipe Gates, and Autarchic Chipset.
 ```

@@ -555,7 +555,8 @@ Crude Oil is a heavy, dark liquid naturally present in subterranean geologic tra
 All generation parameters are fully customizable:
 - `enableOilRetrogen` (default: `true`): Enables automatic generation in existing explored chunks.
 - `oilPitSpawnChance` (default: `0.005`): ~0.5% chance per chunk in allowed biomes (~1 in 200 chunks).
-- `minChunkDistanceBetweenWells` (default: `20`): Minimum chunk distance between oil deposits (320 blocks) to space out wells and prevent clustering.
+- `oceanSpawnChanceMultiplier` (default: `0.20`): Multiplier for ocean biomes (80% frequency reduction) to keep vast deep oceans balanced.
+- `minChunkDistanceBetweenWells` (default: `40`): Minimum chunk distance between oil deposits (640 blocks) to space out wells and prevent clustering (range 1–512).
 - `rareGeyserChance` (default: `0.20`): 20% chance for a spawned pit to be a 2,000k mB super-geyser.
 - `minOilVolumeMb` / `maxOilVolumeMb` (default: `600000` / `1000000`): Standard pit capacity range.
 - `geyserOilVolumeMb` (default: `2000000`): Super-geyser oil capacity.
@@ -866,6 +867,17 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.5.2 (Ocean Generation Balancing & Chunk Cascade Fix)
+- **Cascade Chunk-Loading & Neighbor Spawning Fix**:
+  - Reserved well positions in `wellChunks` saved data **prior** to block placement, eliminating duplicate and touching oil wells caused by boundary chunk loads.
+- **Config Max Spacing Range**:
+  - Expanded `minChunkDistanceBetweenWells` maximum from `64` to `512` chunks, with default set to `40` chunks (640 blocks).
+- **Ocean Biome Over-Generation Balancing**:
+  - Introduced `oceanSpawnChanceMultiplier` (default `0.20`), reducing ocean generation density by 80% to balance vast contiguous oceans.
+  - Enhanced sea-level detection (Y=62/63) so ocean wells anchor correctly to the seabed.
+
+---
 
 ### Version 1.5.1 (Visual Overhaul & Worldgen Balancing)
 - **Crude Oil Spacing & Generation Balancing**:

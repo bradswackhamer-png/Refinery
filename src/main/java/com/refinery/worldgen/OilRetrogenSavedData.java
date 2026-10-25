@@ -78,6 +78,12 @@ public class OilRetrogenSavedData extends SavedData {
         }
     }
 
+    public synchronized void unmarkWell(long chunkCoord) {
+        if (wellChunks.remove(chunkCoord)) {
+            setDirty();
+        }
+    }
+
     public synchronized void clear() {
         processedChunks.clear();
         wellChunks.clear();

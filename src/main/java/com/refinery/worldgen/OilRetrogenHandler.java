@@ -51,11 +51,21 @@ public class OilRetrogenHandler {
 
         RandomSource random = serverLevel.getRandom();
         double spawnChance = RefineryConfig.CONFIG.oilPitSpawnChance.get();
+        if (RefineryConfig.CONFIG.isOceanBiome(biomeHolder)) {
+            spawnChance *= RefineryConfig.CONFIG.oceanSpawnChanceMultiplier.get();
+        }
+
         if (random.nextFloat() < spawnChance) {
+            // Reserve well location in saved data BEFORE generate() runs.
+            // OilPitGenerator sets blocks across chunk boundaries which synchronously loads neighbor chunks;
+            // reserving the chunk first ensures any synchronously loaded neighbor sees isWellNearby() == true
+            // and immediately aborts, preventing cascading touching wells.
+            data.markWellGenerated(chunkKey);
+
             boolean isGeyser = random.nextFloat() < RefineryConfig.CONFIG.rareGeyserChance.get();
             boolean generated = OilPitGenerator.generate(serverLevel, samplePos, isGeyser, random);
-            if (generated) {
-                data.markWellGenerated(chunkKey);
+            if (!generated) {
+                data.unmarkWell(chunkKey);
             }
         }
     }

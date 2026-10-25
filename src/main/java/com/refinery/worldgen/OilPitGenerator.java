@@ -21,7 +21,10 @@ public class OilPitGenerator {
         int centerZ = origin.getZ();
 
         // Check if ocean / water at sea level
-        boolean isOcean = level.getFluidState(new BlockPos(centerX, 63, centerZ)).isSource();
+        boolean isOcean = level.getFluidState(new BlockPos(centerX, 62, centerZ)).isSource()
+                || level.getFluidState(new BlockPos(centerX, 63, centerZ)).isSource()
+                || level.getBlockState(new BlockPos(centerX, 62, centerZ)).is(Blocks.WATER)
+                || level.getBlockState(new BlockPos(centerX, 63, centerZ)).is(Blocks.WATER);
         int surfaceY = isOcean
                 ? level.getHeight(Heightmap.Types.OCEAN_FLOOR, centerX, centerZ)
                 : level.getHeight(Heightmap.Types.WORLD_SURFACE, centerX, centerZ) - 1;

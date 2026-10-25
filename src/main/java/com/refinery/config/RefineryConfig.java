@@ -23,6 +23,7 @@ public class RefineryConfig {
 
     public final ModConfigSpec.BooleanValue enableOilRetrogen;
     public final ModConfigSpec.DoubleValue oilPitSpawnChance;
+    public final ModConfigSpec.DoubleValue oceanSpawnChanceMultiplier;
     public final ModConfigSpec.IntValue minChunkDistanceBetweenWells;
     public final ModConfigSpec.DoubleValue rareGeyserChance;
     public final ModConfigSpec.IntValue minOilVolumeMb;
@@ -41,9 +42,14 @@ public class RefineryConfig {
                 .comment("Chance per valid chunk to spawn an oil pit (0.005 = ~0.5% chance, or roughly 1 in 200 chunks).")
                 .defineInRange("oilPitSpawnChance", 0.005, 0.0, 1.0);
 
+        oceanSpawnChanceMultiplier = builder
+                .comment("Multiplier applied to oilPitSpawnChance specifically in Ocean biomes (0.20 = 80% reduction in ocean frequency).",
+                        "Because oceans are massive contiguous biomes, this prevents deep oceans from having excessive wells.")
+                .defineInRange("oceanSpawnChanceMultiplier", 0.20, 0.0, 1.0);
+
         minChunkDistanceBetweenWells = builder
-                .comment("Minimum chunk distance between oil wells to prevent clustering (e.g. 20 = wells will be at least 20 chunks / 320 blocks apart).")
-                .defineInRange("minChunkDistanceBetweenWells", 20, 1, 64);
+                .comment("Minimum chunk distance between oil wells to prevent clustering (e.g. 40 = wells will be at least 40 chunks / 640 blocks apart).")
+                .defineInRange("minChunkDistanceBetweenWells", 40, 1, 512);
 
         rareGeyserChance = builder
                 .comment("Chance that a spawned oil pit is a massive 2,000,000 mB super-geyser instead of a standard pit (0.20 = 20%).")
@@ -121,5 +127,16 @@ public class RefineryConfig {
         }
 
         return false;
+    }
+
+    public boolean isOceanBiome(Holder<Biome> biomeHolder) {
+        if (biomeHolder == null) return false;
+        Identifier biomeId = biomeHolder.unwrapKey().map(ResourceKey::identifier).orElse(null);
+        String idStr = biomeId != null ? biomeId.toString().toLowerCase() : "";
+        if (idStr.contains("ocean")) return true;
+
+        TagKey<Biome> oceanTag = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("minecraft", "is_ocean"));
+        TagKey<Biome> deepOceanTag = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("minecraft", "is_deep_ocean"));
+        return biomeHolder.is(oceanTag) || biomeHolder.is(deepOceanTag);
     }
 }
