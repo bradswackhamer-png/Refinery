@@ -1,19 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
+  "key": {
+    "G": "minecraft:glass",
+    "C": "minecraft:copper_ingot"
+  },
   "pattern": [
     "GGG",
     "GCG",
     "GGG"
   ],
-  "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    }
-  },
   "result": {
     "count": 4,
     "id": "refinery:smelter_chamber"

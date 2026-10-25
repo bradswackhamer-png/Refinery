@@ -1,21 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
+  "key": {
+    "R": "minecraft:redstone",
+    "F": "minecraft:furnace",
+    "C": "refinery:smelter_casing"
+  },
   "pattern": [
     " R ",
     "FCF"
   ],
-  "key": {
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    },
-    "C": {
-      "item": "refinery:smelter_casing"
-    }
-  },
   "result": {
     "count": 1,
     "id": "refinery:smelter_fuel_port"

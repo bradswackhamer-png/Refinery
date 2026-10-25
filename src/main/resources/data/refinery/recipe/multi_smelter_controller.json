@@ -1,25 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
+  "key": {
+    "C": "refinery:smelter_casing",
+    "F": "minecraft:furnace",
+    "R": "minecraft:redstone",
+    "M": "minecraft:copper_ingot"
+  },
   "pattern": [
     "CFC",
     "CRC",
     "CMC"
   ],
-  "key": {
-    "C": {
-      "item": "refinery:smelter_casing"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "M": {
-      "item": "minecraft:copper_ingot"
-    }
-  },
   "result": {
     "count": 1,
     "id": "refinery:multi_smelter_controller"

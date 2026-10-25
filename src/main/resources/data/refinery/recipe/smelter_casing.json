@@ -1,22 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:bricks",
+    "S": "minecraft:smooth_stone"
+  },
   "pattern": [
     "IBI",
     "BSB",
     "IBI"
   ],
-  "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "B": {
-      "item": "minecraft:bricks"
-    },
-    "S": {
-      "item": "minecraft:smooth_stone"
-    }
-  },
   "result": {
     "count": 4,
     "id": "refinery:smelter_casing"
