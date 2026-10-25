@@ -210,7 +210,7 @@ public class RefineryMod {
             MetalPressControllerBlock::new);
     public static final DeferredItem<BlockItem> METAL_PRESS_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("metal_press_controller", METAL_PRESS_CONTROLLER);
 
-    // === Industrial Grinder (2x3x3) Multiblock ===
+    // === Industrial Grinder (3x3x3) Multiblock ===
     public static final DeferredBlock<IndustrialGrinderControllerBlock> INDUSTRIAL_GRINDER_CONTROLLER = BLOCKS.registerBlock("industrial_grinder_controller",
             IndustrialGrinderControllerBlock::new);
     public static final DeferredItem<BlockItem> INDUSTRIAL_GRINDER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("industrial_grinder_controller", INDUSTRIAL_GRINDER_CONTROLLER);

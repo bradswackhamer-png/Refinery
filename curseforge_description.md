@@ -58,7 +58,12 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 ### 🔨 3. Heavy Metallurgy & Grinding
 - **Industrial Blast Smelter (5x5x5 Multiblock)**: Massive foundry with a continuous 3x3 industrial glass viewing window. Smelts raw iron and coal/coke into structural **Steel Ingots**.
 - **Industrial Metal Press (2x2x2 Multiblock)**: Mechanical stamping press that stamps ingots into heavy **Steel Plates**, rods, and components.
-- **Industrial Grinder & Pulverizer (2x3x3 Multiblock)**: Dual-motor mineral crusher. Provides **2x Ore Doubling**, crushes stone into gravel and sand, and pulverizes oil sand into **3x Bitumen** with a 50% chance for **Tar**.
+- **Industrial Grinder & Pulverizer (3x3x3 Multiblock)**: Dual-motor mineral crusher with twin counter-rotating spiked drums and animated block pulverization. Provides **2x Ore Doubling**, crushes stone into gravel and sand, and pulverizes oil sand into **3x Bitumen** with a 50% chance for **Tar**.
+- **Industrial Multi-Smelter (5x4x3 Multiblock)**: 8-in-1 high-throughput smelting array with dual-fuel operation (Solid Fuel or 30 FE/t RF). Features a 6-block hollow combustion chamber with dynamic 3D floating cooking items and pulsing ember/induction animations.
+- **Electric Arc Melter (3x3x3 Multiblock)**: High-temperature metallurgical induction furnace that melts metal dusts and sand into glowing Molten Iron, Gold, Copper, Tin, Bronze, and Glass.
+- **Continuous Casting Press (3x3x3 Multiblock)**: Automated hydraulic quenching press that casts molten liquid from Arc Melters into solid ingots and glass blocks.
+- **Refractory Casting Channel**: Open 3D trough geometry for seamless in-world fluid transfer between melters and presses.
+- **Industrial Fermenter (Agricultural Biofuel)**: Standalone bioreactor that converts crops (Wheat, Potatoes, etc.) into high-yield **Ethanol** fuel.
 
 ### 🌱 4. Standalone Agricultural Automation
 - **Auto Planter**: 5-block radius smart cultivator that automatically tills dirt into farmland and plants seeds from internal storage, hoppers, or pipes.
@@ -145,7 +150,7 @@ When uploading your `.jar` file to CurseForge, use these values:
 # Industrial Refinery v1.0.0
 
 ### Initial Release Highlights:
-- **7 Complete Multiblock Machines**: Petroleum Refinery (3x3x4), Industrial Blast Smelter (5x5x5), Small Steam Boiler (3x3x3), Large Heavy Steam Boiler (5x5x5), Steam Turbine Generator (3x3x3), Industrial Metal Press (2x2x2), and Industrial Grinder & Pulverizer (2x3x3).
+- **10 Complete Multiblock Machines**: Petroleum Refinery (3x3x4), Industrial Blast Smelter (5x5x5), Small Steam Boiler (3x3x3), Large Heavy Steam Boiler (5x5x5), Steam Turbine Generator (3x3x3), Industrial Metal Press (2x2x2), Industrial Grinder & Pulverizer (3x3x3), Electric Arc Melter (3x3x3), Continuous Casting Press (3x3x3), and Industrial Multi-Smelter (5x4x3).
 - **3D Blueprint Hologram Projection**: Life-sized in-world multiblock holograms with high-contrast signature colors per block type.
 - **Refinery Wrench**: 3D blueprint toggling, block rotation, and Shift + Right-Click instant dismantling.
 - **BuildCraft-Style Pipe Logic Gates**: Basic, Iron, Gold, and Diamond Gates + Autarchic Pulsar variants. Supports 4-color pipe wire broadcasting and automated item/fluid extraction.

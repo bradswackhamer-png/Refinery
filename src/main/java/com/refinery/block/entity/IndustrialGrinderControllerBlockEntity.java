@@ -538,7 +538,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                 linkPorts();
             }
             if (player != null) {
-                player.sendSystemMessage(Component.literal("§a[Industrial Grinder]§r 2x3x3 Machine is §2VALID & OPERATIONAL§r!"));
+                player.sendSystemMessage(Component.literal("§a[Industrial Grinder]§r 3x3x3 Machine is §2VALID & OPERATIONAL§r!"));
             }
         } else {
             this.assembled = false;

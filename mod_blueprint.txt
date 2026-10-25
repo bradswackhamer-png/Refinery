@@ -42,7 +42,7 @@
    - Consumes Steam to generate 250 FE/t, condensing Steam back into Water (Closed-Loop Rankine Cycle).
 5. **Industrial Metal Press (2x2x2)**:
    - Shapes Ingots into Plates, Rods, and Gears with animated mechanical press head.
-6. **Industrial Grinder & Pulverizer (2x3x3)**:
+6. **Industrial Grinder & Pulverizer (3x3x3)**:
    - Raw Ores -> 2x Mineral Dust (Doubling).
    - Stone / Cobblestone -> Gravel -> Sand.
    - Oil Sand (`refinery:oil_sand`, `logistics:core/oil_sand`, `logistics:core/oil_red_sand`, `logistics:core/oil_shale`) -> 3x Bitumen + 50% chance for Tar. Automatically outputs Logistics native tar/bitumen if Logistics mod is loaded.
