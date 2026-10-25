@@ -64,7 +64,7 @@ public class RefineryCommands {
         BlockPos pos = BlockPos.containing(source.getPosition());
         RandomSource random = level.getRandom();
 
-        source.sendSuccess(() -> Component.literal("§6[Refinery Admin] §eSpawning " + (isGeyser ? "1,000,000 mB Super-Geyser" : "300,000-500,000 mB Oil Pit") + " at " + pos.toShortString() + "..."), true);
+        source.sendSuccess(() -> Component.literal("§6[Refinery Admin] §eSpawning " + (isGeyser ? "2,000,000 mB Super-Geyser" : "600,000-1,000,000 mB Oil Pit") + " at " + pos.toShortString() + "..."), true);
         boolean success = OilPitGenerator.generate(level, pos, isGeyser, random);
         if (success) {
             OilRetrogenSavedData data = OilRetrogenSavedData.get(level);

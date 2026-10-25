@@ -40,33 +40,44 @@ public class OilPitGenerator {
         BlockState oilBlock = RefineryFluids.CRUDE_OIL_BLOCK.get().defaultBlockState();
         BlockState oilSand = RefineryMod.OIL_SAND.get().defaultBlockState();
 
-        int cavernY = Math.max(level.getMinY() + 15, surfaceY - (isGeyser ? 45 : 35));
+        int cavernY = Math.max(level.getMinY() + 20, surfaceY - (isGeyser ? 50 : 40));
 
-        // Radii for cavern
-        double rx = isGeyser ? 8.8 : 6.5;
-        double ry = isGeyser ? 5.8 : 4.2;
-        double rz = isGeyser ? 8.8 : 6.5;
+        // Radii for cavern (2x scaled)
+        double rx = isGeyser ? 17.5 : 13.0;
+        double ry = isGeyser ? 11.5 : 8.0;
+        double rz = isGeyser ? 17.5 : 13.0;
 
-        // Radii for surface pool
-        int poolRadius = isGeyser ? 7 : 5;
-        int poolDepth = isGeyser ? 4 : 3;
+        // Radii for surface pool (2x scaled: radius 10/14, diameter 20/28)
+        int poolRadius = isGeyser ? 14 : 10;
+        int poolDepth = isGeyser ? 7 : 5;
+        double rimMargin = isGeyser ? 3.5 : 2.5;
 
         // Collect positions to place oil and positions to place oil sand
         Set<BlockPos> oilPositions = new LinkedHashSet<>();
         Set<BlockPos> sandCasingPositions = new HashSet<>();
 
         // 1. Surface Pool
-        for (int dx = -poolRadius - 1; dx <= poolRadius + 1; dx++) {
-            for (int dz = -poolRadius - 1; dz <= poolRadius + 1; dz++) {
+        int searchRadius = poolRadius + (int) Math.ceil(rimMargin) + 1;
+        for (int dx = -searchRadius; dx <= searchRadius; dx++) {
+            for (int dz = -searchRadius; dz <= searchRadius; dz++) {
                 double distSq = (dx * dx) + (dz * dz);
                 if (distSq <= poolRadius * poolRadius) {
+                    // Clear terrain slopes / cliffs above the pool so it opens cleanly to the sky
+                    for (int dy = 1; dy <= 8; dy++) {
+                        BlockPos above = new BlockPos(centerX + dx, surfaceY + dy, centerZ + dz);
+                        BlockState aboveState = level.getBlockState(above);
+                        if (isReplaceable(aboveState) && !aboveState.isAir() && !aboveState.is(Blocks.WATER)) {
+                            level.setBlock(above, Blocks.AIR.defaultBlockState(), 2);
+                        }
+                    }
+
                     for (int dy = 0; dy >= -poolDepth; dy--) {
                         BlockPos pos = new BlockPos(centerX + dx, surfaceY + dy, centerZ + dz);
                         if (isReplaceable(level.getBlockState(pos))) {
                             oilPositions.add(pos);
                         }
                     }
-                } else if (distSq <= (poolRadius + 1.5) * (poolRadius + 1.5)) {
+                } else if (distSq <= (poolRadius + rimMargin) * (poolRadius + rimMargin)) {
                     // Pool border rim
                     for (int dy = 1; dy >= -poolDepth - 1; dy--) {
                         BlockPos pos = new BlockPos(centerX + dx, surfaceY + dy, centerZ + dz);
@@ -78,8 +89,8 @@ public class OilPitGenerator {
             }
         }
 
-        // 2. Vertical Conduit / Feeder Neck
-        int conduitRadius = isGeyser ? 2 : 1;
+        // 2. Vertical Conduit / Feeder Neck (2x scaled)
+        int conduitRadius = isGeyser ? 3 : 2;
         for (int y = surfaceY - poolDepth; y >= (int) (cavernY + ry); y--) {
             for (int dx = -conduitRadius; dx <= conduitRadius; dx++) {
                 for (int dz = -conduitRadius; dz <= conduitRadius; dz++) {
@@ -128,18 +139,31 @@ public class OilPitGenerator {
 
         // 4. Geyser Surface Spout (if geyser)
         if (isGeyser) {
-            int spoutHeight = random.nextIntBetweenInclusive(6, 10);
+            int spoutHeight = random.nextIntBetweenInclusive(12, 18);
             for (int h = 1; h <= spoutHeight; h++) {
                 BlockPos pos = new BlockPos(centerX, surfaceY + h, centerZ);
                 if (isReplaceable(level.getBlockState(pos))) {
                     oilPositions.add(pos);
                 }
-                // Oil sand spout base collar
-                if (h <= 2) {
+                // Thicker core at lower half
+                if (h <= spoutHeight / 2) {
                     for (Direction d : Direction.Plane.HORIZONTAL) {
-                        BlockPos collar = pos.relative(d);
-                        if (isReplaceable(level.getBlockState(collar))) {
-                            sandCasingPositions.add(collar);
+                        BlockPos wider = pos.relative(d);
+                        if (isReplaceable(level.getBlockState(wider))) {
+                            oilPositions.add(wider);
+                        }
+                    }
+                }
+                // Oil sand spout base collar
+                if (h <= 3) {
+                    for (int cdx = -2; cdx <= 2; cdx++) {
+                        for (int cdz = -2; cdz <= 2; cdz++) {
+                            if (cdx * cdx + cdz * cdz <= 5 && (cdx != 0 || cdz != 0)) {
+                                BlockPos collar = new BlockPos(centerX + cdx, surfaceY + h, centerZ + cdz);
+                                if (isReplaceable(level.getBlockState(collar))) {
+                                    sandCasingPositions.add(collar);
+                                }
+                            }
                         }
                     }
                 }

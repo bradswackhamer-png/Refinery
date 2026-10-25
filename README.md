@@ -536,27 +536,29 @@ All ports and controllers implement native Minecraft and NeoForge capability sta
 ### In-World Fluid Crude Oil
 Crude Oil is a heavy, dark liquid naturally present in subterranean geologic traps:
 - **Liquid Blocks**: `refinery:crude_oil` (source) and `refinery:flowing_crude_oil`.
+- **Block Off & Displace**: Fully follows standard water/lava placement rules — can be blocked off, dammed, or displaced by placing any solid block directly into it.
+- **Viscous Movement Physics**: Thick, viscous fluid physics — entities sink at a steady, damped rate, can wade and swim through it with WASD, and can swim upwards to safety by holding Spacebar.
 - **Handling**: Can be collected using standard Buckets to obtain **Crude Oil Buckets** (`refinery:crude_oil_bucket`), pumped via fluid extraction pipes, or manually right-clicked onto a Refinery **Crude Oil Input Port**.
 - **Port Bucket Interaction**: Right-clicking the **Crude Oil Input Port** with a Crude Oil Bucket empties it into the refinery (+1,000 mB). Right-clicking the **Diesel Port** or **Gas Port** with an empty bucket collects refined fuel (-1,000 mB).
 
 ### Deposit Structures & Capacities
-1. **Standard Oil Pit (300,000 mB – 500,000 mB)**:
-   - **Surface Crater**: A natural dark petroleum lake with shoreline beaches of **Bituminous Oil Sand** (`refinery:oil_sand`).
+1. **Standard Oil Pit (600,000 mB – 1,000,000 mB)**:
+   - **Surface Crater**: A large natural dark petroleum lake (20-block diameter) with shoreline beaches of **Bituminous Oil Sand** (`refinery:oil_sand`).
    - **Feeder Conduit**: A vertical cylindrical conduit dropping through the earth.
    - **Subterranean Reservoir**: A massive subterranean cavern embedded in the deep stone crust, filled with hundreds of source blocks and encased in an oil sand stratum.
-   - **Yield**: Provides 300 to 500 buckets (300k to 500k mB) of pumpable crude oil, plus dozens of mineable oil sand blocks.
-2. **Rare Super-Geyser (1,000,000 mB)**:
+   - **Yield**: Provides 600 to 1,000 buckets (600k to 1,000k mB) of pumpable crude oil, plus dozens of mineable oil sand blocks.
+2. **Rare Super-Geyser (2,000,000 mB)**:
    - A rare high-pressure geologic anomaly (default 20% of spawned oil pits).
-   - Features an active towering geyser fountain erupting above the surface lake, fed by an immense subterranean reservoir dome holding **1,000 crude oil source blocks** (1,000,000 mB).
+   - Features an active towering geyser fountain erupting above the surface lake (28-block diameter), fed by an immense subterranean reservoir dome holding **2,000 crude oil source blocks** (2,000,000 mB).
 
 ### Configuration (`config/refinery.toml`)
 All generation parameters are fully customizable:
 - `enableOilRetrogen` (default: `true`): Enables automatic generation in existing explored chunks.
-- `oilPitSpawnChance` (default: `0.04`): ~4% chance per chunk in allowed biomes.
-- `minChunkDistanceBetweenWells` (default: `4`): Minimum chunk distance between oil deposits to space out wells and prevent clustering.
-- `rareGeyserChance` (default: `0.20`): 20% chance for a spawned pit to be a 1,000k mB super-geyser.
-- `minOilVolumeMb` / `maxOilVolumeMb` (default: `300000` / `500000`): Standard pit capacity range.
-- `geyserOilVolumeMb` (default: `1000000`): Super-geyser oil capacity.
+- `oilPitSpawnChance` (default: `0.02`): ~2% chance per chunk in allowed biomes (~1 in 50 chunks).
+- `minChunkDistanceBetweenWells` (default: `8`): Minimum chunk distance between oil deposits (128 blocks) to space out wells and prevent clustering.
+- `rareGeyserChance` (default: `0.20`): 20% chance for a spawned pit to be a 2,000k mB super-geyser.
+- `minOilVolumeMb` / `maxOilVolumeMb` (default: `600000` / `1000000`): Standard pit capacity range.
+- `geyserOilVolumeMb` (default: `2000000`): Super-geyser oil capacity.
 - `allowedBiomes`: Configurable list of biome IDs or tags. By default includes `#minecraft:is_ocean`, `#minecraft:is_deep_ocean`, `#minecraft:is_desert`, `#minecraft:is_badlands`, all ocean types, deserts, and badlands/mesas. Compatible with modded biomes!
 
 ### Retrogen Persistence (No Re-Gen Once Mined)
@@ -566,7 +568,7 @@ All generation parameters are fully customizable:
 ### Administrative Commands
 Commands can be issued via `/admin` or `/refinery`:
 - `/admin spawn_oil_pit [true|false]` or `/admin spawn_oil [true|false]`: Spawns a standard pit (`false`) or super-geyser (`true`) at your position and registers the location.
-- `/admin spawn_geyser`: Shortcut to spawn a 1,000,000 mB super-geyser.
+- `/admin spawn_geyser`: Shortcut to spawn a 2,000,000 mB super-geyser.
 - `/admin oil_stats`: Displays scanned chunks and total generated oil wells.
 - `/admin reset_oil_retrogen`: Resets retrogen history for the world.
 - *(Also mirrored under `/refinery spawn_oil_pit`, `/refinery spawn_geyser`, `/refinery stats`)*

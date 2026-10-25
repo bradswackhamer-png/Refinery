@@ -6,15 +6,25 @@ import com.refinery.client.renderer.*;
 import com.refinery.client.renderer.entity.PipeGateEntityRenderer;
 import com.refinery.client.renderer.entity.PipeWireEntityRenderer;
 import com.refinery.fluid.RefineryFluids;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import org.joml.Vector4f;
+
+import java.util.function.Supplier;
 
 @Mod(value = RefineryMod.MODID, dist = Dist.CLIENT)
 public class RefineryClientMod {
@@ -23,6 +33,7 @@ public class RefineryClientMod {
         modEventBus.addListener(this::registerMenuScreens);
         modEventBus.addListener(this::registerRenderers);
         modEventBus.addListener(this::registerClientExtensions);
+        modEventBus.addListener(this::registerFluidModels);
     }
 
     private void registerMenuScreens(RegisterMenuScreensEvent event) {
@@ -62,7 +73,12 @@ public class RefineryClientMod {
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.DIESEL_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.GASOLINE_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.STEAM_TYPE.get());
-        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.CRUDE_OIL_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {
+            @Override
+            public void modifyFogColor(Camera camera, float partialTick, ClientLevel level, int renderDistance, float darkenWorldAmount, Vector4f fluidFogColor) {
+                fluidFogColor.set(0.02f, 0.02f, 0.02f, 1.0f);
+            }
+        }, RefineryFluids.CRUDE_OIL_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_IRON_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GOLD_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_COPPER_TYPE.get());
@@ -70,5 +86,30 @@ public class RefineryClientMod {
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_BRONZE_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GLASS_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.ETHANOL_TYPE.get());
+    }
+
+    private void registerFluidModels(RegisterFluidModelsEvent event) {
+        registerFluidModel(event, "crude_oil", RefineryFluids.CRUDE_OIL_SOURCE, RefineryFluids.CRUDE_OIL_FLOWING);
+        registerFluidModel(event, "diesel", RefineryFluids.DIESEL_SOURCE, RefineryFluids.DIESEL_FLOWING);
+        registerFluidModel(event, "gasoline", RefineryFluids.GASOLINE_SOURCE, RefineryFluids.GASOLINE_FLOWING);
+        registerFluidModel(event, "steam", RefineryFluids.STEAM_SOURCE, RefineryFluids.STEAM_FLOWING);
+        registerFluidModel(event, "molten_iron", RefineryFluids.MOLTEN_IRON_SOURCE, RefineryFluids.MOLTEN_IRON_FLOWING);
+        registerFluidModel(event, "molten_gold", RefineryFluids.MOLTEN_GOLD_SOURCE, RefineryFluids.MOLTEN_GOLD_FLOWING);
+        registerFluidModel(event, "molten_copper", RefineryFluids.MOLTEN_COPPER_SOURCE, RefineryFluids.MOLTEN_COPPER_FLOWING);
+        registerFluidModel(event, "molten_tin", RefineryFluids.MOLTEN_TIN_SOURCE, RefineryFluids.MOLTEN_TIN_FLOWING);
+        registerFluidModel(event, "molten_bronze", RefineryFluids.MOLTEN_BRONZE_SOURCE, RefineryFluids.MOLTEN_BRONZE_FLOWING);
+        registerFluidModel(event, "molten_glass", RefineryFluids.MOLTEN_GLASS_SOURCE, RefineryFluids.MOLTEN_GLASS_FLOWING);
+        registerFluidModel(event, "ethanol", RefineryFluids.ETHANOL_SOURCE, RefineryFluids.ETHANOL_FLOWING);
+    }
+
+    private void registerFluidModel(RegisterFluidModelsEvent event, String name,
+            Supplier<? extends Fluid> still,
+            Supplier<? extends Fluid> flowing) {
+        event.register(new FluidModel.Unbaked(
+                new Material(Identifier.fromNamespaceAndPath(RefineryMod.MODID, "block/" + name + "_still")),
+                new Material(Identifier.fromNamespaceAndPath(RefineryMod.MODID, "block/" + name + "_flow")),
+                null,
+                null
+        ), still, flowing);
     }
 }

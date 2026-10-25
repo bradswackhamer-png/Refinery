@@ -6,9 +6,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -17,13 +20,34 @@ import net.neoforged.neoforge.registries.DeferredItem;
 
 public class RefineryFluids {
 
+    public static BlockBehaviour.Properties liquidProperties(MapColor mapColor) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(mapColor)
+                .replaceable()
+                .liquid()
+                .noCollision()
+                .strength(100.0f)
+                .pushReaction(PushReaction.POPPED)
+                .noLootTable()
+                .sound(SoundType.EMPTY);
+    }
+
+    public static BlockBehaviour.Properties moltenLiquidProperties(MapColor mapColor, int light) {
+        return liquidProperties(mapColor).lightLevel(s -> light);
+    }
+
     // === DIESEL ===
     public static final DeferredHolder<FluidType, FluidType> DIESEL_TYPE = RefineryMod.FLUID_TYPES.register("diesel",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(850)
                     .viscosity(1200)
                     .temperature(320)
-                    .descriptionId("fluid.refinery.diesel")));
+                    .fallDistanceModifier(0.5F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.diesel"),
+                    0.70D, 0.85D, 0.40D, 0.020F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> DIESEL_SOURCE = RefineryMod.FLUIDS.register("diesel",
             () -> new BaseFlowingFluid.Source(RefineryFluids.DIESEL_PROPERTIES));
@@ -33,7 +57,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> DIESEL_BLOCK = RefineryMod.BLOCKS.registerBlock("diesel",
             p -> new LiquidBlock(DIESEL_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f));
+            p -> liquidProperties(MapColor.COLOR_YELLOW));
 
     public static final DeferredItem<BucketItem> DIESEL_BUCKET = RefineryMod.ITEMS.registerItem("diesel_bucket",
             p -> new BucketItem(DIESEL_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -47,11 +71,16 @@ public class RefineryFluids {
 
     // === GASOLINE / PETROLEUM GAS ===
     public static final DeferredHolder<FluidType, FluidType> GASOLINE_TYPE = RefineryMod.FLUID_TYPES.register("gasoline",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(720)
                     .viscosity(600)
                     .temperature(295)
-                    .descriptionId("fluid.refinery.gasoline")));
+                    .fallDistanceModifier(0.5F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.gasoline"),
+                    0.80D, 0.85D, 0.50D, 0.025F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> GASOLINE_SOURCE = RefineryMod.FLUIDS.register("gasoline",
             () -> new BaseFlowingFluid.Source(RefineryFluids.GASOLINE_PROPERTIES));
@@ -61,7 +90,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> GASOLINE_BLOCK = RefineryMod.BLOCKS.registerBlock("gasoline",
             p -> new LiquidBlock(GASOLINE_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f));
+            p -> liquidProperties(MapColor.COLOR_LIGHT_GRAY));
 
     public static final DeferredItem<BucketItem> GASOLINE_BUCKET = RefineryMod.ITEMS.registerItem("gasoline_bucket",
             p -> new BucketItem(GASOLINE_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -75,11 +104,15 @@ public class RefineryFluids {
 
     // === HIGH PRESSURE STEAM ===
     public static final DeferredHolder<FluidType, FluidType> STEAM_TYPE = RefineryMod.FLUID_TYPES.register("steam",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(-500)
                     .viscosity(200)
                     .temperature(450)
-                    .descriptionId("fluid.refinery.steam")));
+                    .canSwim(false)
+                    .canDrown(false)
+                    .canPushEntity(false)
+                    .descriptionId("fluid.refinery.steam"),
+                    0.85D, 0.90D, -0.30D, 0.025F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> STEAM_SOURCE = RefineryMod.FLUIDS.register("steam",
             () -> new BaseFlowingFluid.Source(RefineryFluids.STEAM_PROPERTIES));
@@ -89,7 +122,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> STEAM_BLOCK = RefineryMod.BLOCKS.registerBlock("steam",
             p -> new LiquidBlock(STEAM_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f));
+            p -> liquidProperties(MapColor.SNOW));
 
     public static final DeferredItem<BucketItem> STEAM_BUCKET = RefineryMod.ITEMS.registerItem("steam_bucket",
             p -> new BucketItem(STEAM_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -103,11 +136,17 @@ public class RefineryFluids {
 
     // === CRUDE OIL ===
     public static final DeferredHolder<FluidType, FluidType> CRUDE_OIL_TYPE = RefineryMod.FLUID_TYPES.register("crude_oil",
-            () -> new FluidType(FluidType.Properties.create()
-                    .density(950)
+            () -> new RefineryFluidType(FluidType.Properties.create()
+                    .density(1200)
                     .viscosity(3000)
                     .temperature(300)
-                    .descriptionId("fluid.refinery.crude_oil")));
+                    .fallDistanceModifier(0.3F)
+                    .motionScale(0.007D)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.crude_oil"),
+                    0.55D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> CRUDE_OIL_SOURCE = RefineryMod.FLUIDS.register("crude_oil",
             () -> new BaseFlowingFluid.Source(RefineryFluids.CRUDE_OIL_PROPERTIES));
@@ -117,7 +156,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> CRUDE_OIL_BLOCK = RefineryMod.BLOCKS.registerBlock("crude_oil",
             p -> new LiquidBlock(CRUDE_OIL_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f));
+            p -> liquidProperties(MapColor.COLOR_BLACK));
 
     public static final DeferredItem<BucketItem> CRUDE_OIL_BUCKET = RefineryMod.ITEMS.registerItem("crude_oil_bucket",
             p -> new BucketItem(CRUDE_OIL_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -131,12 +170,17 @@ public class RefineryFluids {
 
     // === MOLTEN IRON ===
     public static final DeferredHolder<FluidType, FluidType> MOLTEN_IRON_TYPE = RefineryMod.FLUID_TYPES.register("molten_iron",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(7000)
                     .viscosity(3000)
                     .temperature(1800)
                     .lightLevel(15)
-                    .descriptionId("fluid.refinery.molten_iron")));
+                    .fallDistanceModifier(0.3F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.molten_iron"),
+                    0.50D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_IRON_SOURCE = RefineryMod.FLUIDS.register("molten_iron",
             () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_IRON_PROPERTIES));
@@ -146,7 +190,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> MOLTEN_IRON_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_iron",
             p -> new LiquidBlock(MOLTEN_IRON_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+            p -> moltenLiquidProperties(MapColor.FIRE, 15));
 
     public static final DeferredItem<BucketItem> MOLTEN_IRON_BUCKET = RefineryMod.ITEMS.registerItem("molten_iron_bucket",
             p -> new BucketItem(MOLTEN_IRON_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -160,12 +204,17 @@ public class RefineryFluids {
 
     // === MOLTEN GOLD ===
     public static final DeferredHolder<FluidType, FluidType> MOLTEN_GOLD_TYPE = RefineryMod.FLUID_TYPES.register("molten_gold",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(17000)
                     .viscosity(2500)
                     .temperature(1350)
                     .lightLevel(15)
-                    .descriptionId("fluid.refinery.molten_gold")));
+                    .fallDistanceModifier(0.3F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.molten_gold"),
+                    0.50D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_GOLD_SOURCE = RefineryMod.FLUIDS.register("molten_gold",
             () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_GOLD_PROPERTIES));
@@ -175,7 +224,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> MOLTEN_GOLD_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_gold",
             p -> new LiquidBlock(MOLTEN_GOLD_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+            p -> moltenLiquidProperties(MapColor.GOLD, 15));
 
     public static final DeferredItem<BucketItem> MOLTEN_GOLD_BUCKET = RefineryMod.ITEMS.registerItem("molten_gold_bucket",
             p -> new BucketItem(MOLTEN_GOLD_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -189,12 +238,17 @@ public class RefineryFluids {
 
     // === MOLTEN COPPER ===
     public static final DeferredHolder<FluidType, FluidType> MOLTEN_COPPER_TYPE = RefineryMod.FLUID_TYPES.register("molten_copper",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(8000)
                     .viscosity(2800)
                     .temperature(1350)
                     .lightLevel(15)
-                    .descriptionId("fluid.refinery.molten_copper")));
+                    .fallDistanceModifier(0.3F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.molten_copper"),
+                    0.50D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_COPPER_SOURCE = RefineryMod.FLUIDS.register("molten_copper",
             () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_COPPER_PROPERTIES));
@@ -204,7 +258,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> MOLTEN_COPPER_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_copper",
             p -> new LiquidBlock(MOLTEN_COPPER_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+            p -> moltenLiquidProperties(MapColor.COLOR_ORANGE, 15));
 
     public static final DeferredItem<BucketItem> MOLTEN_COPPER_BUCKET = RefineryMod.ITEMS.registerItem("molten_copper_bucket",
             p -> new BucketItem(MOLTEN_COPPER_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -218,12 +272,17 @@ public class RefineryFluids {
 
     // === MOLTEN TIN ===
     public static final DeferredHolder<FluidType, FluidType> MOLTEN_TIN_TYPE = RefineryMod.FLUID_TYPES.register("molten_tin",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(6500)
                     .viscosity(2000)
                     .temperature(800)
                     .lightLevel(13)
-                    .descriptionId("fluid.refinery.molten_tin")));
+                    .fallDistanceModifier(0.3F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.molten_tin"),
+                    0.50D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_TIN_SOURCE = RefineryMod.FLUIDS.register("molten_tin",
             () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_TIN_PROPERTIES));
@@ -233,7 +292,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> MOLTEN_TIN_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_tin",
             p -> new LiquidBlock(MOLTEN_TIN_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f).lightLevel(s -> 13));
+            p -> moltenLiquidProperties(MapColor.METAL, 13));
 
     public static final DeferredItem<BucketItem> MOLTEN_TIN_BUCKET = RefineryMod.ITEMS.registerItem("molten_tin_bucket",
             p -> new BucketItem(MOLTEN_TIN_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -247,12 +306,17 @@ public class RefineryFluids {
 
     // === MOLTEN BRONZE ===
     public static final DeferredHolder<FluidType, FluidType> MOLTEN_BRONZE_TYPE = RefineryMod.FLUID_TYPES.register("molten_bronze",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(8000)
                     .viscosity(2700)
                     .temperature(1200)
                     .lightLevel(14)
-                    .descriptionId("fluid.refinery.molten_bronze")));
+                    .fallDistanceModifier(0.3F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.molten_bronze"),
+                    0.50D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_BRONZE_SOURCE = RefineryMod.FLUIDS.register("molten_bronze",
             () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_BRONZE_PROPERTIES));
@@ -262,7 +326,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> MOLTEN_BRONZE_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_bronze",
             p -> new LiquidBlock(MOLTEN_BRONZE_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f).lightLevel(s -> 14));
+            p -> moltenLiquidProperties(MapColor.COLOR_BROWN, 14));
 
     public static final DeferredItem<BucketItem> MOLTEN_BRONZE_BUCKET = RefineryMod.ITEMS.registerItem("molten_bronze_bucket",
             p -> new BucketItem(MOLTEN_BRONZE_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -276,12 +340,17 @@ public class RefineryFluids {
 
     // === MOLTEN GLASS ===
     public static final DeferredHolder<FluidType, FluidType> MOLTEN_GLASS_TYPE = RefineryMod.FLUID_TYPES.register("molten_glass",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(2500)
                     .viscosity(6000)
                     .temperature(1700)
                     .lightLevel(15)
-                    .descriptionId("fluid.refinery.molten_glass")));
+                    .fallDistanceModifier(0.3F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.molten_glass"),
+                    0.50D, 0.80D, 0.25D, 0.015F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_GLASS_SOURCE = RefineryMod.FLUIDS.register("molten_glass",
             () -> new BaseFlowingFluid.Source(RefineryFluids.MOLTEN_GLASS_PROPERTIES));
@@ -291,7 +360,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> MOLTEN_GLASS_BLOCK = RefineryMod.BLOCKS.registerBlock("molten_glass",
             p -> new LiquidBlock(MOLTEN_GLASS_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f).lightLevel(s -> 15));
+            p -> moltenLiquidProperties(MapColor.NONE, 15));
 
     public static final DeferredItem<BucketItem> MOLTEN_GLASS_BUCKET = RefineryMod.ITEMS.registerItem("molten_glass_bucket",
             p -> new BucketItem(MOLTEN_GLASS_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
@@ -305,11 +374,16 @@ public class RefineryFluids {
 
     // === ETHANOL (BIOFUEL) ===
     public static final DeferredHolder<FluidType, FluidType> ETHANOL_TYPE = RefineryMod.FLUID_TYPES.register("ethanol",
-            () -> new FluidType(FluidType.Properties.create()
+            () -> new RefineryFluidType(FluidType.Properties.create()
                     .density(789)
                     .viscosity(800)
                     .temperature(300)
-                    .descriptionId("fluid.refinery.ethanol")));
+                    .fallDistanceModifier(0.5F)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.ethanol"),
+                    0.80D, 0.85D, 0.50D, 0.025F));
 
     public static final DeferredHolder<Fluid, FlowingFluid> ETHANOL_SOURCE = RefineryMod.FLUIDS.register("ethanol",
             () -> new BaseFlowingFluid.Source(RefineryFluids.ETHANOL_PROPERTIES));
@@ -319,7 +393,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> ETHANOL_BLOCK = RefineryMod.BLOCKS.registerBlock("ethanol",
             p -> new LiquidBlock(ETHANOL_SOURCE.get(), p),
-            p -> p.noCollision().strength(100.0f));
+            p -> liquidProperties(MapColor.COLOR_LIGHT_GREEN));
 
     public static final DeferredItem<BucketItem> ETHANOL_BUCKET = RefineryMod.ITEMS.registerItem("ethanol_bucket",
             p -> new BucketItem(ETHANOL_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));

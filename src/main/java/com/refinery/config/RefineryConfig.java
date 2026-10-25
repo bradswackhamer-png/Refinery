@@ -38,28 +38,28 @@ public class RefineryConfig {
                 .define("enableOilRetrogen", true);
 
         oilPitSpawnChance = builder
-                .comment("Chance per valid chunk to spawn an oil pit (0.04 = ~4% chance, or roughly 1 in 25 chunks).")
-                .defineInRange("oilPitSpawnChance", 0.04, 0.0, 1.0);
+                .comment("Chance per valid chunk to spawn an oil pit (0.02 = ~2% chance, or roughly 1 in 50 chunks).")
+                .defineInRange("oilPitSpawnChance", 0.02, 0.0, 1.0);
 
         minChunkDistanceBetweenWells = builder
-                .comment("Minimum chunk distance between oil wells to prevent clustering (e.g. 4 = wells will be at least 4 chunks apart).")
-                .defineInRange("minChunkDistanceBetweenWells", 4, 1, 32);
+                .comment("Minimum chunk distance between oil wells to prevent clustering (e.g. 8 = wells will be at least 8 chunks / 128 blocks apart).")
+                .defineInRange("minChunkDistanceBetweenWells", 8, 1, 32);
 
         rareGeyserChance = builder
-                .comment("Chance that a spawned oil pit is a massive 1,000,000 mB super-geyser instead of a standard pit (0.20 = 20%).")
+                .comment("Chance that a spawned oil pit is a massive 2,000,000 mB super-geyser instead of a standard pit (0.20 = 20%).")
                 .defineInRange("rareGeyserChance", 0.20, 0.0, 1.0);
 
         minOilVolumeMb = builder
                 .comment("Minimum oil capacity of a standard oil pit (in mB, 1 source block = 1,000 mB).")
-                .defineInRange("minOilVolumeMb", 300000, 50000, 2000000);
+                .defineInRange("minOilVolumeMb", 600000, 50000, 4000000);
 
         maxOilVolumeMb = builder
                 .comment("Maximum oil capacity of a standard oil pit (in mB).")
-                .defineInRange("maxOilVolumeMb", 500000, 50000, 5000000);
+                .defineInRange("maxOilVolumeMb", 1000000, 50000, 10000000);
 
         geyserOilVolumeMb = builder
                 .comment("Oil capacity of a rare super-geyser (in mB).")
-                .defineInRange("geyserOilVolumeMb", 1000000, 100000, 10000000);
+                .defineInRange("geyserOilVolumeMb", 2000000, 100000, 20000000);
 
         allowedBiomes = builder
                 .comment("List of biome registry IDs or biome tags (#tag) where oil pits and geysers can spawn.",
