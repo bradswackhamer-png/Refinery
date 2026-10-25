@@ -45,10 +45,10 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 ## 🚀 Key Features
 
 ### 🛢️ 1. Petroleum Geology & Fractional Distillation
-- **Real In-World Fluid Crude Oil**: Naturally occurring subterranean oil reservoirs and surface lakes rimmed with bituminous oil sand.
-- **Deposit Capacities**: Standard oil pits yield **300,000 mB to 500,000 mB**, with rare high-pressure **Super-Geysers** erupting with **1,000,000 mB**!
+- **Real In-World Fluid Crude Oil**: Naturally occurring subterranean oil reservoirs and surface lakes rimmed with bituminous oil sand. Viscous black liquid following authentic fluid physics.
+- **Deposit Capacities & Spacing**: Standard oil pits yield **600,000 mB to 1,000,000 mB**, with rare high-pressure **Super-Geysers** erupting with **2,000,000 mB**! Generates ~1 in 200 chunks with an enforced **20-chunk (320-block) minimum spacing** between wells to prevent clustered lakes.
 - **Persistent Anti-Retrogen**: Oil deposits are strictly registered once generated. Even when drained completely dry, chunks will never re-generate oil over your quarries or drills.
-- **Fractional Distillation Column (3x3x4 Multiblock)**: Fractionates crude oil into high-energy **Diesel** (500 mB), **Gasoline** (300 mB), heavy **Bitumen** (burns 1,600t), and chemical **Sulfur Dust**.
+- **Fractional Distillation Column (3x3x4 Multiblock)**: Fractionates crude oil into high-energy **Diesel** (500 mB), **Gasoline** (300 mB), heavy **Bitumen** (burns 1,600t), and chemical **Sulfur Dust**. Also supports direct **Oil Sand Cracking** yielding crude oil, clean sand, and petroleum tar.
 
 ### ⚡ 2. Thermodynamic Closed-Loop Steam Power (Rankine Cycle)
 - **Small (3x3x3) & Large Heavy (5x5x5) Steam Boilers**: Boil water with solid coal/coke or liquid petroleum fuels into pressurized Steam. Features authentic boiler overheating mechanics!
@@ -72,6 +72,7 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 ### 🔌 5. BuildCraft-Style Pipe Logic Gates & Wires
 The classic BuildCraft automation system, re-engineered for modern Minecraft!
 - **Slim Face Attachment**: Attaches flush onto **any face of a pipe**, machine, chest, or refinery port with non-solid hitboxes.
+- **High-Definition Visuals**: Beautifully detailed 14x14 beveled industrial attachment plates with tier-specific metallic bezels, corner mounting bolts, and glowing logic cores; pipe wires render as industrial wire spools with metallic spindles and coiled insulation.
 - **Native Cross-Mod Integration**: Directly interfaces with **Logistics Mod Item & Fluid Pipes** as well as standard NeoForge containers and machines.
 - **4 Gate Tiers**:
   - **Basic Gate**: 1 conditional trigger-action pair.
@@ -128,10 +129,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.0.0.jar`
+`refinery-1.5.1.jar`
 
 ### Display Name
-`Industrial Refinery 1.0.0 (NeoForge 26.3)`
+`Industrial Refinery 1.5.1 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -147,15 +148,23 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.0.0
+# Industrial Refinery v1.5.1
 
-### Initial Release Highlights:
-- **10 Complete Multiblock Machines**: Petroleum Refinery (3x3x4), Industrial Blast Smelter (5x5x5), Small Steam Boiler (3x3x3), Large Heavy Steam Boiler (5x5x5), Steam Turbine Generator (3x3x3), Industrial Metal Press (2x2x2), Industrial Grinder & Pulverizer (3x3x3), Electric Arc Melter (3x3x3), Continuous Casting Press (3x3x3), and Industrial Multi-Smelter (5x4x3).
-- **3D Blueprint Hologram Projection**: Life-sized in-world multiblock holograms with high-contrast signature colors per block type.
-- **Refinery Wrench**: 3D blueprint toggling, block rotation, and Shift + Right-Click instant dismantling.
-- **BuildCraft-Style Pipe Logic Gates**: Basic, Iron, Gold, and Diamond Gates + Autarchic Pulsar variants. Supports 4-color pipe wire broadcasting and automated item/fluid extraction.
-- **Full Logistics Mod Compatibility**: Zero-dependency cross-compatibility with Logistics pipes, tar/bitumen crafting recipes, and oil sand grinding.
-- **Natural Crude Oil Generation & Retrogen**: Surface lakes and subterranean oil caverns (300k–500k mB) and rare super-geysers (1,000,000 mB) with chunk spacing enforcement and persistent non-regenerating mined data.
-- **Agricultural Automation**: Standalone Auto Planter and Auto Harvester.
-- **Administrative Suite**: `/admin spawn_oil_pit`, `/admin spawn_geyser`, `/admin oil_stats`, `/admin reset_oil_retrogen`.
+### 🚀 What's New in v1.5.1:
+- **Crude Oil Spacing & Generation Balancing**:
+  - Balanced default spawn rate to `0.005` (~1 in 200 chunks in valid biomes).
+  - Enforced a minimum distance of **320 blocks (20 chunks)** between oil wells/pits, eliminating clumped surface lakes on both initial world generation and chunk retrogen.
+- **Industrial Multi-Smelter (5x4x3 Multiblock)**:
+  - 8-in-1 early-to-midgame furnace array with dual-power operation (Solid Fuel / Burnt Material or 30 FE/t RF).
+  - 6-block hollow combustion chamber with live 3D floating rotating cooking items and animated ember bed / induction coils.
+  - Fully early-game accessible (NO Steel required).
+  - Fixed 26.3 inventory and hand-held item icons for all 6 multi-smelter block components.
+- **Clear Frosted Ethanol Biofuel**:
+  - Overhauled Ethanol fluid and bucket textures to an authentic frosted clearish-white aesthetic with custom client underwater fog.
+- **Complete Visual Redo of Pipe Attachments**:
+  - **Pipe Wires** (Red, Blue, Green, Yellow): Completely redesigned into detailed industrial wire spools with metallic center spindles, coiled insulation, and stripped wire leads with copper/silver tips.
+  - **Pipe Gates** (Basic, Iron, Gold, Diamond — Normal and Autarchic): Redesigned into 14x14 beveled industrial attachment plates with tier-specific metallic bezels, corner mounting bolts, dark recessed circuit bays, and glowing logic cores.
+  - **Autarchic Chipset**: Redesigned into a dual-in-line IC microchip with gold pins, beveled dark ceramic packaging, and a glowing ruby energy core.
+- **Full Industrial Machine Suite**:
+  - 10 complete multiblocks including Petroleum Refinery, Blast Smelter, Metal Press, Industrial Grinder (with counter-rotating spiked drums), Arc Melter, Casting Press, Boilers, and Steam Turbines.
 ```
