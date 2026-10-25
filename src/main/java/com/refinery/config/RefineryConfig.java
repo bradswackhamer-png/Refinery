@@ -38,12 +38,12 @@ public class RefineryConfig {
                 .define("enableOilRetrogen", true);
 
         oilPitSpawnChance = builder
-                .comment("Chance per valid chunk to spawn an oil pit (0.02 = ~2% chance, or roughly 1 in 50 chunks).")
-                .defineInRange("oilPitSpawnChance", 0.02, 0.0, 1.0);
+                .comment("Chance per valid chunk to spawn an oil pit (0.005 = ~0.5% chance, or roughly 1 in 200 chunks).")
+                .defineInRange("oilPitSpawnChance", 0.005, 0.0, 1.0);
 
         minChunkDistanceBetweenWells = builder
-                .comment("Minimum chunk distance between oil wells to prevent clustering (e.g. 8 = wells will be at least 8 chunks / 128 blocks apart).")
-                .defineInRange("minChunkDistanceBetweenWells", 8, 1, 32);
+                .comment("Minimum chunk distance between oil wells to prevent clustering (e.g. 20 = wells will be at least 20 chunks / 320 blocks apart).")
+                .defineInRange("minChunkDistanceBetweenWells", 20, 1, 64);
 
         rareGeyserChance = builder
                 .comment("Chance that a spawned oil pit is a massive 2,000,000 mB super-geyser instead of a standard pit (0.20 = 20%).")

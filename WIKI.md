@@ -554,8 +554,8 @@ Crude Oil is a heavy, dark liquid naturally present in subterranean geologic tra
 ### Configuration (`config/refinery.toml`)
 All generation parameters are fully customizable:
 - `enableOilRetrogen` (default: `true`): Enables automatic generation in existing explored chunks.
-- `oilPitSpawnChance` (default: `0.02`): ~2% chance per chunk in allowed biomes (~1 in 50 chunks).
-- `minChunkDistanceBetweenWells` (default: `8`): Minimum chunk distance between oil deposits (128 blocks) to space out wells and prevent clustering.
+- `oilPitSpawnChance` (default: `0.005`): ~0.5% chance per chunk in allowed biomes (~1 in 200 chunks).
+- `minChunkDistanceBetweenWells` (default: `20`): Minimum chunk distance between oil deposits (320 blocks) to space out wells and prevent clustering.
 - `rareGeyserChance` (default: `0.20`): 20% chance for a spawned pit to be a 2,000k mB super-geyser.
 - `minOilVolumeMb` / `maxOilVolumeMb` (default: `600000` / `1000000`): Standard pit capacity range.
 - `geyserOilVolumeMb` (default: `2000000`): Super-geyser oil capacity.
@@ -866,6 +866,20 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.5.1 (Visual Overhaul & Worldgen Balancing)
+- **Crude Oil Spacing & Generation Balancing**:
+  - Decreased `oilPitSpawnChance` to `0.005` (1 in 200 chunks) and increased `minChunkDistanceBetweenWells` to `20` chunks (320 blocks minimum well spacing) to prevent clustered oil deposits.
+- **Multi-Smelter Block Icons Fix**:
+  - Added missing 26.3 item definition JSONs for all 6 Multi-Smelter components, fixing invisible/missing inventory item rendering.
+- **Clearish White Ethanol**:
+  - Converted still fluid, flowing fluid, and bucket textures to clear frosted white, updated map color to `MapColor.SNOW`, and updated client underwater fog.
+- **Complete Visual Redo of Pipe Attachments**:
+  - Redesigned all pipe wires (red, blue, green, yellow) into wire spools with metallic center spindles, coiled insulation, and stripped wire leads.
+  - Redesigned all 8 pipe gates (Basic, Iron, Gold, Diamond — standard & autarchic) into 14x14 beveled industrial attachment plates with tier-specific bezels, corner mounting bolts, and glowing logic cores.
+  - Redesigned Autarchic Chipset into an authentic ceramic dual-in-line IC chip with gold pins and glowing energy core.
+
+---
 
 ### Version 1.5.0 (Industrial Multi-Smelter Array)
 - **Industrial Multi-Smelter (5×4×3 Multiblock)**:

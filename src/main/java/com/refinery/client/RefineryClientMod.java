@@ -85,7 +85,12 @@ public class RefineryClientMod {
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_TIN_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_BRONZE_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GLASS_TYPE.get());
-        event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.ETHANOL_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {
+            @Override
+            public void modifyFogColor(Camera camera, float partialTick, ClientLevel level, int renderDistance, float darkenWorldAmount, Vector4f fluidFogColor) {
+                fluidFogColor.set(0.92f, 0.94f, 0.96f, 0.85f);
+            }
+        }, RefineryFluids.ETHANOL_TYPE.get());
     }
 
     private void registerFluidModels(RegisterFluidModelsEvent event) {

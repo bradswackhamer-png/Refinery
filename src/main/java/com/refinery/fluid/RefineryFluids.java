@@ -393,7 +393,7 @@ public class RefineryFluids {
 
     public static final DeferredBlock<LiquidBlock> ETHANOL_BLOCK = RefineryMod.BLOCKS.registerBlock("ethanol",
             p -> new LiquidBlock(ETHANOL_SOURCE.get(), p),
-            p -> liquidProperties(MapColor.COLOR_LIGHT_GREEN));
+            p -> liquidProperties(MapColor.SNOW));
 
     public static final DeferredItem<BucketItem> ETHANOL_BUCKET = RefineryMod.ITEMS.registerItem("ethanol_bucket",
             p -> new BucketItem(ETHANOL_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
