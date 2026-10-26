@@ -36,6 +36,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.*;
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
 import org.slf4j.Logger;
 
 @Mod(RefineryMod.MODID)
@@ -761,14 +762,14 @@ public class RefineryMod {
                 (be, side) -> be.energyStorage);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, AUTO_PLANTER_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
+                (be, side) -> new WorldlyContainerWrapper(be, side));
 
         // Capabilities on Auto Harvester (Energy & Item Container)
         event.registerBlockEntity(Capabilities.Energy.BLOCK, AUTO_HARVESTER_BE.get(),
                 (be, side) -> be.energyStorage);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, AUTO_HARVESTER_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
+                (be, side) -> new WorldlyContainerWrapper(be, side));
 
         // Capabilities on Blast Furnace Controller & Ports (Item Container for pipes/hoppers)
         event.registerBlockEntity(Capabilities.Item.BLOCK, BLAST_FURNACE_CONTROLLER_BE.get(),

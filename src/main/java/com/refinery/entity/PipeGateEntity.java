@@ -468,10 +468,16 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     }
 
     public static boolean hasInventory(Level level, BlockPos pos, Direction side) {
+        if (level == null || pos == null) return false;
         BlockEntity be = level.getBlockEntity(pos);
+        if (isPipeBlock(level, pos, be)) return false;
+
         if (be instanceof Container) return true;
         if (level.getCapability(Capabilities.Item.BLOCK, pos, side) != null) return true;
-        return level.getCapability(Capabilities.Item.BLOCK, pos, null) != null;
+        if (level.getCapability(Capabilities.Item.BLOCK, pos, null) != null) return true;
+        if (level.getCapability(Capabilities.Fluid.BLOCK, pos, side) != null) return true;
+        if (level.getCapability(Capabilities.Fluid.BLOCK, pos, null) != null) return true;
+        return false;
     }
 
     public static PipeAndTarget findPipeAndInventory(Level level, BlockPos basePos, Direction facing) {
@@ -680,16 +686,41 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             case MACHINE_ACTIVE -> {
                 if (containerPos != null) {
                     BlockState s = level.getBlockState(containerPos);
-                    if (s.hasProperty(BlockStateProperties.LIT) && s.getValue(BlockStateProperties.LIT)) yield true;
-                    if (s.hasProperty(PipeGateBlock.ACTIVE) && s.getValue(PipeGateBlock.ACTIVE)) yield true;
+                    for (var prop : s.getProperties()) {
+                        if (prop instanceof net.minecraft.world.level.block.state.properties.BooleanProperty bp) {
+                            String name = bp.getName().toLowerCase();
+                            if (name.equals("working") || name.equals("active") || name.equals("lit") || name.equals("running") || name.equals("powered")) {
+                                if (s.getValue(bp)) yield true;
+                            }
+                        }
+                    }
+                    BlockEntity be = level.getBlockEntity(containerPos);
+                    if (be instanceof com.refinery.block.entity.AutoHarvesterBlockEntity harvester && harvester.isWorking()) yield true;
+                    if (be instanceof com.refinery.block.entity.AutoPlanterBlockEntity planter && planter.isWorking()) yield true;
                 }
                 yield false;
             }
             case MACHINE_IDLE -> {
                 if (containerPos != null) {
                     BlockState s = level.getBlockState(containerPos);
-                    if (s.hasProperty(BlockStateProperties.LIT) && !s.getValue(BlockStateProperties.LIT)) yield true;
-                    if (s.hasProperty(PipeGateBlock.ACTIVE) && !s.getValue(PipeGateBlock.ACTIVE)) yield true;
+                    boolean foundActiveProp = false;
+                    for (var prop : s.getProperties()) {
+                        if (prop instanceof net.minecraft.world.level.block.state.properties.BooleanProperty bp) {
+                            String name = bp.getName().toLowerCase();
+                            if (name.equals("working") || name.equals("active") || name.equals("lit") || name.equals("running") || name.equals("powered")) {
+                                foundActiveProp = true;
+                                if (s.getValue(bp)) yield false;
+                            }
+                        }
+                    }
+                    BlockEntity be = level.getBlockEntity(containerPos);
+                    if (be instanceof com.refinery.block.entity.AutoHarvesterBlockEntity harvester) {
+                        yield !harvester.isWorking();
+                    }
+                    if (be instanceof com.refinery.block.entity.AutoPlanterBlockEntity planter) {
+                        yield !planter.isWorking();
+                    }
+                    if (foundActiveProp) yield true;
                 }
                 yield false;
             }

@@ -269,6 +269,9 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
                 if (dir == facing.getOpposite()) continue; // Skip back to the gate
                 BlockPos nPos = attachedPos.relative(dir);
                 BlockEntity nBe = level.getBlockEntity(nPos);
+                if (nBe != null && (LogisticsPipeCompat.isLogisticsPipe(nBe) || level.getBlockState(nPos).getBlock().getDescriptionId().contains("pipe"))) {
+                    continue; // Skip connected pipes when searching for target inventory
+                }
                 if (container == null && nBe instanceof Container c) {
                     container = c;
                     containerPos = nPos;
@@ -454,16 +457,41 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
             case MACHINE_ACTIVE -> {
                 if (containerPos != null) {
                     BlockState s = level.getBlockState(containerPos);
-                    if (s.hasProperty(BlockStateProperties.LIT) && s.getValue(BlockStateProperties.LIT)) yield true;
-                    if (s.hasProperty(PipeGateBlock.ACTIVE) && s.getValue(PipeGateBlock.ACTIVE)) yield true;
+                    for (var prop : s.getProperties()) {
+                        if (prop instanceof net.minecraft.world.level.block.state.properties.BooleanProperty bp) {
+                            String name = bp.getName().toLowerCase();
+                            if (name.equals("working") || name.equals("active") || name.equals("lit") || name.equals("running") || name.equals("powered")) {
+                                if (s.getValue(bp)) yield true;
+                            }
+                        }
+                    }
+                    BlockEntity be = level.getBlockEntity(containerPos);
+                    if (be instanceof com.refinery.block.entity.AutoHarvesterBlockEntity harvester && harvester.isWorking()) yield true;
+                    if (be instanceof com.refinery.block.entity.AutoPlanterBlockEntity planter && planter.isWorking()) yield true;
                 }
                 yield false;
             }
             case MACHINE_IDLE -> {
                 if (containerPos != null) {
                     BlockState s = level.getBlockState(containerPos);
-                    if (s.hasProperty(BlockStateProperties.LIT) && !s.getValue(BlockStateProperties.LIT)) yield true;
-                    if (s.hasProperty(PipeGateBlock.ACTIVE) && !s.getValue(PipeGateBlock.ACTIVE)) yield true;
+                    boolean foundActiveProp = false;
+                    for (var prop : s.getProperties()) {
+                        if (prop instanceof net.minecraft.world.level.block.state.properties.BooleanProperty bp) {
+                            String name = bp.getName().toLowerCase();
+                            if (name.equals("working") || name.equals("active") || name.equals("lit") || name.equals("running") || name.equals("powered")) {
+                                foundActiveProp = true;
+                                if (s.getValue(bp)) yield false;
+                            }
+                        }
+                    }
+                    BlockEntity be = level.getBlockEntity(containerPos);
+                    if (be instanceof com.refinery.block.entity.AutoHarvesterBlockEntity harvester) {
+                        yield !harvester.isWorking();
+                    }
+                    if (be instanceof com.refinery.block.entity.AutoPlanterBlockEntity planter) {
+                        yield !planter.isWorking();
+                    }
+                    if (foundActiveProp) yield true;
                 }
                 yield false;
             }
@@ -486,6 +514,9 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
             if (dir == facing.getOpposite()) continue;
             BlockPos nPos = attachedPos.relative(dir);
             BlockEntity nBe = level.getBlockEntity(nPos);
+            if (nBe != null && (LogisticsPipeCompat.isLogisticsPipe(nBe) || level.getBlockState(nPos).getBlock().getDescriptionId().contains("pipe"))) {
+                continue; // Skip connected pipes when searching for target inventory to pulse from
+            }
 
             // Item Pull Action from Container
             if (nBe instanceof Container container) {

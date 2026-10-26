@@ -2,6 +2,7 @@ package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
 import com.refinery.block.AutoHarvesterBlock;
+import com.refinery.compat.LogisticsPipeCompat;
 import com.refinery.menu.AutoHarvesterMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -529,7 +530,21 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
 
         for (BlockPos targetPos : targets) {
             BlockEntity targetBE = level.getBlockEntity(targetPos);
-            if (targetBE instanceof Container targetContainer) {
+            Direction targetSide = targetPos.equals(pos.below()) ? Direction.UP : facing;
+            if (targetBE != null && LogisticsPipeCompat.isLogisticsItemPipe(targetBE)) {
+                for (int i = 0; i < INVENTORY_SIZE; i++) {
+                    ItemStack sourceStack = this.items.get(i);
+                    if (!sourceStack.isEmpty()) {
+                        ItemStack one = sourceStack.copyWithCount(1);
+                        if (LogisticsPipeCompat.injectItemIntoPipe(targetBE, targetSide, one.copy())) {
+                            sourceStack.shrink(1);
+                            if (sourceStack.isEmpty()) this.items.set(i, ItemStack.EMPTY);
+                            setChanged();
+                            return;
+                        }
+                    }
+                }
+            } else if (targetBE instanceof Container targetContainer) {
                 for (int i = 0; i < INVENTORY_SIZE; i++) {
                     ItemStack sourceStack = this.items.get(i);
                     if (!sourceStack.isEmpty()) {
@@ -640,6 +655,16 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
 
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+        return true;
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public boolean canTakeItem(Container target, int slot, ItemStack stack) {
         return true;
     }
 

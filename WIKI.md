@@ -881,6 +881,20 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ## 13. Engineering Changelog & Version History
 
+### Version 1.5.7 (Logistics Pipe Compatibility & Machine Detection Fix)
+- **Accurate Machine Inventory Detection for Pipe Gates**:
+  - Fixed an issue where pipe gates mistakenly evaluated connected transport pipes as target inventories instead of the attached machine. Connected pipes are now strictly excluded from inventory resolution, allowing gate conditions (`Has Items`, `Inventory Empty`, `Inventory Space`, `Inventory Full`) to accurately detect machine inventory contents.
+- **Autarchic Pulsar Item Extraction on Logistics Extractor Pipes**:
+  - Fixed a `MethodHandle` polymorphic signature exception in `LogisticsPipeCompat` that prevented pulsar gates on extractor pipes from injecting items into the pipe network.
+  - Implemented reliable accessible reflection with dual fallback (`forceAddItem` with `TravelingItem` and `addItem` with `(Direction, ItemStack)`), allowing pulsar gates to reliably extract items from machines into logistics networks.
+- **Harvester Native Pipe Auto-Export**:
+  - The Automated Harvester now natively detects connected Logistics Automation item pipes positioned behind or below the block, auto-injecting harvested items directly into the pipe network.
+- **WorldlyContainer Capability Wrappers**:
+  - Migrated `AutoPlanterBlockEntity` and `AutoHarvesterBlockEntity` capability registrations to `WorldlyContainerWrapper(be, side)` with explicit `canPlaceItem` and `canTakeItem` handlers, ensuring sided insertion and extraction work with third-party logistics systems, hoppers, and pipes.
+- **Expanded Machine Status Gate Triggers**:
+  - `MACHINE_ACTIVE` and `MACHINE_IDLE` gate triggers now dynamically inspect block state properties (`working`, `active`, `lit`, `running`, `powered`) as well as direct machine working getters for Planters, Harvesters, Boilers, and Controllers.
+
+---
 ### Version 1.5.6 (Automated Tree Farming & Sapling Planting Support)
 - **Automated Planter Sapling & Tree Support**:
   - The **Automated Planter** (`refinery:auto_planter`) now accepts and plants all tree saplings (`#minecraft:saplings`, `SaplingBlock`, and modded saplings) alongside agricultural crops.

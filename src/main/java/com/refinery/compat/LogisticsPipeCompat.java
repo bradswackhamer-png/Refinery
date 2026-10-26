@@ -1,27 +1,28 @@
 package com.refinery.compat;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.slf4j.Logger;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 
 public class LogisticsPipeCompat {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static boolean initialized = false;
     private static Class<?> itemPipeClass = null;
     private static Class<?> fluidPipeClass = null;
     private static Class<?> travelingItemClass = null;
     private static Constructor<?> travelingItemConstructor = null;
-    private static MethodHandle forceAddItemHandle = null;
-    private static MethodHandle addItemHandle = null;
-    private static MethodHandle getTravelingItemsHandle = null;
-    private static MethodHandle totalMilliBucketsHandle = null;
+    private static Method forceAddItemMethod = null;
+    private static Method addItemMethod = null;
+    private static Method getTravelingItemsMethod = null;
+    private static Method totalMilliBucketsMethod = null;
 
-    private static void init() {
+    private static synchronized void init() {
         if (initialized) return;
         initialized = true;
         try {
@@ -29,22 +30,24 @@ public class LogisticsPipeCompat {
             travelingItemClass = Class.forName("com.logistics.core.lib.pipe.TravelingItem");
             travelingItemConstructor = travelingItemClass.getConstructor(ItemStack.class, Direction.class, float.class);
 
-            Method forceAddItemMethod = itemPipeClass.getMethod("forceAddItem", travelingItemClass, Direction.class);
-            forceAddItemHandle = MethodHandles.lookup().unreflect(forceAddItemMethod);
+            forceAddItemMethod = itemPipeClass.getMethod("forceAddItem", travelingItemClass, Direction.class);
+            forceAddItemMethod.setAccessible(true);
 
-            Method addItemMethod = itemPipeClass.getMethod("addItem", Direction.class, ItemStack.class);
-            addItemHandle = MethodHandles.lookup().unreflect(addItemMethod);
+            addItemMethod = itemPipeClass.getMethod("addItem", Direction.class, ItemStack.class);
+            addItemMethod.setAccessible(true);
 
-            Method getTravelingMethod = itemPipeClass.getMethod("getTravelingItems");
-            getTravelingItemsHandle = MethodHandles.lookup().unreflect(getTravelingMethod);
-        } catch (Throwable ignored) {
+            getTravelingItemsMethod = itemPipeClass.getMethod("getTravelingItems");
+            getTravelingItemsMethod.setAccessible(true);
+        } catch (Throwable t) {
+            LOGGER.warn("Failed to initialize Logistics item pipe compatibility: {}", t.getMessage());
         }
 
         try {
             fluidPipeClass = Class.forName("com.logistics.pipe.block.entity.FluidPipeBlockEntity");
-            Method totalMbMethod = fluidPipeClass.getMethod("totalMillibuckets");
-            totalMilliBucketsHandle = MethodHandles.lookup().unreflect(totalMbMethod);
-        } catch (Throwable ignored) {
+            totalMilliBucketsMethod = fluidPipeClass.getMethod("totalMillibuckets");
+            totalMilliBucketsMethod.setAccessible(true);
+        } catch (Throwable t) {
+            LOGGER.warn("Failed to initialize Logistics fluid pipe compatibility: {}", t.getMessage());
         }
     }
 
@@ -70,16 +73,30 @@ public class LogisticsPipeCompat {
     public static boolean injectItemIntoPipe(BlockEntity pipeBe, Direction fromDir, ItemStack stack) {
         if (pipeBe == null || stack == null || stack.isEmpty() || !isLogisticsItemPipe(pipeBe)) return false;
         init();
-        if (forceAddItemHandle != null && travelingItemConstructor != null) {
+
+        // 1. First try forceAddItemMethod (takes TravelingItem and fromDir, bypasses normal pipe intake restrictions)
+        if (forceAddItemMethod != null && travelingItemConstructor != null) {
             try {
-                // When an item enters from 'fromDir' (e.g. from the adjacent chest),
-                // its traveling motion moves towards fromDir.getOpposite() into the pipe.
+                // When an item enters from 'fromDir' (e.g. from the adjacent machine),
+                // its traveling motion heads towards fromDir.getOpposite() into the pipe network
                 Object travelingItem = travelingItemConstructor.newInstance(stack, fromDir.getOpposite(), 0.05f);
-                Object result = forceAddItemHandle.invoke(pipeBe, travelingItem, fromDir);
-                return result instanceof Boolean b && b;
-            } catch (Throwable ignored) {
+                Object result = forceAddItemMethod.invoke(pipeBe, travelingItem, fromDir);
+                if (result instanceof Boolean b && b) return true;
+            } catch (Throwable t) {
+                LOGGER.debug("Logistics forceAddItem reflection invocation failed: {}", t.getMessage());
             }
         }
+
+        // 2. Next try addItemMethod(Direction, ItemStack)
+        if (addItemMethod != null) {
+            try {
+                Object result = addItemMethod.invoke(pipeBe, fromDir, stack);
+                if (result instanceof Boolean b && b) return true;
+            } catch (Throwable t) {
+                LOGGER.debug("Logistics addItem reflection invocation failed: {}", t.getMessage());
+            }
+        }
+
         return false;
     }
 
@@ -88,9 +105,9 @@ public class LogisticsPipeCompat {
     }
 
     public static boolean hasTravelingItems(BlockEntity pipeBe) {
-        if (pipeBe == null || getTravelingItemsHandle == null || !isLogisticsItemPipe(pipeBe)) return false;
+        if (pipeBe == null || getTravelingItemsMethod == null || !isLogisticsItemPipe(pipeBe)) return false;
         try {
-            Object result = getTravelingItemsHandle.invoke(pipeBe);
+            Object result = getTravelingItemsMethod.invoke(pipeBe);
             if (result instanceof List<?> list) {
                 return !list.isEmpty();
             }
@@ -100,9 +117,9 @@ public class LogisticsPipeCompat {
     }
 
     public static long getFluidMilliBuckets(BlockEntity pipeBe) {
-        if (pipeBe == null || totalMilliBucketsHandle == null || !isLogisticsFluidPipe(pipeBe)) return 0;
+        if (pipeBe == null || totalMilliBucketsMethod == null || !isLogisticsFluidPipe(pipeBe)) return 0;
         try {
-            Object result = totalMilliBucketsHandle.invoke(pipeBe);
+            Object result = totalMilliBucketsMethod.invoke(pipeBe);
             if (result instanceof Number num) {
                 return num.longValue();
             }

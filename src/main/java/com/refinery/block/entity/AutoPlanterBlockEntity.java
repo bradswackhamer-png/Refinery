@@ -396,6 +396,11 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     @Override
+    public boolean canTakeItem(Container target, int slot, ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public boolean stillValid(Player player) {
         return Container.stillValidBlockEntity(this, player);
     }
