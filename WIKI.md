@@ -868,6 +868,19 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ## 13. Engineering Changelog & Version History
 
+### Version 1.5.4 (Autarchic Pulsar Item Routing & Gate Redstone Emission Fix)
+- **Autarchic Pulsar Extraction & Safe Injection**:
+  - Replaced unsafe standard external injection calls with internal `forceAddItem` handling in Logistics Pipes compat. External injection was previously failing pipe acceptance rules, causing Logistics to drop extracted items on the ground on every pulse.
+  - Implemented smart bidirectional endpoint resolution (`PipeAndTarget`): automatically identifies which adjacent block is the pipe and which is the inventory container, properly supporting gates mounted either onto pipes facing inventories or onto chests/machines facing pipes.
+  - Extracted items are safely injected into the pipe's internal traveling queue, moving towards connected endpoints without dropping on the ground.
+- **Pipe Gate Redstone Signal Emission**:
+  - Fixed issue where pipe gates configured to emit redstone signals (`REDSTONE_SIGNAL` and `REDSTONE_PULSE`) did not power adjacent redstone dust, repeaters, comparators, or machines.
+  - Because pipe gates are collar entities sharing the pipe's block space rather than standalone full blocks, introduced `BlockStateBaseMixin` injecting into `BlockBehaviour$BlockStateBase.getSignal()`, `getDirectSignal()`, and `isSignalSource()`.
+  - Maintains a thread-safe, dimension-keyed tracking registry of active powered gate positions (`POWERED_GATE_POSITIONS`). Blocks hosting powered gates output redstone signal level 15 in all directions.
+  - Added comprehensive neighbor updates (`updateNeighborsAt`) whenever gate redstone emission toggles on/off or when the gate entity is removed, guaranteeing instant response from adjacent redstone circuits.
+
+---
+
 ### Version 1.5.3 (Persistent Chunk Burnt State & Multi-Tier Retrogen Defense)
 - **Direct-to-Chunk MCA Burnt State**:
   - Implemented persistent NeoForge Data Attachment (`refinery:oil_chunk_burnt`) serialized directly into chunk `.mca` files. Chunks are permanently burnt upon their first load and evaluation, preventing any repeated rolls when players leave and return.

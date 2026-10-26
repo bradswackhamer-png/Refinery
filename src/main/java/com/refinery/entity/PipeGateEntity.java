@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -27,7 +28,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -43,10 +46,39 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     public static final int MAX_SLOTS = 8;
     public static final int DATA_COUNT = 20;
+
+    public record LevelPos(ResourceKey<Level> dimension, BlockPos pos) {}
+    private static final Set<LevelPos> POWERED_GATE_POSITIONS = ConcurrentHashMap.newKeySet();
+
+    public static boolean hasAnyPoweredGates() {
+        return !POWERED_GATE_POSITIONS.isEmpty();
+    }
+
+    public static boolean isEmittingRedstone(BlockGetter level, BlockPos pos, Direction direction) {
+        if (POWERED_GATE_POSITIONS.isEmpty() || pos == null) return false;
+        if (level instanceof Level lvl) {
+            return POWERED_GATE_POSITIONS.contains(new LevelPos(lvl.dimension(), pos.immutable()));
+        }
+        for (LevelPos lp : POWERED_GATE_POSITIONS) {
+            if (lp.pos().equals(pos)) return true;
+        }
+        return false;
+    }
+
+    public static void notifyRedstoneNeighbors(Level level, BlockPos pos) {
+        if (level == null || pos == null || level.isClientSide()) return;
+        BlockState state = level.getBlockState(pos);
+        Block block = state.getBlock();
+        level.updateNeighborsAt(pos, block);
+        for (Direction dir : Direction.values()) {
+            level.updateNeighborsAt(pos.relative(dir), block);
+        }
+    }
 
     private static final EntityDataAccessor<Integer> DATA_TIER = SynchedEntityData.defineId(PipeGateEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_AUTARCHIC = SynchedEntityData.defineId(PipeGateEntity.class, EntityDataSerializers.BOOLEAN);
@@ -322,6 +354,21 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     }
 
     @Override
+    public void remove(RemovalReason reason) {
+        if (!level().isClientSide() && this.entityData.get(DATA_POWERED)) {
+            BlockPos pipePos = getPipePos();
+            POWERED_GATE_POSITIONS.remove(new LevelPos(level().dimension(), pipePos.immutable()));
+            notifyRedstoneNeighbors(level(), pipePos);
+            PipeAndTarget pat = findPipeAndInventory(level(), pipePos, getAttachedFace());
+            if (pat != null && !pat.pipePos().equals(pipePos)) {
+                POWERED_GATE_POSITIONS.remove(new LevelPos(level().dimension(), pat.pipePos().immutable()));
+                notifyRedstoneNeighbors(level(), pat.pipePos());
+            }
+        }
+        super.remove(reason);
+    }
+
+    @Override
     public void tick() {
         super.tick();
 
@@ -389,68 +436,108 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             this.pulsarTimer = 0;
         }
 
+        boolean wasPowered = this.entityData.get(DATA_POWERED);
+        if (!level().isClientSide() && shouldEmitRedstone != wasPowered) {
+            LevelPos lp1 = new LevelPos(level().dimension(), pipePos.immutable());
+            PipeAndTarget pat = findPipeAndInventory(level(), pipePos, facing);
+            LevelPos lp2 = (pat != null && !pat.pipePos().equals(pipePos))
+                    ? new LevelPos(level().dimension(), pat.pipePos().immutable()) : null;
+
+            if (shouldEmitRedstone) {
+                POWERED_GATE_POSITIONS.add(lp1);
+                if (lp2 != null) POWERED_GATE_POSITIONS.add(lp2);
+            } else {
+                POWERED_GATE_POSITIONS.remove(lp1);
+                if (lp2 != null) POWERED_GATE_POSITIONS.remove(lp2);
+            }
+            notifyRedstoneNeighbors(level(), pipePos);
+            if (lp2 != null) notifyRedstoneNeighbors(level(), pat.pipePos());
+        }
+
         this.entityData.set(DATA_POWERED, shouldEmitRedstone);
         this.entityData.set(DATA_ACTIVE, hasAnyActive);
     }
 
+    public record PipeAndTarget(BlockPos pipePos, BlockEntity pipeBe, BlockPos invPos, Direction fromPipeToInv) {}
+
+    public static boolean isPipeBlock(Level level, BlockPos pos, @Nullable BlockEntity be) {
+        if (be != null && LogisticsPipeCompat.isLogisticsPipe(be)) return true;
+        BlockState state = level.getBlockState(pos);
+        String name = state.getBlock().getDescriptionId().toLowerCase();
+        return name.contains("pipe") || name.contains("tube") || name.contains("duct");
+    }
+
+    public static boolean hasInventory(Level level, BlockPos pos, Direction side) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof Container) return true;
+        if (level.getCapability(Capabilities.Item.BLOCK, pos, side) != null) return true;
+        return level.getCapability(Capabilities.Item.BLOCK, pos, null) != null;
+    }
+
+    public static PipeAndTarget findPipeAndInventory(Level level, BlockPos basePos, Direction facing) {
+        BlockEntity baseBe = level.getBlockEntity(basePos);
+        boolean baseIsPipe = isPipeBlock(level, basePos, baseBe);
+
+        if (baseIsPipe) {
+            // Gate is attached to the PIPE!
+            BlockPos facingPos = basePos.relative(facing);
+            if (hasInventory(level, facingPos, facing.getOpposite())) {
+                return new PipeAndTarget(basePos, baseBe, facingPos, facing);
+            }
+            for (Direction dir : Direction.values()) {
+                if (dir == facing) continue;
+                BlockPos nPos = basePos.relative(dir);
+                if (hasInventory(level, nPos, dir.getOpposite())) {
+                    return new PipeAndTarget(basePos, baseBe, nPos, dir);
+                }
+            }
+        } else {
+            // Gate is attached to the INVENTORY (e.g. chest)!
+            BlockPos facingPos = basePos.relative(facing);
+            BlockEntity facingBe = level.getBlockEntity(facingPos);
+            if (isPipeBlock(level, facingPos, facingBe)) {
+                return new PipeAndTarget(facingPos, facingBe, basePos, facing.getOpposite());
+            }
+            for (Direction dir : Direction.values()) {
+                if (dir == facing) continue;
+                BlockPos nPos = basePos.relative(dir);
+                BlockEntity nBe = level.getBlockEntity(nPos);
+                if (isPipeBlock(level, nPos, nBe)) {
+                    return new PipeAndTarget(nPos, nBe, basePos, dir.getOpposite());
+                }
+            }
+        }
+        return null;
+    }
+
     private void evaluateAllTriggers(Level level, BlockPos pipePos, Direction facing) {
-        BlockState pipeState = level.getBlockState(pipePos);
-        BlockEntity pipeBe = level.getBlockEntity(pipePos);
-
-        boolean isPipe = LogisticsPipeCompat.isLogisticsPipe(pipeBe) ||
-                pipeState.getBlock().getDescriptionId().contains("pipe");
-
         Container container = null;
         ResourceHandler<ItemResource> itemHandler = null;
         ResourceHandler<FluidResource> fluidHandler = null;
         BlockPos containerPos = null;
 
-        if (isPipe) {
-            // First prioritize the direction the gate is facing (collar face)
-            Direction[] searchDirs = new Direction[6];
-            searchDirs[0] = facing;
-            int idx = 1;
-            for (Direction d : Direction.values()) {
-                if (d != facing) searchDirs[idx++] = d;
-            }
-
-            for (Direction dir : searchDirs) {
-                BlockPos nPos = pipePos.relative(dir);
-                BlockEntity nBe = level.getBlockEntity(nPos);
-                if (nBe != null) {
-                    if (fluidHandler == null) {
-                        var f = level.getCapability(Capabilities.Fluid.BLOCK, nPos, dir.getOpposite());
-                        if (f == null) f = level.getCapability(Capabilities.Fluid.BLOCK, nPos, null);
-                        if (f != null) {
-                            fluidHandler = f;
-                            if (containerPos == null) containerPos = nPos;
-                        }
-                    }
-                    if (itemHandler == null) {
-                        var it = level.getCapability(Capabilities.Item.BLOCK, nPos, dir.getOpposite());
-                        if (it == null) it = level.getCapability(Capabilities.Item.BLOCK, nPos, null);
-                        if (it != null) {
-                            itemHandler = it;
-                            if (containerPos == null) containerPos = nPos;
-                        }
-                    }
-                    if (container == null && nBe instanceof Container c) {
-                        container = c;
-                        if (containerPos == null) containerPos = nPos;
-                    }
-                }
-            }
+        PipeAndTarget pat = findPipeAndInventory(level, pipePos, facing);
+        if (pat != null) {
+            containerPos = pat.invPos;
+            BlockEntity invBe = level.getBlockEntity(pat.invPos);
+            if (invBe instanceof Container c) container = c;
+            itemHandler = level.getCapability(Capabilities.Item.BLOCK, pat.invPos, pat.fromPipeToInv.getOpposite());
+            if (itemHandler == null) itemHandler = level.getCapability(Capabilities.Item.BLOCK, pat.invPos, null);
+            fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, pat.invPos, pat.fromPipeToInv.getOpposite());
+            if (fluidHandler == null) fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, pat.invPos, null);
         } else {
-            // Attached directly to a machine block
+            // Fallback
             itemHandler = level.getCapability(Capabilities.Item.BLOCK, pipePos, facing);
             if (itemHandler == null) itemHandler = level.getCapability(Capabilities.Item.BLOCK, pipePos, null);
-
             fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, pipePos, facing);
             if (fluidHandler == null) fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, pipePos, null);
-
-            if (pipeBe instanceof Container c) container = c;
+            BlockEntity be = level.getBlockEntity(pipePos);
+            if (be instanceof Container c) container = c;
             containerPos = pipePos;
         }
+
+        BlockEntity pipeBe = pat != null ? pat.pipeBe : level.getBlockEntity(pipePos);
+        boolean isPipe = pat != null || isPipeBlock(level, pipePos, pipeBe);
 
         int activeSlots = getTier().getSlots();
         for (int i = 0; i < activeSlots; i++) {
@@ -617,97 +704,93 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         };
     }
 
-    private void executePulsar(Level level, BlockPos pipePos, Direction facing) {
-        BlockEntity pipeBe = level.getBlockEntity(pipePos);
+    private void executePulsar(Level level, BlockPos basePos, Direction facing) {
+        PipeAndTarget pat = findPipeAndInventory(level, basePos, facing);
+        if (pat == null) return;
 
-        // Check all 6 directions around the pipe
-        for (Direction dir : Direction.values()) {
-            BlockPos nPos = pipePos.relative(dir);
-            BlockEntity nBe = level.getBlockEntity(nPos);
-            if (nBe == null) continue;
+        BlockEntity invBe = level.getBlockEntity(pat.invPos);
 
-            // Item Pull Action from Vanilla Container
-            if (nBe instanceof Container container) {
-                for (int slot = 0; slot < container.getContainerSize(); slot++) {
-                    ItemStack st = container.getItem(slot);
-                    if (!st.isEmpty()) {
-                        ItemStack one = st.copyWithCount(1);
-                        if (LogisticsPipeCompat.addItemToPipe(pipeBe, dir, one.copy())) {
-                            container.removeItem(slot, 1);
-                            spawnPulsarEffect(level, pipePos);
-                            return;
-                        }
-                        ResourceHandler<ItemResource> pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pipePos, dir);
-                        if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pipePos, null);
-                        if (pipeHandler != null) {
-                            try (Transaction tx = Transaction.openRoot()) {
-                                int ins = pipeHandler.insert(ItemResource.of(one), 1, tx);
-                                if (ins > 0) {
-                                    tx.commit();
-                                    container.removeItem(slot, 1);
-                                    spawnPulsarEffect(level, pipePos);
-                                    return;
-                                }
-                            }
-                        }
+        // 1. Item Pull Action from Container
+        if (invBe instanceof Container container) {
+            for (int slot = 0; slot < container.getContainerSize(); slot++) {
+                ItemStack st = container.getItem(slot);
+                if (!st.isEmpty()) {
+                    ItemStack one = st.copyWithCount(1);
+                    if (LogisticsPipeCompat.injectItemIntoPipe(pat.pipeBe, pat.fromPipeToInv, one.copy())) {
+                        container.removeItem(slot, 1);
+                        spawnPulsarEffect(level, pat.pipePos);
+                        return;
                     }
-                }
-            }
-
-            // Item Pull Action from Item ResourceHandler
-            ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, nPos, dir.getOpposite());
-            if (itemHandler == null) itemHandler = level.getCapability(Capabilities.Item.BLOCK, nPos, null);
-            if (itemHandler != null) {
-                for (int s = 0; s < itemHandler.size(); s++) {
-                    ItemResource res = itemHandler.getResource(s);
-                    if (!res.isEmpty() && itemHandler.getAmountAsLong(s) > 0) {
-                        ItemStack one = res.toStack(1);
-                        if (LogisticsPipeCompat.addItemToPipe(pipeBe, dir, one.copy())) {
-                            try (Transaction tx = Transaction.openRoot()) {
-                                itemHandler.extract(s, res, 1, tx);
-                                tx.commit();
-                            }
-                            spawnPulsarEffect(level, pipePos);
-                            return;
-                        }
-                        ResourceHandler<ItemResource> pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pipePos, dir);
-                        if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pipePos, null);
-                        if (pipeHandler != null) {
-                            try (Transaction tx = Transaction.openRoot()) {
-                                int ins = pipeHandler.insert(res, 1, tx);
-                                if (ins > 0) {
-                                    itemHandler.extract(s, res, 1, tx);
-                                    tx.commit();
-                                    spawnPulsarEffect(level, pipePos);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Fluid Pump Action
-            ResourceHandler<FluidResource> sourceFluid = level.getCapability(Capabilities.Fluid.BLOCK, nPos, dir.getOpposite());
-            if (sourceFluid == null) sourceFluid = level.getCapability(Capabilities.Fluid.BLOCK, nPos, null);
-
-            ResourceHandler<FluidResource> pipeFluid = level.getCapability(Capabilities.Fluid.BLOCK, pipePos, dir);
-            if (pipeFluid == null) pipeFluid = level.getCapability(Capabilities.Fluid.BLOCK, pipePos, null);
-
-            if (sourceFluid != null && pipeFluid != null) {
-                for (int t = 0; t < sourceFluid.size(); t++) {
-                    FluidResource res = sourceFluid.getResource(t);
-                    long currentAmt = sourceFluid.getAmountAsLong(t);
-                    if (!res.isEmpty() && currentAmt > 0) {
+                    ResourceHandler<ItemResource> pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pat.pipePos, pat.fromPipeToInv);
+                    if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pat.pipePos, null);
+                    if (pipeHandler != null) {
                         try (Transaction tx = Transaction.openRoot()) {
-                            int toMove = (int) Math.min(250, currentAmt);
-                            int ins = pipeFluid.insert(res, toMove, tx);
+                            int ins = pipeHandler.insert(ItemResource.of(one), 1, tx);
                             if (ins > 0) {
-                                sourceFluid.extract(t, res, ins, tx);
                                 tx.commit();
-                                spawnPulsarEffect(level, pipePos);
+                                container.removeItem(slot, 1);
+                                spawnPulsarEffect(level, pat.pipePos);
                                 return;
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Item Pull Action from Item ResourceHandler
+        ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, pat.invPos, pat.fromPipeToInv.getOpposite());
+        if (itemHandler == null) itemHandler = level.getCapability(Capabilities.Item.BLOCK, pat.invPos, null);
+        if (itemHandler != null) {
+            for (int s = 0; s < itemHandler.size(); s++) {
+                ItemResource res = itemHandler.getResource(s);
+                if (!res.isEmpty() && itemHandler.getAmountAsLong(s) > 0) {
+                    ItemStack one = res.toStack(1);
+                    if (LogisticsPipeCompat.injectItemIntoPipe(pat.pipeBe, pat.fromPipeToInv, one.copy())) {
+                        try (Transaction tx = Transaction.openRoot()) {
+                            itemHandler.extract(s, res, 1, tx);
+                            tx.commit();
+                        }
+                        spawnPulsarEffect(level, pat.pipePos);
+                        return;
+                    }
+                    ResourceHandler<ItemResource> pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pat.pipePos, pat.fromPipeToInv);
+                    if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pat.pipePos, null);
+                    if (pipeHandler != null) {
+                        try (Transaction tx = Transaction.openRoot()) {
+                            int ins = pipeHandler.insert(res, 1, tx);
+                            if (ins > 0) {
+                                itemHandler.extract(s, res, 1, tx);
+                                tx.commit();
+                                spawnPulsarEffect(level, pat.pipePos);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Fluid Pump Action
+        ResourceHandler<FluidResource> sourceFluid = level.getCapability(Capabilities.Fluid.BLOCK, pat.invPos, pat.fromPipeToInv.getOpposite());
+        if (sourceFluid == null) sourceFluid = level.getCapability(Capabilities.Fluid.BLOCK, pat.invPos, null);
+
+        ResourceHandler<FluidResource> pipeFluid = level.getCapability(Capabilities.Fluid.BLOCK, pat.pipePos, pat.fromPipeToInv);
+        if (pipeFluid == null) pipeFluid = level.getCapability(Capabilities.Fluid.BLOCK, pat.pipePos, null);
+
+        if (sourceFluid != null && pipeFluid != null) {
+            for (int t = 0; t < sourceFluid.size(); t++) {
+                FluidResource res = sourceFluid.getResource(t);
+                long currentAmt = sourceFluid.getAmountAsLong(t);
+                if (!res.isEmpty() && currentAmt > 0) {
+                    try (Transaction tx = Transaction.openRoot()) {
+                        int toMove = (int) Math.min(250, currentAmt);
+                        int ins = pipeFluid.insert(res, toMove, tx);
+                        if (ins > 0) {
+                            sourceFluid.extract(t, res, ins, tx);
+                            tx.commit();
+                            spawnPulsarEffect(level, pat.pipePos);
+                            return;
                         }
                     }
                 }

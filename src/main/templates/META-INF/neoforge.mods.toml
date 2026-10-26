@@ -31,3 +31,6 @@ Fractionally distills Crude Oil into Diesel, Gasoline/Gas, Tar, and Sulfur with 
     versionRange="[0.8.0,)"
     ordering="NONE"
     side="BOTH"
+
+[[mixins]]
+config="refinery.mixins.json"
