@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -141,52 +143,90 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
             BlockState targetState = level.getBlockState(targetPos);
             BlockState aboveState = level.getBlockState(abovePos);
 
-            boolean isDirt = targetState.is(Blocks.DIRT) || targetState.is(Blocks.GRASS_BLOCK)
-                    || targetState.is(Blocks.DIRT_PATH) || targetState.is(Blocks.ROOTED_DIRT)
-                    || (targetState.is(BlockTags.DIRT) && !targetState.is(Blocks.FARMLAND) && !targetState.is(Blocks.COARSE_DIRT));
-
             boolean canPlantAbove = aboveState.isAir() || aboveState.canBeReplaced()
                     || aboveState.is(Blocks.SHORT_GRASS) || aboveState.is(Blocks.FERN);
 
-            // Operation 1: Found Dirt -> Till into Farmland and plant if seed is in inventory
-            if (isDirt && canPlantAbove) {
-                if (!aboveState.isAir()) {
-                    level.destroyBlock(abovePos, false);
-                }
+            if (canPlantAbove) {
+                for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+                    ItemStack stack = this.items.get(slot);
+                    if (stack.isEmpty() || !isPlantable(stack)) continue;
 
-                // Till the soil into farmland
-                level.setBlock(targetPos, Blocks.FARMLAND.defaultBlockState(), 3);
-                level.playSound(null, targetPos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 0.8f, 1.0f);
-                serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                        targetPos.getX() + 0.5, targetPos.getY() + 1.0, targetPos.getZ() + 0.5,
-                        3, 0.2, 0.1, 0.2, 0.05);
+                    if (isSapling(stack)) {
+                        // Saplings plant on Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss, etc.
+                        boolean isSoil = targetState.is(BlockTags.DIRT) || targetState.is(Blocks.FARMLAND);
+                        if (!isSoil) continue;
 
-                if (this.energy >= ENERGY_PER_ACTION) {
-                    this.energy -= ENERGY_PER_ACTION;
-                    this.energyStorage.set(this.energy);
-                }
+                        BlockState saplingState = getPlantableCrop(stack, level, abovePos);
+                        if (saplingState == null) continue;
 
-                // Attempt immediate planting
-                tryPlantSeed(serverLevel, abovePos);
+                        // If farmland, revert back to normal dirt for tree sapling
+                        if (targetState.is(Blocks.FARMLAND)) {
+                            level.setBlock(targetPos, Blocks.DIRT.defaultBlockState(), 3);
+                        }
 
-                performedAction = true;
-                break;
-            }
+                        if (!aboveState.isAir()) {
+                            level.destroyBlock(abovePos, false);
+                        }
 
-            // Operation 2: Found unplanted Farmland -> Plant seed
-            boolean isFarmland = targetState.is(Blocks.FARMLAND);
-            if (isFarmland && canPlantAbove) {
-                if (!aboveState.isAir()) {
-                    level.destroyBlock(abovePos, false);
-                }
-                if (tryPlantSeed(serverLevel, abovePos)) {
-                    if (this.energy >= ENERGY_PER_ACTION) {
-                        this.energy -= ENERGY_PER_ACTION;
-                        this.energyStorage.set(this.energy);
+                        stack.shrink(1);
+                        level.setBlock(abovePos, saplingState, 3);
+                        level.playSound(null, abovePos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 0.8f, 1.0f);
+                        serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                                abovePos.getX() + 0.5, abovePos.getY() + 0.2, abovePos.getZ() + 0.5,
+                                3, 0.2, 0.1, 0.2, 0.05);
+
+                        if (this.energy >= ENERGY_PER_ACTION) {
+                            this.energy -= ENERGY_PER_ACTION;
+                            this.energyStorage.set(this.energy);
+                        }
+
+                        performedAction = true;
+                        setChanged();
+                        break;
+                    } else {
+                        // Standard crop seed
+                        boolean isDirt = targetState.is(Blocks.DIRT) || targetState.is(Blocks.GRASS_BLOCK)
+                                || targetState.is(Blocks.DIRT_PATH) || targetState.is(Blocks.ROOTED_DIRT)
+                                || (targetState.is(BlockTags.DIRT) && !targetState.is(Blocks.FARMLAND) && !targetState.is(Blocks.COARSE_DIRT));
+                        boolean isFarmland = targetState.is(Blocks.FARMLAND);
+
+                        if (!isDirt && !isFarmland) continue;
+
+                        if (isDirt) {
+                            if (!aboveState.isAir()) {
+                                level.destroyBlock(abovePos, false);
+                            }
+                            level.setBlock(targetPos, Blocks.FARMLAND.defaultBlockState(), 3);
+                            level.playSound(null, targetPos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 0.8f, 1.0f);
+                            serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                                    targetPos.getX() + 0.5, targetPos.getY() + 1.0, targetPos.getZ() + 0.5,
+                                    3, 0.2, 0.1, 0.2, 0.05);
+                        }
+
+                        BlockState cropState = getPlantableCrop(stack, level, abovePos);
+                        if (cropState != null) {
+                            if (!aboveState.isAir()) {
+                                level.destroyBlock(abovePos, false);
+                            }
+                            stack.shrink(1);
+                            level.setBlock(abovePos, cropState, 3);
+                            level.playSound(null, abovePos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 0.8f, 1.0f);
+                            serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                                    abovePos.getX() + 0.5, abovePos.getY() + 0.2, abovePos.getZ() + 0.5,
+                                    3, 0.2, 0.1, 0.2, 0.05);
+
+                            if (this.energy >= ENERGY_PER_ACTION) {
+                                this.energy -= ENERGY_PER_ACTION;
+                                this.energyStorage.set(this.energy);
+                            }
+
+                            performedAction = true;
+                            setChanged();
+                            break;
+                        }
                     }
-                    performedAction = true;
-                    break;
                 }
+                if (performedAction) break;
             }
         }
 
@@ -199,26 +239,6 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         }
     }
 
-    private boolean tryPlantSeed(ServerLevel level, BlockPos plantPos) {
-        for (int i = 0; i < INVENTORY_SIZE; i++) {
-            ItemStack stack = this.items.get(i);
-            if (!stack.isEmpty()) {
-                BlockState crop = getPlantableCrop(stack, level, plantPos);
-                if (crop != null) {
-                    stack.shrink(1);
-                    level.setBlock(plantPos, crop, 3);
-                    level.playSound(null, plantPos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 0.8f, 1.0f);
-                    level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                            plantPos.getX() + 0.5, plantPos.getY() + 0.2, plantPos.getZ() + 0.5,
-                            3, 0.2, 0.1, 0.2, 0.05);
-                    setChanged();
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     private void setWorking(ServerLevel level, BlockPos pos, boolean isWorking) {
         this.working = isWorking;
         BlockState current = getBlockState();
@@ -227,8 +247,21 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         }
     }
 
+    public static boolean isSapling(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        if (stack.is(ItemTags.SAPLINGS)) return true;
+        Item item = stack.getItem();
+        if (item == Items.MANGROVE_PROPAGULE) return true;
+        if (item instanceof BlockItem bi) {
+            Block block = bi.getBlock();
+            return block instanceof SaplingBlock || block.defaultBlockState().is(BlockTags.SAPLINGS);
+        }
+        return false;
+    }
+
     public static boolean isPlantable(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        if (isSapling(stack)) return true;
         Item item = stack.getItem();
         if (item == Items.WHEAT_SEEDS || item == Items.CARROT || item == Items.POTATO
                 || item == Items.BEETROOT_SEEDS || item == Items.PUMPKIN_SEEDS || item == Items.MELON_SEEDS
@@ -257,7 +290,7 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         if (item instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             BlockState defaultState = block.defaultBlockState();
-            if (block instanceof CropBlock || block instanceof StemBlock) {
+            if (block instanceof CropBlock || block instanceof StemBlock || block instanceof SaplingBlock || defaultState.is(BlockTags.SAPLINGS)) {
                 return defaultState;
             }
             if (defaultState.canSurvive(level, plantPos)) {

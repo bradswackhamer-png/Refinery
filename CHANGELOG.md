@@ -4,6 +4,21 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [v1.5.6] - 2026-10-26
+
+### Added & Improved
+- **Automated Planter Sapling & Tree Support**:
+  - The **Automated Planter** (`refinery:auto_planter`) now accepts and plants all tree saplings (`#minecraft:saplings`, `SaplingBlock`, and modded tree saplings) alongside standard agricultural crop seeds.
+  - Saplings are planted directly on natural soil blocks (`#minecraft:dirt` — Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling them into farmland.
+  - Automatically handles slot placement, hopper/pipe input filtering, and shift-clicking for saplings.
+- **Automated Harvester Tree & Leaf Canopy Felling**:
+  - The **Automated Harvester** (`refinery:auto_harvester`) now detects tree trunks and logs (`#minecraft:logs`) and leaf blocks (`#minecraft:leaves`).
+  - When a tree is scanned, the harvester performs an intelligent 3D recursive flood-fill harvest: felling the entire trunk, diagonal branches, and the surrounding leaf canopy up to 32 blocks high and 8 blocks radius.
+  - Collects all tree drops into the harvester's buffer: wood logs, saplings, apples, and sticks, auto-exporting them to chests or pipes connected behind or below.
+  - Also clears standalone leaf clusters, fully opening the ground for the Automated Planter to replant new saplings and creating a continuous, 100% automated tree farm loop.
+
+---
+
 ## [v1.5.5] - 2026-10-26
 
 ### Added

@@ -129,10 +129,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.5.jar`
+`refinery-1.5.6.jar`
 
 ### Display Name
-`Industrial Refinery 1.5.5 (NeoForge 26.3)`
+`Industrial Refinery 1.5.6 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -148,9 +148,19 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.5
+# Industrial Refinery v1.5.6
 
-### 🚀 What's New in v1.5.5:
+### 🚀 What's New in v1.5.6:
+- **Automated Planter Sapling & Tree Support**:
+  - The **Automated Planter** (`refinery:auto_planter`) now accepts and plants all tree saplings (`#minecraft:saplings`, `SaplingBlock`, and modded saplings) alongside agricultural crops.
+  - Saplings are planted directly on natural soil blocks (`#minecraft:dirt` — Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling them into farmland.
+- **Automated Harvester Tree & Leaf Canopy Felling**:
+  - The **Automated Harvester** (`refinery:auto_harvester`) now detects tree trunks and logs (`#minecraft:logs`) and leaf blocks (`#minecraft:leaves`).
+  - When a tree is scanned, the harvester performs an intelligent 3D recursive flood-fill harvest: felling the entire trunk, diagonal branches, and the surrounding leaf canopy up to 32 blocks high and 8 blocks radius.
+  - Collects all tree drops into the harvester's buffer: wood logs, saplings, apples, and sticks, auto-exporting them to chests or pipes connected behind or below.
+  - Standalone leaf clusters are also cleared, creating a continuous, 100% automated tree farming loop alongside the Planter.
+
+### 📌 Previous v1.5.5 Highlights:
 - **Automated Agricultural Crafting Recipes**:
   - Added shaped crafting recipes for the **Automated Planter** (`refinery:auto_planter`) and **Automated Harvester** (`refinery:auto_harvester`).
   - **Planter**: 4 Iron Ingots, 2 Copper Ingots, 1 Iron Hoe (top), 1 Piston (center), 1 Redstone Dust (bottom).

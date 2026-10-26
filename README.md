@@ -137,17 +137,21 @@ The **Automated Planter** (`refinery:auto_planter`) manages soil preparation and
 
 - **Crafting Recipe**: 4x Iron Ingot, 2x Copper Ingot, 1x Iron Hoe (top-center), 1x Piston (center), 1x Redstone Dust (bottom-center).
 - **Scan Coverage**: 5 blocks in all horizontal directions (an **11×11 square**, 121 tiles total) up to **2 blocks above** the planter.
-- **Tilling & Planting**: Automatically detects dirt or grass blocks, tills them into farmland, and plants any valid seeds found in its 9-slot inventory.
+- **Tilling & Planting**:
+  - **Crops**: Automatically detects dirt or grass blocks, tills them into farmland, and plants any valid seeds found in its 9-slot inventory.
+  - **Trees & Saplings**: Accepts all tree saplings (Oak, Birch, Spruce, Dark Oak, Jungle, Acacia, Cherry, Pale Oak, Mangrove Propagules, and modded saplings). Plants them directly onto natural soil (`#minecraft:dirt` — Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling into farmland.
 - **Energy**: Consumes 1-2 FE/t standby and 10 FE per planting action.
-- **Automation**: Accepts seeds from hoppers, droppers, or item pipes through any face.
+- **Automation**: Accepts seeds and saplings from hoppers, droppers, or item pipes through any face.
 
 ### Automated Harvester
 The **Automated Harvester** (`refinery:auto_harvester`) scans mature crops directly in front of it.
 
 - **Crafting Recipe**: 4x Iron Ingot, 2x Copper Ingot, 1x Shears (top-center), 1x Hopper (center), 1x Redstone Dust (bottom-center).
 - **Scan Coverage**: An **11×11 field** directly in front of the machine (5 blocks to the left, 5 blocks to the right, and 11 blocks forward). Place this unit above ground centered with your farm.
-- **Harvest & Replant**: Detects fully mature crops (Wheat, Carrots, Potatoes, Beetroots, Melon/Pumpkin stems, etc.), harvests the drops, and immediately replants the seed.
-- **Buffer & Ejection**: Internal 9-slot buffer. **Automatically pushes harvested produce into chests or pipes** placed directly **behind** or **below** the harvester!
+- **Harvest & Replant**:
+  - **Crops**: Detects fully mature crops (Wheat, Carrots, Potatoes, Beetroots, Melon/Pumpkin, Sugar Cane, Cocoa, Sweet Berries, etc.), harvests the drops, and immediately replants the seed.
+  - **Trees & Foliage**: Detects tree trunks (`#minecraft:logs`) and leaves (`#minecraft:leaves`). Intelligently fells the entire tree via 3D recursive flood-fill (trunk, branches, and canopy up to 32 blocks high and 8 blocks radius), gathering wood logs, saplings, apples, and sticks while clearing the ground for immediate replanting.
+- **Buffer & Ejection**: Internal 9-slot buffer. **Automatically pushes harvested produce, wood logs, and saplings into chests or pipes** placed directly **behind** or **below** the harvester!
 - **Energy**: Consumes 2 FE/t standby and 20 FE per harvest.
 
 ```
@@ -876,6 +880,18 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.5.6 (Automated Tree Farming & Sapling Planting Support)
+- **Automated Planter Sapling & Tree Support**:
+  - The **Automated Planter** (`refinery:auto_planter`) now accepts and plants all tree saplings (`#minecraft:saplings`, `SaplingBlock`, and modded saplings) alongside agricultural crops.
+  - Saplings are planted directly on natural soil blocks (`#minecraft:dirt` — Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling them into farmland.
+- **Automated Harvester Tree & Leaf Canopy Felling**:
+  - The **Automated Harvester** (`refinery:auto_harvester`) now detects tree trunks and logs (`#minecraft:logs`) and leaf blocks (`#minecraft:leaves`).
+  - When a tree is scanned, the harvester performs an intelligent 3D recursive flood-fill harvest: felling the entire trunk, diagonal branches, and the surrounding leaf canopy up to 32 blocks high and 8 blocks radius.
+  - Collects all tree drops into the harvester's buffer: wood logs, saplings, apples, and sticks, auto-exporting them to chests or pipes connected behind or below.
+  - Standalone leaf clusters are also cleared, creating a continuous, 100% automated tree farming loop alongside the Planter.
+
+---
 
 ### Version 1.5.5 (Automated Agricultural Crafting Recipes)
 - **Automated Planter & Harvester Recipes**:

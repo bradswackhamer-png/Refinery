@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -38,8 +40,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INVENTORY_SIZE = 9;
@@ -193,6 +194,16 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
 
                 harvestedSomething = true;
                 break;
+            } else if (isTreeLog(targetState)) {
+                if (harvestTree(serverLevel, targetPos)) {
+                    harvestedSomething = true;
+                    break;
+                }
+            } else if (isTreeLeaf(targetState)) {
+                if (harvestLeavesCluster(serverLevel, targetPos)) {
+                    harvestedSomething = true;
+                    break;
+                }
             }
         }
 
@@ -203,6 +214,152 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         } else if (this.working && this.actionCooldown == 0) {
             setWorking(serverLevel, pos, false);
         }
+    }
+
+    public static boolean isTreeLog(BlockState state) {
+        if (state.isAir()) return false;
+        return state.is(BlockTags.LOGS);
+    }
+
+    public static boolean isTreeLeaf(BlockState state) {
+        if (state.isAir()) return false;
+        return state.is(BlockTags.LEAVES) || state.getBlock() instanceof LeavesBlock;
+    }
+
+    private boolean harvestTree(ServerLevel level, BlockPos startPos) {
+        Set<BlockPos> logs = new LinkedHashSet<>();
+        Set<BlockPos> leaves = new LinkedHashSet<>();
+        Queue<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> visited = new HashSet<>();
+
+        queue.add(startPos);
+        visited.add(startPos);
+        logs.add(startPos);
+
+        int maxLogs = 128;
+        int maxLeaves = 256;
+        int startY = startPos.getY();
+
+        // 1. Traverse all connected trunk and branch logs (including diagonal branch offsets)
+        while (!queue.isEmpty() && logs.size() < maxLogs) {
+            BlockPos current = queue.poll();
+
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (dx == 0 && dy == 0 && dz == 0) continue;
+                        BlockPos nPos = current.offset(dx, dy, dz);
+                        if (visited.add(nPos)) {
+                            if (nPos.getY() < startY - 2 || nPos.getY() > startY + 32) continue;
+                            if (Math.abs(nPos.getX() - startPos.getX()) > 8 || Math.abs(nPos.getZ() - startPos.getZ()) > 8) continue;
+
+                            BlockState nState = level.getBlockState(nPos);
+                            if (isTreeLog(nState)) {
+                                logs.add(nPos);
+                                queue.add(nPos);
+                            } else if (isTreeLeaf(nState)) {
+                                leaves.add(nPos);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Expand canopy leaves around the collected logs (up to 4 blocks away)
+        Queue<BlockPos> leafQueue = new ArrayDeque<>(leaves);
+        while (!leafQueue.isEmpty() && leaves.size() < maxLeaves) {
+            BlockPos currentLeaf = leafQueue.poll();
+            for (Direction dir : Direction.values()) {
+                BlockPos nPos = currentLeaf.relative(dir);
+                if (visited.add(nPos)) {
+                    if (Math.abs(nPos.getX() - startPos.getX()) > 9 || Math.abs(nPos.getZ() - startPos.getZ()) > 9) continue;
+                    if (nPos.getY() < startY - 1 || nPos.getY() > startY + 34) continue;
+
+                    BlockState nState = level.getBlockState(nPos);
+                    if (isTreeLeaf(nState)) {
+                        leaves.add(nPos);
+                        leafQueue.add(nPos);
+                    }
+                }
+            }
+        }
+
+        if (logs.isEmpty()) return false;
+
+        // 3. Harvest leaves and deposit drops (saplings, apples, sticks)
+        for (BlockPos leafPos : leaves) {
+            BlockState leafState = level.getBlockState(leafPos);
+            List<ItemStack> drops = Block.getDrops(leafState, level, leafPos, null);
+            for (ItemStack drop : drops) {
+                insertIntoBuffer(drop);
+            }
+            level.removeBlock(leafPos, false);
+        }
+
+        // 4. Harvest logs and deposit drops (wood logs)
+        for (BlockPos logPos : logs) {
+            BlockState logState = level.getBlockState(logPos);
+            List<ItemStack> drops = Block.getDrops(logState, level, logPos, null);
+            for (ItemStack drop : drops) {
+                insertIntoBuffer(drop);
+            }
+            level.removeBlock(logPos, false);
+        }
+
+        // 5. Energy consumption
+        int energyCost = ENERGY_PER_HARVEST + (logs.size() * 5) + (leaves.size() * 2);
+        this.energy = Math.max(0, this.energy - energyCost);
+        this.energyStorage.set(this.energy);
+
+        // 6. Sound & visual particles
+        level.playSound(null, startPos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0f, 0.9f);
+        level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                startPos.getX() + 0.5, startPos.getY() + 1.0, startPos.getZ() + 0.5,
+                8, 0.4, 0.4, 0.4, 0.05);
+
+        return true;
+    }
+
+    private boolean harvestLeavesCluster(ServerLevel level, BlockPos startPos) {
+        Set<BlockPos> leaves = new LinkedHashSet<>();
+        Queue<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> visited = new HashSet<>();
+
+        queue.add(startPos);
+        visited.add(startPos);
+        leaves.add(startPos);
+
+        int maxLeaves = 64;
+        while (!queue.isEmpty() && leaves.size() < maxLeaves) {
+            BlockPos current = queue.poll();
+            for (Direction dir : Direction.values()) {
+                BlockPos nPos = current.relative(dir);
+                if (visited.add(nPos)) {
+                    BlockState nState = level.getBlockState(nPos);
+                    if (isTreeLeaf(nState)) {
+                        leaves.add(nPos);
+                        queue.add(nPos);
+                    }
+                }
+            }
+        }
+
+        for (BlockPos leafPos : leaves) {
+            BlockState leafState = level.getBlockState(leafPos);
+            List<ItemStack> drops = Block.getDrops(leafState, level, leafPos, null);
+            for (ItemStack drop : drops) {
+                insertIntoBuffer(drop);
+            }
+            level.removeBlock(leafPos, false);
+        }
+
+        int energyCost = Math.min(this.energy, ENERGY_PER_HARVEST + (leaves.size() * 2));
+        this.energy -= energyCost;
+        this.energyStorage.set(this.energy);
+
+        level.playSound(null, startPos, SoundEvents.GRASS_BREAK, SoundSource.BLOCKS, 0.8f, 1.0f);
+        return true;
     }
 
     public static boolean isMatureCrop(BlockState state, Level level, BlockPos pos) {
