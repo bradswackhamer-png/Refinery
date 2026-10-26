@@ -211,39 +211,42 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
             ItemStack input = this.items.get(inputSlot);
             Fluid resultFluid = getMeltingResult(input);
 
-            boolean canFit = (this.moltenFluid == Fluids.EMPTY || this.moltenFluid == resultFluid)
-                    && (this.moltenAmount + 1000 <= TANK_CAPACITY);
+            if (resultFluid != Fluids.EMPTY) {
+                boolean canFit = (this.moltenFluid == Fluids.EMPTY || this.moltenFluid == resultFluid)
+                        && (this.moltenAmount + 1000 <= TANK_CAPACITY);
+                int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
 
-            if (resultFluid != Fluids.EMPTY && canFit && this.energy >= ENERGY_PER_TICK) {
-                isActive = true;
-                this.energy -= ENERGY_PER_TICK;
-                this.energyStorage.set(this.energy);
-                this.progress++;
+                if (canFit && this.energy >= requiredEnergy) {
+                    isActive = true;
+                    this.energy -= ENERGY_PER_TICK;
+                    this.energyStorage.set(this.energy);
+                    this.progress++;
 
-                // Electric arc sizzle and flashes
-                if (this.progress % 8 == 1) {
-                    Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
-                    BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
-                    serverLevel.playSound(null, chamberPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.2f, 1.8f);
-                    serverLevel.playSound(null, chamberPos, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 0.8f, 1.2f);
+                    // Electric arc sizzle and flashes
+                    if (this.progress % 8 == 1) {
+                        Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
+                        BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
+                        serverLevel.playSound(null, chamberPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.2f, 1.8f);
+                        serverLevel.playSound(null, chamberPos, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 0.8f, 1.2f);
 
-                    serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.4, chamberPos.getZ() + 0.5,
-                            6, 0.2, 0.2, 0.2, 0.05);
-                    serverLevel.sendParticles(ParticleTypes.LAVA,
-                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
-                            3, 0.15, 0.1, 0.15, 0.02);
-                }
+                        serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                                chamberPos.getX() + 0.5, chamberPos.getY() + 0.4, chamberPos.getZ() + 0.5,
+                                6, 0.2, 0.2, 0.2, 0.05);
+                        serverLevel.sendParticles(ParticleTypes.LAVA,
+                                chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
+                                3, 0.15, 0.1, 0.15, 0.02);
+                    }
 
-                if (this.progress >= PROCESS_TIME) {
-                    this.progress = 0;
-                    input.shrink(1);
-                    this.moltenFluid = resultFluid;
-                    this.moltenAmount += 1000;
+                    if (this.progress >= PROCESS_TIME) {
+                        this.progress = 0;
+                        input.shrink(1);
+                        this.moltenFluid = resultFluid;
+                        this.moltenAmount += 1000;
 
-                    Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
-                    BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
-                    serverLevel.playSound(null, chamberPos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 0.7f, 1.1f);
+                        Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
+                        BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
+                        serverLevel.playSound(null, chamberPos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 0.7f, 1.1f);
+                    }
                     setChanged();
                 }
             } else {

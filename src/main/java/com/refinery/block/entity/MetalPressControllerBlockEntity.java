@@ -170,53 +170,58 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         // Check if we can stamp
         int inputSlot = getValidInputSlot();
         ItemStack resultStack = inputSlot != -1 ? getPressResult(this.items.get(inputSlot)) : ItemStack.EMPTY;
-        boolean hasRecipe = !resultStack.isEmpty() && canFitOutput(resultStack);
+        boolean canStamp = (this.progress > 20) || (!resultStack.isEmpty() && canFitOutput(resultStack));
 
-        if (hasRecipe && this.energy >= ENERGY_PER_TICK) {
-            isActive = true;
-            this.energy -= ENERGY_PER_TICK;
-            this.energyStorage.set(this.energy);
-            this.progress++;
+        if (canStamp) {
+            int requiredEnergy = (TOTAL_PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+            if (this.energy >= requiredEnergy) {
+                isActive = true;
+                this.energy -= ENERGY_PER_TICK;
+                this.energyStorage.set(this.energy);
+                this.progress++;
 
-            // Sound of hydraulic motor whirring during stroke
-            if (this.progress == 1 || this.progress == 25) {
-                serverLevel.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5f, 1.4f);
-            }
-
-            // Stamping Impact at tick 20 (bottom of ram stroke)
-            if (this.progress == 20) {
-                // Consume 1 ingot & produce 1 plate
-                ItemStack inputStack = this.items.get(inputSlot);
-                ItemStack result = getPressResult(inputStack);
-                if (!result.isEmpty()) {
-                    inputStack.shrink(1);
-                    addOutput(result.copy());
+                // Sound of hydraulic motor whirring during stroke
+                if (this.progress == 1 || this.progress == 25) {
+                    serverLevel.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5f, 1.4f);
                 }
 
-                // Heavy anvil impact sound
-                Direction facing = state.getValue(MetalPressControllerBlock.FACING);
-                BlockPos bedPos = getRelativePos(1, 0, 0, facing);
-                serverLevel.playSound(null, bedPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.2f, 1.1f);
-                serverLevel.playSound(null, bedPos, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.8f, 0.6f);
+                // Stamping Impact at tick 20 (bottom of ram stroke)
+                if (this.progress == 20) {
+                    // Consume 1 ingot & produce 1 plate
+                    if (inputSlot != -1) {
+                        ItemStack inputStack = this.items.get(inputSlot);
+                        ItemStack result = getPressResult(inputStack);
+                        if (!result.isEmpty()) {
+                            inputStack.shrink(1);
+                            addOutput(result.copy());
+                        }
+                    }
 
-                // Sparks & smoke particles shooting outward from anvil bed
-                serverLevel.sendParticles(ParticleTypes.LAVA,
-                        bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
-                        6, 0.25, 0.05, 0.25, 0.1);
-                serverLevel.sendParticles(ParticleTypes.CRIT,
-                        bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
-                        8, 0.3, 0.1, 0.3, 0.15);
-                serverLevel.sendParticles(ParticleTypes.SMOKE,
-                        bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
-                        3, 0.1, 0.05, 0.1, 0.02);
-            }
+                    // Heavy anvil impact sound
+                    Direction facing = state.getValue(MetalPressControllerBlock.FACING);
+                    BlockPos bedPos = getRelativePos(1, 0, 0, facing);
+                    serverLevel.playSound(null, bedPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.2f, 1.1f);
+                    serverLevel.playSound(null, bedPos, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.8f, 0.6f);
 
-            if (this.progress >= TOTAL_PROCESS_TIME) {
-                this.progress = 0;
+                    // Sparks & smoke particles shooting outward from anvil bed
+                    serverLevel.sendParticles(ParticleTypes.LAVA,
+                            bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
+                            6, 0.25, 0.05, 0.25, 0.1);
+                    serverLevel.sendParticles(ParticleTypes.CRIT,
+                            bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
+                            8, 0.3, 0.1, 0.3, 0.15);
+                    serverLevel.sendParticles(ParticleTypes.SMOKE,
+                            bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
+                            3, 0.1, 0.05, 0.1, 0.02);
+                }
+
+                if (this.progress >= TOTAL_PROCESS_TIME) {
+                    this.progress = 0;
+                }
+                setChanged();
             }
-            setChanged();
         } else {
-            if (this.progress > 0) {
+            if (this.progress > 0 && this.progress <= 20) {
                 this.progress = 0;
                 setChanged();
             }

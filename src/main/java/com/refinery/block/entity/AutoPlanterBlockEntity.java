@@ -106,20 +106,16 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
 
         ServerLevel serverLevel = (ServerLevel) level;
 
-        // Check power availability
-        if (this.energy < ENERGY_PER_TICK) {
-            if (this.working) {
-                setWorking(serverLevel, pos, false);
-            }
+        if (this.actionCooldown > 0) {
+            this.actionCooldown--;
             return;
         }
 
-        // Idle power consumption
-        this.energy -= ENERGY_PER_TICK;
-        this.energyStorage.set(this.energy);
-
-        if (this.actionCooldown > 0) {
-            this.actionCooldown--;
+        // Check power availability: wait until buffered with enough energy for planting action
+        if (this.energy < ENERGY_PER_ACTION) {
+            if (this.working) {
+                setWorking(serverLevel, pos, false);
+            }
             return;
         }
 
@@ -157,12 +153,28 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                         BlockState saplingState = getPlantableCrop(stack, level, abovePos);
                         if (saplingState == null) continue;
 
-                        // If grass block, farmland, or dirt path, turn into plain dirt for tree sapling
-                        if (targetState.is(Blocks.GRASS_BLOCK) || targetState.is(Blocks.FARMLAND) || targetState.is(Blocks.DIRT_PATH)) {
-                            level.setBlock(targetPos, Blocks.DIRT.defaultBlockState(), 3);
-                        }
+                        // Use a hoe on grass, dirt path, or farmland to till/prepare plain dirt before planting sapling
+                        boolean isGrassOrPathOrFarmland = targetState.is(Blocks.GRASS_BLOCK)
+                                || targetState.is(Blocks.DIRT_PATH)
+                                || targetState.is(Blocks.FARMLAND);
 
-                        if (!aboveState.isAir()) {
+                        if (isGrassOrPathOrFarmland) {
+                            if (!aboveState.isAir()) {
+                                level.destroyBlock(abovePos, false);
+                                BlockPos topPos = abovePos.above();
+                                BlockState topState = level.getBlockState(topPos);
+                                if (topState.is(Blocks.TALL_GRASS) || topState.is(Blocks.LARGE_FERN)
+                                        || topState.is(Blocks.SUNFLOWER) || topState.is(Blocks.LILAC)
+                                        || topState.is(Blocks.ROSE_BUSH) || topState.is(Blocks.PEONY)) {
+                                    level.destroyBlock(topPos, false);
+                                }
+                            }
+                            level.setBlock(targetPos, Blocks.DIRT.defaultBlockState(), 3);
+                            level.playSound(null, targetPos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 0.8f, 1.0f);
+                            serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                                    targetPos.getX() + 0.5, targetPos.getY() + 1.0, targetPos.getZ() + 0.5,
+                                    3, 0.2, 0.1, 0.2, 0.05);
+                        } else if (!aboveState.isAir()) {
                             level.destroyBlock(abovePos, false);
                             BlockPos topPos = abovePos.above();
                             BlockState topState = level.getBlockState(topPos);
@@ -180,10 +192,8 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                                 abovePos.getX() + 0.5, abovePos.getY() + 0.2, abovePos.getZ() + 0.5,
                                 3, 0.2, 0.1, 0.2, 0.05);
 
-                        if (this.energy >= ENERGY_PER_ACTION) {
-                            this.energy -= ENERGY_PER_ACTION;
-                            this.energyStorage.set(this.energy);
-                        }
+                        this.energy -= ENERGY_PER_ACTION;
+                        this.energyStorage.set(this.energy);
 
                         performedAction = true;
                         setChanged();
@@ -220,10 +230,8 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                                     abovePos.getX() + 0.5, abovePos.getY() + 0.2, abovePos.getZ() + 0.5,
                                     3, 0.2, 0.1, 0.2, 0.05);
 
-                            if (this.energy >= ENERGY_PER_ACTION) {
-                                this.energy -= ENERGY_PER_ACTION;
-                                this.energyStorage.set(this.energy);
-                            }
+                            this.energy -= ENERGY_PER_ACTION;
+                            this.energyStorage.set(this.energy);
 
                             performedAction = true;
                             setChanged();

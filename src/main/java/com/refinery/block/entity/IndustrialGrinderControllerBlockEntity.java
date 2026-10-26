@@ -177,48 +177,51 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             ItemStack input = this.items.get(inputSlot);
             ItemStack output = getGrindResult(input);
 
-            if (!output.isEmpty() && canFitOutput(output) && this.energy >= ENERGY_PER_TICK) {
-                isActive = true;
-                this.energy -= ENERGY_PER_TICK;
-                this.energyStorage.set(this.energy);
-                this.progress++;
+            if (!output.isEmpty()) {
+                int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+                if (canFitOutput(output) && this.energy >= requiredEnergy) {
+                    isActive = true;
+                    this.energy -= ENERGY_PER_TICK;
+                    this.energyStorage.set(this.energy);
+                    this.progress++;
 
-                // Grinding rumble & crunch sounds
-                if (this.progress % 12 == 1) {
-                    Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
-                    BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
-                    serverLevel.playSound(null, chamberPos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.7f, 0.9f);
-                    serverLevel.playSound(null, chamberPos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.5f, 0.8f);
+                    // Grinding rumble & crunch sounds
+                    if (this.progress % 12 == 1) {
+                        Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
+                        BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
+                        serverLevel.playSound(null, chamberPos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.7f, 0.9f);
+                        serverLevel.playSound(null, chamberPos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.5f, 0.8f);
 
-                    // Sparks & pulverizing dust particles in chamber
-                    serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, input.getItem()),
-                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
-                            6, 0.15, 0.1, 0.15, 0.05);
-                    serverLevel.sendParticles(ParticleTypes.CRIT,
-                            chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
-                            4, 0.15, 0.1, 0.15, 0.05);
-                }
-
-                if (this.progress >= PROCESS_TIME) {
-                    this.progress = 0;
-                    boolean isOilSand = isOilSand(input);
-                    input.shrink(1);
-                    addOutput(output.copy());
-
-                    // Oil Sand has 50% chance to yield 1 Petroleum Tar
-                    if (isOilSand && serverLevel.getRandom().nextFloat() < 0.50f) {
-                        ItemStack tar = new ItemStack(getPreferredTarItem(), 1);
-                        if (canFitOutput(tar)) {
-                            addOutput(tar);
-                        }
+                        // Sparks & pulverizing dust particles in chamber
+                        serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, input.getItem()),
+                                chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
+                                6, 0.15, 0.1, 0.15, 0.05);
+                        serverLevel.sendParticles(ParticleTypes.CRIT,
+                                chamberPos.getX() + 0.5, chamberPos.getY() + 0.3, chamberPos.getZ() + 0.5,
+                                4, 0.15, 0.1, 0.15, 0.05);
                     }
 
-                    // Ejection sound
-                    Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
-                    BlockPos portPos = getRelativePos(1, 0, 0, facing);
-                    serverLevel.playSound(null, portPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8f, 1.2f);
+                    if (this.progress >= PROCESS_TIME) {
+                        this.progress = 0;
+                        boolean isOilSand = isOilSand(input);
+                        input.shrink(1);
+                        addOutput(output.copy());
+
+                        // Oil Sand has 50% chance to yield 1 Petroleum Tar
+                        if (isOilSand && serverLevel.getRandom().nextFloat() < 0.50f) {
+                            ItemStack tar = new ItemStack(getPreferredTarItem(), 1);
+                            if (canFitOutput(tar)) {
+                                addOutput(tar);
+                            }
+                        }
+
+                        // Ejection sound
+                        Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
+                        BlockPos portPos = getRelativePos(1, 0, 0, facing);
+                        serverLevel.playSound(null, portPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8f, 1.2f);
+                    }
+                    setChanged();
                 }
-                setChanged();
             } else {
                 if (this.progress > 0) {
                     this.progress = 0;

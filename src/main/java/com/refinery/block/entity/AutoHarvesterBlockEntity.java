@@ -120,20 +120,16 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
             tryExportItems(serverLevel, pos, facing);
         }
 
-        // Energy availability check
-        if (this.energy < ENERGY_PER_TICK) {
-            if (this.working) {
-                setWorking(serverLevel, pos, false);
-            }
+        if (this.actionCooldown > 0) {
+            this.actionCooldown--;
             return;
         }
 
-        // Idle power draw
-        this.energy -= ENERGY_PER_TICK;
-        this.energyStorage.set(this.energy);
-
-        if (this.actionCooldown > 0) {
-            this.actionCooldown--;
+        // Energy availability check: wait until buffered with enough energy for harvest
+        if (this.energy < ENERGY_PER_HARVEST) {
+            if (this.working) {
+                setWorking(serverLevel, pos, false);
+            }
             return;
         }
 
@@ -182,10 +178,8 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                 }
 
                 // Deduct energy
-                if (this.energy >= ENERGY_PER_HARVEST) {
-                    this.energy -= ENERGY_PER_HARVEST;
-                    this.energyStorage.set(this.energy);
-                }
+                this.energy -= ENERGY_PER_HARVEST;
+                this.energyStorage.set(this.energy);
 
                 // Sounds & visual particles
                 level.playSound(null, targetPos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 0.8f, 1.0f);

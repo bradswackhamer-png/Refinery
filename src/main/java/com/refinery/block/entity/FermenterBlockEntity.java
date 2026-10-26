@@ -127,36 +127,42 @@ public class FermenterBlockEntity extends BlockEntity implements MenuProvider, W
         ItemStack input = this.items.get(0);
         FermentRecipe recipe = getRecipe(input);
 
-        if (recipe != null && (TANK_CAPACITY - this.ethanolAmount) >= recipe.ethanolYield && this.energy >= ENERGY_PER_TICK && canInsertByproduct(recipe.byproduct)) {
-            isActive = true;
-            this.energy -= ENERGY_PER_TICK;
-            this.energyStorage.set(this.energy);
-            this.progress++;
+        if (recipe != null) {
+            boolean canFit = (TANK_CAPACITY - this.ethanolAmount) >= recipe.ethanolYield && canInsertByproduct(recipe.byproduct);
+            int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
 
-            if (level.getRandom().nextInt(5) == 0) {
-                serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                        pos.getX() + 0.3 + level.getRandom().nextDouble() * 0.4,
-                        pos.getY() + 0.8,
-                        pos.getZ() + 0.3 + level.getRandom().nextDouble() * 0.4,
-                        1, 0.02, 0.05, 0.02, 0.01);
-            }
+            if (canFit && this.energy >= requiredEnergy) {
+                isActive = true;
+                this.energy -= ENERGY_PER_TICK;
+                this.energyStorage.set(this.energy);
+                this.progress++;
 
-            if (this.progress >= PROCESS_TIME) {
-                this.progress = 0;
-                input.shrink(1);
-                this.ethanolAmount = Math.min(TANK_CAPACITY, this.ethanolAmount + recipe.ethanolYield);
-
-                // Byproduct chance
-                if (!recipe.byproduct.isEmpty() && level.getRandom().nextFloat() < recipe.byproductChance) {
-                    insertByproduct(recipe.byproduct.copy());
+                if (level.getRandom().nextInt(5) == 0) {
+                    serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                            pos.getX() + 0.3 + level.getRandom().nextDouble() * 0.4,
+                            pos.getY() + 0.8,
+                            pos.getZ() + 0.3 + level.getRandom().nextDouble() * 0.4,
+                            1, 0.02, 0.05, 0.02, 0.01);
                 }
 
-                serverLevel.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.6f, 1.2f);
+                if (this.progress >= PROCESS_TIME) {
+                    this.progress = 0;
+                    input.shrink(1);
+                    this.ethanolAmount = Math.min(TANK_CAPACITY, this.ethanolAmount + recipe.ethanolYield);
+
+                    // Byproduct chance
+                    if (!recipe.byproduct.isEmpty() && level.getRandom().nextFloat() < recipe.byproductChance) {
+                        insertByproduct(recipe.byproduct.copy());
+                    }
+
+                    serverLevel.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.6f, 1.2f);
+                }
                 setChanged();
             }
         } else {
             if (this.progress > 0) {
-                this.progress = Math.max(0, this.progress - 2);
+                this.progress = 0;
+                setChanged();
             }
         }
 

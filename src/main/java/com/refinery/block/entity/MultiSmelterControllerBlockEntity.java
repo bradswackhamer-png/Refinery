@@ -242,11 +242,19 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                     fuelStack.shrink(1);
                     hasPower = true;
                     be.setChanged();
-                } else if (be.energy >= ENERGY_PER_TICK) {
-                    // Try RF / Electric power
-                    be.energy -= ENERGY_PER_TICK;
-                    be.energyStorage.set(be.energy);
-                    hasPower = true;
+                } else {
+                    int maxProgress = 0;
+                    for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
+                        if (canCook[i] && be.cookProgress[i] > maxProgress) {
+                            maxProgress = be.cookProgress[i];
+                        }
+                    }
+                    int requiredEnergy = (PROCESS_TIME - maxProgress) * ENERGY_PER_TICK;
+                    if (be.energy >= requiredEnergy) {
+                        be.energy -= ENERGY_PER_TICK;
+                        be.energyStorage.set(be.energy);
+                        hasPower = true;
+                    }
                 }
             }
 

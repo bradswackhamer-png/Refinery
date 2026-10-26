@@ -193,43 +193,48 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
 
         // Check if we have at least 1000 mB of molten fluid and room in output
         ItemStack resultStack = getCastingProduct(this.moltenFluid);
-        boolean canCast = !resultStack.isEmpty() && this.moltenAmount >= 1000 && canFitOutput(resultStack);
+        boolean canCast = (this.progress > 20) || (!resultStack.isEmpty() && this.moltenAmount >= 1000 && canFitOutput(resultStack));
 
-        if (canCast && this.energy >= ENERGY_PER_TICK) {
-            isActive = true;
-            this.energy -= ENERGY_PER_TICK;
-            this.energyStorage.set(this.energy);
-            this.progress++;
+        if (canCast) {
+            int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+            if (this.energy >= requiredEnergy) {
+                isActive = true;
+                this.energy -= ENERGY_PER_TICK;
+                this.energyStorage.set(this.energy);
+                this.progress++;
 
-            Direction facing = state.getValue(CastingPressControllerBlock.FACING);
-            BlockPos basinPos = getRelativePos(0, 0, 1, facing);
+                Direction facing = state.getValue(CastingPressControllerBlock.FACING);
+                BlockPos basinPos = getRelativePos(0, 0, 1, facing);
 
-            // Stamping impact at tick 20 (bottom of hydraulic stroke)
-            if (this.progress == 20) {
-                this.moltenAmount -= 1000;
-                if (this.moltenAmount <= 0) {
-                    this.moltenFluid = Fluids.EMPTY;
+                // Stamping impact at tick 20 (bottom of hydraulic stroke)
+                if (this.progress == 20) {
+                    this.moltenAmount -= 1000;
+                    if (this.moltenAmount <= 0) {
+                        this.moltenFluid = Fluids.EMPTY;
+                    }
+                    if (!resultStack.isEmpty()) {
+                        addOutput(resultStack.copy());
+                    }
+
+                    // Quench sounds & steam burst
+                    serverLevel.playSound(null, basinPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8f, 0.9f);
+                    serverLevel.playSound(null, basinPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.7f, 1.2f);
+
+                    serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                            basinPos.getX() + 0.5, basinPos.getY() + 0.5, basinPos.getZ() + 0.5,
+                            8, 0.2, 0.1, 0.2, 0.05);
+                    serverLevel.sendParticles(ParticleTypes.POOF,
+                            basinPos.getX() + 0.5, basinPos.getY() + 0.4, basinPos.getZ() + 0.5,
+                            4, 0.15, 0.1, 0.15, 0.03);
                 }
-                addOutput(resultStack.copy());
 
-                // Quench sounds & steam burst
-                serverLevel.playSound(null, basinPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8f, 0.9f);
-                serverLevel.playSound(null, basinPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.7f, 1.2f);
-
-                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                        basinPos.getX() + 0.5, basinPos.getY() + 0.5, basinPos.getZ() + 0.5,
-                        8, 0.2, 0.1, 0.2, 0.05);
-                serverLevel.sendParticles(ParticleTypes.POOF,
-                        basinPos.getX() + 0.5, basinPos.getY() + 0.4, basinPos.getZ() + 0.5,
-                        4, 0.15, 0.1, 0.15, 0.03);
+                if (this.progress >= PROCESS_TIME) {
+                    this.progress = 0;
+                }
+                setChanged();
             }
-
-            if (this.progress >= PROCESS_TIME) {
-                this.progress = 0;
-            }
-            setChanged();
         } else {
-            if (this.progress > 0) {
+            if (this.progress > 0 && this.progress <= 20) {
                 this.progress = 0;
                 setChanged();
             }

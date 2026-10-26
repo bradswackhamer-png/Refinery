@@ -254,90 +254,103 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
 
         // Distillation Refining Process
         // 1. Distillation Refining Process (Crude Oil -> Diesel + Gasoline + Byproducts)
-        boolean canRefine = this.crudeOil >= OIL_PER_RECIPE
+        boolean hasDistillationRecipe = this.crudeOil >= OIL_PER_RECIPE
                 && (TANK_CAPACITY - this.diesel) >= DIESEL_PER_RECIPE
                 && (TANK_CAPACITY - this.gasoline) >= GAS_PER_RECIPE
-                && (this.energy >= ENERGY_PER_TICK || this.burnTime > 0)
                 && canInsertByproducts();
 
-        if (canRefine) {
-            isActive = true;
-            if (this.energy >= ENERGY_PER_TICK) {
-                this.energy -= ENERGY_PER_TICK;
-                this.energyStorage.set(this.energy);
-            }
-            this.progress++;
+        if (hasDistillationRecipe) {
+            int requiredEnergy = (RECIPE_TICKS - this.progress) * ENERGY_PER_TICK;
+            boolean hasPower = this.burnTime > 0 || this.energy >= requiredEnergy;
 
-            // Subtle distillation steam from top column
-            if (level.getRandom().nextInt(4) == 0) {
-                Direction facing = state.getValue(RefineryControllerBlock.FACING);
-                BlockPos topCenter = getRelativePos(0, 2, 1, facing);
-                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                        topCenter.getX() + 0.5, topCenter.getY() + 1.1, topCenter.getZ() + 0.5,
-                        1, 0.05, 0.1, 0.05, 0.02);
-            }
-
-            if (this.progress >= RECIPE_TICKS) {
-                this.progress = 0;
-                this.crudeOil -= OIL_PER_RECIPE;
-                this.diesel += DIESEL_PER_RECIPE;
-                this.gasoline += GAS_PER_RECIPE;
-
-                // Byproducts: Tar (40%) and Sulfur (30%)
-                if (level.getRandom().nextFloat() < 0.40f) {
-                    insertByproduct(new ItemStack(getPreferredTarItem(), 1));
+            if (hasPower) {
+                isActive = true;
+                if (this.burnTime <= 0 && this.energy >= ENERGY_PER_TICK) {
+                    this.energy -= ENERGY_PER_TICK;
+                    this.energyStorage.set(this.energy);
                 }
-                if (level.getRandom().nextFloat() < 0.30f) {
-                    insertByproduct(new ItemStack(RefineryMod.SULFUR_DUST_ITEM.get(), 1));
+                this.progress++;
+
+                // Subtle distillation steam from top column
+                if (level.getRandom().nextInt(4) == 0) {
+                    Direction facing = state.getValue(RefineryControllerBlock.FACING);
+                    BlockPos topCenter = getRelativePos(0, 2, 1, facing);
+                    serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                            topCenter.getX() + 0.5, topCenter.getY() + 1.1, topCenter.getZ() + 0.5,
+                            1, 0.05, 0.1, 0.05, 0.02);
                 }
 
-                serverLevel.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
-                setChanged();
+                if (this.progress >= RECIPE_TICKS) {
+                    this.progress = 0;
+                    this.crudeOil -= OIL_PER_RECIPE;
+                    this.diesel += DIESEL_PER_RECIPE;
+                    this.gasoline += GAS_PER_RECIPE;
+
+                    // Byproducts: Tar (40%) and Sulfur (30%)
+                    if (level.getRandom().nextFloat() < 0.40f) {
+                        insertByproduct(new ItemStack(getPreferredTarItem(), 1));
+                    }
+                    if (level.getRandom().nextFloat() < 0.30f) {
+                        insertByproduct(new ItemStack(RefineryMod.SULFUR_DUST_ITEM.get(), 1));
+                    }
+
+                    serverLevel.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
+                    setChanged();
+                }
             }
         } else {
             if (this.progress > 0) {
-                this.progress = Math.max(0, this.progress - 2);
+                this.progress = 0;
+                setChanged();
             }
         }
 
         // 2. Oil Sand Feedstock Extraction Process (Oil Sand -> 200 mB Crude Oil + 100% Sand + 40% Tar)
         ItemStack feedstock = this.items.get(1);
         boolean isOilSandFeed = isOilSand(feedstock);
-        if (isOilSandFeed && (TANK_CAPACITY - this.crudeOil) >= 200 && (this.energy >= 20 || this.burnTime > 0) && canInsertByproducts()) {
-            isActive = true;
-            if (this.energy >= 20) {
-                this.energy -= 20;
-                this.energyStorage.set(this.energy);
-            }
-            this.oilSandProgress++;
+        boolean hasOilSandRecipe = isOilSandFeed && (TANK_CAPACITY - this.crudeOil) >= 200 && canInsertByproducts();
 
-            if (level.getRandom().nextInt(4) == 0) {
-                Direction facing = state.getValue(RefineryControllerBlock.FACING);
-                BlockPos portPos = getRelativePos(-1, 0, 1, facing);
-                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                        portPos.getX() + 0.5, portPos.getY() + 0.9, portPos.getZ() + 0.5,
-                        1, 0.05, 0.05, 0.05, 0.01);
-            }
+        if (hasOilSandRecipe) {
+            int requiredOilSandEnergy = (OIL_SAND_TICKS - this.oilSandProgress) * 20;
+            boolean hasPower = this.burnTime > 0 || this.energy >= requiredOilSandEnergy;
 
-            if (this.oilSandProgress >= OIL_SAND_TICKS) {
-                this.oilSandProgress = 0;
-                feedstock.shrink(1);
-                this.crudeOil = Math.min(TANK_CAPACITY, this.crudeOil + 200);
+            if (hasPower) {
+                isActive = true;
+                if (this.burnTime <= 0 && this.energy >= 20) {
+                    this.energy -= 20;
+                    this.energyStorage.set(this.energy);
+                }
+                this.oilSandProgress++;
 
-                // 100% chance for 1 Sand
-                insertByproduct(new ItemStack(Items.SAND, 1));
-
-                // 40% chance for Tar
-                if (level.getRandom().nextFloat() < 0.40f) {
-                    insertByproduct(new ItemStack(getPreferredTarItem(), 1));
+                if (level.getRandom().nextInt(4) == 0) {
+                    Direction facing = state.getValue(RefineryControllerBlock.FACING);
+                    BlockPos portPos = getRelativePos(-1, 0, 1, facing);
+                    serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                            portPos.getX() + 0.5, portPos.getY() + 0.9, portPos.getZ() + 0.5,
+                            1, 0.05, 0.05, 0.05, 0.01);
                 }
 
-                serverLevel.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.7f, 1.0f);
-                setChanged();
+                if (this.oilSandProgress >= OIL_SAND_TICKS) {
+                    this.oilSandProgress = 0;
+                    feedstock.shrink(1);
+                    this.crudeOil = Math.min(TANK_CAPACITY, this.crudeOil + 200);
+
+                    // 100% chance for 1 Sand
+                    insertByproduct(new ItemStack(Items.SAND, 1));
+
+                    // 40% chance for Tar
+                    if (level.getRandom().nextFloat() < 0.40f) {
+                        insertByproduct(new ItemStack(getPreferredTarItem(), 1));
+                    }
+
+                    serverLevel.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.7f, 1.0f);
+                    setChanged();
+                }
             }
         } else {
             if (this.oilSandProgress > 0) {
-                this.oilSandProgress = Math.max(0, this.oilSandProgress - 2);
+                this.oilSandProgress = 0;
+                setChanged();
             }
         }
 
