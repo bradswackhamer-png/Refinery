@@ -129,10 +129,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.2.jar`
+`refinery-1.5.3.jar`
 
 ### Display Name
-`Industrial Refinery 1.5.2 (NeoForge 26.3)`
+`Industrial Refinery 1.5.3 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -148,15 +148,18 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.2
+# Industrial Refinery v1.5.3
 
-### 🚀 What's New in v1.5.2:
-- **Ocean Generation Balancing & Spacing**:
+### 🚀 What's New in v1.5.3:
+- **Persistent Chunk "Burnt" State (Anti-Repeat Worldgen)**:
+  - Fixed issue where chunks could re-evaluate oil generation upon leaving and returning if global saved data had not flushed to disk.
+  - Implemented persistent NeoForge Data Attachment (`refinery:oil_chunk_burnt`) saved directly into each chunk's `.mca` region file. Once a chunk is evaluated once in its lifetime, it is permanently marked burnt on disk. Leaving and returning to a chunk will never re-roll or re-evaluate.
+  - Added strict Overworld dimension restriction (`ServerLevel.OVERWORLD`).
+  - Added perimeter burning: spawning an oil well now immediately burns all 8 neighbor chunks around it.
+- **Ocean Generation Balancing & Spacing (v1.5.2)**:
   - Added `oceanSpawnChanceMultiplier` (default `0.20`), reducing oil spawn density in oceans by 80% to keep vast deep oceans balanced.
-  - Expanded `minChunkDistanceBetweenWells` maximum range in config from `64` to `512` chunks (up to 8,192 blocks). Default increased to `40` chunks (640 blocks).
-- **Chunk-Loading Cascade Bug Fix**:
-  - Fixed race condition where placing blocks near chunk borders synchronously loaded neighbor chunks before the generating well was recorded, preventing touching or duplicate oil wells.
-  - Fixed sea-level water detection at Y=62/63 so ocean wells correctly anchor to the ocean floor.
+  - Expanded `minChunkDistanceBetweenWells` maximum range in config up to `512` chunks (default `40` chunks / 640 blocks).
+```
 - **Previous v1.5.1 Highlights**:
   - Industrial Multi-Smelter (5x4x3 Multiblock) 8-in-1 parallel furnace array with dual fuel/RF power.
   - Fixed Multi-Smelter item definitions and icons in 26.3.

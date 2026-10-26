@@ -1,5 +1,6 @@
 package com.refinery.worldgen;
 
+import com.refinery.RefineryMod;
 import com.refinery.config.RefineryConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -21,16 +22,33 @@ public class OilRetrogenHandler {
             return;
         }
 
+        // Only evaluate Overworld chunks for crude oil deposits
+        if (serverLevel.dimension() != ServerLevel.OVERWORLD) {
+            return;
+        }
+
         LevelChunk chunk = event.getChunk();
+
+        // 1. Check persistent chunk attachment (stored directly inside the chunk's .mca file)
+        // If this chunk was already evaluated once in its lifetime, it is permanently BURNT and never re-evaluates.
+        if (Boolean.TRUE.equals(chunk.getData(RefineryMod.OIL_CHUNK_BURNT))) {
+            return;
+        }
+
         ChunkPos chunkPos = chunk.getPos();
         long chunkKey = chunkPos.pack();
 
+        // 2. Check global saved data cache
         OilRetrogenSavedData data = OilRetrogenSavedData.get(serverLevel);
         if (data.isChunkProcessed(chunkKey)) {
-            return; // Once a chunk is processed or mined, it never regens
+            chunk.setData(RefineryMod.OIL_CHUNK_BURNT, true);
+            chunk.markUnsaved();
+            return;
         }
 
-        // Permanently record that this chunk has been evaluated so it is never re-evaluated
+        // Permanently burn the chunk in BOTH places before doing any generation checks
+        chunk.setData(RefineryMod.OIL_CHUNK_BURNT, true);
+        chunk.markUnsaved();
         data.markChunkProcessed(chunkKey);
 
         // Check well spacing to guarantee wells are spaced out across chunks
@@ -61,6 +79,13 @@ public class OilRetrogenHandler {
             // reserving the chunk first ensures any synchronously loaded neighbor sees isWellNearby() == true
             // and immediately aborts, preventing cascading touching wells.
             data.markWellGenerated(chunkKey);
+
+            // Also burn all 8 immediate neighbor chunks around this well
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    data.markChunkProcessed(ChunkPos.pack(chunkPos.x() + dx, chunkPos.z() + dz));
+                }
+            }
 
             boolean isGeyser = random.nextFloat() < RefineryConfig.CONFIG.rareGeyserChance.get();
             boolean generated = OilPitGenerator.generate(serverLevel, samplePos, isGeyser, random);

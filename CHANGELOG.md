@@ -4,6 +4,17 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [v1.5.3] - 2026-10-26
+
+### Fixed
+- **Persistent Chunk "Burnt" State (Anti-Repeat Evaluation)**:
+  - Fixed issue where leaving and re-entering chunks could cause chunks to re-evaluate oil generation if the global saved data hadn't flushed to disk.
+  - Implemented NeoForge Data Attachment (`refinery:oil_chunk_burnt`) saved **directly inside each chunk's `.mca` region file**. Once a chunk loads and evaluates once in its entire lifetime, it is permanently marked burnt on disk. Leaving and returning to the chunk immediately exits without re-evaluating or re-rolling.
+  - Overworld Dimension Guard: Strictly restricts retrogen evaluation to `ServerLevel.OVERWORLD`.
+  - Radius Burning: Whenever an oil well generates, all 8 immediate neighbor chunks around the well are also burned immediately to prevent adjacent boundary generation.
+
+---
+
 ## [v1.5.2] - 2026-10-25
 
 ### Fixed

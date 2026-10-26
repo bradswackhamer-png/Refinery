@@ -868,6 +868,14 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ## 13. Engineering Changelog & Version History
 
+### Version 1.5.3 (Persistent Chunk Burnt State & Multi-Tier Retrogen Defense)
+- **Direct-to-Chunk MCA Burnt State**:
+  - Implemented persistent NeoForge Data Attachment (`refinery:oil_chunk_burnt`) serialized directly into chunk `.mca` files. Chunks are permanently burnt upon their first load and evaluation, preventing any repeated rolls when players leave and return.
+  - Dimension Guard: Strictly confines oil retrogen evaluation to `ServerLevel.OVERWORLD`.
+  - Well Perimeter Burning: Spawning a well now immediately burns all 8 adjacent neighbor chunks.
+
+---
+
 ### Version 1.5.2 (Ocean Generation Balancing & Chunk Cascade Fix)
 - **Cascade Chunk-Loading & Neighbor Spawning Fix**:
   - Reserved well positions in `wellChunks` saved data **prior** to block placement, eliminating duplicate and touching oil wells caused by boundary chunk loads.
