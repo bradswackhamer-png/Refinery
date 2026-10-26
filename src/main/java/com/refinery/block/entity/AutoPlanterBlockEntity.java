@@ -143,8 +143,7 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
             BlockState targetState = level.getBlockState(targetPos);
             BlockState aboveState = level.getBlockState(abovePos);
 
-            boolean canPlantAbove = aboveState.isAir() || aboveState.canBeReplaced()
-                    || aboveState.is(Blocks.SHORT_GRASS) || aboveState.is(Blocks.FERN);
+            boolean canPlantAbove = canPlantAbove(aboveState);
 
             if (canPlantAbove) {
                 for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
@@ -153,19 +152,25 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
 
                     if (isSapling(stack)) {
                         // Saplings plant on Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss, etc.
-                        boolean isSoil = targetState.is(BlockTags.DIRT) || targetState.is(Blocks.FARMLAND);
-                        if (!isSoil) continue;
+                        if (!isSoilForSapling(targetState)) continue;
 
                         BlockState saplingState = getPlantableCrop(stack, level, abovePos);
                         if (saplingState == null) continue;
 
-                        // If farmland, revert back to normal dirt for tree sapling
-                        if (targetState.is(Blocks.FARMLAND)) {
+                        // If grass block, farmland, or dirt path, turn into plain dirt for tree sapling
+                        if (targetState.is(Blocks.GRASS_BLOCK) || targetState.is(Blocks.FARMLAND) || targetState.is(Blocks.DIRT_PATH)) {
                             level.setBlock(targetPos, Blocks.DIRT.defaultBlockState(), 3);
                         }
 
                         if (!aboveState.isAir()) {
                             level.destroyBlock(abovePos, false);
+                            BlockPos topPos = abovePos.above();
+                            BlockState topState = level.getBlockState(topPos);
+                            if (topState.is(Blocks.TALL_GRASS) || topState.is(Blocks.LARGE_FERN)
+                                    || topState.is(Blocks.SUNFLOWER) || topState.is(Blocks.LILAC)
+                                    || topState.is(Blocks.ROSE_BUSH) || topState.is(Blocks.PEONY)) {
+                                level.destroyBlock(topPos, false);
+                            }
                         }
 
                         stack.shrink(1);
@@ -247,6 +252,41 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         }
     }
 
+    public static boolean canPlantAbove(BlockState state) {
+        if (state.isAir()) return true;
+        if (state.canBeReplaced()) return true;
+        return state.is(Blocks.SHORT_GRASS)
+                || state.is(Blocks.TALL_GRASS)
+                || state.is(Blocks.FERN)
+                || state.is(Blocks.LARGE_FERN)
+                || state.is(Blocks.DEAD_BUSH)
+                || state.is(Blocks.BUSH)
+                || state.is(Blocks.SNOW)
+                || state.is(Blocks.VINE)
+                || state.is(BlockTags.FLOWERS)
+                || state.is(BlockTags.REPLACEABLE_BY_TREES)
+                || state.is(BlockTags.REPLACEABLE);
+    }
+
+    public static boolean isSoilForSapling(BlockState state) {
+        if (state.isAir()) return false;
+        return state.is(BlockTags.DIRT)
+                || state.is(Blocks.DIRT)
+                || state.is(Blocks.GRASS_BLOCK)
+                || state.is(Blocks.COARSE_DIRT)
+                || state.is(Blocks.PODZOL)
+                || state.is(Blocks.ROOTED_DIRT)
+                || state.is(Blocks.MUD)
+                || state.is(Blocks.MUDDY_MANGROVE_ROOTS)
+                || state.is(Blocks.MYCELIUM)
+                || state.is(Blocks.MOSS_BLOCK)
+                || state.is(Blocks.DIRT_PATH)
+                || state.is(Blocks.FARMLAND)
+                || state.is(Blocks.CRIMSON_NYLIUM)
+                || state.is(Blocks.WARPED_NYLIUM)
+                || state.is(Blocks.SOUL_SOIL);
+    }
+
     public static boolean isSapling(ItemStack stack) {
         if (stack.isEmpty()) return false;
         if (stack.is(ItemTags.SAPLINGS)) return true;
@@ -290,7 +330,7 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         if (item instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             BlockState defaultState = block.defaultBlockState();
-            if (block instanceof CropBlock || block instanceof StemBlock || block instanceof SaplingBlock || defaultState.is(BlockTags.SAPLINGS)) {
+            if (block instanceof CropBlock || block instanceof StemBlock || block instanceof SaplingBlock || defaultState.is(BlockTags.SAPLINGS) || stack.is(ItemTags.SAPLINGS)) {
                 return defaultState;
             }
             if (defaultState.canSurvive(level, plantPos)) {
