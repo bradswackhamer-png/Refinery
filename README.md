@@ -135,6 +135,7 @@ The **Refinery Wrench** (`refinery:refinery_wrench`) is the ultimate industrial 
 ### Automated Planter
 The **Automated Planter** (`refinery:auto_planter`) manages soil preparation and crop planting over a large farm area.
 
+- **Crafting Recipe**: 4x Iron Ingot, 2x Copper Ingot, 1x Iron Hoe (top-center), 1x Piston (center), 1x Redstone Dust (bottom-center).
 - **Scan Coverage**: 5 blocks in all horizontal directions (an **11×11 square**, 121 tiles total) up to **2 blocks above** the planter.
 - **Tilling & Planting**: Automatically detects dirt or grass blocks, tills them into farmland, and plants any valid seeds found in its 9-slot inventory.
 - **Energy**: Consumes 1-2 FE/t standby and 10 FE per planting action.
@@ -143,6 +144,7 @@ The **Automated Planter** (`refinery:auto_planter`) manages soil preparation and
 ### Automated Harvester
 The **Automated Harvester** (`refinery:auto_harvester`) scans mature crops directly in front of it.
 
+- **Crafting Recipe**: 4x Iron Ingot, 2x Copper Ingot, 1x Shears (top-center), 1x Hopper (center), 1x Redstone Dust (bottom-center).
 - **Scan Coverage**: An **11×11 field** directly in front of the machine (5 blocks to the left, 5 blocks to the right, and 11 blocks forward). Place this unit above ground centered with your farm.
 - **Harvest & Replant**: Detects fully mature crops (Wheat, Carrots, Potatoes, Beetroots, Melon/Pumpkin stems, etc.), harvests the drops, and immediately replants the seed.
 - **Buffer & Ejection**: Internal 9-slot buffer. **Automatically pushes harvested produce into chests or pipes** placed directly **behind** or **below** the harvester!
@@ -428,6 +430,13 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
 | **Bituminous Oil Sand** (x2) | 1 Sand + 1 Petroleum Tar (Shapeless) |
 | **Gunpowder (from Sulfur)** | 1 Sulfur Dust + 1 Charcoal (Shapeless) |
 | **Torches (from Tar)** | 1 Petroleum Tar + 1 Stick -> 4 Torches (Shapeless) |
+
+### Standalone Automation Machines
+| Machine | Crafting Ingredients |
+| :--- | :--- |
+| **Automated Planter** | 4 Iron Ingots, 2 Copper Ingots, 1 Iron Hoe (top-center), 1 Piston (center), 1 Redstone Dust (bottom-center) |
+| **Automated Harvester** | 4 Iron Ingots, 2 Copper Ingots, 1 Shears (top-center), 1 Hopper (center), 1 Redstone Dust (bottom-center) |
+| **Industrial Fermenter** | 4 Iron Ingots, 2 Copper Ingots, 1 Glass (top-center), 1 Cauldron (center), 1 Redstone Dust (bottom-center) |
 
 ### Multiblock Machine Blocks
 | Machine Block | Crafting Ingredients |
@@ -867,6 +876,14 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.5.5 (Automated Agricultural Crafting Recipes)
+- **Automated Planter & Harvester Recipes**:
+  - Added shaped crafting recipes for the **Automated Planter** (`refinery:auto_planter`) and **Automated Harvester** (`refinery:auto_harvester`).
+  - Planter: 4 Iron Ingots, 2 Copper Ingots, 1 Iron Hoe, 1 Piston, 1 Redstone Dust.
+  - Harvester: 4 Iron Ingots, 2 Copper Ingots, 1 Shears, 1 Hopper, 1 Redstone Dust.
+
+---
 
 ### Version 1.5.4 (Autarchic Pulsar Item Routing & Gate Redstone Emission Fix)
 - **Autarchic Pulsar Extraction & Safe Injection**:

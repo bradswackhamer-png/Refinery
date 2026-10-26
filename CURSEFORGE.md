@@ -129,10 +129,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.4.jar`
+`refinery-1.5.5.jar`
 
 ### Display Name
-`Industrial Refinery 1.5.4 (NeoForge 26.3)`
+`Industrial Refinery 1.5.5 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -148,9 +148,16 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.4
+# Industrial Refinery v1.5.5
 
-### 🚀 What's New in v1.5.4:
+### 🚀 What's New in v1.5.5:
+- **Automated Agricultural Crafting Recipes**:
+  - Added shaped crafting recipes for the **Automated Planter** (`refinery:auto_planter`) and **Automated Harvester** (`refinery:auto_harvester`).
+  - **Planter**: 4 Iron Ingots, 2 Copper Ingots, 1 Iron Hoe (top), 1 Piston (center), 1 Redstone Dust (bottom).
+  - **Harvester**: 4 Iron Ingots, 2 Copper Ingots, 1 Shears (top), 1 Hopper (center), 1 Redstone Dust (bottom).
+  - Completes the standalone agricultural automation loop leading into the **Industrial Fermenter** for Ethanol biofuel production.
+
+### 📌 Previous v1.5.4 Highlights:
 - **Autarchic Pulsar Extraction & Safe Injection**:
   - Fixed issue where autarchic pulsar gates spewed items onto the ground instead of into the connected pipe network.
   - Replaced standard external injection calls with internal `forceAddItem(TravelingItem, Direction)` handling in Logistics Pipes compat. External insertion was previously failing pipe acceptance rules, causing Logistics to invoke `dropItemInWorld` on every pulse.

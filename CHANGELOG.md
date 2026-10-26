@@ -4,6 +4,17 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [v1.5.5] - 2026-10-26
+
+### Added
+- **Automated Planter & Automated Harvester Crafting Recipes**:
+  - Added shaped crafting recipes for the **Automated Planter** (`refinery:auto_planter`) and **Automated Harvester** (`refinery:auto_harvester`).
+  - **Automated Planter**: Crafted with 4 Iron Ingots, 2 Copper Ingots, 1 Iron Hoe (top-center), 1 Piston (center), and 1 Redstone Dust (bottom-center).
+  - **Automated Harvester**: Crafted with 4 Iron Ingots, 2 Copper Ingots, 1 Shears (top-center), 1 Hopper (center), and 1 Redstone Dust (bottom-center).
+  - Matches the established industrial agricultural design language alongside the **Industrial Fermenter** (`refinery:fermenter`).
+
+---
+
 ## [v1.5.4] - 2026-10-26
 
 ### Fixed
