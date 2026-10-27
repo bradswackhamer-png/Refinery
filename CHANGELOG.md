@@ -4,6 +4,18 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [v1.5.8] - 2026-10-26
+
+### Added & Improved
+- **Industrial Metal Press Monolithic AIDA NC1-1500 C-Frame Model & Texture**:
+  - Replaced the multiblock's cubic assembled appearance with a seamless, high-definition 3D model of the **AIDA NC1-1500 C-frame Stamping Press**.
+  - Custom 128×128 pixel-art texture featuring classic off-white machine enamel, dark green AIDA branding with diamond logo, NC1-1500 designation, analog circular stroke dial gauge, side electrical cabinet with ventilation louvers, and lower operator pendant with mushroom emergency stop button and flexible conduit.
+  - Member blocks (`PressBedBlock`, `PressHeadBlock`, `PressCasingBlock`, and `MetalPressControllerBlock`) now dynamically suppress their cubic block models when assembled (`invisible.json`) while maintaining collision, hardness, and drop behaviors.
+  - Right-clicking any part of the assembled press forwards interactions directly to the controller and opens the stamping interface.
+  - Integrated dynamic vertical ram slide animation: amber/bronze hydraulic cylinder and safety-yellow die bar that accelerates downward on the power stroke and smoothly retracts during stamping.
+
+---
+
 ## [v1.5.7] - 2026-10-26
 
 ### Fixed & Improved
