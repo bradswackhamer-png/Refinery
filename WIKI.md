@@ -65,7 +65,7 @@ The mod introduces a tiered industrial metallurgy and chemical progression:
 [Raw Iron + Coal] ---> (5x5x5 Blast Smelter) ---> [Steel Ingot]
                                                        |
                                                        v
-                                            (2x2x2 Metal Press)
+                                            (3x2x2 Metal Press)
                                                        |
                                                        v
                                             [Heavy Steel Plate]
@@ -198,10 +198,10 @@ A massive foundry furnace that transforms iron sources and carbon fuels into hig
 
 ---
 
-### Industrial Metal Press (2×2×2)
-A universal hydraulic mechanical press for stamping various metal ingots into structural plates.
+### Industrial Metal Press (3×2×2)
+A universal hydraulic mechanical press with a 3-block-wide conveyor bed and an overhead AIDA NC1-1500 stamping head for stamping metal ingots into structural plates.
 
-- **Dimensions**: 2 wide × 2 tall × 2 deep (8 blocks total).
+- **Dimensions**: 3 wide × 2 tall × 2 deep (12 blocks total; also supports 3×2×1 layout).
 - **Physical 3D Stamping Animation**: Features an in-world animated hydraulic piston ram with a power stroke, heavy anvil impact (`SoundEvents.ANVIL_LAND`), and spark ejection!
 - **Supported Stamping Stamping Recipes** (40 ticks = 2.0s per plate):
   - **Steel Ingot** -> **Heavy Steel Plate**
@@ -215,15 +215,15 @@ A universal hydraulic mechanical press for stamping various metal ingots into st
   - **Top & Sides**: Inserts Ingots into the 2-slot input queue.
   - **Bottom**: Extracts Finished Plates from the 2-slot output buffer.
 
-#### Layer-by-Layer Assembly
+#### Layer-by-Layer Assembly (3×2×2)
 ```
 Top Layer (y=1):
-  [Press Casing]    [Press Hydraulic Head]
-  [Press Casing]    [Press Casing]
+  Back (z=1):  [Press Casing]      [Press Casing]          [Press Casing]
+  Front (z=0): [Press Casing]      [Press Hydraulic Head]  [Press Casing]
 
 Bottom Layer (y=0):
-  [Press Controller] [Press Anvil Bed]
-  [Press Casing]    [Press Casing]
+  Back (z=1):  [Press Anvil Bed]   [Press Anvil Bed]       [Press Anvil Bed]
+  Front (z=0): [Press Anvil Bed]   [Press Controller]      [Press Anvil Bed]
 ```
 
 ---

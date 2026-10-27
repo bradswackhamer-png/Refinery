@@ -4,6 +4,32 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.5.9] - 2026-10-27
+
+### Changed
+- Mod update
+
+---
+
+## [1.5.10] - 2026-10-27
+
+### Changed
+- Mod update
+
+---
+
+## [v1.5.9] - 2026-10-27
+
+### Added, Fixed & Improved
+- **3-Block-Wide (3×2×2) Industrial Metal Press with Conveyor Bed & AIDA NC1-1500 Stamping Head**:
+  - Expanded the Metal Press multiblock structure to **3 blocks wide** (`3×2×2`, with flexible placement supporting centered or side-aligned controllers as well as `3×2×1` depth).
+  - Redesigned the assembled 3D model (`AidaPressModel`) and 256×256 texture atlas (`aida_press.png`) to combine the **Immersive Engineering style 3-block-wide conveyor bed & 4-post center gantry** (dark gunmetal base with bottom vents, 4 brown/bronze vertical tensioner straps with silver rivets, steel end rollers, and a stitched terracotta-orange conveyor belt) with the **AIDA NC1-1500 overhead stamping head** (off-white industrial enamel crown, green AIDA 4-diamond emblem + text, NC1-1500 badge, circular analog tonnage/crank dial gauge, 3 side cooling louvers, amber hydraulic cylinder, side electrical cabinet, operator control pendant with red mushroom E-stop, and safety-yellow die bar).
+  - Fixed member block invisibility when assembled by sharing the `MetalPressControllerBlock.ASSEMBLED` `BooleanProperty` instance across `PressBedBlock`, `PressHeadBlock`, and `PressCasingBlock`, adding `.noOcclusion()`, and overriding `getRenderShape` to return `RenderShape.INVISIBLE` when assembled (preventing X-ray floor culling and hiding all member cubes cleanly).
+  - Fixed client-side custom model rendering by syncing `MetalPressControllerBlockEntity` state via `getUpdateTag`/`getUpdatePacket`, checking blockstate `ASSEMBLED` on the client, and rendering with custom outward-normal geometry (`submitCustomGeometry`).
+  - Forwarded Energy and Item capabilities across all member blocks (`PressBedBlock`, `PressHeadBlock`, `PressCasingBlock`) to the assembled controller.
+
+---
+
 ## [v1.5.8] - 2026-10-26
 
 ### Added & Improved

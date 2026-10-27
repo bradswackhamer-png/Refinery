@@ -5,11 +5,14 @@ import com.refinery.block.MetalPressControllerBlock;
 import com.refinery.menu.MetalPressMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -45,6 +48,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     public static final int TOTAL_PROCESS_TIME = 40; // 2 seconds per press cycle
 
     private boolean assembled = false;
+    private int structureOffsetX = 0; // 0 = centered (-1..1), +1 = right-shifted (0..2), -1 = left-shifted (-2..0)
     private int energy = 0;
     private int progress = 0;
     private int blueprintProjectionTicks = 0;
@@ -76,7 +80,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                 case 1 -> TOTAL_PROCESS_TIME;
                 case 2 -> MetalPressControllerBlockEntity.this.energy & 0xFFFF;
                 case 3 -> (MetalPressControllerBlockEntity.this.energy >> 16) & 0xFFFF;
-                case 4 -> MetalPressControllerBlockEntity.this.assembled ? 1 : 0;
+                case 4 -> MetalPressControllerBlockEntity.this.isAssembled() ? 1 : 0;
                 default -> 0;
             };
         }
@@ -100,7 +104,15 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     }
 
     public boolean isAssembled() {
+        BlockState state = getBlockState();
+        if (state.hasProperty(MetalPressControllerBlock.ASSEMBLED)) {
+            return state.getValue(MetalPressControllerBlock.ASSEMBLED) || this.assembled;
+        }
         return this.assembled;
+    }
+
+    public int getStructureOffsetX() {
+        return this.structureOffsetX;
     }
 
     public int getProgress() {
@@ -115,20 +127,43 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         return this.items;
     }
 
-    public void disassemble() {
-        if (this.assembled) {
-            this.assembled = false;
-            updateMemberBlockStates(false);
-            if (this.level != null && !this.level.isClientSide()) {
-                BlockState state = getBlockState();
-                if (state.getBlock() instanceof MetalPressControllerBlock) {
-                    this.level.setBlock(this.worldPosition, state.setValue(MetalPressControllerBlock.ASSEMBLED, false)
-                            .setValue(MetalPressControllerBlock.ACTIVE, false)
-                            .setValue(MetalPressControllerBlock.BLUEPRINT, false), 3);
-                }
+    public ItemStack getActiveInputItem() {
+        for (int i = 0; i < 2; i++) {
+            ItemStack stack = this.items.get(i);
+            if (!stack.isEmpty() && !getPressResult(stack).isEmpty()) {
+                return stack;
             }
-            setChanged();
         }
+        for (int i = 2; i < 4; i++) {
+            ItemStack stack = this.items.get(i);
+            if (!stack.isEmpty()) {
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    public void disassemble() {
+        this.assembled = false;
+        updateMemberBlockStates(false);
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            if (state.getBlock() instanceof MetalPressControllerBlock) {
+                BlockState newState = state.setValue(MetalPressControllerBlock.ASSEMBLED, false)
+                        .setValue(MetalPressControllerBlock.ACTIVE, false)
+                        .setValue(MetalPressControllerBlock.BLUEPRINT, false);
+                this.level.setBlock(this.worldPosition, newState, 3);
+            }
+        }
+        setChanged();
+        syncToClient();
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -157,6 +192,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             if (this.progress > 0) {
                 this.progress = 0;
                 setChanged();
+                syncToClient();
             }
             BlockState current = getBlockState();
             if (current.getBlock() instanceof MetalPressControllerBlock && current.getValue(MetalPressControllerBlock.ACTIVE)) {
@@ -198,21 +234,21 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                         }
                     }
 
-                    // Heavy anvil impact sound
+                    // Heavy anvil impact sound at center of conveyor press bed
                     Direction facing = state.getValue(MetalPressControllerBlock.FACING);
-                    BlockPos bedPos = getRelativePos(1, 0, 0, facing);
+                    BlockPos bedPos = getRelativePos(this.structureOffsetX, 0, 0, facing);
                     serverLevel.playSound(null, bedPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.2f, 1.1f);
                     serverLevel.playSound(null, bedPos, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.8f, 0.6f);
 
-                    // Sparks & smoke particles shooting outward from anvil bed
+                    // Sparks & smoke particles shooting outward from stamping die
                     serverLevel.sendParticles(ParticleTypes.LAVA,
-                            bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
+                            bedPos.getX() + 0.5, bedPos.getY() + 0.85, bedPos.getZ() + 0.5,
                             6, 0.25, 0.05, 0.25, 0.1);
                     serverLevel.sendParticles(ParticleTypes.CRIT,
-                            bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
+                            bedPos.getX() + 0.5, bedPos.getY() + 0.85, bedPos.getZ() + 0.5,
                             8, 0.3, 0.1, 0.3, 0.15);
                     serverLevel.sendParticles(ParticleTypes.SMOKE,
-                            bedPos.getX() + 0.5, bedPos.getY() + 1.05, bedPos.getZ() + 0.5,
+                            bedPos.getX() + 0.5, bedPos.getY() + 0.85, bedPos.getZ() + 0.5,
                             3, 0.1, 0.05, 0.1, 0.02);
                 }
 
@@ -220,11 +256,15 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                     this.progress = 0;
                 }
                 setChanged();
+                if (this.progress == 1 || this.progress == 20 || this.progress == 0) {
+                    syncToClient();
+                }
             }
         } else {
             if (this.progress > 0 && this.progress <= 20) {
                 this.progress = 0;
                 setChanged();
+                syncToClient();
             }
         }
 
@@ -233,6 +273,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             if (latest.getBlock() instanceof MetalPressControllerBlock) {
                 level.setBlock(pos, latest.setValue(MetalPressControllerBlock.ACTIVE, isActive), 3);
             }
+            syncToClient();
         }
     }
 
@@ -320,10 +361,12 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         BlockState currentState = getBlockState();
         if (!(currentState.getBlock() instanceof MetalPressControllerBlock)) return;
 
+        // Always keep member blocks synchronized with assembly state
+        updateMemberBlockStates(valid);
+
         boolean blockAssembled = currentState.getValue(MetalPressControllerBlock.ASSEMBLED);
         if (valid != this.assembled || blockAssembled != valid) {
             this.assembled = valid;
-            updateMemberBlockStates(valid);
             BlockState newState = currentState.setValue(MetalPressControllerBlock.ASSEMBLED, valid);
             if (valid) {
                 newState = newState.setValue(MetalPressControllerBlock.BLUEPRINT, false);
@@ -331,12 +374,13 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                 if (this.level instanceof ServerLevel serverLevel) {
                     serverLevel.playSound(null, this.worldPosition, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 1.1f);
                     serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                            this.worldPosition.getX() + 1.0, this.worldPosition.getY() + 1.0, this.worldPosition.getZ() + 1.0,
-                            5, 0.3, 0.3, 0.3, 0.05);
+                            this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 1.0, this.worldPosition.getZ() + 0.5,
+                            8, 0.5, 0.3, 0.5, 0.05);
                 }
             }
             this.level.setBlock(this.worldPosition, newState, 3);
             setChanged();
+            syncToClient();
         }
     }
 
@@ -347,16 +391,44 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                 ? currentState.getValue(MetalPressControllerBlock.FACING)
                 : Direction.NORTH;
 
-        for (BlueprintRequirement req : getRequirements()) {
-            if (req.x() == 0 && req.y() == 0 && req.z() == 0) continue;
-            BlockPos targetPos = getRelativePos(req.x(), req.y(), req.z(), facing);
-            BlockState targetState = this.level.getBlockState(targetPos);
-            if (targetState.hasProperty(com.refinery.block.PressBedBlock.ASSEMBLED)) {
-                if (targetState.getValue(com.refinery.block.PressBedBlock.ASSEMBLED) != isAssembled) {
-                    this.level.setBlock(targetPos, targetState.setValue(com.refinery.block.PressBedBlock.ASSEMBLED, isAssembled), 3);
+        if (isAssembled) {
+            for (int y = 0; y < 2; y++) {
+                for (int z = 0; z < 2; z++) {
+                    for (int x = this.structureOffsetX - 1; x <= this.structureOffsetX + 1; x++) {
+                        if (x == 0 && y == 0 && z == 0) continue;
+                        BlockPos targetPos = getRelativePos(x, y, z, facing);
+                        BlockState targetState = this.level.getBlockState(targetPos);
+                        if (isPressComponent(targetState) && targetState.hasProperty(MetalPressControllerBlock.ASSEMBLED)) {
+                            if (!targetState.getValue(MetalPressControllerBlock.ASSEMBLED)) {
+                                this.level.setBlock(targetPos, targetState.setValue(MetalPressControllerBlock.ASSEMBLED, true), 3);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Sweep surrounding area so any previously assembled blocks are guaranteed to become visible again
+            for (int y = 0; y < 2; y++) {
+                for (int z = 0; z < 2; z++) {
+                    for (int x = -2; x <= 2; x++) {
+                        if (x == 0 && y == 0 && z == 0) continue;
+                        BlockPos targetPos = getRelativePos(x, y, z, facing);
+                        BlockState targetState = this.level.getBlockState(targetPos);
+                        if (isPressComponent(targetState) && targetState.hasProperty(MetalPressControllerBlock.ASSEMBLED)) {
+                            if (targetState.getValue(MetalPressControllerBlock.ASSEMBLED)) {
+                                this.level.setBlock(targetPos, targetState.setValue(MetalPressControllerBlock.ASSEMBLED, false), 3);
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private boolean isPressComponent(BlockState state) {
+        return state.is(RefineryMod.PRESS_BED.get())
+                || state.is(RefineryMod.PRESS_HEAD.get())
+                || state.is(RefineryMod.PRESS_CASING.get());
     }
 
     public void toggleBlueprintProjection(@Nullable Player player) {
@@ -373,7 +445,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                 }
             }
             if (player != null) {
-                player.sendSystemMessage(Component.literal("§a[Metal Press]§r 2x2x2 Multiblock Press is §2VALID & OPERATIONAL§r!"));
+                player.sendSystemMessage(Component.literal("§a[Metal Press]§r 3x2x2 Multiblock Press is §2VALID & OPERATIONAL§r!"));
             }
         } else {
             this.assembled = false;
@@ -387,32 +459,40 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                 }
             }
             if (player != null) {
-                player.sendSystemMessage(Component.literal("§6[Metal Press]§r 2x2x2 Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
+                player.sendSystemMessage(Component.literal("§6[Metal Press]§r 3x2x2 Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
 
+    /**
+     * Canonical 3x2x2 (3 wide x 2 tall x 2 deep) Conveyor & AIDA Stamping Press blueprint.
+     */
     public List<BlueprintRequirement> getRequirements() {
-        List<BlueprintRequirement> list = new ArrayList<>(8);
+        List<BlueprintRequirement> list = new ArrayList<>(12);
         Block controller = RefineryMod.METAL_PRESS_CONTROLLER.get();
         Block bed = RefineryMod.PRESS_BED.get();
         Block head = RefineryMod.PRESS_HEAD.get();
         Block casing = RefineryMod.PRESS_CASING.get();
 
-        // Layer 0: Bed & Foundation
-        list.add(new BlueprintRequirement(0, 0, 0, controller, "Metal Press Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement(1, 0, 0, bed, "Press Anvil Bed", 0xFFF59E0B));
-        list.add(new BlueprintRequirement(0, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
+        // Layer 0: 3-Wide Conveyor Bed & Foundation (x = -1, 0, +1)
+        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Metal Press Controller", 0xFF10B981));
+        list.add(new BlueprintRequirement( 1, 0, 0, bed, "Press Anvil Bed", 0xFFF59E0B));
+        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
 
-        // Layer 1: Frame & Hydraulic Head
-        list.add(new BlueprintRequirement(0, 1, 0, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 1, 0, head, "Press Hydraulic Head", 0xFF3B82F6));
-        list.add(new BlueprintRequirement(0, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(1, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
+        // Layer 1: Gantry Frame & AIDA Stamping Head (x = -1, 0, +1)
+        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 0, head, "Press Hydraulic Head", 0xFF3B82F6));
+        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
 
         return list;
     }
@@ -446,8 +526,21 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             }
         }
 
+        if (matched == reqs.size()) {
+            this.structureOffsetX = 0;
+            return true;
+        }
+
+        // Also check flexible 3-wide layout (centered 0, right-aligned +1, or left-aligned -1)
+        for (int candidateOffset : new int[]{ 0, 1, -1 }) {
+            if (checkFlexible3Wide(facing, candidateOffset, 2) || checkFlexible3Wide(facing, candidateOffset, 1)) {
+                this.structureOffsetX = candidateOffset;
+                return true;
+            }
+        }
+
         if (notifyPlayer && player != null) {
-            player.sendSystemMessage(Component.literal("§e[Press Diagnostic]§r Blocks in place: §a" + matched + " / " + reqs.size()));
+            player.sendSystemMessage(Component.literal("§e[Press Diagnostic]§r Blocks in place: §a" + matched + " / " + reqs.size() + " (3x2x2 Structure)"));
             if (!missing.isEmpty()) {
                 player.sendSystemMessage(Component.literal("§cMissing components:"));
                 for (String m : missing) {
@@ -456,13 +549,46 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             }
         }
 
-        return matched == reqs.size();
+        return false;
+    }
+
+    private boolean checkFlexible3Wide(Direction facing, int centerOffset, int depth) {
+        if (this.level == null) return false;
+        Block controller = RefineryMod.METAL_PRESS_CONTROLLER.get();
+        Block bed = RefineryMod.PRESS_BED.get();
+        Block head = RefineryMod.PRESS_HEAD.get();
+        Block casing = RefineryMod.PRESS_CASING.get();
+
+        int beds = 0;
+        int heads = 0;
+
+        for (int y = 0; y < 2; y++) {
+            for (int z = 0; z < depth; z++) {
+                for (int x = centerOffset - 1; x <= centerOffset + 1; x++) {
+                    BlockPos targetPos = getRelativePos(x, y, z, facing);
+                    BlockState state = this.level.getBlockState(targetPos);
+                    if (x == 0 && y == 0 && z == 0) {
+                        if (!state.is(controller)) return false;
+                        continue;
+                    }
+                    if (state.is(bed)) {
+                        beds++;
+                    } else if (state.is(head)) {
+                        heads++;
+                    } else if (!state.is(casing)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return beds >= 1 && heads >= 1;
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putBoolean("assembled", this.assembled);
+        output.putInt("structureOffsetX", this.structureOffsetX);
         output.putInt("energy", this.energy);
         output.putInt("progress", this.progress);
         ContainerHelper.saveAllItems(output, this.items);
@@ -472,10 +598,21 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         this.assembled = input.getBooleanOr("assembled", false);
+        this.structureOffsetX = input.getIntOr("structureOffsetX", 0);
         this.energy = input.getIntOr("energy", 0);
         this.energyStorage.set(this.energy);
         this.progress = input.getIntOr("progress", 0);
         ContainerHelper.loadAllItems(input, this.items);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     // === WorldlyContainer Implementation ===
@@ -521,7 +658,10 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     @Override
     public ItemStack removeItem(int slot, int amount) {
         ItemStack result = ContainerHelper.removeItem(this.items, slot, amount);
-        if (!result.isEmpty()) setChanged();
+        if (!result.isEmpty()) {
+            setChanged();
+            syncToClient();
+        }
         return result;
     }
 
@@ -535,6 +675,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         this.items.set(slot, stack);
         stack.limitSize(this.getMaxStackSize(stack));
         setChanged();
+        syncToClient();
     }
 
     @Override
@@ -550,6 +691,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     @Override
     public void clearContent() {
         this.items.clear();
+        syncToClient();
     }
 
     // === MenuProvider Implementation ===

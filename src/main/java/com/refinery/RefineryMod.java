@@ -880,6 +880,21 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Energy.BLOCK, METAL_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> be.energyStorage);
 
+        event.registerBlock(Capabilities.Energy.BLOCK,
+                (level, pos, state, be, side) -> {
+                    MetalPressControllerBlockEntity controller = PressBedBlock.findNearbyController(level, pos);
+                    return controller != null ? controller.energyStorage : null;
+                },
+                PRESS_BED.get(), PRESS_HEAD.get(), PRESS_CASING.get());
+
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> {
+                    MetalPressControllerBlockEntity controller = PressBedBlock.findNearbyController(level, pos);
+                    if (controller == null) return null;
+                    return side != null ? new WorldlyContainerWrapper(controller, side) : VanillaContainerWrapper.of(controller);
+                },
+                PRESS_BED.get(), PRESS_HEAD.get(), PRESS_CASING.get());
+
         event.registerBlockEntity(Capabilities.Item.BLOCK, METAL_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
 

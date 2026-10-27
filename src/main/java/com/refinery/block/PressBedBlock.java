@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -16,13 +17,19 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class PressBedBlock extends Block {
-    public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
+    public static final BooleanProperty ASSEMBLED = MetalPressControllerBlock.ASSEMBLED;
 
     public PressBedBlock(Properties properties) {
         super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.ANVIL)
+                .noOcclusion()
         );
         this.registerDefaultState(this.stateDefinition.any().setValue(ASSEMBLED, false));
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override
@@ -76,9 +83,9 @@ public class PressBedBlock extends Block {
     }
 
     public static MetalPressControllerBlockEntity findNearbyController(Level level, BlockPos pos) {
-        for (int dx = -2; dx <= 2; dx++) {
+        for (int dx = -3; dx <= 3; dx++) {
             for (int dy = -2; dy <= 2; dy++) {
-                for (int dz = -2; dz <= 2; dz++) {
+                for (int dz = -3; dz <= 3; dz++) {
                     if (level.getBlockEntity(pos.offset(dx, dy, dz)) instanceof MetalPressControllerBlockEntity be) {
                         return be;
                     }

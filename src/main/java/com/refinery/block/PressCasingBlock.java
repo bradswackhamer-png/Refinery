@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -16,13 +17,19 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class PressCasingBlock extends Block {
-    public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
+    public static final BooleanProperty ASSEMBLED = MetalPressControllerBlock.ASSEMBLED;
 
     public PressCasingBlock(Properties properties) {
         super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
+                .noOcclusion()
         );
         this.registerDefaultState(this.stateDefinition.any().setValue(ASSEMBLED, false));
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override
