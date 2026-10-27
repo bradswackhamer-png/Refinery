@@ -1,12 +1,90 @@
 package com.refinery.block;
 
+import com.refinery.RefineryMod;
+import com.refinery.block.entity.MetalPressControllerBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class PressBedBlock extends Block {
+    public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
+
     public PressBedBlock(Properties properties) {
         super(properties.strength(2.0f, 6.0f)
                 .sound(SoundType.ANVIL)
-                );
+        );
+        this.registerDefaultState(this.stateDefinition.any().setValue(ASSEMBLED, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(ASSEMBLED);
+    }
+
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (state.getValue(ASSEMBLED)) {
+            MetalPressControllerBlockEntity controller = findNearbyController(level, pos);
+            if (controller != null) {
+                if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
+                    if (!level.isClientSide()) {
+                        controller.toggleBlueprintProjection(player);
+                    }
+                    return InteractionResult.SUCCESS;
+                }
+                if (!player.isShiftKeyDown() && !level.isClientSide()) {
+                    controller.syncAssembly();
+                    player.openMenu(controller);
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (state.getValue(ASSEMBLED)) {
+            MetalPressControllerBlockEntity controller = findNearbyController(level, pos);
+            if (controller != null && !level.isClientSide()) {
+                controller.syncAssembly();
+                player.openMenu(controller);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return super.useWithoutItem(state, level, pos, player, hitResult);
+    }
+
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (state.getValue(ASSEMBLED)) {
+            MetalPressControllerBlockEntity controller = findNearbyController(level, pos);
+            if (controller != null) {
+                controller.disassemble();
+            }
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    public static MetalPressControllerBlockEntity findNearbyController(Level level, BlockPos pos) {
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dy = -2; dy <= 2; dy++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    if (level.getBlockEntity(pos.offset(dx, dy, dz)) instanceof MetalPressControllerBlockEntity be) {
+                        return be;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

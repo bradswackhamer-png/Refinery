@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "refinery:block/press_head" }
+    "assembled=false": { "model": "refinery:block/press_head" },
+    "assembled=true": { "model": "refinery:block/invisible" }
   }
 }

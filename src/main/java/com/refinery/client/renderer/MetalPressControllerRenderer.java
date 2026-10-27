@@ -1,6 +1,7 @@
 package com.refinery.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.refinery.block.MetalPressControllerBlock;
 import com.refinery.block.entity.MetalPressControllerBlockEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -8,9 +9,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Unit;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
@@ -18,8 +21,10 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MetalPressControllerRenderer implements BlockEntityRenderer<MetalPressControllerBlockEntity, MetalPressControllerRenderState> {
+    private final AidaPressModel pressModel;
 
     public MetalPressControllerRenderer(BlockEntityRendererProvider.Context context) {
+        this.pressModel = new AidaPressModel(AidaPressModel.createPressLayer().bakeRoot());
     }
 
     @Override
@@ -106,113 +111,57 @@ public class MetalPressControllerRenderer implements BlockEntityRenderer<MetalPr
             }
         }
 
-        // 2. Animated Hydraulic Stamping Ram (when assembled)
+        // 2. High-Fidelity AIDA NC1-1500 Stamping Press Rendering (when assembled)
         if (state.isAssembled) {
+            poseStack.pushPose();
+
+            // Orient model with the multiblock structure based on controller facing
+            switch (state.facing) {
+                case NORTH -> {}
+                case SOUTH -> {
+                    poseStack.translate(1.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 180.0f);
+                }
+                case EAST -> {
+                    poseStack.translate(1.0, 0.0, 0.0);
+                    poseStack.rotateDegrees(Axis.YP, 90.0f);
+                }
+                case WEST -> {
+                    poseStack.translate(0.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 270.0f);
+                }
+            }
+
             // Calculate dynamic vertical displacement of the stamping ram
-            float ramY;
-            float restingY = 0.82f;
-            float lowestY = 0.12f;
+            float displacementPixels = 0.0f;
+            float maxStrokePixels = 6.5f;
 
             if (state.progress > 0) {
                 if (state.progress <= 20) {
                     // Power stroke: rapid downward acceleration
                     float t = Math.min(1.0f, (state.progress + state.partialTicks) / 20.0f);
-                    ramY = restingY - (t * t) * (restingY - lowestY);
+                    displacementPixels = (t * t) * maxStrokePixels;
                 } else {
                     // Return stroke: smooth hydraulic retraction
                     float t = Math.min(1.0f, (state.progress - 20 + state.partialTicks) / 20.0f);
-                    ramY = lowestY + t * (restingY - lowestY);
+                    displacementPixels = (1.0f - t) * maxStrokePixels;
                 }
-            } else {
-                ramY = restingY;
             }
 
-            // Stamping ram column is at local (x: 1, y: 0, z: 0)
-            int bedDx = right.getStepX();
-            int bedDz = right.getStepZ();
+            this.pressModel.setRamDisplacement(displacementPixels);
 
-            poseStack.pushPose();
-            poseStack.translate(bedDx, 0, bedDz);
-
-            // A. Hydraulic Cylinder Shaft (from top y=1.0 down to ram)
-            float shaftMinX = 0.42f;
-            float shaftMaxX = 0.58f;
-            float shaftMinZ = 0.42f;
-            float shaftMaxZ = 0.58f;
-            float shaftMinY = ramY + 0.22f;
-            float shaftMaxY = 1.0f;
-
-            // B. Heavy Stamping Die Head (rectangular steel block)
-            float headMinX = 0.22f;
-            float headMaxX = 0.78f;
-            float headMinZ = 0.22f;
-            float headMaxZ = 0.78f;
-            float headMinY = ramY;
-            float headMaxY = ramY + 0.24f;
-
-            // Render Solid 3D Geometry
-            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.debugFilledBox(), (pose, vc) -> {
-                // Shaft (bright chrome steel)
-                drawBox(pose, vc, shaftMinX, shaftMinY, shaftMinZ, shaftMaxX, shaftMaxY, shaftMaxZ, 0xD0, 0xD7, 0xDE, 0xFF);
-                // Ram Head (hardened dark industrial steel)
-                drawBox(pose, vc, headMinX, headMinY, headMinZ, headMaxX, headMaxY, headMaxZ, 0x47, 0x55, 0x69, 0xFF);
-            });
-
-            // Outline bevels on the Ram Die Head for crisp mechanical definition
-            submitNodeCollector.submitShapeOutline(
+            // Submit the complete unified AIDA C-frame model
+            submitNodeCollector.submitModel(
+                    this.pressModel,
+                    Unit.INSTANCE,
                     poseStack,
-                    Shapes.box(headMinX, headMinY, headMinZ, headMaxX, headMaxY, headMaxZ),
-                    RenderTypes.lines(),
-                    0xFF94A3B8,
-                    1.5f,
-                    false
+                    AidaPressModel.TEXTURE,
+                    state.lightCoords,
+                    OverlayTexture.NO_OVERLAY,
+                    -1
             );
 
             poseStack.popPose();
         }
-    }
-
-    private static void drawBox(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer vc,
-                                float x1, float y1, float z1, float x2, float y2, float z2,
-                                int r, int g, int b, int a) {
-        // Top face (+Y)
-        int tr = Math.min(255, (int)(r * 1.15f)), tg = Math.min(255, (int)(g * 1.15f)), tb = Math.min(255, (int)(b * 1.15f));
-        vc.addVertex(pose, x1, y2, z1).setColor(tr, tg, tb, a);
-        vc.addVertex(pose, x1, y2, z2).setColor(tr, tg, tb, a);
-        vc.addVertex(pose, x2, y2, z2).setColor(tr, tg, tb, a);
-        vc.addVertex(pose, x2, y2, z1).setColor(tr, tg, tb, a);
-
-        // Bottom face (-Y)
-        int br = (int)(r * 0.6f), bg = (int)(g * 0.6f), bb = (int)(b * 0.6f);
-        vc.addVertex(pose, x1, y1, z1).setColor(br, bg, bb, a);
-        vc.addVertex(pose, x2, y1, z1).setColor(br, bg, bb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(br, bg, bb, a);
-        vc.addVertex(pose, x1, y1, z2).setColor(br, bg, bb, a);
-
-        // North face (-Z)
-        int nr = (int)(r * 0.8f), ng = (int)(g * 0.8f), nb = (int)(b * 0.8f);
-        vc.addVertex(pose, x1, y1, z1).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x1, y2, z1).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y2, z1).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y1, z1).setColor(nr, ng, nb, a);
-
-        // South face (+Z)
-        vc.addVertex(pose, x1, y1, z2).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x2, y2, z2).setColor(nr, ng, nb, a);
-        vc.addVertex(pose, x1, y2, z2).setColor(nr, ng, nb, a);
-
-        // West face (-X)
-        int wr = (int)(r * 0.9f), wg = (int)(g * 0.9f), wb = (int)(b * 0.9f);
-        vc.addVertex(pose, x1, y1, z1).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x1, y1, z2).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x1, y2, z2).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x1, y2, z1).setColor(wr, wg, wb, a);
-
-        // East face (+X)
-        vc.addVertex(pose, x2, y1, z1).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y2, z1).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y2, z2).setColor(wr, wg, wb, a);
-        vc.addVertex(pose, x2, y1, z2).setColor(wr, wg, wb, a);
     }
 }

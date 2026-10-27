@@ -118,6 +118,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     public void disassemble() {
         if (this.assembled) {
             this.assembled = false;
+            updateMemberBlockStates(false);
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState state = getBlockState();
                 if (state.getBlock() instanceof MetalPressControllerBlock) {
@@ -322,6 +323,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         boolean blockAssembled = currentState.getValue(MetalPressControllerBlock.ASSEMBLED);
         if (valid != this.assembled || blockAssembled != valid) {
             this.assembled = valid;
+            updateMemberBlockStates(valid);
             BlockState newState = currentState.setValue(MetalPressControllerBlock.ASSEMBLED, valid);
             if (valid) {
                 newState = newState.setValue(MetalPressControllerBlock.BLUEPRINT, false);
@@ -338,10 +340,30 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         }
     }
 
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        BlockState currentState = getBlockState();
+        Direction facing = (currentState.getBlock() instanceof MetalPressControllerBlock && currentState.hasProperty(MetalPressControllerBlock.FACING))
+                ? currentState.getValue(MetalPressControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x() == 0 && req.y() == 0 && req.z() == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x(), req.y(), req.z(), facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(com.refinery.block.PressBedBlock.ASSEMBLED)) {
+                if (targetState.getValue(com.refinery.block.PressBedBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(com.refinery.block.PressBedBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
+        }
+    }
+
     public void toggleBlueprintProjection(@Nullable Player player) {
         boolean formed = checkStructure(true, player);
         if (formed) {
             this.assembled = true;
+            updateMemberBlockStates(true);
             this.blueprintProjectionTicks = 0;
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -355,6 +377,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             }
         } else {
             this.assembled = false;
+            updateMemberBlockStates(false);
             this.blueprintProjectionTicks = 600; // 30 seconds
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
