@@ -3,7 +3,9 @@ package com.refinery.block;
 import com.refinery.RefineryMod;
 import com.refinery.block.entity.IBoilerController;
 import com.refinery.block.entity.LargeBoilerControllerBlockEntity;
+import com.refinery.block.entity.LargeDieselBoilerControllerBlockEntity;
 import com.refinery.block.entity.SmallBoilerControllerBlockEntity;
+import com.refinery.block.entity.SmallDieselBoilerControllerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -46,9 +48,7 @@ public class SteelBoilerCasingBlock extends Block {
             BlockEntity controller = findNearbyController(level, pos);
             if (controller instanceof SmallBoilerControllerBlockEntity sbe) {
                 if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
-                    if (!level.isClientSide()) {
-                        sbe.toggleBlueprintProjection(player);
-                    }
+                    if (!level.isClientSide()) sbe.toggleBlueprintProjection(player);
                     return InteractionResult.SUCCESS;
                 }
                 if (!player.isShiftKeyDown() && !level.isClientSide()) {
@@ -58,14 +58,32 @@ public class SteelBoilerCasingBlock extends Block {
                 return InteractionResult.SUCCESS;
             } else if (controller instanceof LargeBoilerControllerBlockEntity lbe) {
                 if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
-                    if (!level.isClientSide()) {
-                        lbe.toggleBlueprintProjection(player);
-                    }
+                    if (!level.isClientSide()) lbe.toggleBlueprintProjection(player);
                     return InteractionResult.SUCCESS;
                 }
                 if (!player.isShiftKeyDown() && !level.isClientSide()) {
                     lbe.syncAssembly();
                     player.openMenu(lbe);
+                }
+                return InteractionResult.SUCCESS;
+            } else if (controller instanceof SmallDieselBoilerControllerBlockEntity sdbe) {
+                if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
+                    if (!level.isClientSide()) sdbe.toggleBlueprintProjection(player);
+                    return InteractionResult.SUCCESS;
+                }
+                if (!player.isShiftKeyDown() && !level.isClientSide()) {
+                    sdbe.syncAssembly();
+                    player.openMenu(sdbe);
+                }
+                return InteractionResult.SUCCESS;
+            } else if (controller instanceof LargeDieselBoilerControllerBlockEntity ldbe) {
+                if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
+                    if (!level.isClientSide()) ldbe.toggleBlueprintProjection(player);
+                    return InteractionResult.SUCCESS;
+                }
+                if (!player.isShiftKeyDown() && !level.isClientSide()) {
+                    ldbe.syncAssembly();
+                    player.openMenu(ldbe);
                 }
                 return InteractionResult.SUCCESS;
             }
@@ -85,6 +103,14 @@ public class SteelBoilerCasingBlock extends Block {
                 lbe.syncAssembly();
                 player.openMenu(lbe);
                 return InteractionResult.SUCCESS;
+            } else if (controller instanceof SmallDieselBoilerControllerBlockEntity sdbe && !level.isClientSide()) {
+                sdbe.syncAssembly();
+                player.openMenu(sdbe);
+                return InteractionResult.SUCCESS;
+            } else if (controller instanceof LargeDieselBoilerControllerBlockEntity ldbe && !level.isClientSide()) {
+                ldbe.syncAssembly();
+                player.openMenu(ldbe);
+                return InteractionResult.SUCCESS;
             }
         }
         return super.useWithoutItem(state, level, pos, player, hitResult);
@@ -98,6 +124,10 @@ public class SteelBoilerCasingBlock extends Block {
                 sbe.disassemble();
             } else if (controller instanceof LargeBoilerControllerBlockEntity lbe) {
                 lbe.disassemble();
+            } else if (controller instanceof SmallDieselBoilerControllerBlockEntity sdbe) {
+                sdbe.disassemble();
+            } else if (controller instanceof LargeDieselBoilerControllerBlockEntity ldbe) {
+                ldbe.disassemble();
             }
         }
         return super.playerWillDestroy(level, pos, state, player);
@@ -113,6 +143,12 @@ public class SteelBoilerCasingBlock extends Block {
                     }
                     if (be instanceof LargeBoilerControllerBlockEntity lbe && lbe.isAssembled()) {
                         return lbe;
+                    }
+                    if (be instanceof SmallDieselBoilerControllerBlockEntity sdbe && sdbe.isAssembled()) {
+                        return sdbe;
+                    }
+                    if (be instanceof LargeDieselBoilerControllerBlockEntity ldbe && ldbe.isAssembled()) {
+                        return ldbe;
                     }
                 }
             }

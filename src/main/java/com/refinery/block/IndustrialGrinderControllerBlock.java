@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -34,12 +35,18 @@ public class IndustrialGrinderControllerBlock extends Block implements EntityBlo
     public IndustrialGrinderControllerBlock(Properties properties) {
         super(properties.strength(2.5f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
+                .noOcclusion()
                 );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(ASSEMBLED, false)
                 .setValue(ACTIVE, false)
                 .setValue(BLUEPRINT, false));
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override

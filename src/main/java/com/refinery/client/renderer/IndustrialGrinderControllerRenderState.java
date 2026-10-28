@@ -21,6 +21,9 @@ public class IndustrialGrinderControllerRenderState extends BlockEntityRenderSta
     public final ItemStackRenderState activeItemState = new ItemStackRenderState();
     public boolean hasActiveItem = false;
 
+    public final ItemStackRenderState outputItemState = new ItemStackRenderState();
+    public boolean hasOutputItem = false;
+
     public record MissingComponent(
             int relX, int relY, int relZ,
             int color,

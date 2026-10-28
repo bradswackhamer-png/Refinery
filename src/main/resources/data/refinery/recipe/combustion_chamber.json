@@ -1,12 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "SCS",
+    "CBC",
     "BFB",
-    "SCS"
+    "CBC"
   ],
   "key": {
-    "S": "refinery:steel_ingot",
     "C": "refinery:reinforced_casing",
     "B": "minecraft:iron_bars",
     "F": "minecraft:blast_furnace"

@@ -178,6 +178,16 @@ public class RefineryMod {
             LargeBoilerControllerBlock::new);
     public static final DeferredItem<BlockItem> LARGE_BOILER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("large_boiler_controller", LARGE_BOILER_CONTROLLER);
 
+    // === Small Diesel Boiler (3x3x3) Controller ===
+    public static final DeferredBlock<SmallDieselBoilerControllerBlock> SMALL_DIESEL_BOILER_CONTROLLER = BLOCKS.registerBlock("small_diesel_boiler_controller",
+            SmallDieselBoilerControllerBlock::new);
+    public static final DeferredItem<BlockItem> SMALL_DIESEL_BOILER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("small_diesel_boiler_controller", SMALL_DIESEL_BOILER_CONTROLLER);
+
+    // === Large Diesel Boiler (5x5x5) Controller ===
+    public static final DeferredBlock<LargeDieselBoilerControllerBlock> LARGE_DIESEL_BOILER_CONTROLLER = BLOCKS.registerBlock("large_diesel_boiler_controller",
+            LargeDieselBoilerControllerBlock::new);
+    public static final DeferredItem<BlockItem> LARGE_DIESEL_BOILER_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("large_diesel_boiler_controller", LARGE_DIESEL_BOILER_CONTROLLER);
+
     // === Steam Turbine (3x3x3) Multiblock ===
     public static final DeferredBlock<TurbineCasingBlock> TURBINE_CASING = BLOCKS.registerBlock("turbine_casing",
             TurbineCasingBlock::new);
@@ -456,6 +466,14 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("large_boiler_controller",
                     () -> new BlockEntityType<>(LargeBoilerControllerBlockEntity::new, LARGE_BOILER_CONTROLLER.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmallDieselBoilerControllerBlockEntity>> SMALL_DIESEL_BOILER_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("small_diesel_boiler_controller",
+                    () -> new BlockEntityType<>(SmallDieselBoilerControllerBlockEntity::new, SMALL_DIESEL_BOILER_CONTROLLER.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LargeDieselBoilerControllerBlockEntity>> LARGE_DIESEL_BOILER_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("large_diesel_boiler_controller",
+                    () -> new BlockEntityType<>(LargeDieselBoilerControllerBlockEntity::new, LARGE_DIESEL_BOILER_CONTROLLER.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BoilerPortBlockEntity>> BOILER_PORT_BE =
             BLOCK_ENTITY_TYPES.register("boiler_port",
                     () -> new BlockEntityType<>(BoilerPortBlockEntity::new,
@@ -543,6 +561,12 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<LargeBoilerMenu>> LARGE_BOILER_MENU =
             MENUS.register("large_boiler", () -> new MenuType<>(LargeBoilerMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<SmallDieselBoilerMenu>> SMALL_DIESEL_BOILER_MENU =
+            MENUS.register("small_diesel_boiler", () -> new MenuType<>(SmallDieselBoilerMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<LargeDieselBoilerMenu>> LARGE_DIESEL_BOILER_MENU =
+            MENUS.register("large_diesel_boiler", () -> new MenuType<>(LargeDieselBoilerMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     public static final DeferredHolder<MenuType<?>, MenuType<SteamTurbineMenu>> STEAM_TURBINE_MENU =
             MENUS.register("steam_turbine", () -> new MenuType<>(SteamTurbineMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
@@ -591,6 +615,8 @@ public class RefineryMod {
                         output.accept(FOUNDRY_OUTPUT_PORT_ITEM.get());
                         output.accept(SMALL_BOILER_CONTROLLER_ITEM.get());
                         output.accept(LARGE_BOILER_CONTROLLER_ITEM.get());
+                        output.accept(SMALL_DIESEL_BOILER_CONTROLLER_ITEM.get());
+                        output.accept(LARGE_DIESEL_BOILER_CONTROLLER_ITEM.get());
                         output.accept(STEEL_BOILER_CASING_ITEM.get());
                         output.accept(BOILER_FIREBOX_ITEM.get());
                         output.accept(BOILER_PIPE_ITEM.get());
@@ -789,6 +815,12 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Item.BLOCK, LARGE_BOILER_CONTROLLER_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
 
+        event.registerBlockEntity(Capabilities.Item.BLOCK, SMALL_DIESEL_BOILER_CONTROLLER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, LARGE_DIESEL_BOILER_CONTROLLER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
         // Capabilities on Boiler Ports (Water In, Steam Out, Fuel In)
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, BOILER_PORT_BE.get(),
                 (be, side) -> {
@@ -799,19 +831,29 @@ public class RefineryMod {
                                 () -> net.minecraft.world.level.material.Fluids.WATER,
                                 controller::getWaterAmount,
                                 controller::setWaterAmount,
-                                SmallBoilerControllerBlockEntity.TANK_CAPACITY,
+                                64000,
                                 true, false, () -> {});
                         case STEAM_OUT -> new SingleFluidHandler(
                                 RefineryFluids.STEAM_SOURCE::get,
                                 controller::getSteamAmount,
                                 controller::setSteamAmount,
-                                SmallBoilerControllerBlockEntity.TANK_CAPACITY,
+                                64000,
                                 false, true, () -> {});
-                        default -> null;
+                        case FUEL_IN -> {
+                            if (controller.isDieselBoiler()) {
+                                yield new SingleFluidHandler(
+                                        RefineryFluids.DIESEL_SOURCE::get,
+                                        controller::getDieselAmount,
+                                        controller::setDieselAmount,
+                                        64000,
+                                        true, false, () -> {});
+                            }
+                            yield null;
+                        }
                     };
                 });
 
-        // Capabilities on Boiler Controllers (Expose Water & Steam to Gates / Pipes)
+        // Capabilities on Boiler Controllers (Expose Water & Steam & Diesel to Gates / Pipes)
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, SMALL_BOILER_CONTROLLER_BE.get(),
                 (be, side) -> {
                     if (!be.isAssembled()) return null;
@@ -828,11 +870,29 @@ public class RefineryMod {
                             new SingleFluidHandler(RefineryFluids.STEAM_SOURCE::get, be::getSteamAmount, be::setSteamAmount, LargeBoilerControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged)
                     );
                 });
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, SMALL_DIESEL_BOILER_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(() -> net.minecraft.world.level.material.Fluids.WATER, be::getWaterAmount, be::setWaterAmount, SmallDieselBoilerControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.STEAM_SOURCE::get, be::getSteamAmount, be::setSteamAmount, SmallDieselBoilerControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.DIESEL_SOURCE::get, be::getDieselAmount, be::setDieselAmount, SmallDieselBoilerControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged)
+                    );
+                });
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, LARGE_DIESEL_BOILER_CONTROLLER_BE.get(),
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(() -> net.minecraft.world.level.material.Fluids.WATER, be::getWaterAmount, be::setWaterAmount, LargeDieselBoilerControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.STEAM_SOURCE::get, be::getSteamAmount, be::setSteamAmount, LargeDieselBoilerControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.DIESEL_SOURCE::get, be::getDieselAmount, be::setDieselAmount, LargeDieselBoilerControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged)
+                    );
+                });
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_PORT_BE.get(),
                 (be, side) -> {
                     var controller = be.getController();
-                    if (controller != null && be.getPortType() == BoilerPortBlock.PortType.FUEL_IN) {
+                    if (controller != null && be.getPortType() == BoilerPortBlock.PortType.FUEL_IN && !controller.isDieselBoiler()) {
                         return VanillaContainerWrapper.of(controller.getFuelContainer());
                     }
                     return null;

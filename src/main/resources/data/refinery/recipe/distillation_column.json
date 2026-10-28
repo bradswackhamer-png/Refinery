@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "CGC",
-    "SGS",
+    "IGI",
     "CGC"
   ],
   "key": {
     "C": "minecraft:copper_ingot",
     "G": "minecraft:glass",
-    "S": "refinery:steel_ingot"
+    "I": "minecraft:iron_ingot"
   },
   "result": {
     "id": "refinery:distillation_column",

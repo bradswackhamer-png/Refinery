@@ -16,9 +16,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
@@ -27,13 +27,11 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<IndustrialGrinderControllerBlockEntity, IndustrialGrinderControllerRenderState> {
     private final ItemModelResolver itemModelResolver;
-    private final CrusherDrumModel drum1Model;
-    private final CrusherDrumModel drum2Model;
+    private final IndustrialGrinderModel grinderModel;
 
     public IndustrialGrinderControllerRenderer(BlockEntityRendererProvider.Context context) {
         this.itemModelResolver = context.itemModelResolver();
-        this.drum1Model = new CrusherDrumModel(CrusherDrumModel.createDrumLayer(true).bakeRoot());
-        this.drum2Model = new CrusherDrumModel(CrusherDrumModel.createDrumLayer(false).bakeRoot());
+        this.grinderModel = new IndustrialGrinderModel();
     }
 
     @Override
@@ -42,12 +40,22 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
     }
 
     @Override
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(IndustrialGrinderControllerBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).inflate(4.0);
+    }
+
+    @Override
     public void extractRenderState(IndustrialGrinderControllerBlockEntity be, IndustrialGrinderControllerRenderState state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         BlockEntityRenderState.extractBase(be, state, breakProgress);
 
         var blockState = be.getBlockState();
         state.isBlueprintActive = blockState.hasProperty(IndustrialGrinderControllerBlock.BLUEPRINT) && blockState.getValue(IndustrialGrinderControllerBlock.BLUEPRINT);
-        state.isAssembled = be.isAssembled();
+        state.isAssembled = (blockState.hasProperty(IndustrialGrinderControllerBlock.ASSEMBLED) && blockState.getValue(IndustrialGrinderControllerBlock.ASSEMBLED)) || be.isAssembled();
         state.isActive = blockState.hasProperty(IndustrialGrinderControllerBlock.ACTIVE) && blockState.getValue(IndustrialGrinderControllerBlock.ACTIVE);
         state.facing = blockState.getValue(IndustrialGrinderControllerBlock.FACING);
         state.controllerPos = be.getBlockPos();
@@ -56,25 +64,42 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
         state.partialTicks = partialTicks;
         state.missingComponents.clear();
 
-        // Extract active crushing item if machine is assembled and processing
+        // Extract input item on feed conveyor
         state.hasActiveItem = false;
         if (state.isAssembled && be.getLevel() != null) {
-            ItemStack processingItem = ItemStack.EMPTY;
+            ItemStack inputItem = ItemStack.EMPTY;
             for (int i = 0; i < 4; i++) {
                 ItemStack s = be.getItem(i);
                 if (!s.isEmpty()) {
-                    processingItem = s;
+                    inputItem = s;
                     break;
                 }
             }
-            if (!processingItem.isEmpty()) {
-                this.itemModelResolver.updateForTopItem(state.activeItemState, processingItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+            if (!inputItem.isEmpty()) {
+                this.itemModelResolver.updateForTopItem(state.activeItemState, inputItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
                 state.hasActiveItem = true;
             }
         }
 
+        // Extract output item on discharge conveyor
+        state.hasOutputItem = false;
+        if (state.isAssembled && be.getLevel() != null) {
+            ItemStack outputItem = ItemStack.EMPTY;
+            for (int i = 4; i < 8; i++) {
+                ItemStack s = be.getItem(i);
+                if (!s.isEmpty()) {
+                    outputItem = s;
+                    break;
+                }
+            }
+            if (!outputItem.isEmpty()) {
+                this.itemModelResolver.updateForTopItem(state.outputItemState, outputItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+                state.hasOutputItem = true;
+            }
+        }
+
         // Blueprint diagnostic hologram
-        if (state.isBlueprintActive && be.getLevel() != null) {
+        if (state.isBlueprintActive && !state.isAssembled && be.getLevel() != null) {
             for (var req : be.getRequirements()) {
                 BlockPos targetPos = be.getRelativePos(req.x(), req.y(), req.z(), state.facing);
                 var targetState = be.getLevel().getBlockState(targetPos);
@@ -98,7 +123,7 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
         Direction back = state.facing.getOpposite();
 
         // 1. Blueprint Hologram Wireframe Rendering
-        if (state.isBlueprintActive && !state.missingComponents.isEmpty()) {
+        if (state.isBlueprintActive && !state.isAssembled && !state.missingComponents.isEmpty()) {
             for (var comp : state.missingComponents) {
                 int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
                 int dy = comp.relY();
@@ -141,61 +166,73 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
             }
         }
 
-        // 2. Animated Heavy Crusher Drums & Crushing Block (Center chamber at local X: 0, Y: 1, Z: 1)
+        // 2. Monolithic 3D Rock Crusher Plant Model & In-World Conveyor Item Animation
         if (state.isAssembled) {
-            int chamberDx = back.getStepX();
-            int chamberDy = 1;
-            int chamberDz = back.getStepZ();
-
             poseStack.pushPose();
-            // Move into the center of the hollow crushing chamber
-            poseStack.translate(chamberDx + 0.5, chamberDy + 0.5, chamberDz + 0.5);
-            // Orient along multiblock facing direction
-            poseStack.rotateDegrees(Axis.YP, -state.facing.toYRot());
 
-            // Rotation speed: rapid heavy crushing when active, slow industrial hum when idle
-            float angle;
-            if (state.isActive) {
-                angle = (state.gameTime + state.partialTicks) * 16.0f;
-            } else {
-                angle = (state.gameTime + state.partialTicks) * 1.5f;
+            // Orient local coordinate space
+            switch (state.facing) {
+                case NORTH -> {}
+                case SOUTH -> {
+                    poseStack.translate(1.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 180.0f);
+                }
+                case EAST -> {
+                    poseStack.translate(1.0, 0.0, 0.0);
+                    poseStack.rotateDegrees(Axis.YP, 270.0f);
+                }
+                case WEST -> {
+                    poseStack.translate(0.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 90.0f);
+                }
             }
 
-            // A. Left Spiked Crusher Drum (local X = -0.23, spins clockwise inward)
-            poseStack.pushPose();
-            poseStack.translate(-0.23, 0.0, 0.0);
-            poseStack.rotateDegrees(Axis.ZP, angle);
-            submitNodeCollector.submitModel(this.drum1Model, Unit.INSTANCE, poseStack, CrusherDrumModel.TEXTURE, state.lightCoords, OverlayTexture.NO_OVERLAY, -1);
-            poseStack.popPose();
+            // A. Submit complete monolithic crusher geometry
+            submitNodeCollector.submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.entitySolid(IndustrialGrinderModel.TEXTURE),
+                    (pose, consumer) -> this.grinderModel.render(
+                            pose,
+                            consumer,
+                            state.isActive,
+                            state.lightCoords,
+                            OverlayTexture.NO_OVERLAY
+                    )
+            );
 
-            // B. Right Spiked Crusher Drum (local X = +0.23, spins counter-clockwise inward, 22.5 deg offset)
-            poseStack.pushPose();
-            poseStack.translate(0.23, 0.0, 0.0);
-            poseStack.rotateDegrees(Axis.ZP, -angle + 22.5f);
-            submitNodeCollector.submitModel(this.drum2Model, Unit.INSTANCE, poseStack, CrusherDrumModel.TEXTURE, state.lightCoords, OverlayTexture.NO_OVERLAY, -1);
-            poseStack.popPose();
-
-            // C. Crushed Block / Ore Kinetic Animation
-            if (state.hasActiveItem && (state.isActive || state.progress > 0)) {
+            // B. Animate Input Material riding in on the Left Feed Conveyor towards the Hopper
+            if (state.hasActiveItem) {
                 poseStack.pushPose();
-
-                float progressRatio = Math.min(1.0f, (float) state.progress / 100.0f);
-                float shakeX = (float) Math.sin((state.gameTime + state.partialTicks) * 3.2f) * 0.035f;
-                float shakeY = (float) Math.cos((state.gameTime + state.partialTicks) * 3.8f) * 0.025f;
-                float shakeRot = (float) Math.sin((state.gameTime + state.partialTicks) * 5.5f) * 8.0f;
-
-                // Suspended right in the nip between the spiked drums, drawn downwards as crushed
-                float posY = 0.14f - (progressRatio * 0.18f) + shakeY;
-                poseStack.translate(shakeX, posY, shakeX * 0.5f);
-                poseStack.rotateDegrees(Axis.YP, shakeRot);
-                poseStack.rotateDegrees(Axis.ZP, shakeX * 50.0f);
-
-                // Pulverization scale down
-                float scale = 0.45f * (1.0f - (progressRatio * 0.35f));
-                poseStack.scale(scale, scale, scale);
-
+                // Material travels on feed conveyor (local X from -1.4 towards -0.4, Y: 2.05, Z: 1.5)
+                float travel = state.isActive ? ((state.gameTime + state.partialTicks) * 0.04f) % 0.8f : 0.0f;
+                poseStack.translate(-1.3 + travel, 2.02, 1.5);
+                poseStack.rotateDegrees(Axis.YP, (state.gameTime + state.partialTicks) * 2.0f);
+                poseStack.scale(0.40f, 0.40f, 0.40f);
                 state.activeItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                poseStack.popPose();
 
+                // Material dropping into hopper mouth and vibrating/grinding
+                if (state.isActive || state.progress > 0) {
+                    poseStack.pushPose();
+                    float shake = (float) Math.sin((state.gameTime + state.partialTicks) * 4.0f) * 0.04f;
+                    poseStack.translate(0.5 + shake, 2.3 + shake * 0.5f, 1.5 + shake * 0.3f);
+                    poseStack.scale(0.35f, 0.35f, 0.35f);
+                    state.activeItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                    poseStack.popPose();
+                }
+            }
+
+            // C. Animate Crushed Product traveling out on the Right Inclined Discharge Conveyor
+            if (state.hasOutputItem) {
+                poseStack.pushPose();
+                // Crushed product climbing inclined conveyor (local X from 1.5 towards 2.2, Y from 1.1 towards 1.5, Z: 1.5)
+                float travelOut = state.isActive ? ((state.gameTime + state.partialTicks) * 0.035f) % 0.7f : 0.0f;
+                float posX = 1.45f + travelOut;
+                float posY = 1.05f + (travelOut * 0.65f);
+                poseStack.translate(posX, posY, 1.5);
+                poseStack.rotateDegrees(Axis.ZP, -25.0f); // Match incline angle
+                poseStack.scale(0.35f, 0.35f, 0.35f);
+                state.outputItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                 poseStack.popPose();
             }
 

@@ -1,12 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "PBP",
+    "BBB",
     "ICI",
-    "PBP"
+    "BBB"
   ],
   "key": {
-    "P": "refinery:steel_plate",
     "B": "minecraft:iron_bars",
     "I": "minecraft:copper_ingot",
     "C": "refinery:reinforced_casing"

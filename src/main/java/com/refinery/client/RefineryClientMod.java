@@ -43,6 +43,8 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.BLAST_FURNACE_MENU.get(), BlastFurnaceScreen::new);
         event.register((MenuType) RefineryMod.SMALL_BOILER_MENU.get(), SmallBoilerScreen::new);
         event.register((MenuType) RefineryMod.LARGE_BOILER_MENU.get(), LargeBoilerScreen::new);
+        event.register((MenuType) RefineryMod.SMALL_DIESEL_BOILER_MENU.get(), SmallDieselBoilerScreen::new);
+        event.register((MenuType) RefineryMod.LARGE_DIESEL_BOILER_MENU.get(), LargeDieselBoilerScreen::new);
         event.register((MenuType) RefineryMod.STEAM_TURBINE_MENU.get(), SteamTurbineScreen::new);
         event.register((MenuType) RefineryMod.METAL_PRESS_MENU.get(), MetalPressScreen::new);
         event.register((MenuType) RefineryMod.INDUSTRIAL_GRINDER_MENU.get(), IndustrialGrinderScreen::new);
@@ -58,6 +60,8 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.BLAST_FURNACE_CONTROLLER_BE.get(), BlastFurnaceControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.SMALL_BOILER_CONTROLLER_BE.get(), SmallBoilerControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.LARGE_BOILER_CONTROLLER_BE.get(), LargeBoilerControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER_BE.get(), SmallDieselBoilerControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.LARGE_DIESEL_BOILER_CONTROLLER_BE.get(), LargeDieselBoilerControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.STEAM_TURBINE_CONTROLLER_BE.get(), SteamTurbineControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.METAL_PRESS_CONTROLLER_BE.get(), MetalPressControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER_BE.get(), IndustrialGrinderControllerRenderer::new);

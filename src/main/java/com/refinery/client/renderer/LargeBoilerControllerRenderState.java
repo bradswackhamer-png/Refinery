@@ -9,6 +9,8 @@ import java.util.List;
 
 public class LargeBoilerControllerRenderState extends BlockEntityRenderState {
     public boolean isBlueprintActive;
+    public boolean isAssembled;
+    public boolean isActive;
     public Direction facing = Direction.NORTH;
     public BlockPos controllerPos = BlockPos.ZERO;
 

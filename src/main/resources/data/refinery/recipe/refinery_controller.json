@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "GRG",
-    "SCS",
-    "SSS"
+    "ICI",
+    "III"
   ],
   "key": {
     "G": "minecraft:glass",
     "R": "minecraft:comparator",
-    "S": "refinery:steel_ingot",
+    "I": "minecraft:iron_ingot",
     "C": "refinery:reinforced_casing"
   },
   "result": {

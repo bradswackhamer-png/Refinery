@@ -25,6 +25,8 @@
         "refinery:boiler_fuel_port",
         "refinery:small_boiler_controller",
         "refinery:large_boiler_controller",
+        "refinery:small_diesel_boiler_controller",
+        "refinery:large_diesel_boiler_controller",
         "refinery:turbine_casing",
         "refinery:turbine_rotor",
         "refinery:turbine_steam_port",

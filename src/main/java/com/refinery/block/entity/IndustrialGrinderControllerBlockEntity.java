@@ -17,6 +17,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -115,23 +118,30 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         return this.energy;
     }
 
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
     public NonNullList<ItemStack> getDrops() {
         return this.items;
     }
 
     public void disassemble() {
-        if (this.assembled) {
-            this.assembled = false;
-            if (this.level != null && !this.level.isClientSide()) {
-                BlockState state = getBlockState();
-                if (state.getBlock() instanceof IndustrialGrinderControllerBlock) {
-                    this.level.setBlock(this.worldPosition, state.setValue(IndustrialGrinderControllerBlock.ASSEMBLED, false)
-                            .setValue(IndustrialGrinderControllerBlock.ACTIVE, false)
-                            .setValue(IndustrialGrinderControllerBlock.BLUEPRINT, false), 3);
-                }
+        this.assembled = false;
+        updateMemberBlockStates(false);
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            if (state.getBlock() instanceof IndustrialGrinderControllerBlock) {
+                this.level.setBlock(this.worldPosition, state.setValue(IndustrialGrinderControllerBlock.ASSEMBLED, false)
+                        .setValue(IndustrialGrinderControllerBlock.ACTIVE, false)
+                        .setValue(IndustrialGrinderControllerBlock.BLUEPRINT, false), 3);
             }
-            setChanged();
         }
+        setChanged();
+        syncToClient();
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -221,17 +231,22 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                         serverLevel.playSound(null, portPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8f, 1.2f);
                     }
                     setChanged();
+                    if (this.progress == 1 || this.progress % 10 == 0 || this.progress == 0) {
+                        syncToClient();
+                    }
                 }
             } else {
                 if (this.progress > 0) {
                     this.progress = 0;
                     setChanged();
+                    syncToClient();
                 }
             }
         } else {
             if (this.progress > 0) {
                 this.progress = 0;
                 setChanged();
+                syncToClient();
             }
         }
 
@@ -240,6 +255,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             if (latest.getBlock() instanceof IndustrialGrinderControllerBlock) {
                 level.setBlock(pos, latest.setValue(IndustrialGrinderControllerBlock.ACTIVE, isActive), 3);
             }
+            syncToClient();
         }
     }
 
@@ -507,6 +523,8 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         BlockState currentState = getBlockState();
         if (!(currentState.getBlock() instanceof IndustrialGrinderControllerBlock)) return;
 
+        updateMemberBlockStates(valid);
+
         boolean blockAssembled = currentState.getValue(IndustrialGrinderControllerBlock.ASSEMBLED);
         if (valid != this.assembled || blockAssembled != valid) {
             this.assembled = valid;
@@ -524,6 +542,25 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             }
             this.level.setBlock(this.worldPosition, newState, 3);
             setChanged();
+            syncToClient();
+        }
+    }
+
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        Direction facing = (getBlockState().getBlock() instanceof IndustrialGrinderControllerBlock && getBlockState().hasProperty(IndustrialGrinderControllerBlock.FACING))
+                ? getBlockState().getValue(IndustrialGrinderControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x == 0 && req.y == 0 && req.z == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(IndustrialGrinderControllerBlock.ASSEMBLED)) {
+                if (targetState.getValue(IndustrialGrinderControllerBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(IndustrialGrinderControllerBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
         }
     }
 
@@ -531,6 +568,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         boolean formed = checkStructure(true, player);
         if (formed) {
             this.assembled = true;
+            updateMemberBlockStates(true);
             this.blueprintProjectionTicks = 0;
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -545,6 +583,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             }
         } else {
             this.assembled = false;
+            updateMemberBlockStates(false);
             this.blueprintProjectionTicks = 600; // 30 seconds
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -558,6 +597,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
@@ -789,7 +829,10 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     @Override
     public ItemStack removeItem(int slot, int amount) {
         ItemStack result = ContainerHelper.removeItem(this.items, slot, amount);
-        if (!result.isEmpty()) setChanged();
+        if (!result.isEmpty()) {
+            setChanged();
+            syncToClient();
+        }
         return result;
     }
 
@@ -803,6 +846,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         this.items.set(slot, stack);
         stack.limitSize(this.getMaxStackSize(stack));
         setChanged();
+        syncToClient();
     }
 
     @Override
@@ -818,6 +862,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     @Override
     public void clearContent() {
         this.items.clear();
+        syncToClient();
     }
 
     // === MenuProvider Implementation ===
@@ -833,7 +878,12 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }

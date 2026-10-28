@@ -15,4 +15,15 @@ public interface IBoilerController {
     void setSteamAmount(int amt);
     Container getFuelContainer();
     boolean canInsertFuel(ItemStack stack);
+
+    default boolean isDieselBoiler() {
+        return false;
+    }
+    default int fillDiesel(int amount) {
+        return 0;
+    }
+    default int getDieselAmount() {
+        return 0;
+    }
+    default void setDieselAmount(int amt) {}
 }

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PDP",
+    "SCS",
+    "PRP"
+  ],
+  "key": {
+    "P": "refinery:steel_plate",
+    "D": "refinery:diesel_bucket",
+    "S": "refinery:steel_ingot",
+    "R": "minecraft:redstone_block",
+    "C": "refinery:small_diesel_boiler_controller"
+  },
+  "result": {
+    "id": "refinery:large_diesel_boiler_controller",
+    "count": 1
+  }
+}

@@ -322,11 +322,19 @@ A compact packaged thermal generator for small-to-mid tier steam power generatio
 
 ---
 
-### Large Heavy Steam Boiler (5Ã—5Ã—5)
+### Large Heavy Steam Boiler (5×5×5)
 An industrial-grade boiler engineered for massive steam output.
 
+- **Monolithic 3D Scotch Marine Package Boiler**: Upon assembly, the entire 5×5×5 structure transforms into a massive monolithic twin-furnace industrial Scotch marine boiler model on structural steel I-beam skid runners:
+  - **Horizontal Cylindrical Pressure Vessel**: Heavy riveted steel cladding with dual support saddles.
+  - **Dual Front Furnace Doors**: Twin circular front doors with heavy black cast iron hinges, perimeter bolt circle, and central burner hubs.
+  - **Twin Emissive Burner Viewports**: Dynamic fiery glow when active (`15728880` full brightness), reverting to dark soot-coated glass when idle.
+  - **Twin Smokestacks**: Dual tall exhaust stacks venting steam and smoke during operation.
+  - **Overhead Steam Manifold & Valve Piping**: Heavy steam piping with dual valve handwheels and central dial pressure gauge.
+  - **Catwalk & Control Console**: Maintenance platform with safety railing, access ladder, side electrical cabinet, and twin vertical water level sight columns.
+- **Custom Industrial GUI**: High-capacity dark steel GUI with dual water and steam buffer columns, 8-slot fuel buffer, combustion viewport, redstone lamp, and meltdown alert.
 - **Capacity**: 64,000 mB Water, 64,000 mB Steam, 8 Fuel slots.
-- **Performance**: 5Ã— production rate (250 mB Water -> 500 mB Steam per cycle).
+- **Performance**: 5× production rate (250 mB Water -> 500 mB Steam per cycle).
 - **Redstone Requirement**: Requires an active redstone signal to burn.
 - **Meltdown Condition**: Running dry for 60 seconds triggers a **massive 10.0 power crater explosion**!
 
@@ -334,13 +342,32 @@ An industrial-grade boiler engineered for massive steam output.
 - **Layer 0 (Foundation & Hearth)**:
   - Front: `(-1, 0, 0)` Water Port, `(0, 0, 0)` Large Controller, `(1, 0, 0)` Fuel Port
   - Rear: `(0, 0, 4)` Steam Port
-  - Center 3Ã—3 hearth (x in [-1, 1], z in [1, 3]): 9 **Boiler Firebox Hearth** blocks
+  - Center 3×3 hearth (x in [-1, 1], z in [1, 3]): 9 **Boiler Firebox Hearth** blocks
   - Perimeter: **Steel Boiler Casing**
-- **Layers 1â€“3 (Core Pressure Piping)**:
-  - Center 3Ã—3Ã—3 core: 27 **Boiler Pressure Pipes** transferring heat
+- **Layers 1–3 (Core Pressure Piping)**:
+  - Center 3×3×3 core: 27 **Boiler Pressure Pipes** transferring heat
   - Outer walls: **Steel Boiler Casing**
 - **Layer 4 (Roof)**:
   - 25 **Steel Boiler Casing** covering the entire top.
+
+---
+
+### Small & Large Diesel-Fired Steam Boilers (3×3×3 & 5×5×5)
+Modern liquid-fueled steam boilers designed to burn refined **Diesel** fuel instead of solid combustibles.
+
+- **Small Diesel Boiler (3×3×3)**:
+  - Controller: `refinery:small_diesel_boiler_controller`
+  - Replaces solid fuel with liquid **Diesel** combustion via precision fuel injectors and high-pressure fuel rail.
+  - **Tanks**: 16,000 mB Diesel, 16,000 mB Water, 16,000 mB High-Pressure Steam.
+  - **Consumption & Output**: Consumes 10 mB Diesel + 50 mB Water -> Produces 100 mB Steam per operational cycle.
+  - **Custom 3-Tank Industrial GUI**: Features 3 recessed fluid columns (Diesel, Water, Steam) with bucket fill/drain slots, redstone signal indicator, burning flame viewport, and status badges.
+- **Large Diesel Boiler (5×5×5)**:
+  - Controller: `refinery:large_diesel_boiler_controller`
+  - Heavy twin-furnace high-volume diesel steam plant.
+  - **Tanks**: 64,000 mB Diesel, 64,000 mB Water, 64,000 mB High-Pressure Steam.
+  - **Consumption & Output**: Consumes 50 mB Diesel + 250 mB Water -> Produces 500 mB Steam per operational cycle.
+  - **Custom 3-Tank Industrial GUI**: High-capacity Diesel, Water, and Steam gauges with automated port interfacing.
+- **Structure**: Uses the exact same multiblock casing, pipe, and port layouts as the standard boilers, swapping only the controller block to `Small Diesel Boiler Controller` or `Large Diesel Boiler Controller`. Water and Diesel can be supplied through ports or directly into the controller.
 
 ---
 
@@ -406,16 +433,22 @@ The Petroleum Refinery features a dedicated high-pressure **Feedstock Input Slot
 
 ---
 
-### Industrial Grinder & Pulverizer (3Ã—3Ã—3)
-A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields and processes geological strata.
+### Industrial Grinder & Pulverizer (3×3×3)
+A heavy rock crushing and pulverizing plant that doubles raw ore yields and processes geological strata.
 
-- **Dimensions**: 3 wide Ã— 3 tall Ã— 3 deep (27 blocks total, matching the Refinery, Boilers, and Blast Smelter).
+- **Monolithic 3D Rock Crusher Plant Transformation**: Upon assembly, the entire 3×3×3 structure transforms into a monolithic heavy rock crusher plant inspired by industrial quarry processing machinery:
+  - **Structural Frame**: 4-post heavy structural steel framework with vibration-dampening foot pads and cross-bracing.
+  - **Crusher Box & Drive System**: Central eccentric jaw/cone crushing box fitted with dual side flywheels, counterweights, and belt-drive housings that rotate during active operation.
+  - **Top Flared Feed Hopper**: Oversized flared rock hopper funnel loaded with stone and mineral chunks.
+  - **Horizontal Feed Conveyor**: Infeed conveyor bringing raw ore and rock into the hopper mouth, with animated items physically traveling across the belt into the machine.
+  - **Inclined Discharge Conveyor**: Angled discharge chute and belt conveyor carrying crushed gravel and mineral dusts out from under the crusher box, complete with animated output items climbing the belt.
+  - **Member Block Occlusion**: Surrounding member blocks automatically turn invisible and forward wrench/hand interactions directly to the controller.
+- **Custom Industrial GUI**: Dark gunmetal steel panel with 2-slot raw feed tray, 4-slot crushed output collection bay, central animated crushing chamber indicator, and real-time status header badge (`ONLINE`, `CRUSHING`, `IDLE`, `UNFORMED`).
 - **Core Functionality**:
   - **Ore Doubling**: Pulverizes Raw Iron, Raw Gold, and Raw Copper (or ore blocks) into **2x Dust** (`refinery:iron_dust`, `gold_dust`, `copper_dust`). Smelting these dusts produces 2 ingots per raw ore!
   - **Stone Crushing**: Crushes Stone, Cobblestone, Deepslate, Andesite, Diorite, and Granite into **1x Gravel**.
   - **Sand Pulverizing**: Crushes Gravel into **1x Sand**.
   - **Ingot Grinding**: Converts Ingots into **1x Dust** for metallurgy and chemistry.
-- **Animated Mechanical Spiked Drums & Pulverizing Block**: Features twin physical cylindrical counter-rotating crusher drums with protruding intermeshing steel spikes visible through the reinforced front viewing window (`refinery:grinder_chamber`). When actively processing, the block/ore being pulverized vibrates violently in the center nip and is drawn downwards into the spinning teeth with rich crunching sound effects and pulverized dust particles.
 - **Specs**:
   - Energy Storage: 50,000 FE
   - Energy Consumption: 30 FE/t while grinding
@@ -435,7 +468,7 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
   - `(0, 2, 1)`: **Grinder Feed Port (Input)** (Top Center Hopper Chute)
   - All other 8 positions: **Grinder Structural Casing**
 
-*(Note: Flexible port placement is supportedâ€”input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
+*(Note: Flexible port placement is supported—input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
 
 ---
 
@@ -896,29 +929,43 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ## 13. Engineering Changelog & Version History
 
-### Version 1.5.13 (Monolithic 3D Small Steam Boiler Model & GUI Overhaul)
-- **Monolithic 3D Small Steam Boiler Model Overhaul (Scotch Marine Package Boiler)**:
-  - Transformed the assembled 3×3×3 Small Steam Boiler (`refinery:small_boiler_controller`) into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model using the established `ASSEMBLED` blockstate and `invisible.json` occlusion pattern (exact technique used on the Metal Press).
-  - Features a horizontal cylindrical boiler drum with solid steel cladding plates and riveted reinforcement straps (solid steel exterior with no exposed cutaways).
-  - Massive circular front boiler door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
-  - Dynamic glowing burner sight-glass viewport: emits an intense fiery glow when combustion is active (`15728880` full brightness) and reverts to dark soot glass on standby.
-  - Lower arched rectangular ash/cleanout access door with heavy latch.
-  - Structural steel I-beam skid base with transverse cross-beams and two curved saddle cradles supporting the drum.
-  - Overhead industrial steam manifold header piping, red globe valve handwheels, safety relief valve, and dial pressure gauge.
-  - Tall vertical exhaust smokestack / chimney with reinforcement collar and top flange.
-  - Side industrial electrical control cabinet (ICI Caldaie style) with status indicator lamps, caution badge, and conduit to skid.
-  - Side vertical water level sight glass column and dual base feed-water booster pumps.
+### Version 1.5.14 (Grinder & 5x5 Boiler Overhaul, Diesel Boilers, Lighter Diesel)
+- **Multiblock Industrial Grinder Monolithic 3D Overhaul & Animated Conveyors**:
+  - Overhauled the 3×3×3 Industrial Grinder (`refinery:industrial_grinder_controller`) into a monolithic 3D rock crushing plant based on real-world heavy industrial machinery.
+  - Structural 4-post steel frame with heavy vibration dampening foot pads, cross-braces, and reinforced mounting flanges.
+  - Central eccentric crushing box with side flywheels, counterweights, and belt-drive housings that animate dynamically during active operation.
+  - Large top flared rock hopper funnel loaded with stone and ore chunks.
+  - Horizontal feed conveyor bringing raw material into the crusher hopper, complete with animated raw items traveling along the belt.
+  - Inclined discharge conveyor carrying crushed gravel and mineral dusts out from under the crusher box, complete with animated output items climbing the belt.
+  - Full member block occlusion via `ASSEMBLED = true -> invisible.json` and interaction/wrench forwarding on `GrinderCasingBlock`, `GrinderChamberBlock`, and `GrinderPortBlock`.
+- **Custom Industrial Grinder GUI**:
+  - Overhauled `IndustrialGrinderScreen` and custom textured `textures/gui/industrial_grinder.png` matching the dark gunmetal steel industrial aesthetic of the Metal Press.
+  - 2-slot raw input feed tray, 4-slot crushed output collection bay, central animated crushing chamber indicator, and real-time status badge (`ONLINE`, `CRUSHING`, `IDLE`, `UNFORMED`).
+- **5x5 Large Steam Boiler Monolithic 3D Overhaul**:
+  - Overhauled the 5×5×5 Large Steam Boiler (`refinery:large_boiler_controller`) into a monolithic 3D twin-furnace Scotch marine industrial packaged boiler (`LargeBoilerModel`).
+  - Massive cylindrical boiler pressure vessel with dark steel structural skid runners and saddle cradles.
+  - Dual circular front boiler furnace doors with twin glowing burner viewports (dynamic `15728880` full emissive flame glow when active).
+  - Twin vertical exhaust smokestacks with top flanges and reinforcement collars.
+  - Overhead heavy steam manifold piping with dual valve handwheels and central dial pressure gauge.
+  - Right-side elevated maintenance catwalk platform with safety handrail and access ladder, side electrical control console, and twin water sight level columns.
+  - Custom high-capacity industrial GUI (`LargeBoilerScreen` & `large_boiler.png`).
+- **Small and Large Diesel-Fired Steam Boilers**:
+  - Introduced the **Small Diesel Boiler** (3×3×3, `refinery:small_diesel_boiler_controller`) and **Large Diesel Boiler** (5×5×5, `refinery:large_diesel_boiler_controller`) that consume liquid **Diesel** instead of solid burnables to produce high-pressure steam.
+  - Custom 3D models with modern liquid fuel injector burner hubs, fuel rails, and high-efficiency combustion chambers.
+  - Custom 3-tank industrial GUIs (`SmallDieselBoilerScreen` & `LargeDieselBoilerScreen`) featuring recessed gauges for Diesel, Water, and Steam, fluid bucket fill/drain interaction slots, redstone indicators, and combustion flame viewports.
+  - Fluid and item capabilities integrated with input/output ports and automation pipes.
+  - Added shaped crafting recipes and loot tables for both diesel boiler controllers.
+- **Lighter Diesel Fluid Texture Palette**:
+  - Re-paletted diesel fluid textures (`diesel_still.png`, `diesel_flow.png`, `diesel_bucket.png`, `port_diesel.png`) to a refined golden straw tone (`#fdee87` / `#f5cf47`) for enhanced visual distinction from crude oil and gasoline.
+
+---
+
+### Version 1.5.13 (Small Steam Boiler Monolithic Scotch Marine Overhaul)
+- **Monolithic 3D Small Steam Boiler Model Overhaul**:
+  - Transformed the assembled 3×3×3 Small Steam Boiler into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model.
+  - Horizontal cylindrical drum with steel cladding plates, circular front door with hinges and central burner hub, emissive burning sight-glass viewport, arched ash door, overhead steam manifold header with valves, exhaust stack, ICI Caldaie style control cabinet, and feed-water booster pumps.
 - **Custom Industrial Small Boiler GUI Overhaul & Realignment**:
-  - Completely aligned and overhauled the Small Boiler GUI (`SmallBoilerScreen` & `small_boiler.png`) into a dark gunmetal steel industrial panel with rivets, matching the custom aesthetics of the Metal Press.
-  - Recessed water buffer tank gauge on the left with blue fluid fill and graduation markings.
-  - Recessed high-pressure steam buffer tank gauge on the right with aqua steam fill and graduation markings.
-  - Central machined steel hearth with 2×2 fuel buffer slot wells.
-  - Round redstone signal indicator lamp (glowing green when powered, dark red when off).
-  - Combustion flame viewport with dynamic flickering flame effect when burning.
-  - Overheat / meltdown danger hazard bar with warning details and countdown timer to explosion.
-  - Real-time status header badge (`ONLINE`, `BURNING`, `OVERHEATING!`, `UNFORMED`).
-- **Member Block Occlusion & Interaction Delegation**:
-  - Member blocks (`SteelBoilerCasingBlock`, `BoilerFireboxBlock`, `BoilerPipeBlock`, `BoilerPortBlock`) now track `ASSEMBLED`, feature `.noOcclusion()`, return `RenderShape.INVISIBLE` when assembled, and forward wrench/hand interactions and destruction to the controller.
+  - Dark gunmetal steel panel with recessed water & steam buffer gauges, 2x2 fuel buffer, redstone lamp, combustion flame viewport, meltdown hazard bar, and real-time status badge.
 
 ---
 

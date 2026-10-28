@@ -4,6 +4,41 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.5.14] - 2026-10-28
+
+### Added
+- **Multiblock Industrial Grinder Monolithic 3D Overhaul & Animated Conveyors**:
+  - Overhauled the $3\times 3\times 3$ Industrial Grinder (`refinery:industrial_grinder_controller`) into a monolithic 3D rock crushing plant based on real-world heavy industrial machinery.
+  - Structural 4-post steel frame with heavy vibration dampening foot pads, cross-braces, and reinforced mounting flanges.
+  - Central eccentric crushing box with side flywheels, counterweights, and belt-drive housings that animate dynamically during active operation.
+  - Large top flared rock hopper funnel loaded with stone and ore chunks.
+  - Horizontal feed conveyor bringing raw material into the crusher hopper, complete with animated raw items traveling along the belt.
+  - Inclined discharge conveyor carrying crushed gravel and mineral dusts out from under the crusher box, complete with animated output items climbing the belt.
+  - Full member block occlusion via `ASSEMBLED = true -> invisible.json` and interaction/wrench forwarding on `GrinderCasingBlock`, `GrinderChamberBlock`, and `GrinderPortBlock`.
+- **Custom Industrial Grinder GUI**:
+  - Overhauled `IndustrialGrinderScreen` and custom textured `textures/gui/industrial_grinder.png` matching the dark gunmetal steel industrial aesthetic of the Metal Press.
+  - 2-slot raw input feed tray, 4-slot crushed output collection bay, central animated crushing chamber indicator, and real-time status badge (`ONLINE`, `CRUSHING`, `IDLE`, `UNFORMED`).
+- **5x5 Large Steam Boiler Monolithic 3D Overhaul**:
+  - Overhauled the $5\times 5\times 5$ Large Steam Boiler (`refinery:large_boiler_controller`) into a monolithic 3D twin-furnace Scotch marine industrial packaged boiler (`LargeBoilerModel`).
+  - Massive cylindrical boiler pressure vessel with dark steel structural skid runners and saddle cradles.
+  - Dual circular front boiler furnace doors with twin glowing burner viewports (dynamic `15728880` full emissive flame glow when active).
+  - Twin vertical exhaust smokestacks with top flanges and reinforcement collars.
+  - Overhead heavy steam manifold piping with dual valve handwheels and central dial pressure gauge.
+  - Right-side elevated maintenance catwalk platform with safety handrail and access ladder, side electrical control console, and twin water sight level columns.
+  - Custom high-capacity industrial GUI (`LargeBoilerScreen` & `large_boiler.png`).
+- **Small and Large Diesel-Fired Steam Boilers**:
+  - Introduced the **Small Diesel Boiler** ($3\times 3\times 3$, `refinery:small_diesel_boiler_controller`) and **Large Diesel Boiler** ($5\times 5\times 5$, `refinery:large_diesel_boiler_controller`) that consume liquid **Diesel** instead of solid burnables to produce high-pressure steam.
+  - Custom 3D models with modern liquid fuel injector burner hubs, fuel rails, and high-efficiency combustion chambers.
+  - Custom 3-tank industrial GUIs (`SmallDieselBoilerScreen` & `LargeDieselBoilerScreen`) featuring recessed gauges for Diesel, Water, and Steam, fluid bucket fill/drain interaction slots, redstone indicators, and combustion flame viewports.
+  - Fluid and item capabilities integrated with input/output ports and automation pipes.
+  - Added shaped crafting recipes and loot tables for both diesel boiler controllers.
+
+### Changed
+- **Lighter Diesel Fluid Texture Palette**:
+  - Re-paletted diesel fluid textures (`diesel_still.png`, `diesel_flow.png`, `diesel_bucket.png`, `port_diesel.png`) to a refined golden straw tone (`#fdee87` / `#f5cf47`) for enhanced visual distinction from crude oil and gasoline.
+
+---
+
 ## [1.5.13] - 2026-10-28
 
 ### Changed

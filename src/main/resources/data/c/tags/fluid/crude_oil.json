@@ -1,7 +1,5 @@
 {
   "values": [
-    "refinery:crude_oil",
-    "refinery:flowing_crude_oil",
     "#c:oil",
     { "id": "logistics:core/crude_oil", "required": false }
   ]

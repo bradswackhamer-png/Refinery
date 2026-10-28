@@ -7,9 +7,12 @@ import com.refinery.block.LargeBoilerControllerBlock;
 import com.refinery.menu.LargeBoilerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -163,19 +166,26 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
         return this.items;
     }
 
-    public void disassemble() {
-        if (this.assembled) {
-            this.assembled = false;
-            if (this.level != null && !this.level.isClientSide()) {
-                BlockState state = getBlockState();
-                if (state.getBlock() instanceof LargeBoilerControllerBlock) {
-                    this.level.setBlock(this.worldPosition, state.setValue(LargeBoilerControllerBlock.ASSEMBLED, false)
-                            .setValue(LargeBoilerControllerBlock.ACTIVE, false)
-                            .setValue(LargeBoilerControllerBlock.BLUEPRINT, false), 3);
-                }
-            }
-            setChanged();
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
         }
+    }
+
+    public void disassemble() {
+        this.assembled = false;
+        updateMemberBlockStates(false);
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            if (state.getBlock() instanceof LargeBoilerControllerBlock) {
+                this.level.setBlock(this.worldPosition, state.setValue(LargeBoilerControllerBlock.ASSEMBLED, false)
+                        .setValue(LargeBoilerControllerBlock.ACTIVE, false)
+                        .setValue(LargeBoilerControllerBlock.BLUEPRINT, false), 3);
+            }
+        }
+        setChanged();
+        syncToClient();
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -316,6 +326,8 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
         BlockState currentState = getBlockState();
         if (!(currentState.getBlock() instanceof LargeBoilerControllerBlock)) return;
 
+        updateMemberBlockStates(valid);
+
         boolean blockAssembled = currentState.getValue(LargeBoilerControllerBlock.ASSEMBLED);
         if (valid != this.assembled || blockAssembled != valid) {
             this.assembled = valid;
@@ -333,6 +345,25 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
             }
             this.level.setBlock(this.worldPosition, newState, 3);
             setChanged();
+            syncToClient();
+        }
+    }
+
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        Direction facing = (getBlockState().getBlock() instanceof LargeBoilerControllerBlock && getBlockState().hasProperty(LargeBoilerControllerBlock.FACING))
+                ? getBlockState().getValue(LargeBoilerControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x() == 0 && req.y() == 0 && req.z() == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x(), req.y(), req.z(), facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(LargeBoilerControllerBlock.ASSEMBLED)) {
+                if (targetState.getValue(LargeBoilerControllerBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(LargeBoilerControllerBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
         }
     }
 
@@ -340,6 +371,7 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
         boolean formed = checkStructure(true, player);
         if (formed) {
             this.assembled = true;
+            updateMemberBlockStates(true);
             this.blueprintProjectionTicks = 0;
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -354,6 +386,7 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
             }
         } else {
             this.assembled = false;
+            updateMemberBlockStates(false);
             this.blueprintProjectionTicks = 600; // 30 seconds
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -367,6 +400,7 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
@@ -583,5 +617,15 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         return new LargeBoilerMenu(containerId, playerInventory, this, this.dataAccess);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }

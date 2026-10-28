@@ -129,7 +129,7 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.13.jar`
+`refinery-1.5.14.jar`
 
 ### Display Name
 `Industrial Refinery 1.5.13 (NeoForge 26.3)`
@@ -148,31 +148,43 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.13
+# Industrial Refinery v1.5.14
 
-### What's New in v1.5.13:
+### What's New in v1.5.14:
+- **Multiblock Industrial Grinder Monolithic 3D Overhaul & Animated Conveyors**:
+  - Overhauled the 3×3×3 Industrial Grinder (`refinery:industrial_grinder_controller`) into a monolithic 3D rock crushing plant based on real-world heavy industrial machinery.
+  - Structural 4-post steel frame with heavy vibration dampening foot pads, cross-braces, and reinforced mounting flanges.
+  - Central eccentric crushing box with side flywheels, counterweights, and belt-drive housings that animate dynamically during active operation.
+  - Large top flared rock hopper funnel loaded with stone and ore chunks.
+  - Horizontal feed conveyor bringing raw material into the crusher hopper, complete with animated raw items traveling along the belt.
+  - Inclined discharge conveyor carrying crushed gravel and mineral dusts out from under the crusher box, complete with animated output items climbing the belt.
+  - Full member block occlusion via `ASSEMBLED = true -> invisible.json` and interaction/wrench forwarding on `GrinderCasingBlock`, `GrinderChamberBlock`, and `GrinderPortBlock`.
+- **Custom Industrial Grinder GUI**:
+  - Overhauled `IndustrialGrinderScreen` and custom textured `textures/gui/industrial_grinder.png` matching the dark gunmetal steel industrial aesthetic of the Metal Press.
+  - 2-slot raw input feed tray, 4-slot crushed output collection bay, central animated crushing chamber indicator, and real-time status badge (`ONLINE`, `CRUSHING`, `IDLE`, `UNFORMED`).
+- **5x5 Large Steam Boiler Monolithic 3D Overhaul**:
+  - Overhauled the 5×5×5 Large Steam Boiler (`refinery:large_boiler_controller`) into a monolithic 3D twin-furnace Scotch marine industrial packaged boiler (`LargeBoilerModel`).
+  - Massive cylindrical boiler pressure vessel with dark steel structural skid runners and saddle cradles.
+  - Dual circular front boiler furnace doors with twin glowing burner viewports (dynamic `15728880` full emissive flame glow when active).
+  - Twin vertical exhaust smokestacks with top flanges and reinforcement collars.
+  - Overhead heavy steam manifold piping with dual valve handwheels and central dial pressure gauge.
+  - Right-side elevated maintenance catwalk platform with safety handrail and access ladder, side electrical control console, and twin water sight level columns.
+  - Custom high-capacity industrial GUI (`LargeBoilerScreen` & `large_boiler.png`).
+- **Small and Large Diesel-Fired Steam Boilers**:
+  - Introduced the **Small Diesel Boiler** (3×3×3, `refinery:small_diesel_boiler_controller`) and **Large Diesel Boiler** (5×5×5, `refinery:large_diesel_boiler_controller`) that consume liquid **Diesel** instead of solid burnables to produce high-pressure steam.
+  - Custom 3D models with modern liquid fuel injector burner hubs, fuel rails, and high-efficiency combustion chambers.
+  - Custom 3-tank industrial GUIs (`SmallDieselBoilerScreen` & `LargeDieselBoilerScreen`) featuring recessed gauges for Diesel, Water, and Steam, fluid bucket fill/drain interaction slots, redstone indicators, and combustion flame viewports.
+  - Fluid and item capabilities integrated with input/output ports and automation pipes.
+  - Added shaped crafting recipes and loot tables for both diesel boiler controllers.
+- **Lighter Diesel Fluid Texture Palette**:
+  - Re-paletted diesel fluid textures (`diesel_still.png`, `diesel_flow.png`, `diesel_bucket.png`, `port_diesel.png`) to a refined golden straw tone (`#fdee87` / `#f5cf47`) for enhanced visual distinction from crude oil and gasoline.
+
+### Previous v1.5.13 Highlights:
 - **Monolithic 3D Small Steam Boiler Model Overhaul (Scotch Marine Package Boiler)**:
-  - Transformed the assembled 3×3×3 Small Steam Boiler (`refinery:small_boiler_controller`) into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model using the established `ASSEMBLED` blockstate and `invisible.json` occlusion pattern (exact technique used on the Metal Press).
-  - Features a horizontal cylindrical boiler drum with solid steel cladding plates and riveted reinforcement straps (solid steel exterior with no exposed cutaways).
-  - Massive circular front boiler door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
-  - Dynamic glowing burner sight-glass viewport: emits an intense fiery glow when combustion is active (`15728880` full brightness) and reverts to dark soot glass on standby.
-  - Lower arched rectangular ash/cleanout access door with heavy latch.
-  - Structural steel I-beam skid base with transverse cross-beams and two curved saddle cradles supporting the drum.
-  - Overhead industrial steam manifold header piping, red globe valve handwheels, safety relief valve, and dial pressure gauge.
-  - Tall vertical exhaust smokestack / chimney with reinforcement collar and top flange.
-  - Side industrial electrical control cabinet (ICI Caldaie style) with status indicator lamps, caution badge, and conduit to skid.
-  - Side vertical water level sight glass column and dual base feed-water booster pumps.
+  - Transformed the assembled 3×3×3 Small Steam Boiler into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model.
+  - Circular front boiler door, glowing burner sight-glass viewport, arched ash door, overhead steam manifold header with valves, exhaust stack, ICI Caldaie style control cabinet, and feed-water booster pumps.
 - **Custom Industrial Small Boiler GUI Overhaul & Realignment**:
-  - Completely aligned and overhauled the Small Boiler GUI (`SmallBoilerScreen` & `small_boiler.png`) into a dark gunmetal steel industrial panel with rivets, matching the custom aesthetics of the Metal Press.
-  - Recessed water buffer tank gauge on the left with blue fluid fill and graduation markings.
-  - Recessed high-pressure steam buffer tank gauge on the right with aqua steam fill and graduation markings.
-  - Central machined steel hearth with 2×2 fuel buffer slot wells.
-  - Round redstone signal indicator lamp (glowing green when powered, dark red when off).
-  - Combustion flame viewport with dynamic flickering flame effect when burning.
-  - Overheat / meltdown danger hazard bar with warning details and countdown timer to explosion.
-  - Real-time status header badge (`ONLINE`, `BURNING`, `OVERHEATING!`, `UNFORMED`).
-- **Member Block Occlusion & Interaction Delegation**:
-  - Member blocks (`SteelBoilerCasingBlock`, `BoilerFireboxBlock`, `BoilerPipeBlock`, `BoilerPortBlock`) now track `ASSEMBLED`, feature `.noOcclusion()`, return `RenderShape.INVISIBLE` when assembled, and forward wrench/hand interactions and destruction to the controller.
+  - Dark gunmetal steel panel with recessed water & steam buffer gauges, 2x2 fuel buffer, redstone lamp, combustion flame viewport, meltdown hazard bar, and real-time status badge.
 
 ### Previous v1.5.11 Highlights:
 - **Planter & Harvester GUI On/Off Power Switch**:

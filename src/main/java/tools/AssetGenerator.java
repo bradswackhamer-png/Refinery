@@ -187,17 +187,17 @@ public class AssetGenerator {
 
         // Ports
         createPortTexture("port_crude_oil", new Color(0x1c, 0x19, 0x17), new Color(0x44, 0x40, 0x3c));
-        createPortTexture("port_diesel", new Color(0xca, 0x8a, 0x04), new Color(0xfa, 0xcc, 0x15));
+        createPortTexture("port_diesel", new Color(0xf5, 0xcf, 0x47), new Color(0xfd, 0xee, 0x87));
         createPortTexture("port_gas", new Color(0x08, 0x91, 0xb2), new Color(0x67, 0xe8, 0xf9));
         createPortTexture("port_byproduct", new Color(0x47, 0x55, 0x69), new Color(0x94, 0xa3, 0xb8));
 
         // Fluids
-        createFluidTextures("diesel", new Color(0xea, 0xb3, 0x08), new Color(0xca, 0x8a, 0x04));
+        createFluidTextures("diesel", new Color(0xfd, 0xee, 0x87), new Color(0xf5, 0xcf, 0x47));
         createFluidTextures("gasoline", new Color(0x38, 0xbd, 0xf8), new Color(0x02, 0x84, 0xc7));
 
         // Items: Wrench, Diesel Bucket, Gas Bucket
         createWrenchTexture();
-        createBucketTexture("diesel_bucket", new Color(0xea, 0xb3, 0x08));
+        createBucketTexture("diesel_bucket", new Color(0xfd, 0xee, 0x87));
         createBucketTexture("gasoline_bucket", new Color(0x38, 0xbd, 0xf8));
     }
 
