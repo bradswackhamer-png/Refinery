@@ -1,6 +1,8 @@
 {
   "variants": {
-    "lit=false": { "model": "refinery:block/boiler_firebox" },
-    "lit=true": { "model": "refinery:block/boiler_firebox_lit" }
+    "assembled=false,lit=false": { "model": "refinery:block/boiler_firebox" },
+    "assembled=false,lit=true": { "model": "refinery:block/boiler_firebox_lit" },
+    "assembled=true,lit=false": { "model": "refinery:block/invisible" },
+    "assembled=true,lit=true": { "model": "refinery:block/invisible" }
   }
 }

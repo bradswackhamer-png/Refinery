@@ -1,4 +1,4 @@
-﻿# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
+# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
 *A comprehensive guide to heavy industry, fractional distillation, steam power, metallurgy, and automation for Minecraft 26.3 NeoForge.*
 
 ---
@@ -291,9 +291,18 @@ Layer 0 (Foundation & Ports, Y=0):
 
 ## 5. Thermodynamic Steam Power & Closed-Loop Energy
 
-### Small Steam Boiler (3Ã—3Ã—3)
-A compact thermal generator for small-to-mid tier power generation.
+### Small Steam Boiler (3×3×3)
+A compact packaged thermal generator for small-to-mid tier steam power generation.
 
+- **Monolithic 3D Package Boiler Transformation**: Upon assembly, the entire 3×3×3 block structure transforms into a seamless monolithic industrial Scotch marine fire-tube package boiler model on structural steel I-beam skid runners:
+  - **Horizontal Cylindrical Shell**: Solid steel cladding plates with riveted reinforcement straps (smooth exterior with no exposed cutaways).
+  - **Hinged Front Boiler Door**: Massive bolted circular door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
+  - **Dynamic Sight-Glass Viewport**: Illuminates with an intense full-brightness fire glow when burning and reverts to dark soot-coated inspection glass on standby.
+  - **Lower Cleanout Hatch**: Arched ash cleanout hatch with heavy latch handle.
+  - **Overhead Steam Manifold & Piping**: Industrial steam header, red globe valve handwheels, safety relief valve, and dial pressure gauge.
+  - **Chimney Smokestack**: Tall exhaust stack with reinforcement collar and top flange, venting steam and combustion smoke while active.
+  - **Side Equipment**: Industrial electrical control cabinet (ICI Caldaie style) with status lamps on the right side; vertical water level column and dual feed-water booster pumps on the left.
+- **Custom Industrial GUI**: Redesigned dark gunmetal steel GUI panel with dual fluid glass column gauges (Water Buffer on the left, High-Pressure Steam on the right), 2×2 fuel hearth slots, round redstone status indicator lamp, firebox flame viewport, real-time status header badge, and overheat hazard warning bar.
 - **Capacity**: 16,000 mB Water, 16,000 mB Steam, 4 Fuel slots.
 - **Performance**: Consumes 50 mB Water -> Produces 100 mB Steam per cycle.
 - **Redstone Requirement**: Requires an active redstone signal to burn fuel.

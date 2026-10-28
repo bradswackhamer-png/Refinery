@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "refinery:block/steel_boiler_casing" }
+    "assembled=false": { "model": "refinery:block/steel_boiler_casing" },
+    "assembled=true": { "model": "refinery:block/invisible" }
   }
 }

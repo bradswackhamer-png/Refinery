@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "refinery:block/boiler_pipe" }
+    "assembled=false": { "model": "refinery:block/boiler_pipe" },
+    "assembled=true": { "model": "refinery:block/invisible" }
   }
 }

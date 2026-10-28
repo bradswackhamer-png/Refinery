@@ -4,6 +4,43 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.5.13] - 2026-10-28
+
+### Changed
+- Mod update
+
+---
+
+## [v1.5.13] - 2026-10-28
+
+### Added
+- **Monolithic 3D Small Steam Boiler Model Overhaul (Scotch Marine Package Boiler)**:
+  - Transformed the assembled 3×3×3 Small Steam Boiler (`refinery:small_boiler_controller`) into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model using the established `ASSEMBLED` blockstate and `invisible.json` occlusion pattern (exact technique used on the Metal Press).
+  - Features a horizontal cylindrical boiler drum with solid steel cladding plates and riveted reinforcement straps (solid steel exterior with no exposed cutaways).
+  - Massive circular front boiler door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
+  - Dynamic glowing burner sight-glass viewport: emits an intense fiery glow when combustion is active (`15728880` full brightness) and reverts to dark soot glass on standby.
+  - Lower arched rectangular ash/cleanout access door with heavy latch.
+  - Structural steel I-beam skid base with transverse cross-beams and two curved saddle cradles supporting the drum.
+  - Overhead industrial steam manifold header piping, red globe valve handwheels, safety relief valve, and dial pressure gauge.
+  - Tall vertical exhaust smokestack / chimney with reinforcement collar and top flange.
+  - Side industrial electrical control cabinet (ICI Caldaie style) with status indicator lamps, caution badge, and conduit to skid.
+  - Side vertical water level sight glass column and dual base feed-water booster pumps.
+- **Member Block Occlusion & Interaction Delegation**:
+  - Member blocks (`SteelBoilerCasingBlock`, `BoilerFireboxBlock`, `BoilerPipeBlock`, `BoilerPortBlock`) now track `ASSEMBLED`, feature `.noOcclusion()`, return `RenderShape.INVISIBLE` when assembled, and forward wrench/hand interactions and destruction to the controller.
+
+### Changed
+- **Custom Industrial Small Boiler GUI Overhaul & Realignment**:
+  - Completely aligned and overhauled the Small Boiler GUI (`SmallBoilerScreen` & `small_boiler.png`) into a dark gunmetal steel industrial panel with rivets, matching the custom aesthetics of the Metal Press.
+  - Recessed water buffer tank gauge on the left with blue fluid fill and graduation markings.
+  - Recessed high-pressure steam buffer tank gauge on the right with aqua steam fill and graduation markings.
+  - Central machined steel hearth with $2\times 2$ fuel buffer slot wells.
+  - Round redstone signal indicator lamp (glowing green when powered, dark red when off).
+  - Combustion flame viewport with dynamic flickering flame effect when burning.
+  - Overheat / meltdown danger hazard bar with warning details and countdown timer to explosion.
+  - Real-time status header badge (`ONLINE`, `BURNING`, `OVERHEATING!`, `UNFORMED`).
+
+---
+
 ## [v1.5.11] - 2026-10-28
 
 ### Added

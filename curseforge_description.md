@@ -1,4 +1,4 @@
-﻿# CurseForge Upload Template & Metadata Guide: Industrial Refinery
+# CurseForge Upload Template & Metadata Guide: Industrial Refinery
 
 This document contains everything needed to publish and update **Industrial Refinery** on CurseForge. You can copy-paste each section directly into the CurseForge Project Creation and File Upload forms.
 
@@ -129,10 +129,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.11.jar`
+`refinery-1.5.13.jar`
 
 ### Display Name
-`Industrial Refinery 1.5.11 (NeoForge 26.3)`
+`Industrial Refinery 1.5.13 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -148,9 +148,33 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.11
+# Industrial Refinery v1.5.13
 
-### What's New in v1.5.11:
+### What's New in v1.5.13:
+- **Monolithic 3D Small Steam Boiler Model Overhaul (Scotch Marine Package Boiler)**:
+  - Transformed the assembled 3×3×3 Small Steam Boiler (`refinery:small_boiler_controller`) into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model using the established `ASSEMBLED` blockstate and `invisible.json` occlusion pattern (exact technique used on the Metal Press).
+  - Features a horizontal cylindrical boiler drum with solid steel cladding plates and riveted reinforcement straps (solid steel exterior with no exposed cutaways).
+  - Massive circular front boiler door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
+  - Dynamic glowing burner sight-glass viewport: emits an intense fiery glow when combustion is active (`15728880` full brightness) and reverts to dark soot glass on standby.
+  - Lower arched rectangular ash/cleanout access door with heavy latch.
+  - Structural steel I-beam skid base with transverse cross-beams and two curved saddle cradles supporting the drum.
+  - Overhead industrial steam manifold header piping, red globe valve handwheels, safety relief valve, and dial pressure gauge.
+  - Tall vertical exhaust smokestack / chimney with reinforcement collar and top flange.
+  - Side industrial electrical control cabinet (ICI Caldaie style) with status indicator lamps, caution badge, and conduit to skid.
+  - Side vertical water level sight glass column and dual base feed-water booster pumps.
+- **Custom Industrial Small Boiler GUI Overhaul & Realignment**:
+  - Completely aligned and overhauled the Small Boiler GUI (`SmallBoilerScreen` & `small_boiler.png`) into a dark gunmetal steel industrial panel with rivets, matching the custom aesthetics of the Metal Press.
+  - Recessed water buffer tank gauge on the left with blue fluid fill and graduation markings.
+  - Recessed high-pressure steam buffer tank gauge on the right with aqua steam fill and graduation markings.
+  - Central machined steel hearth with 2×2 fuel buffer slot wells.
+  - Round redstone signal indicator lamp (glowing green when powered, dark red when off).
+  - Combustion flame viewport with dynamic flickering flame effect when burning.
+  - Overheat / meltdown danger hazard bar with warning details and countdown timer to explosion.
+  - Real-time status header badge (`ONLINE`, `BURNING`, `OVERHEATING!`, `UNFORMED`).
+- **Member Block Occlusion & Interaction Delegation**:
+  - Member blocks (`SteelBoilerCasingBlock`, `BoilerFireboxBlock`, `BoilerPipeBlock`, `BoilerPortBlock`) now track `ASSEMBLED`, feature `.noOcclusion()`, return `RenderShape.INVISIBLE` when assembled, and forward wrench/hand interactions and destruction to the controller.
+
+### Previous v1.5.11 Highlights:
 - **Planter & Harvester GUI On/Off Power Switch**:
   - Added an interactive power toggle switch directly inside the Automated Planter and Automated Harvester GUIs.
   - Toggling OFF immediately pauses all scanning routines, ceases idle energy consumption, and displays a clear `DISABLED` status.

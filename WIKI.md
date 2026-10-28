@@ -1,4 +1,4 @@
-﻿# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
+# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
 *A comprehensive guide to heavy industry, fractional distillation, steam power, metallurgy, and automation for Minecraft 26.3 NeoForge.*
 
 ---
@@ -291,9 +291,18 @@ Layer 0 (Foundation & Ports, Y=0):
 
 ## 5. Thermodynamic Steam Power & Closed-Loop Energy
 
-### Small Steam Boiler (3Ã—3Ã—3)
-A compact thermal generator for small-to-mid tier power generation.
+### Small Steam Boiler (3×3×3)
+A compact packaged thermal generator for small-to-mid tier steam power generation.
 
+- **Monolithic 3D Package Boiler Transformation**: Upon assembly, the entire 3×3×3 block structure transforms into a seamless monolithic industrial Scotch marine fire-tube package boiler model on structural steel I-beam skid runners:
+  - **Horizontal Cylindrical Shell**: Solid steel cladding plates with riveted reinforcement straps (smooth exterior with no exposed cutaways).
+  - **Hinged Front Boiler Door**: Massive bolted circular door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
+  - **Dynamic Sight-Glass Viewport**: Illuminates with an intense full-brightness fire glow when burning and reverts to dark soot-coated inspection glass on standby.
+  - **Lower Cleanout Hatch**: Arched ash cleanout hatch with heavy latch handle.
+  - **Overhead Steam Manifold & Piping**: Industrial steam header, red globe valve handwheels, safety relief valve, and dial pressure gauge.
+  - **Chimney Smokestack**: Tall exhaust stack with reinforcement collar and top flange, venting steam and combustion smoke while active.
+  - **Side Equipment**: Industrial electrical control cabinet (ICI Caldaie style) with status lamps on the right side; vertical water level column and dual feed-water booster pumps on the left.
+- **Custom Industrial GUI**: Redesigned dark gunmetal steel GUI panel with dual fluid glass column gauges (Water Buffer on the left, High-Pressure Steam on the right), 2×2 fuel hearth slots, round redstone status indicator lamp, firebox flame viewport, real-time status header badge, and overheat hazard warning bar.
 - **Capacity**: 16,000 mB Water, 16,000 mB Steam, 4 Fuel slots.
 - **Performance**: Consumes 50 mB Water -> Produces 100 mB Steam per cycle.
 - **Redstone Requirement**: Requires an active redstone signal to burn fuel.
@@ -886,6 +895,32 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.5.13 (Monolithic 3D Small Steam Boiler Model & GUI Overhaul)
+- **Monolithic 3D Small Steam Boiler Model Overhaul (Scotch Marine Package Boiler)**:
+  - Transformed the assembled 3×3×3 Small Steam Boiler (`refinery:small_boiler_controller`) into a monolithic 3D industrial packaged Scotch marine fire-tube boiler model using the established `ASSEMBLED` blockstate and `invisible.json` occlusion pattern (exact technique used on the Metal Press).
+  - Features a horizontal cylindrical boiler drum with solid steel cladding plates and riveted reinforcement straps (solid steel exterior with no exposed cutaways).
+  - Massive circular front boiler door with heavy black cast iron hinges, perimeter bolt circle, and central burner hub.
+  - Dynamic glowing burner sight-glass viewport: emits an intense fiery glow when combustion is active (`15728880` full brightness) and reverts to dark soot glass on standby.
+  - Lower arched rectangular ash/cleanout access door with heavy latch.
+  - Structural steel I-beam skid base with transverse cross-beams and two curved saddle cradles supporting the drum.
+  - Overhead industrial steam manifold header piping, red globe valve handwheels, safety relief valve, and dial pressure gauge.
+  - Tall vertical exhaust smokestack / chimney with reinforcement collar and top flange.
+  - Side industrial electrical control cabinet (ICI Caldaie style) with status indicator lamps, caution badge, and conduit to skid.
+  - Side vertical water level sight glass column and dual base feed-water booster pumps.
+- **Custom Industrial Small Boiler GUI Overhaul & Realignment**:
+  - Completely aligned and overhauled the Small Boiler GUI (`SmallBoilerScreen` & `small_boiler.png`) into a dark gunmetal steel industrial panel with rivets, matching the custom aesthetics of the Metal Press.
+  - Recessed water buffer tank gauge on the left with blue fluid fill and graduation markings.
+  - Recessed high-pressure steam buffer tank gauge on the right with aqua steam fill and graduation markings.
+  - Central machined steel hearth with 2×2 fuel buffer slot wells.
+  - Round redstone signal indicator lamp (glowing green when powered, dark red when off).
+  - Combustion flame viewport with dynamic flickering flame effect when burning.
+  - Overheat / meltdown danger hazard bar with warning details and countdown timer to explosion.
+  - Real-time status header badge (`ONLINE`, `BURNING`, `OVERHEATING!`, `UNFORMED`).
+- **Member Block Occlusion & Interaction Delegation**:
+  - Member blocks (`SteelBoilerCasingBlock`, `BoilerFireboxBlock`, `BoilerPipeBlock`, `BoilerPortBlock`) now track `ASSEMBLED`, feature `.noOcclusion()`, return `RenderShape.INVISIBLE` when assembled, and forward wrench/hand interactions and destruction to the controller.
+
+---
 
 ### Version 1.5.11 (Planter & Harvester GUI Power Switch & Work Radius Control)
 - **GUI ON/OFF Power Switch**:
