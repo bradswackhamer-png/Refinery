@@ -4,17 +4,22 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-## [1.5.9] - 2026-10-27
+## [v1.5.11] - 2026-10-28
+
+### Added
+- **Automated Planter & Harvester GUI ON/OFF Power Switch**:
+  - Added an interactive power toggle switch directly inside the Automated Planter and Automated Harvester GUIs.
+  - Players can toggle machine operation ON or OFF at any time. When turned OFF, machines immediately pause scanning, cease idle energy consumption, and set status to `DISABLED`.
+  - Power state is synchronized across client-server and persisted in block entity NBT.
+- **Configurable Work Radius in All Directions (Up to 9 Blocks / 100m+ Area)**:
+  - Added interactive radius adjustment buttons (`-` and `+`) to the Planter and Harvester GUIs, with live radius readout and area display.
+  - Adjustable from 1 block up to 9 blocks away from the machine in all directions, offering coverage areas ranging from 3x3 (9 tiles) up to 19x19 (361 tiles / 100m+ area). Default radius is 5 blocks (11x11 square / 121 tiles).
+  - Radius settings persist across world saves and synchronize via container data slots.
 
 ### Changed
-- Mod update
-
----
-
-## [1.5.10] - 2026-10-27
-
-### Changed
-- Mod update
+- **Omnidirectional Harvester Coverage**:
+  - The Automated Harvester now sweeps in all horizontal directions around itself up to the configured radius (matching the Planter's circular/square perimeter coverage), allowing flexible farm and tree orchard layouts.
+  - Preserved backward-compatible auto-ejection to chests and logistics pipes positioned behind or below the harvester.
 
 ---
 

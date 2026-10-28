@@ -43,6 +43,9 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
     public static final int ENERGY_CAPACITY = 10_000;
     public static final int ENERGY_PER_TICK = 1;
     public static final int ENERGY_PER_ACTION = 10;
+    public static final int DEFAULT_RADIUS = 5;
+    public static final int MIN_RADIUS = 1;
+    public static final int MAX_RADIUS = 9;
     public static final int RADIUS = 5;
     public static final int DIAMETER = 11; // -5 to +5
     public static final int Y_LEVELS = 4; // dy: -1, 0, 1, 2
@@ -53,6 +56,8 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
     private int scanIndex = 0;
     private int actionCooldown = 0;
     private boolean working = false;
+    private boolean enabled = true;
+    private int radius = DEFAULT_RADIUS;
 
     public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 500, 0) {
         @Override
@@ -78,6 +83,8 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                 case 1 -> (AutoPlanterBlockEntity.this.energy >> 16) & 0xFFFF;
                 case 2 -> AutoPlanterBlockEntity.this.working ? 1 : 0;
                 case 3 -> AutoPlanterBlockEntity.this.getTotalSeedsCount();
+                case 4 -> AutoPlanterBlockEntity.this.enabled ? 1 : 0;
+                case 5 -> AutoPlanterBlockEntity.this.radius;
                 default -> 0;
             };
         }
@@ -88,12 +95,14 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                 case 0 -> AutoPlanterBlockEntity.this.energy = (AutoPlanterBlockEntity.this.energy & 0xFFFF0000) | (value & 0xFFFF);
                 case 1 -> AutoPlanterBlockEntity.this.energy = (AutoPlanterBlockEntity.this.energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 2 -> AutoPlanterBlockEntity.this.working = (value != 0);
+                case 4 -> AutoPlanterBlockEntity.this.enabled = (value != 0);
+                case 5 -> AutoPlanterBlockEntity.this.radius = value;
             }
         }
 
         @Override
         public int getCount() {
-            return 4;
+            return 6;
         }
     };
 
@@ -105,6 +114,14 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         if (level.isClientSide()) return;
 
         ServerLevel serverLevel = (ServerLevel) level;
+
+        // Check if enabled
+        if (!this.enabled) {
+            if (this.working) {
+                setWorking(serverLevel, pos, false);
+            }
+            return;
+        }
 
         if (this.actionCooldown > 0) {
             this.actionCooldown--;
@@ -122,16 +139,24 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         boolean performedAction = false;
         int checks = 0;
 
+        int diameter = this.radius * 2 + 1;
+        int totalPositions = diameter * diameter * Y_LEVELS;
+
         // Scan up to 16 positions per tick
         while (checks < 16) {
             checks++;
-            this.scanIndex = (this.scanIndex + 1) % TOTAL_POSITIONS;
+            this.scanIndex = (this.scanIndex + 1) % totalPositions;
 
             int col = this.scanIndex / Y_LEVELS;
             int dyIdx = this.scanIndex % Y_LEVELS;
-            int dx = (col % DIAMETER) - RADIUS;
-            int dz = (col / DIAMETER) - RADIUS;
+            int dx = (col % diameter) - this.radius;
+            int dz = (col / diameter) - this.radius;
             int dy = dyIdx - 1; // -1, 0, 1, 2
+
+            // Do not till or plant the planter block itself or directly below it
+            if (dx == 0 && dz == 0 && (dy == 0 || dy == -1)) {
+                continue;
+            }
 
             BlockPos targetPos = pos.offset(dx, dy, dz);
             BlockPos abovePos = targetPos.above();
@@ -364,12 +389,54 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         return this.working;
     }
 
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            setChanged();
+        }
+    }
+
+    public void toggleEnabled() {
+        setEnabled(!this.enabled);
+    }
+
+    public int getRadius() {
+        return this.radius;
+    }
+
+    public void setRadius(int radius) {
+        int clamped = Math.clamp(radius, MIN_RADIUS, MAX_RADIUS);
+        if (this.radius != clamped) {
+            this.radius = clamped;
+            this.scanIndex = 0;
+            setChanged();
+        }
+    }
+
+    public void increaseRadius() {
+        if (this.radius < MAX_RADIUS) {
+            setRadius(this.radius + 1);
+        }
+    }
+
+    public void decreaseRadius() {
+        if (this.radius > MIN_RADIUS) {
+            setRadius(this.radius - 1);
+        }
+    }
+
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putInt("energy", this.energy);
         output.putInt("scanIndex", this.scanIndex);
         output.putBoolean("working", this.working);
+        output.putBoolean("enabled", this.enabled);
+        output.putInt("radius", this.radius);
         ContainerHelper.saveAllItems(output, this.items);
     }
 
@@ -380,6 +447,8 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         this.energyStorage.set(this.energy);
         this.scanIndex = input.getIntOr("scanIndex", 0);
         this.working = input.getBooleanOr("working", false);
+        this.enabled = input.getBooleanOr("enabled", true);
+        this.radius = Math.clamp(input.getIntOr("radius", DEFAULT_RADIUS), MIN_RADIUS, MAX_RADIUS);
         ContainerHelper.loadAllItems(input, this.items);
     }
 

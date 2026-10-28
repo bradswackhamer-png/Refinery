@@ -49,8 +49,11 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
     public static final int ENERGY_PER_TICK = 1;
     public static final int ENERGY_PER_HARVEST = 20;
 
-    public static final int SIDE_RANGE = 5;      // 5 left to 5 right (width: 11)
-    public static final int FORWARD_RANGE = 11;  // 1 to 11 blocks in front
+    public static final int DEFAULT_RADIUS = 5;
+    public static final int MIN_RADIUS = 1;
+    public static final int MAX_RADIUS = 9;
+    public static final int SIDE_RANGE = 5;      // Retained for backwards compatibility
+    public static final int FORWARD_RANGE = 11;  // Retained for backwards compatibility
     public static final int Y_LEVELS = 4;        // dy: -2, -1, 0, 1
     public static final int TOTAL_POSITIONS = (SIDE_RANGE * 2 + 1) * FORWARD_RANGE * Y_LEVELS; // 11 * 11 * 4 = 484
 
@@ -60,6 +63,8 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
     private int actionCooldown = 0;
     private int exportCooldown = 0;
     private boolean working = false;
+    private boolean enabled = true;
+    private int radius = DEFAULT_RADIUS;
 
     public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 500, 0) {
         @Override
@@ -85,6 +90,8 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                 case 1 -> (AutoHarvesterBlockEntity.this.energy >> 16) & 0xFFFF;
                 case 2 -> AutoHarvesterBlockEntity.this.working ? 1 : 0;
                 case 3 -> AutoHarvesterBlockEntity.this.getTotalItemCount();
+                case 4 -> AutoHarvesterBlockEntity.this.enabled ? 1 : 0;
+                case 5 -> AutoHarvesterBlockEntity.this.radius;
                 default -> 0;
             };
         }
@@ -95,12 +102,14 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                 case 0 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0xFFFF0000) | (value & 0xFFFF);
                 case 1 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 2 -> AutoHarvesterBlockEntity.this.working = (value != 0);
+                case 4 -> AutoHarvesterBlockEntity.this.enabled = (value != 0);
+                case 5 -> AutoHarvesterBlockEntity.this.radius = value;
             }
         }
 
         @Override
         public int getCount() {
-            return 4;
+            return 6;
         }
     };
 
@@ -118,6 +127,14 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         if (--this.exportCooldown <= 0) {
             this.exportCooldown = 10;
             tryExportItems(serverLevel, pos, facing);
+        }
+
+        // Machine enabled check
+        if (!this.enabled) {
+            if (this.working) {
+                setWorking(serverLevel, pos, false);
+            }
+            return;
         }
 
         if (this.actionCooldown > 0) {
@@ -144,25 +161,28 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         boolean harvestedSomething = false;
         int checks = 0;
 
+        int diameter = this.radius * 2 + 1;
+        int totalPositions = diameter * diameter * Y_LEVELS;
+
         // Scan up to 16 positions per tick
         while (checks < 16) {
             checks++;
-            this.scanIndex = (this.scanIndex + 1) % TOTAL_POSITIONS;
+            this.scanIndex = (this.scanIndex + 1) % totalPositions;
 
-            // Coordinate math: 11 wide (-5 to +5), 11 forward (1 to 11), 4 vertical (-2 to 1)
+            // Coordinate math: radius in all directions
             int col = this.scanIndex / Y_LEVELS;
             int dyIdx = this.scanIndex % Y_LEVELS;
 
-            int sideOffset = (col % (SIDE_RANGE * 2 + 1)) - SIDE_RANGE; // -5 to +5
-            int forwardDist = (col / (SIDE_RANGE * 2 + 1)) + 1;           // 1 to 11
-            int dy = dyIdx - 2;                                          // -2, -1, 0, 1
+            int dx = (col % diameter) - this.radius;
+            int dz = (col / diameter) - this.radius;
+            int dy = dyIdx - 2; // -2, -1, 0, 1
 
-            // Calculate actual world target block
-            Direction right = facing.getClockWise();
-            BlockPos targetPos = pos.relative(facing, forwardDist)
-                    .relative(right, sideOffset)
-                    .above(dy);
+            // Do not target the harvester itself or the block directly underneath
+            if (dx == 0 && dz == 0 && (dy == 0 || dy == -1)) {
+                continue;
+            }
 
+            BlockPos targetPos = pos.offset(dx, dy, dz);
             BlockState targetState = level.getBlockState(targetPos);
 
             if (isMatureCrop(targetState, level, targetPos)) {
@@ -615,12 +635,54 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         return this.working;
     }
 
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            setChanged();
+        }
+    }
+
+    public void toggleEnabled() {
+        setEnabled(!this.enabled);
+    }
+
+    public int getRadius() {
+        return this.radius;
+    }
+
+    public void setRadius(int radius) {
+        int clamped = Math.clamp(radius, MIN_RADIUS, MAX_RADIUS);
+        if (this.radius != clamped) {
+            this.radius = clamped;
+            this.scanIndex = 0;
+            setChanged();
+        }
+    }
+
+    public void increaseRadius() {
+        if (this.radius < MAX_RADIUS) {
+            setRadius(this.radius + 1);
+        }
+    }
+
+    public void decreaseRadius() {
+        if (this.radius > MIN_RADIUS) {
+            setRadius(this.radius - 1);
+        }
+    }
+
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putInt("energy", this.energy);
         output.putInt("scanIndex", this.scanIndex);
         output.putBoolean("working", this.working);
+        output.putBoolean("enabled", this.enabled);
+        output.putInt("radius", this.radius);
         ContainerHelper.saveAllItems(output, this.items);
     }
 
@@ -631,6 +693,8 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         this.energyStorage.set(this.energy);
         this.scanIndex = input.getIntOr("scanIndex", 0);
         this.working = input.getBooleanOr("working", false);
+        this.enabled = input.getBooleanOr("enabled", true);
+        this.radius = Math.clamp(input.getIntOr("radius", DEFAULT_RADIUS), MIN_RADIUS, MAX_RADIUS);
         ContainerHelper.loadAllItems(input, this.items);
     }
 

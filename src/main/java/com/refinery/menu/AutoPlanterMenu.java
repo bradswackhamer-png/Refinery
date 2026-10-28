@@ -14,13 +14,20 @@ import net.minecraft.world.item.ItemStack;
 
 public class AutoPlanterMenu extends AbstractContainerMenu {
     public static final int CONTAINER_SIZE = AutoPlanterBlockEntity.INVENTORY_SIZE;
-    public static final int DATA_COUNT = 4;
+    public static final int DATA_COUNT = 6;
 
     private final Container container;
     private final ContainerData data;
 
     public AutoPlanterMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, new SimpleContainer(CONTAINER_SIZE), new SimpleContainerData(DATA_COUNT));
+        this(containerId, playerInventory, new SimpleContainer(CONTAINER_SIZE), createDefaultContainerData());
+    }
+
+    private static ContainerData createDefaultContainerData() {
+        SimpleContainerData defaultData = new SimpleContainerData(DATA_COUNT);
+        defaultData.set(4, 1); // enabled = true
+        defaultData.set(5, AutoPlanterBlockEntity.DEFAULT_RADIUS);
+        return defaultData;
     }
 
     public AutoPlanterMenu(int containerId, Inventory playerInventory, Container container, ContainerData data) {
@@ -68,6 +75,29 @@ public class AutoPlanterMenu extends AbstractContainerMenu {
 
     public int getSeedCount() {
         return this.data.get(3);
+    }
+
+    public boolean isEnabled() {
+        return this.data.get(4) != 0;
+    }
+
+    public int getRadius() {
+        int r = this.data.get(5);
+        return r > 0 ? r : AutoPlanterBlockEntity.DEFAULT_RADIUS;
+    }
+
+    @Override
+    public boolean clickMenuButton(Player player, int id) {
+        if (this.container instanceof AutoPlanterBlockEntity be) {
+            switch (id) {
+                case 0 -> be.toggleEnabled();
+                case 1 -> be.decreaseRadius();
+                case 2 -> be.increaseRadius();
+                default -> { return false; }
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

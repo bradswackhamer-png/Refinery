@@ -1,4 +1,4 @@
-# Industrial Refinery — Complete Mod Wiki & Engineering Guide
+﻿# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
 *A comprehensive guide to heavy industry, fractional distillation, steam power, metallurgy, and automation for Minecraft 26.3 NeoForge.*
 
 ---
@@ -10,19 +10,19 @@
    - [Automated Planter](#automated-planter)
    - [Automated Harvester](#automated-harvester)
 4. [Heavy Metallurgy](#4-heavy-metallurgy)
-   - [Industrial Blast Smelter (5×5×5 Multiblock)](#industrial-blast-smelter-555)
-   - [Industrial Metal Press (2×2×2 Multiblock)](#industrial-metal-press-222)
-   - [Industrial Multi-Smelter (5×4×3 Heavy Smelter Array)](#industrial-multi-smelter-543)
+   - [Industrial Blast Smelter (5Ã—5Ã—5 Multiblock)](#industrial-blast-smelter-555)
+   - [Industrial Metal Press (2Ã—2Ã—2 Multiblock)](#industrial-metal-press-222)
+   - [Industrial Multi-Smelter (5Ã—4Ã—3 Heavy Smelter Array)](#industrial-multi-smelter-543)
 5. [Thermodynamic Steam Power & Closed-Loop Energy](#5-thermodynamic-steam-power--closed-loop-energy)
-   - [Small Steam Boiler (3×3×3 Multiblock)](#small-steam-boiler-333)
-   - [Large Heavy Steam Boiler (5×5×5 Multiblock)](#large-heavy-steam-boiler-555)
-   - [Steam Turbine Generator (3×3×3 Multiblock)](#steam-turbine-generator-333)
+   - [Small Steam Boiler (3Ã—3Ã—3 Multiblock)](#small-steam-boiler-333)
+   - [Large Heavy Steam Boiler (5Ã—5Ã—5 Multiblock)](#large-heavy-steam-boiler-555)
+   - [Steam Turbine Generator (3Ã—3Ã—3 Multiblock)](#steam-turbine-generator-333)
    - [The Closed-Loop Rankine Cycle](#the-closed-loop-rankine-cycle)
 6. [Petroleum Refining & Chemical Byproducts](#6-petroleum-refining--chemical-byproducts)
-   - [Petroleum Refinery (3×3×4 Multiblock)](#petroleum-refinery-334)
+   - [Petroleum Refinery (3Ã—3Ã—4 Multiblock)](#petroleum-refinery-334)
    - [Oil Sand Cracking & Extraction](#oil-sand-cracking--extraction)
    - [Fuels & Byproducts](#fuels--byproducts)
-   - [Industrial Grinder & Pulverizer (3×3×3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
+   - [Industrial Grinder & Pulverizer (3Ã—3Ã—3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Pipes, & Interfacing](#8-automation-pipes--interfacing)
 9. [Crude Oil World Generation & Retrogen](#9-crude-oil-world-generation--retrogen)
@@ -40,9 +40,9 @@
    - [Crafting & In-World Upgrades](#crafting--in-world-upgrades)
 11. [Continuous Molten Metallurgy & Ingot Casting Suite](#11-continuous-molten-metallurgy--ingot-casting-suite)
    - [Molten Fluids & Thermochemistry](#molten-fluids--thermochemistry)
-   - [Electric Arc Melter (3×3×3 Multiblock)](#electric-arc-melter-333-multiblock)
+   - [Electric Arc Melter (3Ã—3Ã—3 Multiblock)](#electric-arc-melter-333-multiblock)
    - [Open Casting Channel (Refractory Trough)](#open-casting-channel-refractory-trough)
-   - [Continuous Casting Press (3×3×3 Multiblock)](#continuous-casting-press-333-multiblock)
+   - [Continuous Casting Press (3Ã—3Ã—3 Multiblock)](#continuous-casting-press-333-multiblock)
    - [Melting & Stamping Recipe Codex](#melting--stamping-recipe-codex)
 12. [Biofuel Production & Industrial Fermentation](#12-biofuel-production--industrial-fermentation)
    - [Industrial Fermenter](#industrial-fermenter)
@@ -136,23 +136,29 @@ The **Refinery Wrench** (`refinery:refinery_wrench`) is the ultimate industrial 
 The **Automated Planter** (`refinery:auto_planter`) manages soil preparation and crop planting over a large farm area.
 
 - **Crafting Recipe**: 4x Iron Ingot, 2x Copper Ingot, 1x Iron Hoe (top-center), 1x Piston (center), 1x Redstone Dust (bottom-center).
-- **Scan Coverage**: 5 blocks in all horizontal directions (an **11×11 square**, 121 tiles total) up to **2 blocks above** the planter.
+- **GUI Controls**:
+  - **Power Switch**: Interactive GUI `ON`/`OFF` toggle button. Turning the machine OFF pauses all scanning and stops idle energy consumption.
+  - **Configurable Work Radius**: Interactive `[-]` and `[+]` buttons to configure the work radius anywhere from **1 to 9 blocks** away in all directions (yielding square areas from 3x3 up to 19x19 / 361 tiles total, easily covering 100m+ farms). Default is 5 blocks (11x11 square / 121 tiles).
+- **Scan Coverage**: 1 to 9 blocks in all horizontal directions (centered on the planter) up to **2 blocks above** the planter.
 - **Tilling & Planting**:
   - **Crops**: Automatically detects dirt or grass blocks, tills them into farmland, and plants any valid seeds found in its 9-slot inventory.
-  - **Trees & Saplings**: Accepts all tree saplings (Oak, Birch, Spruce, Dark Oak, Jungle, Acacia, Cherry, Pale Oak, Mangrove Propagules, and modded saplings). Plants them directly onto natural soil (`#minecraft:dirt` — Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling into farmland.
+  - **Trees & Saplings**: Accepts all tree saplings (Oak, Birch, Spruce, Dark Oak, Jungle, Acacia, Cherry, Pale Oak, Mangrove Propagules, and modded saplings). Plants them directly onto natural soil (`#minecraft:dirt` â€” Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling into farmland.
 - **Energy**: Consumes 1-2 FE/t standby and 10 FE per planting action.
 - **Automation**: Accepts seeds and saplings from hoppers, droppers, or item pipes through any face.
 
 ### Automated Harvester
-The **Automated Harvester** (`refinery:auto_harvester`) scans mature crops directly in front of it.
+The **Automated Harvester** (`refinery:auto_harvester`) scans and collects mature crops and trees across your farm.
 
 - **Crafting Recipe**: 4x Iron Ingot, 2x Copper Ingot, 1x Shears (top-center), 1x Hopper (center), 1x Redstone Dust (bottom-center).
-- **Scan Coverage**: An **11×11 field** directly in front of the machine (5 blocks to the left, 5 blocks to the right, and 11 blocks forward). Place this unit above ground centered with your farm.
+- **GUI Controls**:
+  - **Power Switch**: Interactive GUI `ON`/`OFF` toggle button to immediately run or pause harvesting without breaking the machine.
+  - **Configurable Work Radius**: Interactive `[-]` and `[+]` buttons to configure the scan radius from **1 to 9 blocks** away in all directions (3x3 up to 19x19 / 361 tiles total). Default is 5 blocks (11x11 square / 121 tiles).
+- **Scan Coverage**: Configurable radius up to 9 blocks away in all directions around the harvester, spanning vertical offsets from 2 blocks below to 1 block above.
 - **Harvest & Replant**:
   - **Crops**: Detects fully mature crops (Wheat, Carrots, Potatoes, Beetroots, Melon/Pumpkin, Sugar Cane, Cocoa, Sweet Berries, etc.), harvests the drops, and immediately replants the seed.
   - **Trees & Foliage**: Detects tree trunks (`#minecraft:logs`) and leaves (`#minecraft:leaves`). Intelligently fells the entire tree via 3D recursive flood-fill (trunk, branches, and canopy up to 32 blocks high and 8 blocks radius), gathering wood logs, saplings, apples, and sticks while clearing the ground for immediate replanting.
 - **Buffer & Ejection**: Internal 9-slot buffer. **Automatically pushes harvested produce, wood logs, and saplings into chests or pipes** placed directly **behind** or **below** the harvester!
-- **Energy**: Consumes 2 FE/t standby and 20 FE per harvest.
+- **Energy**: Consumes 1-2 FE/t standby and 20 FE per harvest.
 
 ```
        [+5 Left] <--- 11 Blocks Wide ---> [+5 Right]
@@ -169,11 +175,11 @@ The **Automated Harvester** (`refinery:auto_harvester`) scans mature crops direc
 
 ## 4. Heavy Metallurgy
 
-### Industrial Blast Smelter (5×5×5)
+### Industrial Blast Smelter (5Ã—5Ã—5)
 A massive foundry furnace that transforms iron sources and carbon fuels into high-grade Steel Ingots.
 
-- **Dimensions**: 5 blocks wide × 5 blocks tall × 5 blocks deep (125 blocks total).
-- **Viewing Window**: The front wall features a 3×3 transparent **Foundry Heat Glass** window where you can watch raw materials drop into the molten chamber and cook into glowing steel!
+- **Dimensions**: 5 blocks wide Ã— 5 blocks tall Ã— 5 blocks deep (125 blocks total).
+- **Viewing Window**: The front wall features a 3Ã—3 transparent **Foundry Heat Glass** window where you can watch raw materials drop into the molten chamber and cook into glowing steel!
 - **Universal Ingredients**:
   - **Iron Sources**: Raw Iron, Iron Ingot, Iron Ore, Deepslate Iron Ore, Raw Iron Block, or **Iron Dust** (`#c:dusts/iron`).
   - **Fuel Sources**: Coal, Charcoal, Coal Block, Petroleum Tar, Bitumen, or **Coal Dust / Charcoal Dust** (`#c:dusts/coal`, `#c:dusts/charcoal`).
@@ -189,19 +195,19 @@ A massive foundry furnace that transforms iron sources and carbon fuels into hig
   - `(-1, 0, 0)`: **Foundry Input Port**
   - `(1, 0, 0)`: **Foundry Output Port**
   - Remaining 22 floor positions: **Foundry Refractory Casing**
-- **Layers 1–3 (Smelting Chamber & Viewing Window)**:
-  - Front face x in [-1, 1]: **Foundry Heat Glass** (3×3 window)
-  - Center 3×3 interior (x in [-1, 1], z in [1, 3]): **Air (Hollow chamber)**
+- **Layers 1â€“3 (Smelting Chamber & Viewing Window)**:
+  - Front face x in [-1, 1]: **Foundry Heat Glass** (3Ã—3 window)
+  - Center 3Ã—3 interior (x in [-1, 1], z in [1, 3]): **Air (Hollow chamber)**
   - Outer side and back walls: **Foundry Refractory Casing**
 - **Layer 4 (Roof)**:
   - 25 **Foundry Refractory Casing** covering the entire top.
 
 ---
 
-### Industrial Metal Press (3×2×2)
+### Industrial Metal Press (3Ã—2Ã—2)
 A universal hydraulic mechanical press with a 3-block-wide conveyor bed and an overhead AIDA NC1-1500 stamping head for stamping metal ingots into structural plates.
 
-- **Dimensions**: 3 wide × 2 tall × 2 deep (12 blocks total; also supports 3×2×1 layout).
+- **Dimensions**: 3 wide Ã— 2 tall Ã— 2 deep (12 blocks total; also supports 3Ã—2Ã—1 layout).
 - **Physical 3D Stamping Animation**: Features an in-world animated hydraulic piston ram with a power stroke, heavy anvil impact (`SoundEvents.ANVIL_LAND`), and spark ejection!
 - **Supported Stamping Stamping Recipes** (40 ticks = 2.0s per plate):
   - **Steel Ingot** -> **Heavy Steel Plate**
@@ -215,7 +221,7 @@ A universal hydraulic mechanical press with a 3-block-wide conveyor bed and an o
   - **Top & Sides**: Inserts Ingots into the 2-slot input queue.
   - **Bottom**: Extracts Finished Plates from the 2-slot output buffer.
 
-#### Layer-by-Layer Assembly (3×2×2)
+#### Layer-by-Layer Assembly (3Ã—2Ã—2)
 ```
 Top Layer (y=1):
   Back (z=1):  [Press Casing]      [Press Casing]          [Press Casing]
@@ -228,17 +234,17 @@ Bottom Layer (y=0):
 
 ---
 
-### Industrial Multi-Smelter (5×4×3)
+### Industrial Multi-Smelter (5Ã—4Ã—3)
 An early-to-midgame high-throughput industrial smelting array that unifies **8 independent furnaces into a single automated multiblock machine**. 
 
-- **Dimensions**: 5 wide × 4 high × 3 deep (60 blocks total volume).
+- **Dimensions**: 5 wide Ã— 4 high Ã— 3 deep (60 blocks total volume).
 - **Hollow Core & 3D In-World Animation**:
-  - The interior 3 wide × 2 high × 1 deep core (`X` in [-1, 1], `Y` in [1, 2], `Z` = 1) is a **6-block hollow air combustion chamber**.
-  - The front face (`Z` = 0) features a 3×2 array of **Smelter Chamber Glass** viewing windows so players can peer directly into the active furnace interior.
+  - The interior 3 wide Ã— 2 high Ã— 1 deep core (`X` in [-1, 1], `Y` in [1, 2], `Z` = 1) is a **6-block hollow air combustion chamber**.
+  - The front face (`Z` = 0) features a 3Ã—2 array of **Smelter Chamber Glass** viewing windows so players can peer directly into the active furnace interior.
   - **Dynamic In-World 3D Visuals**:
     - **Solid Fuel Combustion**: When burning solid fuel, a glowing fiery red-orange charcoal ember bed and flame grate pulse on the chamber floor.
     - **Electric RF Induction**: When running on RF/FE, 3 glowing orange electric induction coils illuminate the chamber.
-    - **Live Cooking Items**: All items actively being smelted float inside the chamber in an organized 4×2 floating matrix, gently bobbing and spinning smoothly in the heat haze!
+    - **Live Cooking Items**: All items actively being smelted float inside the chamber in an organized 4Ã—2 floating matrix, gently bobbing and spinning smoothly in the heat haze!
     - Emits server-side flame particles, smoke trails, and realistic furnace crackle audio.
 - **8 Parallel Smelting Slots**:
   - Contains **8 Input Slots** (slots 0..7), **8 Output Slots** (slots 8..15), and **1 Solid Fuel Slot** (slot 16).
@@ -285,7 +291,7 @@ Layer 0 (Foundation & Ports, Y=0):
 
 ## 5. Thermodynamic Steam Power & Closed-Loop Energy
 
-### Small Steam Boiler (3×3×3)
+### Small Steam Boiler (3Ã—3Ã—3)
 A compact thermal generator for small-to-mid tier power generation.
 
 - **Capacity**: 16,000 mB Water, 16,000 mB Steam, 4 Fuel slots.
@@ -307,11 +313,11 @@ A compact thermal generator for small-to-mid tier power generation.
 
 ---
 
-### Large Heavy Steam Boiler (5×5×5)
+### Large Heavy Steam Boiler (5Ã—5Ã—5)
 An industrial-grade boiler engineered for massive steam output.
 
 - **Capacity**: 64,000 mB Water, 64,000 mB Steam, 8 Fuel slots.
-- **Performance**: 5× production rate (250 mB Water -> 500 mB Steam per cycle).
+- **Performance**: 5Ã— production rate (250 mB Water -> 500 mB Steam per cycle).
 - **Redstone Requirement**: Requires an active redstone signal to burn.
 - **Meltdown Condition**: Running dry for 60 seconds triggers a **massive 10.0 power crater explosion**!
 
@@ -319,17 +325,17 @@ An industrial-grade boiler engineered for massive steam output.
 - **Layer 0 (Foundation & Hearth)**:
   - Front: `(-1, 0, 0)` Water Port, `(0, 0, 0)` Large Controller, `(1, 0, 0)` Fuel Port
   - Rear: `(0, 0, 4)` Steam Port
-  - Center 3×3 hearth (x in [-1, 1], z in [1, 3]): 9 **Boiler Firebox Hearth** blocks
+  - Center 3Ã—3 hearth (x in [-1, 1], z in [1, 3]): 9 **Boiler Firebox Hearth** blocks
   - Perimeter: **Steel Boiler Casing**
-- **Layers 1–3 (Core Pressure Piping)**:
-  - Center 3×3×3 core: 27 **Boiler Pressure Pipes** transferring heat
+- **Layers 1â€“3 (Core Pressure Piping)**:
+  - Center 3Ã—3Ã—3 core: 27 **Boiler Pressure Pipes** transferring heat
   - Outer walls: **Steel Boiler Casing**
 - **Layer 4 (Roof)**:
   - 25 **Steel Boiler Casing** covering the entire top.
 
 ---
 
-### Steam Turbine Generator (3×3×3)
+### Steam Turbine Generator (3Ã—3Ã—3)
 A heavy Rankine-cycle turbine converting High Pressure Steam into Forge Energy and recyclable water.
 
 - **Capacity**: 32,000 mB Steam, 16,000 mB Water, **1,000,000 FE battery**.
@@ -358,10 +364,10 @@ Since the turbine condenses steam back into water at a 2:1 ratio, a closed loop 
 
 ## 6. Petroleum Refining & Chemical Byproducts
 
-### Petroleum Refinery (3×3×4)
+### Petroleum Refinery (3Ã—3Ã—4)
 A multi-stage fractional distillation column that refines raw Crude Oil into commercial fuels and chemical feedstocks.
 
-- **Dimensions**: 3 wide × 4 tall × 3 deep (36 blocks total).
+- **Dimensions**: 3 wide Ã— 4 tall Ã— 3 deep (36 blocks total).
 - **Operation**: Consumes 200 mB Crude Oil + 40 FE/t over 100 ticks.
 - **Outputs**:
   - **120 mB Diesel** (drained from Diesel Port)
@@ -391,10 +397,10 @@ The Petroleum Refinery features a dedicated high-pressure **Feedstock Input Slot
 
 ---
 
-### Industrial Grinder & Pulverizer (3×3×3)
+### Industrial Grinder & Pulverizer (3Ã—3Ã—3)
 A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields and processes geological strata.
 
-- **Dimensions**: 3 wide × 3 tall × 3 deep (27 blocks total, matching the Refinery, Boilers, and Blast Smelter).
+- **Dimensions**: 3 wide Ã— 3 tall Ã— 3 deep (27 blocks total, matching the Refinery, Boilers, and Blast Smelter).
 - **Core Functionality**:
   - **Ore Doubling**: Pulverizes Raw Iron, Raw Gold, and Raw Copper (or ore blocks) into **2x Dust** (`refinery:iron_dust`, `gold_dust`, `copper_dust`). Smelting these dusts produces 2 ingots per raw ore!
   - **Stone Crushing**: Crushes Stone, Cobblestone, Deepslate, Andesite, Diorite, and Granite into **1x Gravel**.
@@ -420,7 +426,7 @@ A heavy dual-roller crushing and pulverizing mill that doubles raw ore yields an
   - `(0, 2, 1)`: **Grinder Feed Port (Input)** (Top Center Hopper Chute)
   - All other 8 positions: **Grinder Structural Casing**
 
-*(Note: Flexible port placement is supported—input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
+*(Note: Flexible port placement is supportedâ€”input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
 
 ---
 
@@ -549,13 +555,13 @@ All ports and controllers implement native Minecraft and NeoForge capability sta
 ### In-World Fluid Crude Oil
 Crude Oil is a heavy, dark liquid naturally present in subterranean geologic traps:
 - **Liquid Blocks**: `refinery:crude_oil` (source) and `refinery:flowing_crude_oil`.
-- **Block Off & Displace**: Fully follows standard water/lava placement rules — can be blocked off, dammed, or displaced by placing any solid block directly into it.
-- **Viscous Movement Physics**: Thick, viscous fluid physics — entities sink at a steady, damped rate, can wade and swim through it with WASD, and can swim upwards to safety by holding Spacebar.
+- **Block Off & Displace**: Fully follows standard water/lava placement rules â€” can be blocked off, dammed, or displaced by placing any solid block directly into it.
+- **Viscous Movement Physics**: Thick, viscous fluid physics â€” entities sink at a steady, damped rate, can wade and swim through it with WASD, and can swim upwards to safety by holding Spacebar.
 - **Handling**: Can be collected using standard Buckets to obtain **Crude Oil Buckets** (`refinery:crude_oil_bucket`), pumped via fluid extraction pipes, or manually right-clicked onto a Refinery **Crude Oil Input Port**.
 - **Port Bucket Interaction**: Right-clicking the **Crude Oil Input Port** with a Crude Oil Bucket empties it into the refinery (+1,000 mB). Right-clicking the **Diesel Port** or **Gas Port** with an empty bucket collects refined fuel (-1,000 mB).
 
 ### Deposit Structures & Capacities
-1. **Standard Oil Pit (600,000 mB – 1,000,000 mB)**:
+1. **Standard Oil Pit (600,000 mB â€“ 1,000,000 mB)**:
    - **Surface Crater**: A large natural dark petroleum lake (20-block diameter) with shoreline beaches of **Bituminous Oil Sand** (`refinery:oil_sand`).
    - **Feeder Conduit**: A vertical cylindrical conduit dropping through the earth.
    - **Subterranean Reservoir**: A massive subterranean cavern embedded in the deep stone crust, filled with hundreds of source blocks and encased in an oil sand stratum.
@@ -569,7 +575,7 @@ All generation parameters are fully customizable:
 - `enableOilRetrogen` (default: `true`): Enables automatic generation in existing explored chunks.
 - `oilPitSpawnChance` (default: `0.005`): ~0.5% chance per chunk in allowed biomes (~1 in 200 chunks).
 - `oceanSpawnChanceMultiplier` (default: `0.20`): Multiplier for ocean biomes (80% frequency reduction) to keep vast deep oceans balanced.
-- `minChunkDistanceBetweenWells` (default: `40`): Minimum chunk distance between oil deposits (640 blocks) to space out wells and prevent clustering (range 1–512).
+- `minChunkDistanceBetweenWells` (default: `40`): Minimum chunk distance between oil deposits (640 blocks) to space out wells and prevent clustering (range 1â€“512).
 - `rareGeyserChance` (default: `0.20`): 20% chance for a spawned pit to be a 2,000k mB super-geyser.
 - `minOilVolumeMb` / `maxOilVolumeMb` (default: `600000` / `1000000`): Standard pit capacity range.
 - `geyserOilVolumeMb` (default: `2000000`): Super-geyser oil capacity.
@@ -591,7 +597,7 @@ Commands can be issued via `/admin` or `/refinery`:
 
 ## 10. BuildCraft-Style Pipe Logic Gates & Wires
 
-Industrial Refinery brings back the classic, beloved **BuildCraft Pipe Logic Gate** automation system — fully re-engineered for Minecraft 26.3 NeoForge!
+Industrial Refinery brings back the classic, beloved **BuildCraft Pipe Logic Gate** automation system â€” fully re-engineered for Minecraft 26.3 NeoForge!
 
 Gates are slim, directional logic controllers that can be attached to **any face of a pipe** (including Logistics mod Item & Fluid pipes, Refinery multiblock ports, vanilla containers, or any modded pipes/machines).
 
@@ -764,18 +770,18 @@ Six high-temperature molten fluids can be held in buckets, pumped through fluid 
 
 ---
 
-### Electric Arc Melter (3×3×3 Multiblock)
+### Electric Arc Melter (3Ã—3Ã—3 Multiblock)
 
 The **Electric Arc Melter** superheats mineral dusts and raw ores into liquid molten baths using high-energy graphite electrodes.
 
 #### Multiblock Structure & Blueprint:
 - **Dimensions**: 3 blocks wide $\times$ 3 blocks tall $\times$ 3 blocks deep (27 blocks total).
 - **Core Requirements**:
-  - 1x **Electric Arc Melter Controller** (`refinery:arc_melter_controller`) — front face, center-bottom.
-  - 22x **Arc Melter Casing** (`refinery:melter_casing`) — heavy heat-dissipating refractory outer framing.
-  - 2x **Arc Melter Observation Chamber** (`refinery:melter_chamber`) — tinted safety glass viewports.
-  - 1x **Arc Melter Input Port** (`refinery:melter_input_port`) — top or side funnel hopper. Accepts dusts & raw ores from hoppers and item pipes.
-  - 1x **Arc Melter Output Port** (`refinery:melter_output_port`) — bottom or side molten spout. Automatically pushes molten liquid to adjacent Casting Channels, fluid pipes, or tanks!
+  - 1x **Electric Arc Melter Controller** (`refinery:arc_melter_controller`) â€” front face, center-bottom.
+  - 22x **Arc Melter Casing** (`refinery:melter_casing`) â€” heavy heat-dissipating refractory outer framing.
+  - 2x **Arc Melter Observation Chamber** (`refinery:melter_chamber`) â€” tinted safety glass viewports.
+  - 1x **Arc Melter Input Port** (`refinery:melter_input_port`) â€” top or side funnel hopper. Accepts dusts & raw ores from hoppers and item pipes.
+  - 1x **Arc Melter Output Port** (`refinery:melter_output_port`) â€” bottom or side molten spout. Automatically pushes molten liquid to adjacent Casting Channels, fluid pipes, or tanks!
 - **Hologram Support**: Right-click the Controller with a **Refinery Wrench** to project the full color-coded 3D holographic blueprint.
 
 #### Operation & Animated Renderer:
@@ -798,19 +804,19 @@ The **Casting Channel** (`refinery:casting_channel`) is an open refractory ceram
 
 ---
 
-### Continuous Casting Press (3×3×3 Multiblock)
+### Continuous Casting Press (3Ã—3Ã—3 Multiblock)
 
 The **Continuous Casting Press** receives molten liquids and uses a heavy overhead hydraulic press and water-quenching die to stamp them into solidified ingots and glass blocks.
 
 #### Multiblock Structure & Blueprint:
 - **Dimensions**: 3 blocks wide $\times$ 3 blocks tall $\times$ 3 blocks deep (27 blocks total).
 - **Core Requirements**:
-  - 1x **Continuous Casting Press Controller** (`refinery:casting_press_controller`) — front face, center-bottom.
-  - 20x **Casting Press Casing** (`refinery:casting_casing`) — heavy hydraulic frame with safety hazard striping.
-  - 2x **Casting Mold Basin** (`refinery:casting_basin`) — ceramic mold bed at the base where liquid pools.
-  - 2x **Casting Safety Chamber** (`refinery:casting_chamber`) — wire-reinforced safety viewing windows.
-  - 1x **Casting Press Input Port** (`refinery:casting_input_port`) — top or side intake. Connects directly to Casting Channels or fluid pipes.
-  - 1x **Casting Press Output Port** (`refinery:casting_output_port`) — bottom or side exit conveyor chute. Automatically ejects finished ingots and blocks into hoppers, chests, or transport pipes!
+  - 1x **Continuous Casting Press Controller** (`refinery:casting_press_controller`) â€” front face, center-bottom.
+  - 20x **Casting Press Casing** (`refinery:casting_casing`) â€” heavy hydraulic frame with safety hazard striping.
+  - 2x **Casting Mold Basin** (`refinery:casting_basin`) â€” ceramic mold bed at the base where liquid pools.
+  - 2x **Casting Safety Chamber** (`refinery:casting_chamber`) â€” wire-reinforced safety viewing windows.
+  - 1x **Casting Press Input Port** (`refinery:casting_input_port`) â€” top or side intake. Connects directly to Casting Channels or fluid pipes.
+  - 1x **Casting Press Output Port** (`refinery:casting_output_port`) â€” bottom or side exit conveyor chute. Automatically ejects finished ingots and blocks into hoppers, chests, or transport pipes!
 
 #### Operation & Animated Renderer:
 - **Power Consumption**: 40 FE/t while stamping.
@@ -881,6 +887,32 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ## 13. Engineering Changelog & Version History
 
+### Version 1.5.11 (Planter & Harvester GUI Power Switch & Work Radius Control)
+- **GUI ON/OFF Power Switch**:
+  - Added an interactive power switch directly in the Automated Planter and Automated Harvester GUIs, with live LED indicators and status readouts.
+  - Toggling OFF stops machine scanning and cuts idle energy drain.
+- **Adjustable Work Radius (Up to 9 Blocks / 100m+ Area)**:
+  - Added `-` and `+` radius control buttons to both machines, allowing operators to set work radius from 1 block to 9 blocks away in all directions (covering 3x3 up to 19x19 / 361 tiles total).
+  - Harvester now scans in all directions around the block, matching the Planter's circular/square perimeter coverage while maintaining backward-compatible auto-ejection behind or below.
+- **Persistent Settings & Network Sync**:
+  - Machine enabled status and configured radius are stored in block entity NBT and synchronized via menu container data.
+
+---
+
+### Version 1.5.9 (3-Block-Wide Industrial Metal Press & Conveyor Bed)
+- **3-Block-Wide (3Ã—2Ã—2) Industrial Metal Press with Conveyor Bed & AIDA NC1-1500 Stamping Head**:
+  - Expanded the Metal Press multiblock structure to 3 blocks wide (`3Ã—2Ã—2`, with flexible placement supporting centered or side-aligned controllers as well as `3Ã—2Ã—1` depth).
+  - Redesigned the assembled 3D model (`AidaPressModel`) and 256Ã—256 texture atlas (`aida_press.png`) combining an Immersive Engineering-style conveyor bed and 4-post center gantry with the AIDA NC1-1500 overhead stamping head.
+  - Clean member block model suppression (`invisible.json`) and forwarded energy/item capabilities to the controller.
+
+---
+
+### Version 1.5.8 (Industrial Metal Press Monolithic AIDA NC1-1500 C-Frame Model & Texture)
+- **Monolithic AIDA NC1-1500 C-Frame Model & Texture**:
+  - High-definition seamless 3D model with classic off-white machine enamel, AIDA diamond branding, analog dial gauge, operator control pendant with mushroom E-stop, and animated hydraulic ram slide.
+
+---
+
 ### Version 1.5.7 (Logistics Pipe Compatibility & Machine Detection Fix)
 - **Accurate Machine Inventory Detection for Pipe Gates**:
   - Fixed an issue where pipe gates mistakenly evaluated connected transport pipes as target inventories instead of the attached machine. Connected pipes are now strictly excluded from inventory resolution, allowing gate conditions (`Has Items`, `Inventory Empty`, `Inventory Space`, `Inventory Full`) to accurately detect machine inventory contents.
@@ -898,7 +930,7 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ### Version 1.5.6 (Automated Tree Farming & Sapling Planting Support)
 - **Automated Planter Sapling & Tree Support**:
   - The **Automated Planter** (`refinery:auto_planter`) now accepts and plants all tree saplings (`#minecraft:saplings`, `SaplingBlock`, and modded saplings) alongside agricultural crops.
-  - Saplings are planted directly on natural soil blocks (`#minecraft:dirt` — Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling them into farmland.
+  - Saplings are planted directly on natural soil blocks (`#minecraft:dirt` â€” Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss) without tilling them into farmland.
 - **Automated Harvester Tree & Leaf Canopy Felling**:
   - The **Automated Harvester** (`refinery:auto_harvester`) now detects tree trunks and logs (`#minecraft:logs`) and leaf blocks (`#minecraft:leaves`).
   - When a tree is scanned, the harvester performs an intelligent 3D recursive flood-fill harvest: felling the entire trunk, diagonal branches, and the surrounding leaf canopy up to 32 blocks high and 8 blocks radius.
@@ -956,13 +988,13 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
   - Converted still fluid, flowing fluid, and bucket textures to clear frosted white, updated map color to `MapColor.SNOW`, and updated client underwater fog.
 - **Complete Visual Redo of Pipe Attachments**:
   - Redesigned all pipe wires (red, blue, green, yellow) into wire spools with metallic center spindles, coiled insulation, and stripped wire leads.
-  - Redesigned all 8 pipe gates (Basic, Iron, Gold, Diamond — standard & autarchic) into 14x14 beveled industrial attachment plates with tier-specific bezels, corner mounting bolts, and glowing logic cores.
+  - Redesigned all 8 pipe gates (Basic, Iron, Gold, Diamond â€” standard & autarchic) into 14x14 beveled industrial attachment plates with tier-specific bezels, corner mounting bolts, and glowing logic cores.
   - Redesigned Autarchic Chipset into an authentic ceramic dual-in-line IC chip with gold pins and glowing energy core.
 
 ---
 
 ### Version 1.5.0 (Industrial Multi-Smelter Array)
-- **Industrial Multi-Smelter (5×4×3 Multiblock)**:
+- **Industrial Multi-Smelter (5Ã—4Ã—3 Multiblock)**:
   - 8-in-1 parallel furnace array multiblock acting as an industrial super-smelter.
   - 6-block hollow air combustion chamber with front viewing windows and live 3D BER rendering.
   - Dual-power: runs on solid fuel (coal, wood, tar, bitumen, ethanol) OR electric RF (50,000 FE buffer, 30 FE/t).
@@ -1001,18 +1033,18 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ### Version 1.3.0 (Continuous Molten Metallurgy)
 - **Molten Foundry Suite**:
   - Registered 6 molten fluids (Molten Iron, Gold, Copper, Tin, Bronze, Glass) with buckets, light emission, and in-world interaction.
-- **Electric Arc Melter (3×3×3 Multiblock)**:
+- **Electric Arc Melter (3Ã—3Ã—3 Multiblock)**:
   - High-temperature induction melting with 3D animated descending carbon electrodes and dynamic electric arc discharges.
 - **Open Refractory Casting Channel**:
   - Seamless 3D trough geometry with directional side extensions, down-spouts, and glowing flowing molten liquid rendering.
-- **Continuous Casting Press (3×3×3 Multiblock)**:
+- **Continuous Casting Press (3Ã—3Ã—3 Multiblock)**:
   - Overhead hydraulic stamping ram with water-quenching steam clouds, mechanical piston sound effects, and ingot/block stamping.
 
 ---
 
 ### Version 1.2.0 (Grinder Overhaul & Logic Gates)
-- **Industrial Grinder 3×3×3 Multiblock**:
-  - Expanded into a full 3×3×3 multiblock with 3D physical counter-rotating spiked crushing drums.
+- **Industrial Grinder 3Ã—3Ã—3 Multiblock**:
+  - Expanded into a full 3Ã—3Ã—3 multiblock with 3D physical counter-rotating spiked crushing drums.
 - **In-Space Logic Gates**:
   - BuildCraft-style logic gates now snap directly to pipe faces, occupying the same block space.
   - Pipe wires rendered seamlessly along pipe paths.
@@ -1030,9 +1062,9 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ### Version 1.0.0 (Foundational Release)
-- **Petroleum Distillation Refinery (3×3×4 Multiblock)**
-- **Industrial Blast Smelter (5×5×5 Multiblock)** & **Industrial Metal Press (2×2×2 Multiblock)**
-- **Thermodynamic Steam Power Suite**: Small Boiler (3×3×3), Large Boiler (5×5×5), Steam Turbine (3×3×3) with Rankine cycle.
+- **Petroleum Distillation Refinery (3Ã—3Ã—4 Multiblock)**
+- **Industrial Blast Smelter (5Ã—5Ã—5 Multiblock)** & **Industrial Metal Press (2Ã—2Ã—2 Multiblock)**
+- **Thermodynamic Steam Power Suite**: Small Boiler (3Ã—3Ã—3), Large Boiler (5Ã—5Ã—5), Steam Turbine (3Ã—3Ã—3) with Rankine cycle.
 - **Agricultural Automation**: Automated Planter and Automated Harvester.
 - **Refinery Wrench**: 3D holographic blueprints and instant block dismantle.
 
