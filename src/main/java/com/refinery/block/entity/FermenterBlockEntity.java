@@ -31,6 +31,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 public class FermenterBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
@@ -203,11 +204,19 @@ public class FermenterBlockEntity extends BlockEntity implements MenuProvider, W
             if (neighborHandler != null) {
                 int toPush = Math.min(250, this.ethanolAmount);
                 FluidResource res = FluidResource.of(RefineryFluids.ETHANOL_SOURCE.get());
-                int inserted = neighborHandler.insert(0, res, toPush, null);
-                if (inserted > 0) {
-                    this.ethanolAmount -= inserted;
-                    setChanged();
-                    if (this.ethanolAmount <= 0) break;
+                try (Transaction tx = Transaction.openRoot()) {
+                    int inserted = 0;
+                    for (int i = 0; i < neighborHandler.size(); i++) {
+                        int ins = neighborHandler.insert(i, res, toPush - inserted, tx);
+                        inserted += ins;
+                        if (inserted >= toPush) break;
+                    }
+                    if (inserted > 0) {
+                        tx.commit();
+                        this.ethanolAmount -= inserted;
+                        setChanged();
+                        if (this.ethanolAmount <= 0) break;
+                    }
                 }
             }
         }

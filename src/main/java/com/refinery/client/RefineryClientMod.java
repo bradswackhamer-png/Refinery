@@ -53,6 +53,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.CASTING_PRESS_MENU.get(), CastingPressScreen::new);
         event.register((MenuType) RefineryMod.FERMENTER_MENU.get(), FermenterScreen::new);
         event.register((MenuType) RefineryMod.MULTI_SMELTER_MENU.get(), MultiSmelterScreen::new);
+        event.register((MenuType) RefineryMod.FLUID_PUMP_MENU.get(), FluidPumpScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -69,6 +70,8 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.CASTING_CHANNEL_BE.get(), CastingChannelRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.CASTING_PRESS_CONTROLLER_BE.get(), CastingPressControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.MULTI_SMELTER_CONTROLLER_BE.get(), MultiSmelterControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.FLUID_PUMP_BE.get(), FluidPumpRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.FLUID_DISCHARGE_BE.get(), FluidDischargeRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_GATE_ENTITY.get(), PipeGateEntityRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_WIRE_ENTITY.get(), PipeWireEntityRenderer::new);
     }

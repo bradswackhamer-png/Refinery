@@ -36,6 +36,8 @@
 
   "block.refinery.auto_planter": "Agricultural Auto-Planter",
   "block.refinery.auto_harvester": "Agricultural Auto-Harvester",
+  "block.refinery.fluid_pump": "Industrial Fluid Pump",
+  "block.refinery.fluid_discharge": "Industrial Fluid Discharge",
 
   "item.refinery.refinery_wrench": "Refinery Wrench",
   "item.refinery.tar": "Petroleum Tar",
@@ -57,9 +59,11 @@
   "container.refinery.metal_press": "Industrial Metal Press",
   "container.refinery.auto_planter": "Auto-Planter Station",
   "container.refinery.auto_harvester": "Auto-Harvester Station",
+  "container.refinery.fluid_pump": "Industrial Fluid Pump",
 
   "tooltip.refinery.wrench.desc_1": "§7Right-click blocks to rotate facing.",
   "tooltip.refinery.wrench.desc_2": "§6Right-click Controller to toggle 3D Blueprint Projection!",
+  "tooltip.refinery.wrench.desc_3": "§bShift-right-click Fluid Pump, then click target block/fluid to link suction hose.",
   "tooltip.refinery.tar.desc": "§7Viscous petroleum residue. Burns as fuel or crafts torches.",
   "tooltip.refinery.sulfur_dust.desc": "§eRefined mineral byproduct. Used in gunpowder and chemistry."
 }

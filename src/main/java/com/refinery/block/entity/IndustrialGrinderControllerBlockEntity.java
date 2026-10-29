@@ -181,6 +181,43 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         boolean wasActive = state.getValue(IndustrialGrinderControllerBlock.ACTIVE);
         boolean isActive = false;
 
+        // Check if any dropped ItemEntities fell into the top hopper bowl (Y = 2..3 above base)
+        Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
+        BlockPos hopperCenter = getRelativePos(0, 2, 1, facing);
+        net.minecraft.world.phys.AABB hopperBox = new net.minecraft.world.phys.AABB(hopperCenter).inflate(1.25, 0.85, 1.25);
+        List<net.minecraft.world.entity.item.ItemEntity> droppedItems = level.getEntitiesOfClass(
+                net.minecraft.world.entity.item.ItemEntity.class, hopperBox,
+                ie -> ie.isAlive() && !ie.getItem().isEmpty() && !getGrindResult(ie.getItem()).isEmpty());
+        if (!droppedItems.isEmpty()) {
+            boolean absorbedAny = false;
+            for (net.minecraft.world.entity.item.ItemEntity itemEntity : droppedItems) {
+                ItemStack entityStack = itemEntity.getItem();
+                for (int i = 0; i < 4 && !entityStack.isEmpty(); i++) {
+                    ItemStack slotStack = this.items.get(i);
+                    if (slotStack.isEmpty()) {
+                        this.items.set(i, entityStack.copy());
+                        entityStack.setCount(0);
+                        absorbedAny = true;
+                    } else if (ItemStack.isSameItemSameComponents(slotStack, entityStack) && slotStack.getCount() < slotStack.getMaxStackSize()) {
+                        int space = slotStack.getMaxStackSize() - slotStack.getCount();
+                        int transfer = Math.min(space, entityStack.getCount());
+                        slotStack.grow(transfer);
+                        entityStack.shrink(transfer);
+                        absorbedAny = true;
+                    }
+                }
+                if (entityStack.isEmpty()) {
+                    itemEntity.discard();
+                } else {
+                    itemEntity.setItem(entityStack);
+                }
+            }
+            if (absorbedAny) {
+                setChanged();
+                syncToClient();
+            }
+        }
+
         // Check if we have an item to grind
         int inputSlot = getFirstGrindableSlot();
         if (inputSlot != -1) {
@@ -197,7 +234,6 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
 
                     // Grinding rumble & crunch sounds
                     if (this.progress % 12 == 1) {
-                        Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
                         BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
                         serverLevel.playSound(null, chamberPos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.7f, 0.9f);
                         serverLevel.playSound(null, chamberPos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.5f, 0.8f);
@@ -226,7 +262,6 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                         }
 
                         // Ejection sound
-                        Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
                         BlockPos portPos = getRelativePos(1, 0, 0, facing);
                         serverLevel.playSound(null, portPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8f, 1.2f);
                     }

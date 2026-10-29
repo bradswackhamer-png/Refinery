@@ -310,6 +310,16 @@ public class RefineryMod {
             FermenterBlock::new);
     public static final DeferredItem<BlockItem> FERMENTER_ITEM = ITEMS.registerSimpleBlockItem("fermenter", FERMENTER);
 
+    // === Industrial Portable Fluid Pump ===
+    public static final DeferredBlock<FluidPumpBlock> FLUID_PUMP = BLOCKS.registerBlock("fluid_pump",
+            FluidPumpBlock::new);
+    public static final DeferredItem<BlockItem> FLUID_PUMP_ITEM = ITEMS.registerSimpleBlockItem("fluid_pump", FLUID_PUMP);
+
+    // === Industrial Fluid Discharge Block ===
+    public static final DeferredBlock<FluidDischargeBlock> FLUID_DISCHARGE = BLOCKS.registerBlock("fluid_discharge",
+            FluidDischargeBlock::new);
+    public static final DeferredItem<BlockItem> FLUID_DISCHARGE_ITEM = ITEMS.registerSimpleBlockItem("fluid_discharge", FLUID_DISCHARGE);
+
     // === Industrial Multi-Smelter (5x4x3) Multiblock ===
     public static final DeferredBlock<MultiSmelterControllerBlock> MULTI_SMELTER_CONTROLLER = BLOCKS.registerBlock("multi_smelter_controller",
             MultiSmelterControllerBlock::new);
@@ -533,6 +543,14 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("fermenter",
                     () -> new BlockEntityType<>(FermenterBlockEntity::new, FERMENTER.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidPumpBlockEntity>> FLUID_PUMP_BE =
+            BLOCK_ENTITY_TYPES.register("fluid_pump",
+                    () -> new BlockEntityType<>(FluidPumpBlockEntity::new, FLUID_PUMP.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidDischargeBlockEntity>> FLUID_DISCHARGE_BE =
+            BLOCK_ENTITY_TYPES.register("fluid_discharge",
+                    () -> new BlockEntityType<>(FluidDischargeBlockEntity::new, FLUID_DISCHARGE.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiSmelterControllerBlockEntity>> MULTI_SMELTER_CONTROLLER_BE =
             BLOCK_ENTITY_TYPES.register("multi_smelter_controller",
                     () -> new BlockEntityType<>(MultiSmelterControllerBlockEntity::new, MULTI_SMELTER_CONTROLLER.get()));
@@ -587,6 +605,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<FermenterMenu>> FERMENTER_MENU =
             MENUS.register("fermenter", () -> new MenuType<>(FermenterMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<FluidPumpMenu>> FLUID_PUMP_MENU =
+            MENUS.register("fluid_pump", () -> new MenuType<>(FluidPumpMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     public static final DeferredHolder<MenuType<?>, MenuType<MultiSmelterMenu>> MULTI_SMELTER_MENU =
             MENUS.register("multi_smelter", () -> new MenuType<>(MultiSmelterMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -651,6 +672,8 @@ public class RefineryMod {
                         output.accept(CASTING_INPUT_PORT_ITEM.get());
                         output.accept(CASTING_OUTPUT_PORT_ITEM.get());
                         output.accept(FERMENTER_ITEM.get());
+                        output.accept(FLUID_PUMP_ITEM.get());
+                        output.accept(FLUID_DISCHARGE_ITEM.get());
                         output.accept(MULTI_SMELTER_CONTROLLER_ITEM.get());
                         output.accept(SMELTER_CASING_ITEM.get());
                         output.accept(SMELTER_CHAMBER_ITEM.get());
@@ -958,18 +981,33 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Item.BLOCK, METAL_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
 
-        // Capabilities on Industrial Grinder Controller & Ports
+        // Capabilities on Industrial Grinder Controller, Member Blocks & Ports
         event.registerBlockEntity(Capabilities.Energy.BLOCK, INDUSTRIAL_GRINDER_CONTROLLER_BE.get(),
                 (be, side) -> be.energyStorage);
 
+        event.registerBlock(Capabilities.Energy.BLOCK,
+                (level, pos, state, be, side) -> {
+                    IndustrialGrinderControllerBlockEntity controller = GrinderCasingBlock.findNearbyController(level, pos);
+                    return controller != null && controller.isAssembled() ? controller.energyStorage : null;
+                },
+                GRINDER_CASING.get(), GRINDER_CHAMBER.get(), GRINDER_INPUT_PORT.get(), GRINDER_OUTPUT_PORT.get());
+
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> {
+                    IndustrialGrinderControllerBlockEntity controller = GrinderCasingBlock.findNearbyController(level, pos);
+                    if (controller == null || !controller.isAssembled()) return null;
+                    return side != null ? new WorldlyContainerWrapper(controller, side) : VanillaContainerWrapper.of(controller);
+                },
+                GRINDER_CASING.get(), GRINDER_CHAMBER.get());
+
         event.registerBlockEntity(Capabilities.Item.BLOCK, INDUSTRIAL_GRINDER_CONTROLLER_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
+                (be, side) -> side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be));
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, GRINDER_PORT_BE.get(),
                 (be, side) -> {
                     var controller = be.getController();
                     if (controller == null) return null;
-                    return VanillaContainerWrapper.of(be);
+                    return side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be);
                 });
 
         // Capabilities on Electric Arc Melter
@@ -1058,6 +1096,19 @@ public class RefineryMod {
                 (be, side) -> be.fluidHandler);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, FERMENTER_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+
+        // Capabilities on Industrial Fluid Pump (Energy, Fluid Output/Diesel, Items)
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, FLUID_PUMP_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, FLUID_PUMP_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, FLUID_DISCHARGE_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, FLUID_PUMP_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
 
         // Capabilities on Industrial Multi-Smelter Controller & Ports

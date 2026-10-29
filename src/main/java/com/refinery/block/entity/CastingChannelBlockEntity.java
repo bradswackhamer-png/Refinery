@@ -16,6 +16,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 public class CastingChannelBlockEntity extends BlockEntity {
     public static final int CAPACITY = 1000;
@@ -89,15 +90,23 @@ public class CastingChannelBlockEntity extends BlockEntity {
         if (targetHandler != null) {
             int toTransfer = Math.min(100, this.moltenAmount);
             FluidResource res = FluidResource.of(this.moltenFluid);
-            int accepted = targetHandler.insert(0, res, toTransfer, null);
-            if (accepted > 0) {
-                this.moltenAmount -= accepted;
-                if (this.moltenAmount <= 0) {
-                    this.moltenFluid = Fluids.EMPTY;
+            try (Transaction tx = Transaction.openRoot()) {
+                int accepted = 0;
+                for (int i = 0; i < targetHandler.size(); i++) {
+                    int ins = targetHandler.insert(i, res, toTransfer - accepted, tx);
+                    accepted += ins;
+                    if (accepted >= toTransfer) break;
                 }
-                setChanged();
-                this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
-                return true;
+                if (accepted > 0) {
+                    tx.commit();
+                    this.moltenAmount -= accepted;
+                    if (this.moltenAmount <= 0) {
+                        this.moltenFluid = Fluids.EMPTY;
+                    }
+                    setChanged();
+                    this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
+                    return true;
+                }
             }
         }
         return false;

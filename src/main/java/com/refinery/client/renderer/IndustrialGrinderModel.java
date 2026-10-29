@@ -7,6 +7,8 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +17,8 @@ import java.util.List;
  * High-Fidelity 3x3x3 Multiblock Model for the Assembled Industrial Grinder:
  * - 4-post heavy structural steel stand with rubber vibration-damping feet
  * - Central heavy crushing box with side flywheels, belt drive, and eccentric bearing hubs
- * - Top tapered hopper funnel loaded with rock / ore chunks
- * - Left horizontal feed conveyor bringing material into the crusher
- * - Right inclined discharge conveyor with chevron belt carrying crushed product away
+ * - Open-top tapered hopper bowl with twin counter-rotating 3D spiked grinding rotors & blades inside
+ * - Right inclined discharge conveyor with empty cycling chevron belt (crushed product rendered dynamically)
  */
 @OnlyIn(Dist.CLIENT)
 public class IndustrialGrinderModel {
@@ -51,20 +52,18 @@ public class IndustrialGrinderModel {
         }
     }
 
-    // Atlas UV Regions (matching GrinderAssetGenerator 256x256 layout)
+    // Atlas UV Regions (matching 256x256 layout)
     private static final UVRect UV_CRUSH_PLATES     = UVRect.of(0, 0, 96, 48);
     private static final UVRect UV_SUPPORT_LEGS     = UVRect.of(96, 0, 64, 48);
     private static final UVRect UV_FLYWHEEL         = UVRect.of(160, 0, 48, 48);
     private static final UVRect UV_BEARING_HUBS     = UVRect.of(208, 0, 48, 48);
     private static final UVRect UV_HOPPER_FUNNEL    = UVRect.of(0, 48, 64, 48);
-    private static final UVRect UV_ROCK_MOUND       = UVRect.of(64, 48, 64, 48);
-    private static final UVRect UV_FEED_CONVEYOR    = UVRect.of(128, 48, 64, 32);
     private static final UVRect UV_DISCHARGE_BELT   = UVRect.of(192, 48, 64, 32);
     private static final UVRect UV_DRIVE_MOTOR      = UVRect.of(0, 96, 64, 48);
     private static final UVRect UV_JAW_PLATES       = UVRect.of(64, 96, 64, 48);
-    private static final UVRect UV_CRUSHED_AGG      = UVRect.of(128, 96, 64, 48);
 
     private final List<Cuboid> staticCuboids = new ArrayList<>();
+    private final List<Cuboid> rotorParts = new ArrayList<>();
     private final Cuboid flywheel;
     private final Cuboid motorPulley;
 
@@ -107,7 +106,7 @@ public class IndustrialGrinderModel {
         // Left Eccentric Bearing Hub & Grease Cap
         staticCuboids.add(Cuboid.uniform(-13.0f, 21.0f, 19.0f, -8.0f, 31.0f, 29.0f, UV_BEARING_HUBS));
 
-        // Drive Flywheel on the right (rotates around Z-axis)
+        // Drive Flywheel on the right
         this.flywheel = Cuboid.uniform(25.0f, 18.0f, 16.0f, 29.5f, 34.0f, 32.0f, UV_FLYWHEEL);
 
         // Electric Drive Motor on Right Side
@@ -118,60 +117,92 @@ public class IndustrialGrinderModel {
         staticCuboids.add(Cuboid.uniform(26.5f, 13.0f, 22.0f, 28.5f, 22.0f, 28.0f, UV_FLYWHEEL));
 
         // =========================================================================
-        // 3. TOP TAPERED HOPPER FUNNEL (Y: 34..52)
+        // 3. OPEN-TOP TAPERED HOPPER BOWL (Y: 34..48.5)
         // =========================================================================
-        // Lower Tapered Funnel Chute
-        staticCuboids.add(Cuboid.uniform(-6.0f, 34.0f, 8.0f, 22.0f, 38.0f, 40.0f, UV_HOPPER_FUNNEL));
-        // Flared Upper Funnel Box
-        staticCuboids.add(Cuboid.uniform(-10.0f, 38.0f, 4.0f, 26.0f, 46.0f, 44.0f, UV_HOPPER_FUNNEL));
-        // Bolted Top Reinforcement Rim
-        staticCuboids.add(Cuboid.uniform(-11.5f, 46.0f, 2.5f, 27.5f, 48.5f, 45.5f, UV_HOPPER_FUNNEL));
+        // Deep Inner Throat Floor (beneath the twin grinding rotors)
+        staticCuboids.add(Cuboid.uniform(-5.0f, 34.0f, 9.0f, 21.0f, 36.5f, 39.0f, UV_JAW_PLATES));
 
-        // Jagged Rock & Ore Mound Piled Inside Hopper
-        staticCuboids.add(Cuboid.uniform(-8.5f, 46.0f, 5.0f, 24.5f, 52.0f, 43.0f, UV_ROCK_MOUND));
-        staticCuboids.add(Cuboid.uniform(-5.0f, 52.0f, 10.0f, 21.0f, 55.0f, 38.0f, UV_ROCK_MOUND));
+        // Lower Tapered Funnel Chute Walls (Hollow Bowl Lower Tier, Y: 34..38)
+        staticCuboids.add(Cuboid.uniform(-6.0f, 34.0f, 8.0f, 22.0f, 38.0f, 11.0f, UV_HOPPER_FUNNEL)); // North
+        staticCuboids.add(Cuboid.uniform(-6.0f, 34.0f, 37.0f, 22.0f, 38.0f, 40.0f, UV_HOPPER_FUNNEL)); // South
+        staticCuboids.add(Cuboid.uniform(-6.0f, 34.0f, 11.0f, -3.0f, 38.0f, 37.0f, UV_HOPPER_FUNNEL)); // West
+        staticCuboids.add(Cuboid.uniform(19.0f, 34.0f, 11.0f, 22.0f, 38.0f, 37.0f, UV_HOPPER_FUNNEL)); // East
+
+        // Flared Upper Funnel Bowl Walls (Hollow Bowl Upper Tier, Y: 38..46)
+        staticCuboids.add(Cuboid.uniform(-10.0f, 38.0f, 4.0f, 26.0f, 46.0f, 7.5f, UV_HOPPER_FUNNEL));   // North wall
+        staticCuboids.add(Cuboid.uniform(-10.0f, 38.0f, 40.5f, 26.0f, 46.0f, 44.0f, UV_HOPPER_FUNNEL)); // South wall
+        staticCuboids.add(Cuboid.uniform(-10.0f, 38.0f, 7.5f, -6.5f, 46.0f, 40.5f, UV_HOPPER_FUNNEL));  // West wall
+        staticCuboids.add(Cuboid.uniform(22.5f, 38.0f, 7.5f, 26.0f, 46.0f, 40.5f, UV_HOPPER_FUNNEL));   // East wall
+
+        // Inner Sloped Liner Plates / Breaker Bars inside Hopper Bowl
+        staticCuboids.add(Cuboid.uniform(-6.5f, 38.0f, 7.5f, 22.5f, 41.5f, 9.5f, UV_JAW_PLATES));     // North inner liner
+        staticCuboids.add(Cuboid.uniform(-6.5f, 38.0f, 38.5f, 22.5f, 41.5f, 40.5f, UV_JAW_PLATES));   // South inner liner
+        staticCuboids.add(Cuboid.uniform(-6.5f, 38.0f, 9.5f, -4.5f, 41.5f, 38.5f, UV_JAW_PLATES));    // West inner liner
+        staticCuboids.add(Cuboid.uniform(20.5f, 38.0f, 9.5f, 22.5f, 41.5f, 38.5f, UV_JAW_PLATES));    // East inner liner
+
+        // Bolted Top Reinforcement Rim (Open Hollow Perimeter Frame, Y: 46..48.5)
+        staticCuboids.add(Cuboid.uniform(-11.5f, 46.0f, 2.5f, 27.5f, 48.5f, 7.5f, UV_HOPPER_FUNNEL));   // North rim
+        staticCuboids.add(Cuboid.uniform(-11.5f, 46.0f, 40.5f, 27.5f, 48.5f, 45.5f, UV_HOPPER_FUNNEL)); // South rim
+        staticCuboids.add(Cuboid.uniform(-11.5f, 46.0f, 7.5f, -6.5f, 48.5f, 40.5f, UV_HOPPER_FUNNEL));  // West rim
+        staticCuboids.add(Cuboid.uniform(22.5f, 46.0f, 7.5f, 27.5f, 48.5f, 40.5f, UV_HOPPER_FUNNEL));   // East rim
+
+        // Rotor End Bearing Mounts inside North & South Bowl Walls
+        staticCuboids.add(Cuboid.uniform(-0.5f, 39.0f, 7.2f, 4.5f, 44.0f, 9.8f, UV_BEARING_HUBS));
+        staticCuboids.add(Cuboid.uniform(11.5f, 39.0f, 7.2f, 16.5f, 44.0f, 9.8f, UV_BEARING_HUBS));
+        staticCuboids.add(Cuboid.uniform(-0.5f, 39.0f, 38.2f, 4.5f, 44.0f, 40.8f, UV_BEARING_HUBS));
+        staticCuboids.add(Cuboid.uniform(11.5f, 39.0f, 38.2f, 16.5f, 44.0f, 40.8f, UV_BEARING_HUBS));
 
         // =========================================================================
-        // 4. INPUT FEED CONVEYOR (Left Side, X: -26..-6, Y: 26..35)
+        // 4. 3D SPINNING CRUSHER BLADE ROTOR GEOMETRY (Local to Rotor Axis)
         // =========================================================================
-        // Horizontal Feed Conveyor Trough Frame
-        staticCuboids.add(Cuboid.uniform(-26.0f, 26.0f, 17.0f, -6.0f, 30.0f, 31.0f, UV_FEED_CONVEYOR));
-        // Feed Conveyor Rubber Belt Bed
-        staticCuboids.add(Cuboid.uniform(-26.0f, 29.5f, 18.0f, -6.0f, 31.0f, 30.0f, UV_FEED_CONVEYOR));
-        // Front and Back Steel Guide Skirts
-        staticCuboids.add(Cuboid.uniform(-26.0f, 30.5f, 17.0f, -6.0f, 35.0f, 18.5f, UV_FEED_CONVEYOR));
-        staticCuboids.add(Cuboid.uniform(-26.0f, 30.5f, 29.5f, -6.0f, 35.0f, 31.0f, UV_FEED_CONVEYOR));
-        // Cantilever Support Strut connecting to frame
-        staticCuboids.add(Cuboid.uniform(-22.0f, 18.0f, 22.0f, -12.0f, 26.0f, 26.0f, UV_SUPPORT_LEGS));
+        // Central Heavy Hexagonal Steel Axle Shaft (spans Z = 8.5..39.5)
+        rotorParts.add(Cuboid.uniform(-2.0f, -2.0f, 8.5f, 2.0f, 2.0f, 39.5f, UV_SUPPORT_LEGS));
+        // Heavy Cylindrical Drum Core
+        rotorParts.add(Cuboid.uniform(-3.0f, -1.5f, 9.5f, 3.0f, 1.5f, 38.5f, UV_JAW_PLATES));
+        rotorParts.add(Cuboid.uniform(-1.5f, -3.0f, 9.5f, 1.5f, 3.0f, 38.5f, UV_JAW_PLATES));
 
-        // Rock Chunks riding on the Feed Conveyor (Visual Feed In)
-        staticCuboids.add(Cuboid.uniform(-24.0f, 31.0f, 19.5f, -10.0f, 34.0f, 28.5f, UV_ROCK_MOUND));
+        // 7 Intermeshing Toothed Shredder / Crusher Blade Discs along the shaft
+        float[] bladeZPositions = {11.0f, 15.0f, 19.0f, 23.0f, 27.0f, 31.0f, 35.0f};
+        for (int i = 0; i < bladeZPositions.length; i++) {
+            float bz = bladeZPositions[i];
+            // Solid circular collar disc
+            rotorParts.add(Cuboid.uniform(-3.8f, -3.8f, bz, 3.8f, 3.8f, bz + 2.0f, UV_FLYWHEEL));
+            if (i % 2 == 0) {
+                // Vertical & Horizontal Shredder Teeth (extend to 5.6px radius)
+                rotorParts.add(Cuboid.uniform(-5.6f, -1.3f, bz + 0.2f, 5.6f, 1.3f, bz + 1.8f, UV_JAW_PLATES));
+                rotorParts.add(Cuboid.uniform(-1.3f, -5.6f, bz + 0.2f, 1.3f, 5.6f, bz + 1.8f, UV_JAW_PLATES));
+            } else {
+                // Staggered Offset Shredder Teeth (creates a helical biting pattern)
+                rotorParts.add(Cuboid.uniform(-5.2f, -2.6f, bz + 0.2f, 5.2f, 0.4f, bz + 1.8f, UV_JAW_PLATES));
+                rotorParts.add(Cuboid.uniform(-5.2f, -0.4f, bz + 0.2f, 5.2f, 2.6f, bz + 1.8f, UV_JAW_PLATES));
+                rotorParts.add(Cuboid.uniform(-2.6f, -5.2f, bz + 0.2f, 0.4f, 5.2f, bz + 1.8f, UV_JAW_PLATES));
+                rotorParts.add(Cuboid.uniform(-0.4f, -5.2f, bz + 0.2f, 2.6f, 5.2f, bz + 1.8f, UV_JAW_PLATES));
+            }
+        }
 
         // =========================================================================
-        // 5. OUTPUT DISCHARGE CONVEYOR (Right Side, X: 16..38, Inclined)
+        // 5. OUTPUT DISCHARGE CONVEYOR (Right Side, X: 14..38.5, Clean Empty Belt)
         // =========================================================================
         // Under-Chamber Discharge Chute Catch Pan
         staticCuboids.add(Cuboid.uniform(14.0f, 12.0f, 17.0f, 24.0f, 16.0f, 31.0f, UV_DISCHARGE_BELT));
-        // Inclined Rising Conveyor Truss (Angles up to discharge crushed product)
-        staticCuboids.add(Cuboid.uniform(22.0f, 14.0f, 17.5f, 36.0f, 26.0f, 30.5f, UV_DISCHARGE_BELT));
-        // Inclined Chevron Rubber Belt
+        // Inclined Rising Conveyor Truss Frame
+        staticCuboids.add(Cuboid.uniform(22.0f, 14.0f, 17.5f, 36.0f, 26.0f, 30.5f, UV_SUPPORT_LEGS));
+        // Clean Empty Inclined Chevron Rubber Belt (No pre-generated aggregate mound!)
         staticCuboids.add(Cuboid.uniform(22.0f, 16.5f, 18.5f, 36.0f, 27.5f, 29.5f, UV_DISCHARGE_BELT));
         // Conveyor End Roller Pulley
         staticCuboids.add(Cuboid.uniform(35.0f, 24.5f, 18.0f, 38.5f, 28.5f, 30.0f, UV_SUPPORT_LEGS));
         // Slanted Side Guard Rails
-        staticCuboids.add(Cuboid.uniform(22.0f, 16.0f, 17.0f, 37.0f, 29.0f, 18.5f, UV_DISCHARGE_BELT));
-        staticCuboids.add(Cuboid.uniform(22.0f, 16.0f, 29.5f, 37.0f, 29.0f, 31.0f, UV_DISCHARGE_BELT));
+        staticCuboids.add(Cuboid.uniform(22.0f, 16.0f, 17.0f, 37.0f, 29.0f, 18.5f, UV_SUPPORT_LEGS));
+        staticCuboids.add(Cuboid.uniform(22.0f, 16.0f, 29.5f, 37.0f, 29.0f, 31.0f, UV_SUPPORT_LEGS));
         // Diagonal Support Strut
         staticCuboids.add(Cuboid.uniform(24.0f, 10.0f, 23.0f, 32.0f, 18.0f, 25.0f, UV_SUPPORT_LEGS));
-
-        // Crushed Aggregate riding up the Discharge Conveyor
-        staticCuboids.add(Cuboid.uniform(24.0f, 17.5f, 20.0f, 35.0f, 28.0f, 28.0f, UV_CRUSHED_AGG));
     }
 
     public void render(
             PoseStack.Pose pose,
             VertexConsumer consumer,
             boolean isActive,
+            float bladeAngleDegrees,
             int light,
             int overlay
     ) {
@@ -185,6 +216,25 @@ public class IndustrialGrinderModel {
         // 2. Emit Flywheel and Motor Pulley
         emitCuboid(pose, poseMatrix, consumer, this.flywheel, light, overlay);
         emitCuboid(pose, poseMatrix, consumer, this.motorPulley, light, overlay);
+
+        // 3. Emit Twin Counter-Rotating 3D Spiked Grinder Blade Rotors inside the Top Hopper Bowl
+        float rad = (float) Math.toRadians(bladeAngleDegrees);
+
+        // Left Rotor (Centered at X = 2.0, Y = 41.5, turns clockwise / inward toward center)
+        Matrix4f leftRotorMatrix = new Matrix4f(poseMatrix)
+                .translate(2.0f / 16.0f, 41.5f / 16.0f, 0.0f)
+                .rotateZ(-rad);
+        for (Cuboid part : this.rotorParts) {
+            emitCuboid(pose, leftRotorMatrix, consumer, part, light, overlay);
+        }
+
+        // Right Rotor (Centered at X = 14.0, Y = 41.5, counter-rotates +45 deg offset so teeth intermesh)
+        Matrix4f rightRotorMatrix = new Matrix4f(poseMatrix)
+                .translate(14.0f / 16.0f, 41.5f / 16.0f, 0.0f)
+                .rotateZ(rad + (float) Math.toRadians(45.0f));
+        for (Cuboid part : this.rotorParts) {
+            emitCuboid(pose, rightRotorMatrix, consumer, part, light, overlay);
+        }
     }
 
     private static void emitCuboid(

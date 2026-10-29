@@ -69,7 +69,15 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 - **Auto Planter**: Smart cultivator with GUI On/Off switch and configurable work radius up to 9 blocks away in all directions (3x3 up to 19x19 / 361 tiles). Automatically prepares soil and plants seeds and tree saplings from internal storage, hoppers, or pipes.
 - **Auto Harvester**: Omnidirectional farm harvester with GUI On/Off switch and configurable radius up to 9 blocks in all directions. Auto-harvests mature crops, fells trees/leaves, replants seeds, and ejects drops into chests or pipes behind or below.
 
-### ?? 5. BuildCraft-Style Pipe Logic Gates & Wires
+### ⛽ 5. Portable Industrial Fluid Pump & 3D Suction Hose
+- **Industrial Fluid Pump (`refinery:fluid_pump`)**: Heavy-duty portable engine-driven pump with monolithic 3D model (black roll cage, yellow recoil starter, white gas tank, cast aluminum centrifugal pump body).
+- **In-World 3D Flexible Suction Hose**: Sneak-click with the Refinery Wrench to link, then click any block or fluid source in the world (up to 64 blocks away) to deploy a dynamic 3D spiral-ribbed suction hose with brass suction strainer.
+- **Connected Fluid Source BFS Flood-Fill**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward without touching unconnected pockets.
+- **Infinite Water Mode (`INF` / `DRY`)**: GUI toggle to pump infinite water without consuming source blocks, or pump lakes and caverns completely dry.
+- **Multi-Fuel Engine**: Operates on RF / FE (400 FE/bucket), Solid Fuels (Coal, Charcoal, Tar, Wood), or Liquid Diesel/Biofuel (10 mB/bucket).
+- **Logistics Craft Output**: Automatically discharges pumped fluids directly into adjacent Logistics Craft fluid pipes and tanks through its top outlet flange.
+
+### ?? 6. BuildCraft-Style Pipe Logic Gates & Wires
 The classic BuildCraft automation system, re-engineered for modern Minecraft!
 - **Slim Face Attachment**: Attaches flush onto **any face of a pipe**, machine, chest, or refinery port with non-solid hitboxes.
 - **High-Definition Visuals**: Beautifully detailed 14x14 beveled industrial attachment plates with tier-specific metallic bezels, corner mounting bolts, and glowing logic cores; pipe wires render as industrial wire spools with metallic spindles and coiled insulation.
@@ -129,10 +137,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.5.14.jar`
+`refinery-1.6.4.jar`
 
 ### Display Name
-`Industrial Refinery 1.5.13 (NeoForge 26.3)`
+`Industrial Refinery 1.6.2 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -148,9 +156,62 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.5.14
+# Industrial Refinery v1.6.4
 
-### What's New in v1.5.14:
+### What's New in v1.6.4:
+- **Coal Mode Burn Rate Tuning**:
+  - Calibrated solid fuel combustion in the Fluid Pump to burn exactly 1 Coal (or burnable item) per 3 seconds (60 ticks) of active pumping. Fuel is never wasted when the pump is idle, paused by redstone, or when fluid is dry.
+- **Genuine Minecraft GUI Buttons**:
+  - Transformed the Power Mode and Drain Mode toggles into authentic 3D beveled Minecraft buttons with client-side prediction, click sound effects, and instant state switching between `[ RF ]`, `[ COAL ]`, and `[ DIESEL ]` (can toggle anytime without requiring external connections).
+- **Digital Power Buffer Readout (No Progress Bar)**:
+  - Replaced the left progress bar with a clean digital readout panel displaying current power mode, stored FE, burn seconds, or diesel fuel volume directly without needing to mouse over.
+- **Calibrated Fluid Tank Reservoir & Flow Animation**:
+  - Upgraded the fluid output gauge into a calibrated glass reservoir with graduations (25%, 50%, 75%), volume readouts, and active fluid flow animations when pumping directly into pipes.
+- **26.3 Item Model Definitions**:
+  - Added modern 26.3 item definition files (`assets/refinery/items/fluid_pump.json` and `assets/refinery/items/fluid_discharge.json`), resolving broken inventory icons for both blocks.
+
+### Previous v1.6.3 Highlights:
+- **Transfer API Transaction Safety & Crash Fix**:
+  - Fixed `NullPointerException: Cannot invoke "net.neoforged.neoforge.transfer.transaction.TransactionContext.depth()" because "transaction" is null` that crashed the game when the Fluid Pump pumped fluid into Logistics Automation pipes.
+  - Wrapped all capability fluid insertion logic inside `try (Transaction tx = Transaction.openRoot()) { ... tx.commit(); }` across `FluidPumpBlockEntity`, `ArcMelterControllerBlockEntity`, `CastingChannelBlockEntity`, and `FermenterBlockEntity`.
+- **Screen Typography & Missing Glyphs Fix**:
+  - Replaced unsupported Unicode emojis in `FluidPumpScreen` with crisp, legible bracketed status badges (`[PUMPING]`, `[IDLE]`, `[NO POWER]`, `[NO FUEL]`, `[NO DIESEL]`, `[TANK FULL]`, `[NO INTAKE]`, `[OUT OF RANGE]`, `[POOL DRAINED]`, `[PAUSED - REDSTONE]`), eliminating rectangular missing glyph boxes.
+
+### Previous v1.6.2 Highlights:
+- **Industrial Fluid Discharge (`refinery:fluid_discharge`)**:
+  - Heavy-duty industrial foot valve & slotted discharge strainer outlet block.
+  - **Monolithic 3D Model**: High-gloss fire-engine red cylindrical housing, mounting collar with 4 cast ribs, dual-tier bolt flanges with side ear lugs, graphite gasket, polished silver/chrome hexagonal bolt heads, threaded studs with hex nuts, slotted dome cage with vertical vent slots exposing dark interior valve throat and flapper plate, and perforated dome crown.
+  - **Dual Toggled Operational Modes**:
+    - **`VOID / DUMP`**: Fluid pumped into the block from Logistics Automation or standard pipes simply disappears (voided).
+    - **`FILL`**: Discharges liquid into the surrounding area at the **same Y level**, filling contiguous air/replaceable blocks with fluid source blocks (1,000 mB per block).
+    - **Strict Contiguous Flood-Fill (BFS)**: Fluid expands only through the discharge block or contiguous blocks of the same fluid. Never jumps across solid walls or boundaries into neighboring pits!
+  - **Snap Interaction & Mode Toggling**:
+    - Right-click with empty hand or Refinery Wrench toggles mode with sound and chat feedback.
+    - Sneak-right-click inspects live status: mode, fluid volume, active state, and redstone signal.
+  - **Redstone Control**: Redstone signal safely pauses discharging.
+
+### Previous v1.6.0 Highlights:
+- **Industrial Fluid Pump (`refinery:fluid_pump`)**:
+  - Heavy-duty portable engine-driven pump modeled after classic industrial gas/diesel water pumps (Superkiger WP40X).
+  - High-fidelity **Monolithic 3D Model**: tubular black steel roll cage, safety-yellow recoil pull-starter shroud, white enamel fuel tank with chrome cap, cast aluminum centrifugal volute pump casing, top vertical discharge pipe/flange, and front suction intake flange.
+  - **In-World 3D Suction Hose**: Dynamic 3D flexible spiral-ribbed suction hose connecting the pump to the suction point in the world, complete with brass perforated suction strainer basket and active pulsing suction wave animation.
+  - **Refinery Wrench Suction Point Linking**: Sneak-right-click the pump with a Refinery Wrench to link, then click any block or fluid source in the world (up to 64 blocks away) to set the suction intake. Double sneak-clicking dismantles the pump.
+  - **Contiguous Fluid Source Flood-Fill (BFS)**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward.
+  - **Infinite Water Mode Toggle (`INF` / `DRY`)**: Toggleable in the GUI. Pumps infinite water without removing source blocks, or drains pools dry. Non-water fluids always drain.
+  - **Multi-Fuel Engine Architecture**: RF/FE mode, solid fuel (coal/tar/wood) mode, and liquid diesel/gasoline mode.
+  - **Logistics Craft Pipe Auto-Output**: Automatically pumps fluid out of its 10,000 mB tank directly into adjacent Logistics Craft fluid pipes.
+
+### Previous v1.5.15 Highlights:
+- **Open-Top Grinder Hopper with 3D Spinning Crusher Blades**:
+  - Redesigned the Industrial Grinder's top hopper into an open-top steel bowl housing twin counter-rotating 3D spiked shredder rotors (`7` toothed blade discs per shaft) that spin while grinding and display the actual loaded input material being pulled into the blades.
+  - Added direct top-hopper item intake: items dropped into the top hopper bowl (from standalone conveyors or droppers) are automatically absorbed into the machine's input buffer.
+- **Dynamic Output Conveyor & Clean Belt Visuals**:
+  - Removed the left-side belt and all pre-generated static rock mounds from the hopper and discharge belt.
+  - The right-side inclined output conveyor now renders an empty belt when idle and dynamically displays the actual crushed output product climbing the conveyor when unloading.
+- **Fixed Transparent Floor Under Assembled Multiblocks**:
+  - Fixed an issue where floor blocks directly beneath the Industrial Grinder, Steam Boilers, and Metal Press were culled/transparent when assembled (`getOcclusionShape` now returns `Shapes.empty()` when assembled).
+
+### Previous v1.5.14 Highlights:
 - **Multiblock Industrial Grinder Monolithic 3D Overhaul & Animated Conveyors**:
   - Overhauled the 3×3×3 Industrial Grinder (`refinery:industrial_grinder_controller`) into a monolithic 3D rock crushing plant based on real-world heavy industrial machinery.
   - Structural 4-post steel frame with heavy vibration dampening foot pads, cross-braces, and reinforced mounting flanges.

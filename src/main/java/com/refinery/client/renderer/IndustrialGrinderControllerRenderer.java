@@ -64,7 +64,7 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
         state.partialTicks = partialTicks;
         state.missingComponents.clear();
 
-        // Extract input item on feed conveyor
+        // Extract input item loaded in top hopper
         state.hasActiveItem = false;
         if (state.isAssembled && be.getLevel() != null) {
             ItemStack inputItem = ItemStack.EMPTY;
@@ -81,7 +81,7 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
             }
         }
 
-        // Extract output item on discharge conveyor
+        // Extract output item on right discharge conveyor
         state.hasOutputItem = false;
         if (state.isAssembled && be.getLevel() != null) {
             ItemStack outputItem = ItemStack.EMPTY;
@@ -166,7 +166,7 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
             }
         }
 
-        // 2. Monolithic 3D Rock Crusher Plant Model & In-World Conveyor Item Animation
+        // 2. Monolithic 3D Rock Crusher Plant Model & In-World Hopper/Conveyor Item Animation
         if (state.isAssembled) {
             poseStack.pushPose();
 
@@ -187,53 +187,63 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
                 }
             }
 
-            // A. Submit complete monolithic crusher geometry
+            // Compute blade rotation angle (spins when actively grinding)
+            float animTicks = state.gameTime + state.partialTicks;
+            boolean grindingNow = state.isActive || state.progress > 0;
+            float bladeAngle = grindingNow ? (animTicks * 14.0f) % 360.0f : 0.0f;
+
+            // A. Submit complete monolithic crusher geometry (with 3D spinning blade rotors in top hopper)
             submitNodeCollector.submitCustomGeometry(
                     poseStack,
                     RenderTypes.entitySolid(IndustrialGrinderModel.TEXTURE),
                     (pose, consumer) -> this.grinderModel.render(
                             pose,
                             consumer,
-                            state.isActive,
+                            grindingNow,
+                            bladeAngle,
                             state.lightCoords,
                             OverlayTexture.NO_OVERLAY
                     )
             );
 
-            // B. Animate Input Material riding in on the Left Feed Conveyor towards the Hopper
+            // B. Render Loaded Input Material inside the Top Hopper Bowl between the Spinning Blades
             if (state.hasActiveItem) {
-                poseStack.pushPose();
-                // Material travels on feed conveyor (local X from -1.4 towards -0.4, Y: 2.05, Z: 1.5)
-                float travel = state.isActive ? ((state.gameTime + state.partialTicks) * 0.04f) % 0.8f : 0.0f;
-                poseStack.translate(-1.3 + travel, 2.02, 1.5);
-                poseStack.rotateDegrees(Axis.YP, (state.gameTime + state.partialTicks) * 2.0f);
-                poseStack.scale(0.40f, 0.40f, 0.40f);
-                state.activeItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
-                poseStack.popPose();
-
-                // Material dropping into hopper mouth and vibrating/grinding
-                if (state.isActive || state.progress > 0) {
+                // Draw 3 chunks/items along the length of the hopper bowl (Z = 1.1, 1.5, 1.9) being pulled into the blades
+                float[] zOffsets = {1.12f, 1.50f, 1.88f};
+                for (int i = 0; i < zOffsets.length; i++) {
                     poseStack.pushPose();
-                    float shake = (float) Math.sin((state.gameTime + state.partialTicks) * 4.0f) * 0.04f;
-                    poseStack.translate(0.5 + shake, 2.3 + shake * 0.5f, 1.5 + shake * 0.3f);
-                    poseStack.scale(0.35f, 0.35f, 0.35f);
+                    float phase = animTicks * 5.0f + (i * 2.1f);
+                    float shakeX = grindingNow ? (float) Math.sin(phase) * 0.035f : 0.0f;
+                    float shakeY = grindingNow ? (float) Math.abs(Math.cos(phase * 0.8f)) * 0.05f : 0.0f;
+                    float sinkY = grindingNow ? (state.progress / 60.0f) * 0.14f : 0.0f;
+
+                    // Hopper center is X = 0.5 (8/16), Y = 2.72 (43.5/16), Z = zOffsets[i]
+                    poseStack.translate(0.5f + shakeX, 2.74f - sinkY + shakeY, zOffsets[i]);
+                    poseStack.rotateDegrees(Axis.YP, (i * 60.0f) + (grindingNow ? animTicks * 3.0f : 0.0f));
+                    poseStack.rotateDegrees(Axis.XP, grindingNow ? (float) Math.sin(phase) * 18.0f : 15.0f);
+                    poseStack.scale(0.42f, 0.42f, 0.42f);
                     state.activeItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                     poseStack.popPose();
                 }
             }
 
-            // C. Animate Crushed Product traveling out on the Right Inclined Discharge Conveyor
+            // C. Animate Actual Crushed Output Material traveling up the Right Inclined Discharge Conveyor
             if (state.hasOutputItem) {
-                poseStack.pushPose();
-                // Crushed product climbing inclined conveyor (local X from 1.5 towards 2.2, Y from 1.1 towards 1.5, Z: 1.5)
-                float travelOut = state.isActive ? ((state.gameTime + state.partialTicks) * 0.035f) % 0.7f : 0.0f;
-                float posX = 1.45f + travelOut;
-                float posY = 1.05f + (travelOut * 0.65f);
-                poseStack.translate(posX, posY, 1.5);
-                poseStack.rotateDegrees(Axis.ZP, -25.0f); // Match incline angle
-                poseStack.scale(0.35f, 0.35f, 0.35f);
-                state.outputItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
-                poseStack.popPose();
+                // Render a stream of 2 items spaced along the inclined discharge belt
+                for (int i = 0; i < 2; i++) {
+                    poseStack.pushPose();
+                    float cycle = grindingNow
+                            ? (((animTicks * 0.03f) + (i * 0.45f)) % 0.90f)
+                            : (0.20f + i * 0.40f);
+                    float posX = 1.40f + cycle;
+                    float posY = 1.08f + (cycle * 0.72f);
+                    poseStack.translate(posX, posY, 1.50f);
+                    poseStack.rotateDegrees(Axis.ZP, 35.0f); // Align flat with the rising belt slope
+                    poseStack.rotateDegrees(Axis.XP, 90.0f); // Lay flat on conveyor belt
+                    poseStack.scale(0.38f, 0.38f, 0.38f);
+                    state.outputItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                    poseStack.popPose();
+                }
             }
 
             poseStack.popPose();

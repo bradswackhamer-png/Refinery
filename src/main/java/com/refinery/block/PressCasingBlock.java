@@ -7,6 +7,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -15,6 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PressCasingBlock extends Block {
     public static final BooleanProperty ASSEMBLED = MetalPressControllerBlock.ASSEMBLED;
@@ -25,6 +28,21 @@ public class PressCasingBlock extends Block {
                 .noOcclusion()
         );
         this.registerDefaultState(this.stateDefinition.any().setValue(ASSEMBLED, false));
+    }
+
+    @Override
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? Shapes.empty() : Shapes.block();
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.getValue(ASSEMBLED) ? 1.0f : super.getShadeBrightness(state, level, pos);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return state.getValue(ASSEMBLED);
     }
 
     @Override

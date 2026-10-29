@@ -127,6 +127,7 @@ The **Refinery Wrench** (`refinery:refinery_wrench`) is the ultimate industrial 
     - **Press Anvil Bed**: Cobalt Indigo (`#818CF8`)
     - **Casings**: Clean metallic tones (Platinum Slate, Steel Blue, Industrial Brass, Titanium, Periwinkle, Hazard Yellow).
   - Both the 3D wireframe outline and floating text match their block type's signature color, making complex structures instantly readable from any angle.
+- **Fluid Pump Suction Hose Linking**: Sneak-right-click the **Industrial Fluid Pump** with the wrench to select it, then right-click or sneak-click any block or fluid source in the world (up to 64 blocks away) to link the suction intake point. The mod immediately deploys a dynamic 3D flexible suction hose connecting the pump to that exact point! Double sneak-clicking the pump dismantles and picks it up.
 
 ---
 
@@ -437,12 +438,12 @@ The Petroleum Refinery features a dedicated high-pressure **Feedstock Input Slot
 A heavy rock crushing and pulverizing plant that doubles raw ore yields and processes geological strata.
 
 - **Monolithic 3D Rock Crusher Plant Transformation**: Upon assembly, the entire 3×3×3 structure transforms into a monolithic heavy rock crusher plant inspired by industrial quarry processing machinery:
-  - **Structural Frame**: 4-post heavy structural steel framework with vibration-dampening foot pads and cross-bracing.
-  - **Crusher Box & Drive System**: Central eccentric jaw/cone crushing box fitted with dual side flywheels, counterweights, and belt-drive housings that rotate during active operation.
-  - **Top Flared Feed Hopper**: Oversized flared rock hopper funnel loaded with stone and mineral chunks.
-  - **Horizontal Feed Conveyor**: Infeed conveyor bringing raw ore and rock into the hopper mouth, with animated items physically traveling across the belt into the machine.
-  - **Inclined Discharge Conveyor**: Angled discharge chute and belt conveyor carrying crushed gravel and mineral dusts out from under the crusher box, complete with animated output items climbing the belt.
-  - **Member Block Occlusion**: Surrounding member blocks automatically turn invisible and forward wrench/hand interactions directly to the controller.
+  - **Structural Frame**: 4-post heavy structural steel framework with vibration-dampening foot pads and cross-bracing, with full non-occluding skylight propagation so the floor underneath the machine's legs remains visible and naturally lit.
+  - **Crusher Box & Drive System**: Central eccentric jaw/cone crushing box fitted with side flywheels, counterweights, and belt-drive housings.
+  - **Open-Top Feed Hopper with 3D Spinning Crusher Blades**: Deep open-top flared hopper bowl housing twin counter-rotating 3D toothed shredder rotors. When grinding, the 3D blades spin and pull the actual loaded input material down into the crushing throat.
+  - **Top Hopper Direct Item Intake**: In addition to the GUI and ports, the top hopper acts as an open physical intake—items dropped into the top hopper bowl (from standalone conveyors, droppers, or players) or pushed via hoppers/pipes are automatically loaded into the grinder.
+  - **Inclined Output Discharge Conveyor**: Angled right-side discharge conveyor with an empty chevron belt that dynamically displays the actual crushed output material climbing the belt as products are unloaded.
+  - **Member Block Occlusion**: Surrounding member blocks automatically turn invisible without culling adjacent floor faces and forward wrench/hand interactions directly to the controller.
 - **Custom Industrial GUI**: Dark gunmetal steel panel with 2-slot raw feed tray, 4-slot crushed output collection bay, central animated crushing chamber indicator, and real-time status header badge (`ONLINE`, `CRUSHING`, `IDLE`, `UNFORMED`).
 - **Core Functionality**:
   - **Ore Doubling**: Pulverizes Raw Iron, Raw Gold, and Raw Copper (or ore blocks) into **2x Dust** (`refinery:iron_dust`, `gold_dust`, `copper_dust`). Smelting these dusts produces 2 ingots per raw ore!
@@ -770,6 +771,71 @@ Hold an **Autarchic Chipset** and right-click any placed in-world Gate. It insta
 
 ---
 
+## 10.5. Industrial Fluid Pump & 3D In-World Suction Hose
+
+The **Industrial Fluid Pump** (`refinery:fluid_pump`) is a high-performance portable engine-driven pump inspired by heavy-duty commercial centrifugal water pumps (Superkiger WP40X).
+
+### Key Features & Operation
+- **Monolithic 3D Model**:
+  - Full black tubular steel roll-cage with rubber vibration damping pads.
+  - Industrial combustion engine with a safety-yellow recoil pull-starter shroud and pull handle.
+  - White enamel fuel tank with chrome gas cap and embossed logo badge.
+  - Heavy cast aluminum centrifugal volute pump casing with circular front inspection cover.
+  - Vertical discharge neck and top flange for fluid pipes.
+  - Front suction intake collar for in-world hose attachment.
+- **In-World 3D Suction Hose**:
+  - Renders a 3D flexible, spiral-ribbed industrial suction hose extending directly from the pump's front suction port to the set in-world intake point up to 64 blocks away.
+  - Follows a natural Cubic Bezier curve with realistic gravity catenary sag.
+  - Complete with a perforated brass suction strainer basket submerged at the intake target.
+  - Features an active pulsing suction wave animation along the hose while the machine is actively pumping!
+- **Refinery Wrench Suction Point Linking**:
+  - **Link Suction Intake**: Sneak-right-click the placed Fluid Pump with a **Refinery Wrench** to select it. Then, right-click or sneak-click **any block or fluid source** anywhere in the world (up to 64 blocks away) to link the suction intake point.
+  - **Direct Fluid Clicking**: Aim directly at the surface of lakes, rivers, ocean trenches, or lava pools to submerge the intake hose right into the liquid.
+  - **Dismantle**: Sneak-right-clicking the pump twice in succession with the wrench instantly dismantles and collects the pump.
+- **Contiguous Source Flood-Fill (BFS)**:
+  - Automatically discovers all contiguous, directly connected fluid source blocks of the target liquid.
+  - Pumps blocks **one at a time from the pumping point outward**.
+  - Unconnected fluid pockets are never touched, ensuring clean and predictable draining.
+- **Infinite Water Mode (`INF` / `DRY`)**:
+  - Interactive GUI toggle button.
+  - **INF (Infinite Water)**: When pumping water sources, generates 1,000 mB of water per cycle without destroying or removing source blocks. Perfect for continuous boiler feed-water and cooling!
+  - **DRY (Drain Pool)**: Removes the fluid source block each cycle, pumping caverns, lakes, and quarries completely dry. (Non-water fluids like Lava and Crude Oil always drain).
+- **Multi-Fuel Engine Architecture**:
+  - **RF / FE Mode**: Operates on electrical power with very low requirements (400 FE per 1,000 mB bucket / 20 FE/t) from an internal 20,000 FE buffer.
+  - **Solid Fuel (Burnables) Mode**: Consumes Coal, Charcoal, Wood, Blaze Rods, Petroleum Tar, or Bitumen in its fuel slot.
+  - **Diesel Mode**: Uses 10 mB of liquid Diesel, Gasoline, or Biofuel/Ethanol per 1,000 mB pumped (1 bucket of diesel powers 100 buckets pumped!) from its 4,000 mB fuel tank.
+- **Redstone Automation**:
+  - GUI button toggles between `RS: Ignored`, `RS: High` (only runs when powered), and `RS: Low` (runs when unpowered, pauses with redstone signal).
+- **Logistics Craft & Fluid Pipe Integration**:
+  - The top vertical discharge flange automatically pumps fluid directly into adjacent **Logistics Craft fluid pipes** and fluid tanks every tick.
+  - Exposes standard NeoForge `Capabilities.Fluid.BLOCK` on all faces for external pipe extraction.
+- **Crafting Recipe**:
+  - 4x Iron Ingot, 1x Bucket (top center), 1x Piston (center), 1x Redstone Dust (bottom center), 2x Smooth Stone (bottom corners).
+
+---
+
+## 10.6. Industrial Fluid Discharge Block (`refinery:fluid_discharge`)
+
+The **Industrial Fluid Discharge** block is an industrial fire-engine red foot valve and slotted strainer outlet engineered to accept piped fluids from Logistics Automation pipes and standard fluid capabilities, featuring two distinct operational modes:
+
+### Key Features & Operation
+- **Monolithic 3D Model**:
+  - High-gloss safety/fire-engine red cylindrical housing with octagonal base collar, 4 vertical cast reinforcement ribs, dual-tier mounting flanges with side ear lugs, dark graphite sealing gasket, polished silver/chrome hexagonal bolt heads, and threaded steel studs with bottom hex nuts.
+  - Domed slotted strainer cage with vertical vent slots revealing a dark interior valve chamber and bronze flapper plate, capped with a perforated top dome crown.
+- **Dual Operational Modes**:
+  - **`VOID / DUMP` Mode**: Instantly destroys / dumps any fluid received from pipe systems without backing up pipe networks or spilling into the world. Ideal for discarding surplus refinery byproducts, contaminated wastewater, or unwanted fluids.
+  - **`FILL` Mode**: Discharges fluid directly into the world at the **exact same Y level** ($Y = Y_{discharge}$), converting contiguous air and replaceable blocks into genuine fluid source blocks (consuming 1,000 mB per block).
+  - **Contiguous Flood-Fill (BFS) with Barrier Isolation**: Uses strict 4-way orthogonal Breadth-First Search on the horizontal plane. Fluid only expands through the discharge block itself or contiguous blocks of the same fluid. It will **never jump over walls or barriers** into neighboring pits!
+- **Snap Interaction & Mode Toggling**:
+  - Right-click with empty hand or with a **Refinery Wrench** to toggle instantly between `VOID` and `FILL` mode with sound and chat feedback.
+  - Sneak-right-click with an empty hand to inspect live status: current mode, buffer fluid volume, active state, and redstone signal.
+- **Redstone Automation**:
+  - Receiving a redstone signal safely pauses discharging operations.
+- **Crafting Recipe**:
+  - 4x Iron Ingot, 2x Red Dye, 1x Iron Bars (top center), 1x Bucket (center), 1x Redstone Dust (bottom center).
+
+---
+
 ## 11. Continuous Molten Metallurgy & Ingot Casting Suite
 
 The Continuous Molten Metallurgy suite introduces an automated, visually stunning foundry pipeline:
@@ -928,6 +994,46 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.6.2 (Industrial Fluid Discharge & Void/Fill Outlet)
+- **Industrial Fluid Discharge (`refinery:fluid_discharge`)**:
+  - Added an industrial fire-engine red foot valve and discharge strainer outlet block.
+  - **Monolithic 3D Model**: Cast red body, mounting collar with ribs, dual-tier bolt flanges with side ear lugs, graphite gasket, chrome hex bolts/studs, slotted dome cage, and perforated crown.
+  - **Dual Toggled Operational Modes**:
+    - **`VOID / DUMP`**: Fluid pumped into the block from Logistics Automation or standard pipes is immediately dumped and voided.
+    - **`FILL`**: Discharges liquid into the surrounding area at the **same Y level**, contiguous-only BFS (no jumping walls/barriers into adjacent pits).
+  - **Simple Mode Toggling**: Right-click with empty hand or Refinery Wrench toggles mode with sound and action bar/system feedback; sneak-click inspects status.
+  - **Redstone Automation**: Redstone high signal pauses discharging.
+
+### Version 1.6.0 (Industrial Fluid Pump & 3D Suction Hose)
+- **Industrial Fluid Pump (`refinery:fluid_pump`)**:
+  - Added a heavy-duty portable engine-driven fluid pump modeled after industrial gas/diesel water pumps (Superkiger WP40X).
+  - High-fidelity **Monolithic 3D Model**: tubular black steel roll-cage with rubber damping pads, safety-yellow recoil pull-starter shroud, white enamel fuel tank with chrome cap, cast aluminum centrifugal volute pump casing, top vertical discharge pipe/flange, and front suction intake flange.
+  - **In-World 3D Suction Hose**: Renders a dynamic, 3D spiral-ribbed flexible suction hose extending from the pump's suction flange to the in-world intake point, complete with metal camlock quick-connect couplings, brass perforated intake strainer basket, and an active pulsing suction wave animation when pumping.
+  - **Refinery Wrench Suction Point Linking**: Sneak-right-clicking the pump with a Refinery Wrench selects the pump; right-clicking or sneak-clicking any block or fluid in the world (up to 64 blocks away) connects the pump intake and deploys the 3D suction hose. Double sneak-clicking the pump dismantles it.
+  - **Contiguous Fluid Source Flood-Fill (BFS)**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward. Never draws from unconnected pockets.
+  - **Infinite Water Mode Toggle (`INF` / `DRY`)**: Toggleable in the GUI. When active on water sources, continuously pumps water without destroying source blocks for infinite water extraction. When inactive (or when pumping non-water fluids like Lava or Crude Oil), drains the fluid pool completely.
+  - **Multi-Fuel Engine Architecture**:
+    - **RF / FE Mode**: Consumes low electrical energy (400 FE per 1,000 mB bucket / 20 FE/t) into its 20,000 FE buffer.
+    - **Solid Fuel (Burnables) Mode**: Consumes coal, charcoal, wood, blaze rods, or petroleum tar/bitumen in its fuel slot.
+    - **Diesel Mode**: Uses 10 mB of Diesel, Gasoline, or Biofuel per bucket pumped from its internal 4,000 mB fuel tank; refueled by placing fuel buckets into the GUI or via fluid pipes.
+  - **Redstone Control Mode**: Configurable via GUI between `Ignored`, `Require High Signal`, or `Require Low Signal`.
+  - **Logistics Craft Pipe Auto-Output**: Automatically pumps fluid out of its 10,000 mB tank directly into adjacent Logistics Craft fluid pipes and tanks, prioritizing the top discharge flange.
+  - **Interactive GUI**: Displays live machine status, digital intake coordinate readout, fluid volume gauge with dynamic fluid colors, RF energy gauge, fuel slot with bucket output, burn time / diesel gauges, and mode toggle buttons.
+
+---
+
+### Version 1.5.15 (Industrial Grinder Open-Top Blade Hopper, Dynamic Output Conveyor & Floor Occlusion Fix)
+- **Open-Top Hopper Bowl with 3D Counter-Rotating Spiked Grinder Blades**:
+  - Replaced the static rock mound inside the Industrial Grinder's top hopper with a hollow open-top steel bowl containing twin counter-rotating 3D spiked shredder rotors that spin when grinding and render the actual loaded input items between the blades.
+  - Dropped items falling into the top hopper bowl (e.g., from standalone conveyors) are automatically absorbed into the grinder's input inventory.
+- **Clean Output Conveyor & Removal of Left Side Belt**:
+  - Removed the left-side feed belt and all pre-generated static rock/aggregate geometry.
+  - Kept the right-side inclined discharge conveyor with a clean empty belt that dynamically renders the actual crushed output material climbing out of the machine.
+- **Floor Occlusion Fix Under Assembled Multiblocks**:
+  - Fixed transparent floor X-raying beneath assembled multiblocks by returning `Shapes.empty()` from `getOcclusionShape(BlockState)` when `ASSEMBLED=true`.
+
+---
 
 ### Version 1.5.14 (Grinder & 5x5 Boiler Overhaul, Diesel Boilers, Lighter Diesel)
 - **Multiblock Industrial Grinder Monolithic 3D Overhaul & Animated Conveyors**:

@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/fluid_discharge_side",
+    "up": "refinery:block/fluid_discharge_top",
+    "down": "refinery:block/fluid_discharge_bottom",
+    "side": "refinery:block/fluid_discharge_side"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1],
+      "to": [15, 15, 15],
+      "faces": {
+        "down":  { "texture": "#down", "cullface": "down" },
+        "up":    { "texture": "#up" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west":  { "texture": "#side" },
+        "east":  { "texture": "#side" }
+      }
+    }
+  ]
+}

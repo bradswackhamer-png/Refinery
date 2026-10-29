@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/fluid_discharge" },
+    "facing=south": { "model": "refinery:block/fluid_discharge", "y": 180 },
+    "facing=west":  { "model": "refinery:block/fluid_discharge", "y": 270 },
+    "facing=east":  { "model": "refinery:block/fluid_discharge", "y": 90 }
+  }
+}

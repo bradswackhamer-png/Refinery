@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/fluid_pump_front",
+    "up": "refinery:block/fluid_pump_top",
+    "down": "refinery:block/fluid_pump_bottom",
+    "north": "refinery:block/fluid_pump_front",
+    "south": "refinery:block/fluid_pump_side",
+    "east": "refinery:block/fluid_pump_side",
+    "west": "refinery:block/fluid_pump_side"
+  }
+}

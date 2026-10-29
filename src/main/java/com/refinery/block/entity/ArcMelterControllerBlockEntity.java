@@ -44,6 +44,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -210,12 +211,10 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         if (inputSlot != -1) {
             ItemStack input = this.items.get(inputSlot);
             Fluid resultFluid = getMeltingResult(input);
-
             if (resultFluid != Fluids.EMPTY) {
                 boolean canFit = (this.moltenFluid == Fluids.EMPTY || this.moltenFluid == resultFluid)
                         && (this.moltenAmount + 1000 <= TANK_CAPACITY);
                 int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
-
                 if (canFit && this.energy >= requiredEnergy) {
                     isActive = true;
                     this.energy -= ENERGY_PER_TICK;
@@ -228,7 +227,6 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                         BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
                         serverLevel.playSound(null, chamberPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.2f, 1.8f);
                         serverLevel.playSound(null, chamberPos, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 0.8f, 1.2f);
-
                         serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
                                 chamberPos.getX() + 0.5, chamberPos.getY() + 0.4, chamberPos.getZ() + 0.5,
                                 6, 0.2, 0.2, 0.2, 0.05);
@@ -273,6 +271,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     private void pushFluidOut() {
         if (this.level == null) return;
         Direction facing = getBlockState().getValue(ArcMelterControllerBlock.FACING);
+
         // Find output port
         for (BlueprintRequirement req : getRequirements()) {
             BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
@@ -284,14 +283,22 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                         if (neighborHandler != null) {
                             int toPush = Math.min(250, this.moltenAmount);
                             FluidResource res = FluidResource.of(this.moltenFluid);
-                            int inserted = neighborHandler.insert(0, res, toPush, null);
-                            if (inserted > 0) {
-                                this.moltenAmount -= inserted;
-                                if (this.moltenAmount <= 0) {
-                                    this.moltenFluid = Fluids.EMPTY;
+                            try (Transaction tx = Transaction.openRoot()) {
+                                int inserted = 0;
+                                for (int i = 0; i < neighborHandler.size(); i++) {
+                                    int ins = neighborHandler.insert(i, res, toPush - inserted, tx);
+                                    inserted += ins;
+                                    if (inserted >= toPush) break;
                                 }
-                                setChanged();
-                                return;
+                                if (inserted > 0) {
+                                    tx.commit();
+                                    this.moltenAmount -= inserted;
+                                    if (this.moltenAmount <= 0) {
+                                        this.moltenFluid = Fluids.EMPTY;
+                                    }
+                                    setChanged();
+                                    return;
+                                }
                             }
                         }
                     }
@@ -350,7 +357,6 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         boolean next = !current;
         this.blueprintTicks = next ? 600 : 0;
         level.setBlock(getBlockPos(), state.setValue(ArcMelterControllerBlock.BLUEPRINT, next), 3);
-
         if (next) {
             checkStructure(true, player);
             if (player != null) {
@@ -409,7 +415,6 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public BlockPos getRelativePos(int localX, int localY, int localZ, Direction facing) {
         Direction right = facing.getClockWise();
         Direction back = facing.getOpposite();
-
         return this.worldPosition
                 .relative(right, localX)
                 .above(localY)
@@ -493,6 +498,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                     if (x == 0 && y == 1 && z == 1 && state.isAir()) {
                         continue;
                     }
+
                     if (state.is(inputPort)) inPorts++;
                     else if (state.is(outputPort)) outPorts++;
                     else if (state.is(chamber)) chambers++;
@@ -540,6 +546,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         this.energyStorage.set(this.energy);
         this.progress = input.getIntOr("progress", 0);
         this.moltenAmount = input.getIntOr("moltenAmount", 0);
+
         String fluidId = input.getStringOr("moltenFluid", "");
         if (!fluidId.isEmpty()) {
             Identifier id = Identifier.tryParse(fluidId);
@@ -551,6 +558,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         } else {
             this.moltenFluid = Fluids.EMPTY;
         }
+
         ContainerHelper.loadAllItems(input, this.items);
     }
 
@@ -560,6 +568,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     }
 
     // === WorldlyContainer Implementation ===
+
     @Override
     public int[] getSlotsForFace(Direction side) {
         return new int[]{0, 1, 2, 3};
