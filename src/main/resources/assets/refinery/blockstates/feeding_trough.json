@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,part=foot": { "model": "refinery:block/feeding_trough" },
+    "facing=south,part=foot": { "model": "refinery:block/feeding_trough", "y": 180 },
+    "facing=west,part=foot":  { "model": "refinery:block/feeding_trough", "y": 270 },
+    "facing=east,part=foot":  { "model": "refinery:block/feeding_trough", "y": 90 },
+    "facing=north,part=head": { "model": "refinery:block/feeding_trough" },
+    "facing=south,part=head": { "model": "refinery:block/feeding_trough", "y": 180 },
+    "facing=west,part=head":  { "model": "refinery:block/feeding_trough", "y": 270 },
+    "facing=east,part=head":  { "model": "refinery:block/feeding_trough", "y": 90 }
+  }
+}

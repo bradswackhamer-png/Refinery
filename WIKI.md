@@ -9,6 +9,7 @@
 3. [Standalone Agricultural Automation](#3-standalone-agricultural-automation)
    - [Automated Planter](#automated-planter)
    - [Automated Harvester](#automated-harvester)
+   - [Livestock Feeding Trough](#livestock-feeding-trough)
 4. [Heavy Metallurgy](#4-heavy-metallurgy)
    - [Industrial Blast Smelter (5Ã—5Ã—5 Multiblock)](#industrial-blast-smelter-555)
    - [Industrial Metal Press (2Ã—2Ã—2 Multiblock)](#industrial-metal-press-222)
@@ -171,6 +172,29 @@ The **Automated Harvester** (`refinery:auto_harvester`) scans and collects matur
                    [ HARVESTER ]
                    [Output Chest] (Placed Behind or Below)
 ```
+
+### Livestock Feeding Trough
+The **Livestock Feeding Trough** (`refinery:feeding_trough`) is a 2-block-wide monolithic galvanized steel feed bunk engineered for automated livestock breeding and animal ranching.
+
+- **Monolithic 3D Architecture**: Modeled after heavy-duty weathered galvanized sheet steel feed bunks, complete with realistic zinc spangle crystal flakes, formed trapezoidal sloped sidewalls, rolled top safety flanges, four heavy-gauge steel divider cross-struts, end bulkheads with cleanout slots, and corner skid feet.
+- **Dynamic In-World Hay Mound**:
+  - The trough interior features a dynamic, textured golden chopped straw/hay layer.
+  - The feed mound smoothly and continuously rises from **Y = 1.0px** (empty metal floor) to **Y = 6.4px** (completely full bunk) proportional to the total food stocked in the inventory.
+  - When completely empty, the golden hay hides, revealing the clean galvanized sheet metal floor.
+- **Automated Livestock Breeding**:
+  - **4.5-Block Radar Range**: Automatically scans a 4.5-block horizontal and 2-block vertical radius (10×5×10 volume) around the two trough blocks every second.
+  - **Off-Cooldown Adults Only**: Feeds up to 2 eligible adult animals per second that are off breeding cooldown (`canFallInLove()`).
+  - **Heart & Sound Effects**: Successfully fed animals emit love heart particles (`broadcastEntityEvent(18)`) and play authentic eating sound effects (`SoundEvents.GENERIC_EAT`).
+  - Baby animals and animals currently in love or on breeding cooldown are never fed, completely preventing food waste.
+- **Universal Animal & Diet Compatibility**:
+  - Dynamically queries `animal.isFood(stack)` to support all vanilla and modded livestock species.
+  - Accepts any valid breeding food: Wheat, Hay Bales, Seeds (Wheat, Pumpkin, Melon, Beetroot, Torchflower, Pitcher Pod), Vegetables (Carrots, Potatoes, Beetroots), Apples, Golden Apples/Carrots, Berries (Sweet, Glow), Bamboo, Seagrass, Kelp, Meats, Fish, Slimeballs, and Fungi.
+- **Logistics & Multiblock Integration**:
+  - **Unified Double-Block Inventory**: Placing the trough creates a 2-block structure (`FOOT` and `HEAD`). Both halves seamlessly forward all item interactions, hoppers, droppers, and Logistics Automation pipe connections to the master block entity.
+  - **Interactive Quick-Deposit**: Right-clicking the trough while holding any valid animal feed instantly deposits food into the trough with sound feedback. Right-clicking with an empty hand opens the container GUI.
+  - **Custom GUI**: Features a 9-slot feed grid, a dynamic golden hay level gauge, a live herd radar counter showing nearby animals, and status LED.
+- **Crafting Recipe**:
+  - 4x Steel Plate, 2x Iron Bars, 1x Hay Bale produces 1 Feeding Trough.
 
 ---
 
@@ -489,6 +513,7 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
 | :--- | :--- |
 | **Automated Planter** | 4 Iron Ingots, 2 Copper Ingots, 1 Iron Hoe (top-center), 1 Piston (center), 1 Redstone Dust (bottom-center) |
 | **Automated Harvester** | 4 Iron Ingots, 2 Copper Ingots, 1 Shears (top-center), 1 Hopper (center), 1 Redstone Dust (bottom-center) |
+| **Livestock Feeding Trough** | 4 Steel Plates, 2 Iron Bars, 1 Hay Bale |
 | **Industrial Fermenter** | 4 Iron Ingots, 2 Copper Ingots, 1 Glass (top-center), 1 Cauldron (center), 1 Redstone Dust (bottom-center) |
 
 ### Multiblock Machine Blocks
@@ -572,7 +597,29 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
 
 ---
 
-## 8. Automation, Pipes, & Interfacing
+## 8. Automation, Conveyors, Pipes, & Interfacing
+
+### Industrial Belt Conveyor (`refinery:conveyor_belt`)
+A modular low-profile belt conveyor system for high-throughput factory automation and dedicated item transport:
+- **Monolithic 3D Model**: High-detail extruded anodized aluminum bed frame with longitudinal side T-slot channels, recessed deck plate, heavy cast steel mounting feet, and sleek guide lips.
+- **Matte Black Industrial Belt**: High-density vulcanized rubber canvas belt with micro-grip friction ribs.
+- **Calibrated Forward Motion & Speed**:
+  - Smooth 0.05 blocks/tick (~1 block/sec) item conveyance, calibrated to half speed for realistic factory pacing.
+  - Seamless UV texture scrolling moves forward in exact synchronization with item travel, while the return belt travels in reverse.
+  - Precision brushed stainless steel cylindrical end rollers physically rotate around their axles at matching velocity.
+  - Real-time physical item centering keeps dropped items aligned along the conveyor's center axis.
+  - **Item-Only Conveyance**: Specifically transports items (`ItemEntity`) without pushing players, animals, or monsters, allowing smooth foot traversal across the belt without interference.
+- **Intelligent Seamless Snapping**:
+  - Placing conveyors in a row automatically snaps them together into a continuous, seamless belt assembly.
+  - Intermediate end terminals open up, seamlessly joining side rails, T-slots, and belt surfaces with zero gaps or visible seams.
+  - Head and tail rollers and machined bearing plates automatically render only at the exposed line terminals.
+- **Automated Machine & Container Integration**:
+  - Items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, furnaces, and machines via the NeoForge item transfer system.
+  - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
+- **Redstone & Wrench Automation**:
+  - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
+  - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
+  - Crafting Recipe: 3 Petroleum Tar + 1 Redstone Dust + 5 Iron Ingots produce 4 Industrial Conveyor Belts.
 
 All ports and controllers implement native Minecraft and NeoForge capability standards:
 
@@ -994,6 +1041,50 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.8.0 (Livestock Feeding Trough & Automated Ranching)
+- **Livestock Feeding Trough (`refinery:feeding_trough`)**:
+  - Added a 2-block-wide monolithic multiblock feed bunk designed for automated livestock breeding and animal farming.
+  - **Monolithic 3D Model**: High-detail formed weathered galvanized sheet steel feed bunk featuring realistic zinc spangle crystal flakes, rolled top safety flanges, four heavy-gauge steel divider cross-struts, end bulkheads with cleanout slots, and corner skid feet.
+  - **Dynamic In-World Hay Mound**: High-resolution golden straw/hay texture filling the trough that rises smoothly and continuously from Y = 1.0px to Y = 6.4px based on inventory food stock.
+  - **Automated Livestock Breeding**:
+    - Scans a 4.5-block radius (10×5×10 bounding volume) around the 2-block trough every second.
+    - Feeds up to 2 eligible adult animals per second that are off breeding cooldown (`canFallInLove()`), triggering love hearts (`broadcastEntityEvent(18)`) and realistic eating sound effects (`SoundEvents.GENERIC_EAT`).
+    - Excludes baby animals and animals currently on breeding cooldown or already in love.
+  - **Universal Animal & Diet Compatibility**: Dynamically checks `animal.isFood(stack)` to accept any valid food item for vanilla and modded livestock.
+  - **Logistics & Multiblock Integration**: Unified double-block inventory accessible from any face by Logistics Automation item pipes, conveyors, hoppers, and droppers. Interactive right-click quick-deposit and custom GUI with live herd radar counter and golden hay fill gauge.
+  - **Crafting Recipe**: 4 Steel Plates + 2 Iron Bars + 1 Hay Bale produce 1 Feeding Trough.
+
+### Version 1.7.2 (Conveyor Speed Calibration, Scroll Sync & Item-Only Mode)
+- **Calibrated 1/2 Item Transit Speed**:
+  - Reduced item velocity from 0.10 to 0.05 blocks/tick (~1.0 block per second) for steady, authentic factory pacing.
+- **Item-Only Conveyance**:
+  - The conveyor now exclusively conveys items (`ItemEntity`). Players, animals, and monsters are no longer pushed or displaced when standing or walking over the belt.
+- **Synchronized Scroll Direction**:
+  - Fixed top belt UV texture scrolling to advance forward in the exact direction items travel.
+  - Added reverse scrolling on the bottom return belt and calibrated rotating end roller velocity.
+
+### Version 1.7.0 (Industrial Belt Conveyor System)
+- **Industrial Belt Conveyor (`refinery:conveyor_belt`)**:
+  - Added modular low-profile belt conveyor system for high-throughput factory automation, item transport, and entity conveyance.
+  - **Monolithic 3D Model**: High-detail extruded anodized aluminum bed frame with longitudinal side T-slot channels, recessed deck plate, heavy cast mounting foot pads, and sleek guide lips.
+  - **Matte Black Industrial Belt**: High-density vulcanized rubber canvas belt with micro-grip friction ribs.
+  - **Dynamic In-World Animations**:
+    - Seamless UV texture scrolling animation smoothly moves the top belt forward and bottom return belt backward.
+    - Precision brushed stainless steel cylindrical end rollers physically rotate around their axles at exact belt surface velocity.
+    - Real-time physical item centering and smooth propulsion along the conveyor line.
+    - Player and mob conveyance with sneak/crouch stability.
+  - **Intelligent Seamless Snapping**:
+    - Placing conveyors in a row automatically snaps them together into a continuous, seamless belt assembly.
+    - Intermediate end terminals open up, seamlessly joining side rails, T-slots, and belt surfaces with zero gaps or visible seams.
+    - Head and tail rollers and machined bearing plates automatically render only at the exposed line terminals.
+  - **Automated Machine & Container Integration**:
+    - Items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, furnaces, and machines via the NeoForge item transfer system.
+    - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
+  - **Redstone & Wrench Automation**:
+    - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
+    - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
+  - **Crafting Recipe**: 3 Petroleum Tar + 1 Redstone Dust + 5 Iron Ingots produce 4 Industrial Conveyor Belts.
 
 ### Version 1.6.2 (Industrial Fluid Discharge & Void/Fill Outlet)
 - **Industrial Fluid Discharge (`refinery:fluid_discharge`)**:

@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/conveyor_belt_side",
+    "up": "refinery:block/conveyor_belt_top",
+    "down": "refinery:block/conveyor_belt_bottom",
+    "side": "refinery:block/conveyor_belt_side"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 5, 16],
+      "faces": {
+        "down":  { "texture": "#down", "cullface": "down" },
+        "up":    { "texture": "#up" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west":  { "texture": "#side" },
+        "east":  { "texture": "#side" }
+      }
+    }
+  ]
+}

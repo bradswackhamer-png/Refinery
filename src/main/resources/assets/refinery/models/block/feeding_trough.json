@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/feeding_trough_side",
+    "up": "refinery:block/feeding_trough_top",
+    "down": "refinery:block/feeding_trough_bottom",
+    "side": "refinery:block/feeding_trough_side"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 0],
+      "to": [15, 8, 16],
+      "faces": {
+        "down":  { "texture": "#down", "cullface": "down" },
+        "up":    { "texture": "#up" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west":  { "texture": "#side" },
+        "east":  { "texture": "#side" }
+      }
+    }
+  ]
+}

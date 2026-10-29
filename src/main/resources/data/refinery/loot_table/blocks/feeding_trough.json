@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "refinery:feeding_trough",
+          "properties": {
+            "part": "foot"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "refinery:feeding_trough"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

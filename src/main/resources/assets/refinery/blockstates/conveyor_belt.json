@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/conveyor_belt" },
+    "facing=south": { "model": "refinery:block/conveyor_belt", "y": 180 },
+    "facing=west":  { "model": "refinery:block/conveyor_belt", "y": 270 },
+    "facing=east":  { "model": "refinery:block/conveyor_belt", "y": 90 }
+  }
+}

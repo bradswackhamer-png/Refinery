@@ -332,6 +332,16 @@ public class RefineryMod {
             FluidDischargeBlock::new);
     public static final DeferredItem<BlockItem> FLUID_DISCHARGE_ITEM = ITEMS.registerSimpleBlockItem("fluid_discharge", FLUID_DISCHARGE);
 
+    // === Industrial Belt Conveyor System ===
+    public static final DeferredBlock<ConveyorBeltBlock> CONVEYOR_BELT = BLOCKS.registerBlock("conveyor_belt",
+            ConveyorBeltBlock::new);
+    public static final DeferredItem<BlockItem> CONVEYOR_BELT_ITEM = ITEMS.registerSimpleBlockItem("conveyor_belt", CONVEYOR_BELT);
+
+    // === Livestock Feeding Trough (2-Block Multiblock) ===
+    public static final DeferredBlock<FeedingTroughBlock> FEEDING_TROUGH = BLOCKS.registerBlock("feeding_trough",
+            FeedingTroughBlock::new);
+    public static final DeferredItem<BlockItem> FEEDING_TROUGH_ITEM = ITEMS.registerSimpleBlockItem("feeding_trough", FEEDING_TROUGH);
+
     // === Industrial Multi-Smelter (5x4x3) Multiblock ===
     public static final DeferredBlock<MultiSmelterControllerBlock> MULTI_SMELTER_CONTROLLER = BLOCKS.registerBlock("multi_smelter_controller",
             MultiSmelterControllerBlock::new);
@@ -575,6 +585,14 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("fluid_discharge",
                     () -> new BlockEntityType<>(FluidDischargeBlockEntity::new, FLUID_DISCHARGE.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ConveyorBeltBlockEntity>> CONVEYOR_BELT_BE =
+            BLOCK_ENTITY_TYPES.register("conveyor_belt",
+                    () -> new BlockEntityType<>(ConveyorBeltBlockEntity::new, CONVEYOR_BELT.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FeedingTroughBlockEntity>> FEEDING_TROUGH_BE =
+            BLOCK_ENTITY_TYPES.register("feeding_trough",
+                    () -> new BlockEntityType<>(FeedingTroughBlockEntity::new, FEEDING_TROUGH.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiSmelterControllerBlockEntity>> MULTI_SMELTER_CONTROLLER_BE =
             BLOCK_ENTITY_TYPES.register("multi_smelter_controller",
                     () -> new BlockEntityType<>(MultiSmelterControllerBlockEntity::new, MULTI_SMELTER_CONTROLLER.get()));
@@ -645,6 +663,9 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<MultiSmelterMenu>> MULTI_SMELTER_MENU =
             MENUS.register("multi_smelter", () -> new MenuType<>(MultiSmelterMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<FeedingTroughMenu>> FEEDING_TROUGH_MENU =
+            MENUS.register("feeding_trough", () -> new MenuType<>(FeedingTroughMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
             () -> CreativeModeTab.builder()
@@ -710,6 +731,8 @@ public class RefineryMod {
                         output.accept(ELECTRIC_FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_DISCHARGE_ITEM.get());
+                        output.accept(CONVEYOR_BELT_ITEM.get());
+                        output.accept(FEEDING_TROUGH_ITEM.get());
                         output.accept(MULTI_SMELTER_CONTROLLER_ITEM.get());
                         output.accept(SMELTER_CASING_ITEM.get());
                         output.accept(SMELTER_CHAMBER_ITEM.get());
@@ -1156,6 +1179,10 @@ public class RefineryMod {
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, FLUID_PUMP_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, CONVEYOR_BELT_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, FEEDING_TROUGH_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be.getMaster()));
 
         // Capabilities on Industrial Multi-Smelter Controller & Ports
         event.registerBlockEntity(Capabilities.Energy.BLOCK, MULTI_SMELTER_CONTROLLER_BE.get(),

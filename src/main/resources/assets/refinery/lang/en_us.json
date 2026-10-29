@@ -41,6 +41,9 @@
   "block.refinery.diesel_fluid_pump": "Diesel Fluid Pump",
   "block.refinery.electric_fluid_pump": "Electric Fluid Pump",
   "block.refinery.fluid_discharge": "Industrial Fluid Discharge",
+  "block.refinery.conveyor_belt": "Industrial Conveyor Belt",
+  "block.refinery.feeding_trough": "Livestock Feeding Trough",
+  "container.refinery.feeding_trough": "Livestock Feeding Trough",
 
   "item.refinery.refinery_wrench": "Refinery Wrench",
   "item.refinery.tar": "Petroleum Tar",

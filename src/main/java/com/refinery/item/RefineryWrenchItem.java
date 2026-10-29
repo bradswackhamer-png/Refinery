@@ -4,6 +4,7 @@ import com.refinery.RefineryMod;
 import com.refinery.block.*;
 import com.refinery.block.entity.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -266,7 +267,20 @@ public class RefineryWrenchItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        // 5. Rotate horizontal directional blocks
+        // 5. Rotate Industrial Conveyor Belt (with seamless connection recalculation & neighbor notification)
+        if (state.getBlock() instanceof ConveyorBeltBlock) {
+            if (!level.isClientSide()) {
+                Direction currentFacing = state.getValue(ConveyorBeltBlock.FACING);
+                Direction newFacing = player != null && player.isShiftKeyDown() ? currentFacing.getCounterClockWise() : currentFacing.getClockWise();
+                BlockState rotated = ConveyorBeltBlock.updateConnections(state.setValue(ConveyorBeltBlock.FACING, newFacing), level, pos);
+                level.setBlock(pos, rotated, 3);
+                level.updateNeighborsAt(pos, state.getBlock());
+                level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.4f, 1.4f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // 6. Rotate horizontal directional blocks
         if (state.hasProperty(HorizontalDirectionalBlock.FACING)) {
             if (!level.isClientSide()) {
                 var currentFacing = state.getValue(HorizontalDirectionalBlock.FACING);

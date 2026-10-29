@@ -68,6 +68,7 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 ### ?? 4. Standalone Agricultural Automation
 - **Auto Planter**: Smart cultivator with GUI On/Off switch and configurable work radius up to 9 blocks away in all directions (3x3 up to 19x19 / 361 tiles). Automatically prepares soil and plants seeds and tree saplings from internal storage, hoppers, or pipes.
 - **Auto Harvester**: Omnidirectional farm harvester with GUI On/Off switch and configurable radius up to 9 blocks in all directions. Auto-harvests mature crops, fells trees/leaves, replants seeds, and ejects drops into chests or pipes behind or below.
+- **Livestock Feeding Trough (`refinery:feeding_trough`)**: A 2-block-wide monolithic galvanized steel feed bunk engineered for automated livestock breeding and animal farming. Features a dynamic 3D golden straw mound that physically rises and falls with inventory stock, a 4.5m herd radar, automated breeding for any adult animal off cooldown, full dietary compatibility (wheat, seeds, vegetables, fruit, fungi, meat, fish), and seamless Logistics Automation pipe and hopper connectivity.
 
 ### ⛽ 5. Portable Industrial Fluid Pumps & 3D Suction Hose
 - **Three Specialized Variants**:
@@ -80,7 +81,28 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 - **Dedicated GUIs**: Clean, customized screen layouts displaying only the controls and gauges appropriate for that pump type (no useless RF gauges on coal pumps or coal slots on electric pumps). Intake coordinates are hidden for maximum UI clarity.
 - **Logistics Craft Output**: Automatically discharges pumped fluids directly into adjacent Logistics Craft fluid pipes and tanks through its top outlet flange.
 
-### ?? 6. BuildCraft-Style Pipe Logic Gates & Wires
+### 📦 6. Industrial Belt Conveyor System
+- **Modular Low-Profile Belt Conveyors (`refinery:conveyor_belt`)**:
+  - High-throughput item transport and entity conveyance modeled after extruded aluminum industrial conveyor lines.
+  - **Monolithic 3D Model**: Extruded anodized aluminum bed frame with side T-slot channels, heavy cast mounting foot pads, and galvanized steel deck bed.
+  - **Matte Black Industrial Belt**: High-density vulcanized rubber canvas belt with micro-grip friction ribs.
+  - **Dynamic In-World Animation**:
+    - Seamless UV texture scrolling animation smoothly moves the top belt forward and bottom return belt backward.
+    - Precision brushed stainless steel cylindrical end rollers physically rotate around their axles at exact belt surface velocity.
+    - Real-time physical item centering and smooth propulsion along the conveyor line.
+    - Player and mob conveyance with sneak/crouch stability.
+  - **Intelligent Seamless Snapping**:
+    - Placing conveyors in a row automatically snaps them together into a continuous, seamless belt assembly.
+    - Intermediate end terminals open up, seamlessly joining side rails, T-slots, and belt surfaces with zero gaps or visible seams.
+    - Head and tail rollers and machined bearing plates automatically render only at the exposed line terminals.
+  - **Automated Machine & Container Integration**:
+    - Items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, furnaces, and machines via the NeoForge item transfer system.
+    - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
+  - **Redstone & Wrench Automation**:
+    - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
+    - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
+
+### 🔌 7. BuildCraft-Style Pipe Logic Gates & Wires
 The classic BuildCraft automation system, re-engineered for modern Minecraft!
 - **Slim Face Attachment**: Attaches flush onto **any face of a pipe**, machine, chest, or refinery port with non-solid hitboxes.
 - **High-Definition Visuals**: Beautifully detailed 14x14 beveled industrial attachment plates with tier-specific metallic bezels, corner mounting bolts, and glowing logic cores; pipe wires render as industrial wire spools with metallic spindles and coiled insulation.
@@ -94,7 +116,7 @@ The classic BuildCraft automation system, re-engineered for modern Minecraft!
 - **4-Color Pipe Wires**: Broadcast Red, Blue, Green, and Yellow logic signals along continuous pipe networks up to 24 blocks.
 - **Visual Console**: Interactive GUI with live glowing green status LEDs for every active condition!
 
-### ?? 6. 3D Holographic In-World Blueprints & The Refinery Wrench
+### 🔧 8. 3D Holographic In-World Blueprints & The Refinery Wrench
 - Right-click any multiblock controller with the **Refinery Wrench** to project a life-sized, translucent **3D building hologram**.
 - **Color-Coded Blueprints**: Every block type renders in a signature high-contrast color (Emerald Controllers, Petroleum Amber Ports, Canary Diesel, Flame Orange Fuel, Fiery Red Fireboxes, Lime Energy, Crystal Purple Glass) so multiblock construction is effortless!
 - **Instant Dismantling**: Shift + Right-Click any machine block with the wrench to instantly break and collect it into your inventory.
@@ -140,10 +162,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.6.5.jar`
+`refinery-1.8.0.jar`
 
 ### Display Name
-`Industrial Refinery 1.6.2 (NeoForge 26.3)`
+`Industrial Refinery 1.8.0 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -159,19 +181,51 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.6.4
+# Industrial Refinery v1.8.0
 
-### What's New in v1.6.4:
-- **Coal Mode Burn Rate Tuning**:
-  - Calibrated solid fuel combustion in the Fluid Pump to burn exactly 1 Coal (or burnable item) per 3 seconds (60 ticks) of active pumping. Fuel is never wasted when the pump is idle, paused by redstone, or when fluid is dry.
-- **Genuine Minecraft GUI Buttons**:
-  - Transformed the Power Mode and Drain Mode toggles into authentic 3D beveled Minecraft buttons with client-side prediction, click sound effects, and instant state switching between `[ RF ]`, `[ COAL ]`, and `[ DIESEL ]` (can toggle anytime without requiring external connections).
-- **Digital Power Buffer Readout (No Progress Bar)**:
-  - Replaced the left progress bar with a clean digital readout panel displaying current power mode, stored FE, burn seconds, or diesel fuel volume directly without needing to mouse over.
-- **Calibrated Fluid Tank Reservoir & Flow Animation**:
-  - Upgraded the fluid output gauge into a calibrated glass reservoir with graduations (25%, 50%, 75%), volume readouts, and active fluid flow animations when pumping directly into pipes.
-- **26.3 Item Model Definitions**:
-  - Added modern 26.3 item definition files (`assets/refinery/items/fluid_pump.json` and `assets/refinery/items/fluid_discharge.json`), resolving broken inventory icons for both blocks.
+### What's New in v1.8.0:
+- **Livestock Feeding Trough (`refinery:feeding_trough`)**:
+  - Added a 2-block-wide monolithic multiblock feed bunk designed for automated livestock breeding and animal farming.
+  - **Monolithic 3D Model**: High-detail formed weathered galvanized sheet steel feed bunk featuring realistic zinc spangle crystal flakes, rolled top safety flanges, four heavy-gauge steel divider cross-struts, end bulkheads with cleanout slots, and corner skid feet.
+  - **Dynamic In-World Hay Mound**: High-resolution golden straw/hay texture filling the trough that rises smoothly and continuously from Y = 1.0px to Y = 6.4px based on inventory food stock.
+  - **Automated Livestock Breeding**:
+    - Scans a 4.5-block radius (10×5×10 bounding volume) around the 2-block trough every second.
+    - Feeds up to 2 eligible adult animals per second that are off breeding cooldown (`canFallInLove()`), triggering love hearts (`broadcastEntityEvent(18)`) and realistic eating sound effects (`SoundEvents.GENERIC_EAT`).
+    - Excludes baby animals and animals currently on breeding cooldown or already in love.
+  - **Universal Animal & Diet Compatibility**: Dynamically checks `animal.isFood(stack)` to accept any valid food item for vanilla and modded livestock (wheat, seeds, carrots, potatoes, beetroots, apples, berries, grasses, kelp, meat/fish, slimeballs, fungi, etc.).
+  - **Logistics & Multiblock Integration**: Unified double-block inventory accessible from any face by Logistics Automation item pipes, conveyors, hoppers, and droppers. Interactive right-click quick-deposit and custom GUI with live herd radar counter and golden hay fill gauge.
+  - **Crafting Recipe**: 4 Steel Plates + 2 Iron Bars + 1 Hay Bale produce 1 Feeding Trough.
+
+### Previous v1.7.2 Highlights:
+- **Calibrated 1/2 Conveyor Speed**:
+  - Reduced item transit velocity by half to 0.05 blocks/tick (~1.0 block per second), providing smooth, authentic industrial conveyor pacing.
+- **Item-Only Conveyance**:
+  - The conveyor belt now strictly conveys items (`ItemEntity`). Players, animals, and monsters are no longer pushed or displaced when standing or walking over the belt.
+- **Forward Belt Scroll Direction Fix**:
+  - Fixed UV texture scrolling to advance forward in the exact direction items travel.
+  - Added reverse return belt scrolling along the underside and synchronized rotating end roller velocity.
+
+### Previous v1.7.0 Highlights:
+- **Industrial Belt Conveyor System (`refinery:conveyor_belt`)**:
+  - Added modular low-profile belt conveyor system for high-throughput factory automation, item transport, and seamless row snapping.
+  - High-detail extruded anodized aluminum bed frame with side T-slot channels, heavy cast mounting foot pads, and galvanized steel deck bed.
+  - Matte black high-density vulcanized rubber canvas belt with micro-grip friction ribs.
+  - Intelligent snapping: conveyors placed in a row join seamlessly with zero gaps, hiding intermediate end caps and rollers.
+  - Automated inventory injection at head terminal and insertion from hoppers/droppers/pipes.
+  - Redstone halt support and Refinery Wrench rotation.
+  - **Automated Machine & Container Integration**:
+    - Items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, furnaces, and machines via the NeoForge item transfer system.
+    - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
+  - **Redstone & Wrench Automation**:
+    - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
+    - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
+  - **Crafting Recipe**: 3 Petroleum Tar + 1 Redstone Dust + 5 Iron Ingots produce 4 Industrial Conveyor Belts.
+
+### Previous v1.6.5 Highlights:
+- **Dedicated Fluid Pump Variants**: Split the fluid pump into 3 distinct specialized machine blocks and items: Coal Fluid Pump (`#374151`), Diesel Fluid Pump (`#FA983A`), and Electric Fluid Pump (`#2563EB`).
+- **Dedicated GUIs**: Tailored interfaces displaying only relevant power controls and gauges.
+- **In-World Shift-Right-Click Mode Toggle**: Toggle between `[ INFINITE WATER ]` and `[ DRAIN POOL ]` in-world.
+- **Water Drain Traversal Fix**: Navigates across both source and flowing water to drain pools dry.
 
 ### Previous v1.6.3 Highlights:
 - **Transfer API Transaction Safety & Crash Fix**:
