@@ -771,13 +771,17 @@ Hold an **Autarchic Chipset** and right-click any placed in-world Gate. It insta
 
 ---
 
-## 10.5. Industrial Fluid Pump & 3D In-World Suction Hose
+## 10.5. Industrial Fluid Pumps & 3D In-World Suction Hose
 
-The **Industrial Fluid Pump** (`refinery:fluid_pump`) is a high-performance portable engine-driven pump inspired by heavy-duty commercial centrifugal water pumps (Superkiger WP40X).
+The **Industrial Fluid Pump** system features high-performance portable engine-driven pumps inspired by heavy-duty commercial centrifugal water pumps (Superkiger WP40X). Available in three specialized variants with distinct roll-cage frame colorings and tailored interfaces:
+
+- **Coal Fluid Pump (`refinery:coal_fluid_pump`)**: Heavy Cast-Iron Dark Charcoal frame (`#374151`). Burns coal, charcoal, and other solid fuels at 1 coal per 3 seconds (60 ticks) of active pumping.
+- **Diesel Fluid Pump (`refinery:diesel_fluid_pump`)**: Caterpillar Yellow-Orange frame (`#FA983A`). Internal 4,000 mB diesel tank consuming 10 mB per bucket pumped (1 bucket powers 100 buckets pumped). Refueled via bucket slots or fluid pipes.
+- **Electric Fluid Pump (`refinery:electric_fluid_pump`)**: High-Voltage Electric Blue frame (`#2563EB`). 20,000 FE internal buffer consuming 400 FE per bucket pumped (20 FE/t).
 
 ### Key Features & Operation
-- **Monolithic 3D Model**:
-  - Full black tubular steel roll-cage with rubber vibration damping pads.
+- **Monolithic 3D Model with Frame Tinting**:
+  - Full tubular steel roll-cage color-coded by fuel type (Charcoal, Caterpillar Orange, Electric Blue) with rubber vibration damping pads.
   - Industrial combustion engine with a safety-yellow recoil pull-starter shroud and pull handle.
   - White enamel fuel tank with chrome gas cap and embossed logo badge.
   - Heavy cast aluminum centrifugal volute pump casing with circular front inspection cover.
@@ -795,15 +799,14 @@ The **Industrial Fluid Pump** (`refinery:fluid_pump`) is a high-performance port
 - **Contiguous Source Flood-Fill (BFS)**:
   - Automatically discovers all contiguous, directly connected fluid source blocks of the target liquid.
   - Pumps blocks **one at a time from the pumping point outward**.
+  - Traverses across both source and flowing water in Drain mode, pumping water bodies completely dry.
   - Unconnected fluid pockets are never touched, ensuring clean and predictable draining.
-- **Infinite Water Mode (`INF` / `DRY`)**:
-  - Interactive GUI toggle button.
-  - **INF (Infinite Water)**: When pumping water sources, generates 1,000 mB of water per cycle without destroying or removing source blocks. Perfect for continuous boiler feed-water and cooling!
-  - **DRY (Drain Pool)**: Removes the fluid source block each cycle, pumping caverns, lakes, and quarries completely dry. (Non-water fluids like Lava and Crude Oil always drain).
-- **Multi-Fuel Engine Architecture**:
-  - **RF / FE Mode**: Operates on electrical power with very low requirements (400 FE per 1,000 mB bucket / 20 FE/t) from an internal 20,000 FE buffer.
-  - **Solid Fuel (Burnables) Mode**: Consumes Coal, Charcoal, Wood, Blaze Rods, Petroleum Tar, or Bitumen in its fuel slot.
-  - **Diesel Mode**: Uses 10 mB of liquid Diesel, Gasoline, or Biofuel/Ethanol per 1,000 mB pumped (1 bucket of diesel powers 100 buckets pumped!) from its 4,000 mB fuel tank.
+- **Infinite Water Mode (`[ INFINITE ]` / `[ DRAIN ]`)**:
+  - Toggleable via GUI button or by **Shift-Right-Clicking the pump block in-world** with an empty hand or wrench!
+  - **INFINITE (Infinite Water)**: When pumping water sources, generates 1,000 mB of water per cycle without destroying or removing source blocks. Perfect for continuous boiler feed-water and cooling!
+  - **DRAIN (Drain Pool)**: Removes fluid source blocks each cycle, pumping caverns, lakes, and quarries completely dry. (Non-water fluids like Lava and Crude Oil always drain).
+- **Dedicated GUIs**:
+  - Tailored to each machine type with no unnecessary gauges or slots. Intake coordinates have been streamlined away for maximum clarity.
 - **Redstone Automation**:
   - GUI button toggles between `RS: Ignored`, `RS: High` (only runs when powered), and `RS: Low` (runs when unpowered, pauses with redstone signal).
 - **Logistics Craft & Fluid Pipe Integration**:
@@ -994,6 +997,18 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.6.5 (Dedicated Coal/Diesel/RF Fluid Pumps & Drain Fixes)
+- **Specialized Fluid Pump Split**:
+  - Replaced the single multi-mode pump with 3 distinct machine blocks: **Coal Fluid Pump** (Dark Charcoal frame `#374151`), **Diesel Fluid Pump** (Caterpillar Orange frame `#FA983A`), and **Electric Fluid Pump** (Electric Blue frame `#2563EB`).
+  - Added dedicated crafting recipes, loot tables, and 32x32 item textures for all three variants.
+- **Dedicated GUIs**:
+  - Each machine now has its own tailored interface displaying only relevant power slots and readouts (no unnecessary RF bars on coal pumps or coal slots on electric pumps).
+  - Streamlined GUI layout by removing intake coordinates and unlink button.
+- **In-World Shift-Right-Click Toggle**:
+  - Shift-right-click any fluid pump in the world with an empty hand or wrench to instantly toggle between `[ INFINITE WATER ]` and `[ DRAIN POOL ]` with sound and chat feedback.
+- **Contiguous Drain Fix for Water**:
+  - Fixed fluid traversal in Drain mode to navigate across water (`is(FluidTags.WATER)`), ensuring full pools are completely drained dry without stalling.
 
 ### Version 1.6.4 (Fluid Pump Coal Fuel Tuning, Real Buttons & 26.3 Item Icons)
 - **Coal Mode Burn Rate**:

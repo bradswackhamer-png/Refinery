@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:bucket",
+    "P": "minecraft:piston",
+    "F": "minecraft:furnace",
+    "S": "minecraft:smooth_stone"
+  },
+  "pattern": [
+    "IBI",
+    "IPI",
+    "SFS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:coal_fluid_pump"
+  }
+}

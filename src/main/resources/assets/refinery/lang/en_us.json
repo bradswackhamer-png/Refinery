@@ -37,6 +37,9 @@
   "block.refinery.auto_planter": "Agricultural Auto-Planter",
   "block.refinery.auto_harvester": "Agricultural Auto-Harvester",
   "block.refinery.fluid_pump": "Industrial Fluid Pump",
+  "block.refinery.coal_fluid_pump": "Coal Fluid Pump",
+  "block.refinery.diesel_fluid_pump": "Diesel Fluid Pump",
+  "block.refinery.electric_fluid_pump": "Electric Fluid Pump",
   "block.refinery.fluid_discharge": "Industrial Fluid Discharge",
 
   "item.refinery.refinery_wrench": "Refinery Wrench",
@@ -60,6 +63,9 @@
   "container.refinery.auto_planter": "Auto-Planter Station",
   "container.refinery.auto_harvester": "Auto-Harvester Station",
   "container.refinery.fluid_pump": "Industrial Fluid Pump",
+  "container.refinery.coal_fluid_pump": "Coal Fluid Pump",
+  "container.refinery.diesel_fluid_pump": "Diesel Fluid Pump",
+  "container.refinery.electric_fluid_pump": "Electric Fluid Pump",
 
   "tooltip.refinery.wrench.desc_1": "§7Right-click blocks to rotate facing.",
   "tooltip.refinery.wrench.desc_2": "§6Right-click Controller to toggle 3D Blueprint Projection!",

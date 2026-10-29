@@ -3,6 +3,7 @@ package com.refinery.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.refinery.block.FluidPumpBlock;
+import com.refinery.block.entity.AbstractFluidPumpBlockEntity;
 import com.refinery.block.entity.FluidPumpBlockEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -22,7 +23,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
-public class FluidPumpRenderer implements BlockEntityRenderer<FluidPumpBlockEntity, FluidPumpRenderState> {
+public class FluidPumpRenderer implements BlockEntityRenderer<AbstractFluidPumpBlockEntity, FluidPumpRenderState> {
     private final FluidPumpModel model;
 
     public FluidPumpRenderer(BlockEntityRendererProvider.Context context) {
@@ -40,7 +41,7 @@ public class FluidPumpRenderer implements BlockEntityRenderer<FluidPumpBlockEnti
     }
 
     @Override
-    public AABB getRenderBoundingBox(FluidPumpBlockEntity blockEntity) {
+    public AABB getRenderBoundingBox(AbstractFluidPumpBlockEntity blockEntity) {
         AABB box = new AABB(blockEntity.getBlockPos());
         BlockPos target = blockEntity.getTargetPos();
         if (target != null) {
@@ -51,7 +52,7 @@ public class FluidPumpRenderer implements BlockEntityRenderer<FluidPumpBlockEnti
 
     @Override
     public void extractRenderState(
-            FluidPumpBlockEntity be,
+            AbstractFluidPumpBlockEntity be,
             FluidPumpRenderState state,
             float partialTicks,
             Vec3 cameraPosition,
@@ -70,6 +71,7 @@ public class FluidPumpRenderer implements BlockEntityRenderer<FluidPumpBlockEnti
         state.hasTarget = state.targetPos != null;
         state.gameTime = be.getLevel() != null ? be.getLevel().getGameTime() : 0;
         state.partialTicks = partialTicks;
+        state.frameColor = be.getFrameColor();
     }
 
     @Override
@@ -109,7 +111,8 @@ public class FluidPumpRenderer implements BlockEntityRenderer<FluidPumpBlockEnti
                         state.isActive,
                         animTicks,
                         state.lightCoords,
-                        OverlayTexture.NO_OVERLAY
+                        OverlayTexture.NO_OVERLAY,
+                        state.frameColor
                 )
         );
 
@@ -272,7 +275,8 @@ public class FluidPumpRenderer implements BlockEntityRenderer<FluidPumpBlockEnti
                             uv,
                             n.x, n.y, n.z,
                             light,
-                            OverlayTexture.NO_OVERLAY
+                            OverlayTexture.NO_OVERLAY,
+                            0xFFFFFFFF
                     );
                 }
             }

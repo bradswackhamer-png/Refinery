@@ -310,10 +310,22 @@ public class RefineryMod {
             FermenterBlock::new);
     public static final DeferredItem<BlockItem> FERMENTER_ITEM = ITEMS.registerSimpleBlockItem("fermenter", FERMENTER);
 
-    // === Industrial Portable Fluid Pump ===
+    // === Industrial Portable Fluid Pumps ===
     public static final DeferredBlock<FluidPumpBlock> FLUID_PUMP = BLOCKS.registerBlock("fluid_pump",
             FluidPumpBlock::new);
     public static final DeferredItem<BlockItem> FLUID_PUMP_ITEM = ITEMS.registerSimpleBlockItem("fluid_pump", FLUID_PUMP);
+
+    public static final DeferredBlock<CoalFluidPumpBlock> COAL_FLUID_PUMP = BLOCKS.registerBlock("coal_fluid_pump",
+            CoalFluidPumpBlock::new);
+    public static final DeferredItem<BlockItem> COAL_FLUID_PUMP_ITEM = ITEMS.registerSimpleBlockItem("coal_fluid_pump", COAL_FLUID_PUMP);
+
+    public static final DeferredBlock<DieselFluidPumpBlock> DIESEL_FLUID_PUMP = BLOCKS.registerBlock("diesel_fluid_pump",
+            DieselFluidPumpBlock::new);
+    public static final DeferredItem<BlockItem> DIESEL_FLUID_PUMP_ITEM = ITEMS.registerSimpleBlockItem("diesel_fluid_pump", DIESEL_FLUID_PUMP);
+
+    public static final DeferredBlock<ElectricFluidPumpBlock> ELECTRIC_FLUID_PUMP = BLOCKS.registerBlock("electric_fluid_pump",
+            ElectricFluidPumpBlock::new);
+    public static final DeferredItem<BlockItem> ELECTRIC_FLUID_PUMP_ITEM = ITEMS.registerSimpleBlockItem("electric_fluid_pump", ELECTRIC_FLUID_PUMP);
 
     // === Industrial Fluid Discharge Block ===
     public static final DeferredBlock<FluidDischargeBlock> FLUID_DISCHARGE = BLOCKS.registerBlock("fluid_discharge",
@@ -547,6 +559,18 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("fluid_pump",
                     () -> new BlockEntityType<>(FluidPumpBlockEntity::new, FLUID_PUMP.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CoalFluidPumpBlockEntity>> COAL_FLUID_PUMP_BE =
+            BLOCK_ENTITY_TYPES.register("coal_fluid_pump",
+                    () -> new BlockEntityType<>(CoalFluidPumpBlockEntity::new, COAL_FLUID_PUMP.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DieselFluidPumpBlockEntity>> DIESEL_FLUID_PUMP_BE =
+            BLOCK_ENTITY_TYPES.register("diesel_fluid_pump",
+                    () -> new BlockEntityType<>(DieselFluidPumpBlockEntity::new, DIESEL_FLUID_PUMP.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ElectricFluidPumpBlockEntity>> ELECTRIC_FLUID_PUMP_BE =
+            BLOCK_ENTITY_TYPES.register("electric_fluid_pump",
+                    () -> new BlockEntityType<>(ElectricFluidPumpBlockEntity::new, ELECTRIC_FLUID_PUMP.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidDischargeBlockEntity>> FLUID_DISCHARGE_BE =
             BLOCK_ENTITY_TYPES.register("fluid_discharge",
                     () -> new BlockEntityType<>(FluidDischargeBlockEntity::new, FLUID_DISCHARGE.get()));
@@ -608,6 +632,15 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<FluidPumpMenu>> FLUID_PUMP_MENU =
             MENUS.register("fluid_pump", () -> new MenuType<>(FluidPumpMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<CoalFluidPumpMenu>> COAL_FLUID_PUMP_MENU =
+            MENUS.register("coal_fluid_pump", () -> new MenuType<>(CoalFluidPumpMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<DieselFluidPumpMenu>> DIESEL_FLUID_PUMP_MENU =
+            MENUS.register("diesel_fluid_pump", () -> new MenuType<>(DieselFluidPumpMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ElectricFluidPumpMenu>> ELECTRIC_FLUID_PUMP_MENU =
+            MENUS.register("electric_fluid_pump", () -> new MenuType<>(ElectricFluidPumpMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     public static final DeferredHolder<MenuType<?>, MenuType<MultiSmelterMenu>> MULTI_SMELTER_MENU =
             MENUS.register("multi_smelter", () -> new MenuType<>(MultiSmelterMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -672,6 +705,9 @@ public class RefineryMod {
                         output.accept(CASTING_INPUT_PORT_ITEM.get());
                         output.accept(CASTING_OUTPUT_PORT_ITEM.get());
                         output.accept(FERMENTER_ITEM.get());
+                        output.accept(COAL_FLUID_PUMP_ITEM.get());
+                        output.accept(DIESEL_FLUID_PUMP_ITEM.get());
+                        output.accept(ELECTRIC_FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_DISCHARGE_ITEM.get());
                         output.accept(MULTI_SMELTER_CONTROLLER_ITEM.get());
@@ -1098,16 +1134,26 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Item.BLOCK, FERMENTER_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
 
-        // Capabilities on Industrial Fluid Pump (Energy, Fluid Output/Diesel, Items)
-        event.registerBlockEntity(Capabilities.Energy.BLOCK, FLUID_PUMP_BE.get(),
+        // Capabilities on Industrial Fluid Pumps
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, ELECTRIC_FLUID_PUMP_BE.get(),
                 (be, side) -> be.energyStorage);
 
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, COAL_FLUID_PUMP_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, DIESEL_FLUID_PUMP_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ELECTRIC_FLUID_PUMP_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, FLUID_PUMP_BE.get(),
                 (be, side) -> be.getFluidHandler(side));
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, FLUID_DISCHARGE_BE.get(),
                 (be, side) -> be.getFluidHandler(side));
 
+        event.registerBlockEntity(Capabilities.Item.BLOCK, COAL_FLUID_PUMP_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, DIESEL_FLUID_PUMP_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, FLUID_PUMP_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
 

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:bucket",
+    "P": "minecraft:piston",
+    "D": "refinery:diesel_bucket",
+    "S": "refinery:steel_ingot"
+  },
+  "pattern": [
+    "IBI",
+    "IPI",
+    "SDS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:diesel_fluid_pump"
+  }
+}

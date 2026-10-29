@@ -4,6 +4,25 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.6.5] - 2026-10-29
+
+### Added
+- **Dedicated Fluid Pump Variants**: Split the fluid pump into 3 distinct specialized machine blocks and items, each with custom frame coloring on the monolithic 3D model, custom inventory slots, and unique crafting recipes:
+  - **Coal Fluid Pump (`refinery:coal_fluid_pump`)**: Heavy Cast-Iron Dark Charcoal frame (`#374151`). Single solid-fuel slot burning coal, charcoal, or other furnace fuels at a calibrated rate of 1 coal per 3 seconds (60 ticks) of active pumping.
+  - **Diesel Fluid Pump (`refinery:diesel_fluid_pump`)**: Industrial Caterpillar Yellow-Orange frame (`#FA983A`). Internal 4,000 mB diesel reservoir consuming 10 mB per bucket pumped (1 bucket of fuel yields 100 buckets pumped). Refuelable via fuel bucket slots or fluid pipes.
+  - **Electric Fluid Pump (`refinery:electric_fluid_pump`)**: High-Voltage Electric Blue frame (`#2563EB`). 20,000 FE buffer consuming 400 FE per bucket pumped (20 FE/t). Connects to external RF/FE power grids.
+- **Custom Screen Interfaces**: Each pump variant features a custom-tailored GUI displaying only its relevant power gauges and controls (burn flame & rate for Coal, diesel gauge & bucket transfer slots for Diesel, energy meter & digital readout for Electric).
+- **Shift-Right-Click In-World Mode Toggle**: Shift-Right-Clicking any fluid pump with an empty hand or Refinery Wrench directly toggles between `[ INFINITE WATER ]` and `[ DRAIN POOL ]` with sound effects and on-screen notification.
+
+### Changed
+- **Fluid Pump GUI Streamlining**: Removed the coordinate readout and unlink button from the GUI, keeping the interface clean, compact, and focused on operational controls and internal fluid storage.
+- **Backward Compatibility**: Existing `refinery:fluid_pump` blocks and items now map cleanly to the Coal Fluid Pump behavior and retain full world functionality.
+
+### Fixed
+- **Fluid Pool Drain Traversal**: Fixed water pool drainage traversal across water so BFS travels across both source and flowing water blocks (`is(FluidTags.WATER)`), allowing entire water bodies to be drained dry in Drain mode without prematurely stopping.
+
+---
+
 ## [1.6.4] - 2026-10-29
 
 ### Changed

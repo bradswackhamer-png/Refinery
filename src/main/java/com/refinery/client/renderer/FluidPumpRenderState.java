@@ -16,4 +16,5 @@ public class FluidPumpRenderState extends BlockEntityRenderState {
     public long gameTime = 0;
     public float partialTicks = 0.0f;
     public int lightCoords = 0;
+    public int frameColor = 0xFFFFFFFF;
 }

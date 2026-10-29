@@ -69,12 +69,15 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 - **Auto Planter**: Smart cultivator with GUI On/Off switch and configurable work radius up to 9 blocks away in all directions (3x3 up to 19x19 / 361 tiles). Automatically prepares soil and plants seeds and tree saplings from internal storage, hoppers, or pipes.
 - **Auto Harvester**: Omnidirectional farm harvester with GUI On/Off switch and configurable radius up to 9 blocks in all directions. Auto-harvests mature crops, fells trees/leaves, replants seeds, and ejects drops into chests or pipes behind or below.
 
-### ⛽ 5. Portable Industrial Fluid Pump & 3D Suction Hose
-- **Industrial Fluid Pump (`refinery:fluid_pump`)**: Heavy-duty portable engine-driven pump with monolithic 3D model (black roll cage, yellow recoil starter, white gas tank, cast aluminum centrifugal pump body).
+### ⛽ 5. Portable Industrial Fluid Pumps & 3D Suction Hose
+- **Three Specialized Variants**:
+  - **Coal Fluid Pump (`refinery:coal_fluid_pump`)**: Heavy Cast-Iron Dark Charcoal frame (`#374151`). Single solid-fuel slot burning coal, charcoal, or furnace fuels at 1 coal per 3 seconds (60 ticks) of active pumping.
+  - **Diesel Fluid Pump (`refinery:diesel_fluid_pump`)**: Caterpillar Yellow-Orange frame (`#FA983A`). Internal 4,000 mB diesel reservoir consuming 10 mB per bucket pumped (1 bucket powers 100 buckets pumped). Refuelable via bucket slots or fluid pipes.
+  - **Electric Fluid Pump (`refinery:electric_fluid_pump`)**: High-Voltage Electric Blue frame (`#2563EB`). 20,000 FE buffer consuming 400 FE per bucket pumped (20 FE/t). Connects to external RF/FE power grids.
 - **In-World 3D Flexible Suction Hose**: Sneak-click with the Refinery Wrench to link, then click any block or fluid source in the world (up to 64 blocks away) to deploy a dynamic 3D spiral-ribbed suction hose with brass suction strainer.
-- **Connected Fluid Source BFS Flood-Fill**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward without touching unconnected pockets.
-- **Infinite Water Mode (`INF` / `DRY`)**: GUI toggle to pump infinite water without consuming source blocks, or pump lakes and caverns completely dry.
-- **Multi-Fuel Engine**: Operates on RF / FE (400 FE/bucket), Solid Fuels (Coal, Charcoal, Tar, Wood), or Liquid Diesel/Biofuel (10 mB/bucket).
+- **Connected Fluid Source BFS Flood-Fill**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward without touching unconnected pockets. Full water pool drainage now navigates both source and flowing water cleanly to drain pools dry.
+- **Infinite Water Mode (`[ INFINITE ]` / `[ DRAIN ]`)**: Toggleable in the dedicated GUI or by **Shift-Right-Clicking the pump block in-world** with an empty hand or wrench! Infinite mode draws unlimited water without destroying source blocks; Drain mode clears fluid bodies completely dry.
+- **Dedicated GUIs**: Clean, customized screen layouts displaying only the controls and gauges appropriate for that pump type (no useless RF gauges on coal pumps or coal slots on electric pumps). Intake coordinates are hidden for maximum UI clarity.
 - **Logistics Craft Output**: Automatically discharges pumped fluids directly into adjacent Logistics Craft fluid pipes and tanks through its top outlet flange.
 
 ### ?? 6. BuildCraft-Style Pipe Logic Gates & Wires
@@ -137,7 +140,7 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.6.4.jar`
+`refinery-1.6.5.jar`
 
 ### Display Name
 `Industrial Refinery 1.6.2 (NeoForge 26.3)`

@@ -54,6 +54,9 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.FERMENTER_MENU.get(), FermenterScreen::new);
         event.register((MenuType) RefineryMod.MULTI_SMELTER_MENU.get(), MultiSmelterScreen::new);
         event.register((MenuType) RefineryMod.FLUID_PUMP_MENU.get(), FluidPumpScreen::new);
+        event.register((MenuType) RefineryMod.COAL_FLUID_PUMP_MENU.get(), CoalFluidPumpScreen::new);
+        event.register((MenuType) RefineryMod.DIESEL_FLUID_PUMP_MENU.get(), DieselFluidPumpScreen::new);
+        event.register((MenuType) RefineryMod.ELECTRIC_FLUID_PUMP_MENU.get(), ElectricFluidPumpScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -71,6 +74,9 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.CASTING_PRESS_CONTROLLER_BE.get(), CastingPressControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.MULTI_SMELTER_CONTROLLER_BE.get(), MultiSmelterControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.FLUID_PUMP_BE.get(), FluidPumpRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.COAL_FLUID_PUMP_BE.get(), FluidPumpRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.DIESEL_FLUID_PUMP_BE.get(), FluidPumpRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.ELECTRIC_FLUID_PUMP_BE.get(), FluidPumpRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.FLUID_DISCHARGE_BE.get(), FluidDischargeRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_GATE_ENTITY.get(), PipeGateEntityRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_WIRE_ENTITY.get(), PipeWireEntityRenderer::new);

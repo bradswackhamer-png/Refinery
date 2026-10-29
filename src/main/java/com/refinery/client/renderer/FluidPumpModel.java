@@ -161,13 +161,14 @@ public class FluidPumpModel {
             boolean active,
             float animTicks,
             int light,
-            int overlay
+            int overlay,
+            int frameColor
     ) {
         Matrix4f matrix = pose.pose();
 
-        // 1. Static Frame
+        // 1. Static Frame (tinted to frameColor for Coal, Diesel, or Electric pump)
         for (Cuboid c : frameCuboids) {
-            renderCuboid(pose, matrix, consumer, c, 0.0f, 0.0f, 0.0f, light, overlay);
+            renderCuboid(pose, matrix, consumer, c, 0.0f, 0.0f, 0.0f, light, overlay, frameColor);
         }
 
         // 2. Engine and Pump (apply subtle engine vibration rumble when active)
@@ -179,10 +180,10 @@ public class FluidPumpModel {
         }
 
         for (Cuboid c : engineCuboids) {
-            renderCuboid(pose, matrix, consumer, c, vibX, vibY, 0.0f, light, overlay);
+            renderCuboid(pose, matrix, consumer, c, vibX, vibY, 0.0f, light, overlay, 0xFFFFFFFF);
         }
         for (Cuboid c : pumpCuboids) {
-            renderCuboid(pose, matrix, consumer, c, vibX, vibY, 0.0f, light, overlay);
+            renderCuboid(pose, matrix, consumer, c, vibX, vibY, 0.0f, light, overlay, 0xFFFFFFFF);
         }
     }
 
@@ -193,7 +194,8 @@ public class FluidPumpModel {
             Cuboid c,
             float ox, float oy, float oz,
             int light,
-            int overlay
+            int overlay,
+            int tintColor
     ) {
         float x0 = (c.x0() / 16.0f) + ox;
         float y0 = (c.y0() / 16.0f) + oy;
@@ -205,32 +207,32 @@ public class FluidPumpModel {
         // NORTH Face (-Z)
         emitQuad(pose, matrix, consumer,
                 x1, y1, z0, x1, y0, z0, x0, y0, z0, x0, y1, z0,
-                c.north(), 0.0f, 0.0f, -1.0f, light, overlay);
+                c.north(), 0.0f, 0.0f, -1.0f, light, overlay, tintColor);
 
         // SOUTH Face (+Z)
         emitQuad(pose, matrix, consumer,
                 x0, y1, z1, x0, y0, z1, x1, y0, z1, x1, y1, z1,
-                c.south(), 0.0f, 0.0f, 1.0f, light, overlay);
+                c.south(), 0.0f, 0.0f, 1.0f, light, overlay, tintColor);
 
         // WEST Face (-X)
         emitQuad(pose, matrix, consumer,
                 x0, y1, z0, x0, y0, z0, x0, y0, z1, x0, y1, z1,
-                c.west(), -1.0f, 0.0f, 0.0f, light, overlay);
+                c.west(), -1.0f, 0.0f, 0.0f, light, overlay, tintColor);
 
         // EAST Face (+X)
         emitQuad(pose, matrix, consumer,
                 x1, y1, z1, x1, y0, z1, x1, y0, z0, x1, y1, z0,
-                c.east(), 1.0f, 0.0f, 0.0f, light, overlay);
+                c.east(), 1.0f, 0.0f, 0.0f, light, overlay, tintColor);
 
         // UP Face (+Y)
         emitQuad(pose, matrix, consumer,
                 x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0,
-                c.up(), 0.0f, 1.0f, 0.0f, light, overlay);
+                c.up(), 0.0f, 1.0f, 0.0f, light, overlay, tintColor);
 
         // DOWN Face (-Y)
         emitQuad(pose, matrix, consumer,
                 x0, y0, z1, x0, y0, z0, x1, y0, z0, x1, y0, z1,
-                c.down(), 0.0f, -1.0f, 0.0f, light, overlay);
+                c.down(), 0.0f, -1.0f, 0.0f, light, overlay, tintColor);
     }
 
     public static void emitQuad(
@@ -244,31 +246,36 @@ public class FluidPumpModel {
             UVRect uv,
             float nx, float ny, float nz,
             int light,
-            int overlay
+            int overlay,
+            int tintColor
     ) {
+        int r = (tintColor >> 16) & 0xFF;
+        int g = (tintColor >> 8) & 0xFF;
+        int b = tintColor & 0xFF;
+
         consumer.addVertex(matrix, xA, yA, zA)
-                .setColor(255, 255, 255, 255)
+                .setColor(r, g, b, 255)
                 .setUv(uv.u0(), uv.v0())
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(pose, nx, ny, nz);
 
         consumer.addVertex(matrix, xB, yB, zB)
-                .setColor(255, 255, 255, 255)
+                .setColor(r, g, b, 255)
                 .setUv(uv.u0(), uv.v1())
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(pose, nx, ny, nz);
 
         consumer.addVertex(matrix, xC, yC, zC)
-                .setColor(255, 255, 255, 255)
+                .setColor(r, g, b, 255)
                 .setUv(uv.u1(), uv.v1())
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(pose, nx, ny, nz);
 
         consumer.addVertex(matrix, xD, yD, zD)
-                .setColor(255, 255, 255, 255)
+                .setColor(r, g, b, 255)
                 .setUv(uv.u1(), uv.v0())
                 .setOverlay(overlay)
                 .setLight(light)

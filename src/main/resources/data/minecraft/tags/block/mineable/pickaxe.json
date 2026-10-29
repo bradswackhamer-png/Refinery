@@ -48,6 +48,11 @@
         "refinery:smelter_chamber",
         "refinery:smelter_input_port",
         "refinery:smelter_output_port",
-        "refinery:smelter_fuel_port"
+        "refinery:smelter_fuel_port",
+        "refinery:fluid_pump",
+        "refinery:coal_fluid_pump",
+        "refinery:diesel_fluid_pump",
+        "refinery:electric_fluid_pump",
+        "refinery:fluid_discharge"
     ]
 }
