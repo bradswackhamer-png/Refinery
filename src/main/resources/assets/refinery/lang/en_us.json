@@ -45,6 +45,11 @@
   "block.refinery.feeding_trough": "Livestock Feeding Trough",
   "container.refinery.feeding_trough": "Livestock Feeding Trough",
 
+  "block.refinery.storage_tank_casing": "Liquid Storage Tank Casing",
+  "block.refinery.storage_tank_drain_valve": "Liquid Storage Tank Drain Valve",
+  "block.refinery.storage_tank_fill_valve": "Liquid Storage Tank Fill Valve",
+  "container.refinery.storage_tank": "Liquid Storage Tank",
+
   "item.refinery.refinery_wrench": "Refinery Wrench",
   "item.refinery.tar": "Petroleum Tar",
   "item.refinery.sulfur_dust": "Sulfur Dust",

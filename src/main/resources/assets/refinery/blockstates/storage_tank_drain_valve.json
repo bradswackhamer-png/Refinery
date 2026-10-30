@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "assembled=false,blueprint=false": { "model": "refinery:block/storage_tank_drain_valve" },
+    "assembled=false,blueprint=true": { "model": "refinery:block/storage_tank_drain_valve" },
+    "assembled=true,blueprint=false": { "model": "refinery:block/invisible" },
+    "assembled=true,blueprint=true": { "model": "refinery:block/invisible" }
+  }
+}

@@ -30,17 +30,31 @@ public class BlastFurnaceMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
 
-        // 1. Raw Iron Input Queue (2x2 grid: x: 20, 38; y: 22, 40)
-        this.addSlot(new Slot(container, 0, 20, 22));
-        this.addSlot(new Slot(container, 1, 38, 22));
-        this.addSlot(new Slot(container, 2, 20, 40));
-        this.addSlot(new Slot(container, 3, 38, 40));
+        // 1. Iron Input Queue (2x2 grid: x: 20, 38; y: 22, 40)
+        for (int r = 0; r < 2; r++) {
+            for (int c = 0; c < 2; c++) {
+                int slotIndex = c + r * 2;
+                this.addSlot(new Slot(container, slotIndex, 20 + c * 18, 22 + r * 18) {
+                    @Override
+                    public boolean mayPlace(ItemStack stack) {
+                        return BlastFurnaceControllerBlockEntity.isIronSource(stack);
+                    }
+                });
+            }
+        }
 
-        // 2. Fuel / Coal Input Queue (2x2 grid: x: 62, 80; y: 22, 40)
-        this.addSlot(new Slot(container, 4, 62, 22));
-        this.addSlot(new Slot(container, 5, 80, 22));
-        this.addSlot(new Slot(container, 6, 62, 40));
-        this.addSlot(new Slot(container, 7, 80, 40));
+        // 2. Coal / Fuel Input Queue (2x2 grid: x: 62, 80; y: 22, 40)
+        for (int r = 0; r < 2; r++) {
+            for (int c = 0; c < 2; c++) {
+                int slotIndex = 4 + c + r * 2;
+                this.addSlot(new Slot(container, slotIndex, 62 + c * 18, 22 + r * 18) {
+                    @Override
+                    public boolean mayPlace(ItemStack stack) {
+                        return BlastFurnaceControllerBlockEntity.isFuelSource(stack);
+                    }
+                });
+            }
+        }
 
         // 3. Steel Ingot Output Buffer (2x2 grid: x: 126, 144; y: 22, 40)
         for (int r = 0; r < 2; r++) {

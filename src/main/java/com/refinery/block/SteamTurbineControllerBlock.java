@@ -9,10 +9,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -22,6 +24,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 public class SteamTurbineControllerBlock extends Block implements EntityBlock {
@@ -33,12 +37,33 @@ public class SteamTurbineControllerBlock extends Block implements EntityBlock {
     public SteamTurbineControllerBlock(Properties properties) {
         super(properties.strength(2.5f, 6.0f)
                 .sound(SoundType.NETHERITE_BLOCK)
+                .noOcclusion()
                 );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(ASSEMBLED, false)
                 .setValue(ACTIVE, false)
                 .setValue(BLUEPRINT, false));
+    }
+
+    @Override
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? Shapes.empty() : Shapes.block();
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.getValue(ASSEMBLED) ? 1.0f : super.getShadeBrightness(state, level, pos);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return state.getValue(ASSEMBLED);
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override
@@ -99,9 +124,11 @@ public class SteamTurbineControllerBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        if (blockEntityType == RefineryMod.STEAM_TURBINE_CONTROLLER_BE.get()) {
-            return (lvl, p, st, be) -> ((SteamTurbineControllerBlockEntity) be).tick(lvl, p, st);
-        }
-        return null;
+        if (level.isClientSide()) return null;
+        return (lvl, pos, st, be) -> {
+            if (be instanceof SteamTurbineControllerBlockEntity controllerBE) {
+                controllerBE.tick(lvl, pos, st);
+            }
+        };
     }
 }

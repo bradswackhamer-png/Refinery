@@ -27,6 +27,7 @@
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Conveyors, Pipes, & Interfacing](#8-automation-conveyors-pipes--interfacing)
    - [Industrial Belt Conveyor](#industrial-belt-conveyor)
+   - [Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks](#glass-fused-to-steel-gfs-multiblock-liquid-storage-tanks)
 9. [Crude Oil World Generation & Retrogen](#9-crude-oil-world-generation--retrogen)
    - [In-World Fluid Crude Oil](#in-world-fluid-crude-oil)
    - [Deposit Structures & Capacities](#deposit-structures--capacities)
@@ -50,6 +51,10 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.7 (Blast Furnace Input Restrictions & Fluid Discharge Drop Fix)](#version-187-blast-furnace-input-restrictions--fluid-discharge-drop-fix)
+   - [Version 1.8.6 (Storage Tank Ladder & Visual Clean-up)](#version-186-storage-tank-ladder--visual-clean-up)
+   - [Version 1.8.5 (Glass-Fused-to-Steel Multiblock Liquid Storage Tanks)](#version-185-glass-fused-to-steel-multiblock-liquid-storage-tanks)
+   - [Version 1.8.4 (Steam Turbine Monolithic 3D Model & High-Resolution Textures)](#version-184-steam-turbine-monolithic-3d-model--high-resolution-textures)
    - [Version 1.4.1 (Progression Balancing & Steel Plate Exclusivity)](#version-141-progression-balancing--steel-plate-exclusivity)
    - [Version 1.4.0 (Biofuel & Oil Sand Cracking)](#version-140-biofuel--oil-sand-cracking)
    - [Version 1.3.0 (Continuous Molten Metallurgy)](#version-130-continuous-molten-metallurgy)
@@ -64,7 +69,7 @@
 The mod introduces a tiered industrial metallurgy and chemical progression:
 
 ```
-[Raw Iron + Coal] ---> (5x5x5 Blast Smelter) ---> [Steel Ingot]
+[Iron Ingot / Block + Coal / Block] ---> (5x5x5 Blast Smelter) ---> [Steel Ingot]
                                                        |
                                                        v
                                             (3x2x2 Metal Press)
@@ -206,11 +211,11 @@ A massive foundry furnace that transforms iron sources and carbon fuels into hig
 
 - **Dimensions**: 5 blocks wide Ã— 5 blocks tall Ã— 5 blocks deep (125 blocks total).
 - **Viewing Window**: The front wall features a 3Ã—3 transparent **Foundry Heat Glass** window where you can watch raw materials drop into the molten chamber and cook into glowing steel!
-- **Universal Ingredients**:
-  - **Iron Sources**: Raw Iron, Iron Ingot, Iron Ore, Deepslate Iron Ore, Raw Iron Block, or **Iron Dust** (`#c:dusts/iron`).
-  - **Fuel Sources**: Coal, Charcoal, Coal Block, Petroleum Tar, Bitumen, or **Coal Dust / Charcoal Dust** (`#c:dusts/coal`, `#c:dusts/charcoal`).
-- **Recipe**: 1 Iron Source + 1 Fuel Source -> 1 Steel Ingot (100 ticks).
-- **Buffers**: 4 Iron input slots, 4 Fuel slots, 4 Steel output slots.
+- **Strict Supported Ingredients**:
+  - **Iron Sources**: Iron Ingot (`minecraft:iron_ingot`) or Block of Iron (`minecraft:iron_block`). (1 Iron Ingot = 1 Iron Unit; 1 Block of Iron = 9 Iron Units). Raw iron, ores, and dusts are not accepted.
+  - **Fuel Sources**: Coal (`minecraft:coal`) or Block of Coal (`minecraft:coal_block`). (1 Coal = 1 Fuel Unit; 1 Block of Coal = 9 Fuel Units). Charcoal, dusts, petroleum tar, bitumen, and other burnables are not accepted.
+- **Recipe**: 1 Iron Unit + 1 Fuel Unit -> 1 Steel Ingot (100 ticks). 1 Block of Iron + 1 Block of Coal yields 9 Steel Ingots.
+- **Buffers**: 4 Iron input slots, 4 Fuel slots, 4 Steel output slots. Partial block units are tracked and preserved.
 - **Automation**: 
   - **Foundry Input Port**: Inserts Iron and Fuel via pipes/hoppers.
   - **Foundry Output Port**: Automatically pulls out finished Steel Ingots.
@@ -397,9 +402,18 @@ Modern liquid-fueled steam boilers designed to burn refined **Diesel** fuel inst
 
 ---
 
-### Steam Turbine Generator (3Ã—3Ã—3)
+### Steam Turbine Generator (3×3×3)
 A heavy Rankine-cycle turbine converting High Pressure Steam into Forge Energy and recyclable water.
 
+- **Monolithic 3D Model**: High-fidelity industrial turbine-generator skid in vibrant industrial electric blue (`#12569F`), inspired by heavy industrial Elliott, Dresser-Rand, and Siemens steam turbine generator sets.
+  - **Structural Steel Base Skid**: Heavy I-beam perimeter runners, transverse cross-beams, and foundation anchor footing pads with mounting shims.
+  - **Electric AC Alternator / Generator**: Cylindrical stator housing with horizontal cooling vents, end bell air intake cowl with perforated black mesh, and top rectangular junction box with high-voltage hazard plate.
+  - **Intermediate Gearbox**: Cast speed-reduction casing with red lubrication inspection tag ("Royal Purple" style), oil level sight glass, and flexible coupling guards.
+  - **Split Turbine Casing**: Horizontally split casing shell with curved dome, prominent bolted split-line perimeter flange, circular bearing end covers, and crane lifting eye lugs.
+  - **Steam Inlet Chest & Governor**: Front flanged steam inlet nozzle with circular bolt circle and dark steam bore, throttle trip valve with red handwheel, and top governor valve actuator assembly with linkage arms.
+  - **Upright Control Console & Gauges**: Upper blue instrumentation box housing three analog dial gauges (Steam Pressure 0-600 PSI, Turbine RPM, and Condenser Vacuum) and digital LED readout, plus lower silver/grey electrical cabinet with 3D red emergency stop mushroom button, yellow bezel, rotary selector switches, status lamps, and wiring conduit.
+  - **Dynamic Emissive Indicators**: Full-bright glowing green run lamp and active power output display when actively generating FE (`isActive = true`).
+  - **Seamless Invisibility**: Constituent blocks become invisible with empty occlusion shapes when assembled, seamlessly rendering the monolithic model with interaction forwarding to the controller menu and wrench blueprint toggles.
 - **Capacity**: 32,000 mB Steam, 16,000 mB Water, **1,000,000 FE battery**.
 - **Thermodynamic Conversion**:
   - 1 mB High Pressure Steam -> 20 FE + 0.5 mB Condensed Water.
@@ -576,6 +590,13 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
 | **3 Copper Dust + 1 Tin Dust** | Crafting Table (Shapeless) | **4x Bronze Dust** |
 | **Any Ingot (Steel, Iron, Copper, Gold, Tin, Bronze)** | Industrial Metal Press | **1x Respective Plate** |
 
+### Multiblock Liquid Storage Tanks
+| Block | Recipe / Ingredients | Output |
+| :--- | :--- | :--- |
+| **Storage Tank Casing** | 4 Steel Plates + 4 Glass + 1 Iron Block | **4x Storage Tank Casing** |
+| **Storage Tank Drain Valve** | 4 Steel Plates + 3 Iron Bars + 1 Storage Tank Casing + 1 Hopper | **1x Storage Tank Drain Valve** |
+| **Storage Tank Fill Valve** | 4 Steel Plates + 3 Iron Bars + 1 Storage Tank Casing + 1 Hopper | **1x Storage Tank Fill Valve** |
+
 ### Logistics Mod Cross-Compatibility & Tar Recipes
 *(These recipes activate dynamically when the Logistics mod is detected with zero hard dependencies)*
 - **Smart Stacking Byproducts**: When Logistics is installed, the Industrial Grinder and Refinery automatically output native `logistics:core/tar` and `logistics:core/bitumen` so they immediately stack with your existing pipes and storage. If standalone, it gracefully outputs `refinery:tar` and `refinery:bitumen`.
@@ -621,6 +642,32 @@ A modular low-profile belt conveyor system for high-throughput factory automatio
   - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
   - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
 - **Crafting Recipe**: 3 Petroleum Tar + 1 Redstone Dust + 5 Iron Ingots produce 4 Industrial Conveyor Belts.
+
+### Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks
+Engineered for bulk storage of any liquid resource, modeled after real-world Glass-Fused-to-Steel (GFS) enamel bolted industrial storage tanks.
+
+- **Six Scalable Multiblock Geometries**:
+  - `3x3x3`: **64,000 mB** (64 Buckets)
+  - `3x3x6`: **256,000 mB** (256 Buckets)
+  - `3x3x9`: **512,000 mB** (512 Buckets)
+  - `5x5x5`: **1,000,000 mB** (1,000 Buckets)
+  - `5x5x7`: **2,000,000 mB** (2,000 Buckets)
+  - `5x5x9`: **4,000,000 mB** (4,000 Buckets)
+- **Universal Liquid Compatibility**:
+  - Stores any fluid (Water, Lava, Crude Oil, Diesel, Gasoline, High Pressure Steam, Ethanol, Molten Metals) with transactional rollback safety.
+- **Top Fill Valve & Bottom Drain Valve**:
+  - **Fill Valve (`refinery:storage_tank_fill_valve`)**: Top-center block. Accepts inputs from fluid pipes, pumps, or buckets and directs them into the central reservoir.
+  - **Drain Valve (`refinery:storage_tank_drain_valve`)**: Bottom-center block. Multiblock master controller managing structure formation, fluid storage, and active drainage.
+- **No Extract Pipe Needed (Logistics & Pipe Auto-Push)**:
+  - The drain valve actively auto-pushes stored liquid downward into pipes laid beneath the tank floor, as well as horizontally into adjacent pipes.
+  - Attaching regular liquid pipes directly receives fluid flow without requiring an extract pipe or external pump.
+- **Dedicated Industrial GUI & Sight Glass Gauge**:
+  - Custom interface with fill and empty bucket slots.
+  - Vertical illuminated sight glass gauge displaying real-time liquid level percentage, fluid title, and formatted mB volume.
+  - "Dump / Flush" button to purge residual fluids when converting the tank to a different liquid.
+- **Monolithic 3D Render & Holographic Blueprint**:
+  - High-gloss enamel bolted shell panels, concrete foundation curb, circumferential galvanized wind stiffener rings, caged safety climbing ladder, intermediate rest landing platform, and roof perimeter handrails.
+  - Right-click the drain valve with the **Refinery Wrench** to activate the 3D building guide hologram. `Shift-Right-Click` cycles between the 6 supported tank sizes.
 
 All ports and controllers implement native Minecraft and NeoForge capability standards:
 
@@ -1045,6 +1092,74 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.8.7 (Blast Furnace Input Restrictions & Fluid Discharge Drop Fix)
+- **Industrial Fluid Discharge Survival Drop Fix**:
+  - Added the missing block loot table definitions (`data/refinery/loot_table/blocks/fluid_discharge.json` and `loot_tables/blocks/fluid_discharge.json`) so breaking or mining the Industrial Fluid Discharge block in survival returns the item properly.
+- **Storage Tank Item Icons & Held Models**:
+  - Added missing item definitions for `storage_tank_casing`, `storage_tank_drain_valve`, and `storage_tank_fill_valve`, restoring crisp GUI inventory icons and 3D held models in player hands.
+- **Blast Furnace Input Restrictions**:
+  - Iron input slots and automation ports now strictly accept ONLY **Iron Ingot** (`minecraft:iron_ingot`) and **Block of Iron** (`minecraft:iron_block`). Raw iron, iron ores, and dusts are rejected.
+  - Fuel input slots and automation ports now strictly accept ONLY **Coal** (`minecraft:coal`) and **Block of Coal** (`minecraft:coal_block`). Charcoal, coal dust, petroleum tar, bitumen, and other burnables are rejected.
+  - Implemented unit conversion: 1 Block of Iron provides 9 iron units (yielding 9 steel ingots); 1 Block of Coal provides 9 fuel units (fueling 9 smelting operations).
+  - In-progress iron units and fuel units are persistently stored in NBT and safely drop as items upon dismantling the controller.
+  - Updated GUI validation and tooltips to clearly reflect the Iron Ingot/Block and Coal/Block requirements.
+
+### Version 1.8.6 (Storage Tank Ladder & Visual Clean-up)
+- **Sleek Industrial Access Ladder Redesign**:
+  - Replaced the bulky, chunky caged ladder with a clean, authentic industrial steel access ladder mounted directly up the North face of the tank.
+  - Features twin vertical stringer rails, standoff wall brackets connecting to the tank shell, distinct individual horizontal climbing rungs spaced every 3.5 units with hollow air between them (exposing the dark enamel tank panels behind), and smooth top walkthrough grab bars stepping onto the roof rim.
+  - Assembled storage tank casing blocks in the North ladder column (`relX == 0, relZ == -radius`) now implement `isLadder = true`, allowing players to physically climb the ladder to the roof of the tank.
+  - Updated all ladder stringers, rungs, and roof handrails to use a crisp, bright galvanized industrial steel texture swatch (`#D8DFE8`), eliminating messy textures and distorted UVs.
+  - Overhauled top roof guardrails to follow the octagonal profile of the tank with an open walkthrough entry at the ladder head.
+- **Removed Exterior Red Standpipe**:
+  - Completely removed the vertical red pipe and flanged valves running down the side of the tank model.
+
+### Version 1.8.5 (Glass-Fused-to-Steel Multiblock Liquid Storage Tanks)
+- **Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks**:
+  - Implemented multiblock industrial liquid storage tanks based on modern Glass-Fused-to-Steel / Enamel bolted tank engineering (Hebei Wansheng / enameltanks.com reference design).
+  - **Six Supported Multiblock Geometries & Capacities**:
+    - `3x3x3`: **64,000 mB** (64 Buckets)
+    - `3x3x6`: **256,000 mB** (256 Buckets)
+    - `3x3x9`: **512,000 mB** (512 Buckets)
+    - `5x5x5`: **1,000,000 mB** (1,000 Buckets)
+    - `5x5x7`: **2,000,000 mB** (2,000 Buckets)
+    - `5x5x9`: **4,000,000 mB** (4,000 Buckets)
+  - **Universal Fluid Acceptance & Storage**:
+    - Accepts and stores any fluid resource (Water, Lava, Crude Oil, Diesel, Gasoline, High-Pressure Steam, Ethanol, Molten Metals, etc.) with transactional rollback safety.
+  - **Top-Center Intake & Bottom-Center Drainage**:
+    - Top Center Fill Valve (`storage_tank_fill_valve`): accepts fluid inputs via pipes, pumps, or buckets and directs them to the tank interior.
+    - Bottom Center Drain Valve (`storage_tank_drain_valve`): master multiblock controller managing structure assembly, fluid storage, container interactions, and active pipe drainage.
+  - **Seamless Logistics Automation & Standard Pipe Support (No Extract Pipe Required)**:
+    - The bottom center drain valve actively auto-pushes fluid downwards into pipes underneath the tank floor and horizontally into neighbor pipes.
+    - Attaching a regular liquid pipe directly receives fluid without requiring an extraction pipe or mechanical puller.
+  - **Custom Industrial Storage Tank GUI**:
+    - Custom brushed-metal interface with two bucket transfer slots (fill and empty).
+    - Real-time animated sight glass fluid gauge displaying fluid level percentage, formatted fluid name, and exact amount/capacity readout.
+    - Quick "Dump / Flush" button to purge contents when re-tasking a tank for a different fluid.
+  - **Monolithic 3D Render & Holographic Blueprint Projection**:
+    - Monolithic rendering featuring gloss enamel bolted panels, concrete foundation ring curb, circumferential galvanized wind stiffener rings, white/galvanized caged safety ladder, intermediate rest landing platform, and top roof perimeter handrails.
+    - Holographic blueprint ghost projection showing exact block placement requirements and ghost guides when cycling target sizes with the Refinery Wrench.
+  - **Shaped Crafting Recipes & Loot Tables**:
+    - Added crafting recipes and loot tables for `storage_tank_casing`, `storage_tank_drain_valve`, and `storage_tank_fill_valve`.
+
+### Version 1.8.4 (Steam Turbine Monolithic 3D Model & High-Resolution Textures)
+- **Monolithic 3D Steam Turbine Model & High-Resolution Textures**:
+  - Replaced individual multiblock block models with a custom, high-fidelity monolithic 3D industrial steam turbine model based on heavy industrial turbine-generator skids (Elliott, Dresser-Rand, Siemens).
+  - **Structural Base Skid**: Electric blue (`#12569F`) heavy steel I-beam skid base with longitudinal runners, cross-beams, and anchor footing pads with foundation bolts.
+  - **Electric AC Generator / Alternator**: Cylindrical stator housing with horizontal cooling vents/ribs, end bell air intake cowl with perforated black mesh, and top rectangular terminal junction box with high-voltage hazard plate.
+  - **Intermediate Gearbox**: Cast speed-reduction gear casing with red lubrication tag plate ("Royal Purple" style), oil level sight glass, and flexible coupling guards.
+  - **Split Turbine Casing**: Heavy horizontally split cast turbine shell with curved dome, prominent bolted perimeter split flange, circular bearing inspection end-cap covers, and crane lifting eye lugs.
+  - **Steam Inlet Chest & Governor**: Front flanged steam inlet nozzle with circular bolt circle and dark steam bore (aligned with the Steam Port), throttle trip valve with red handwheel, and top governor valve actuator assembly with linkage arms.
+  - **Upright Control Console & Instrumentation**:
+    - Upper blue instrumentation box housing three analog dial gauges (Steam Pressure 0-600 PSI, Turbine RPM, and Condenser Vacuum) and digital LED readout window.
+    - Lower pale-grey electrical cabinet with 3D red emergency stop mushroom button, yellow bezel, rotary selector switches, status lamps, and wiring conduit.
+  - **Dynamic Operational Indicators**:
+    - Full-bright emissive green run indicator lamp and active power output display when the turbine is actively generating Forge Energy (`isActive = true`).
+    - Idle standby indicator lamp and resting dials when offline.
+  - **Seamless Multiblock Invisibility & Interaction Forwarding**:
+    - Turbine Casing, Turbine Rotor Shaft, and Turbine Port blocks dynamically convert to invisible, occlusion-free states when assembled, ensuring seamless rendering without light clipping or internal block occlusion.
+    - Right-clicking any constituent block in an assembled turbine forwards interactions to the controller menu or allows wrench toggling of blueprint holograms.
 
 ### Version 1.8.2 (Fluid Pump Wrench Linking & Pipe Backflow Prevention)
 - **Fluid Pump Wrench Linking Mode**:

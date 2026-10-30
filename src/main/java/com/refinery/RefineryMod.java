@@ -367,6 +367,19 @@ public class RefineryMod {
             p -> new SmelterPortBlock(SmelterPortBlock.PortType.ENERGY_FUEL, p));
     public static final DeferredItem<BlockItem> SMELTER_FUEL_PORT_ITEM = ITEMS.registerSimpleBlockItem("smelter_fuel_port", SMELTER_FUEL_PORT);
 
+    // === Storage Tanks ===
+    public static final DeferredBlock<StorageTankCasingBlock> STORAGE_TANK_CASING = BLOCKS.registerBlock("storage_tank_casing",
+            StorageTankCasingBlock::new);
+    public static final DeferredItem<BlockItem> STORAGE_TANK_CASING_ITEM = ITEMS.registerSimpleBlockItem("storage_tank_casing", STORAGE_TANK_CASING);
+
+    public static final DeferredBlock<StorageTankDrainValveBlock> STORAGE_TANK_DRAIN_VALVE = BLOCKS.registerBlock("storage_tank_drain_valve",
+            StorageTankDrainValveBlock::new);
+    public static final DeferredItem<BlockItem> STORAGE_TANK_DRAIN_VALVE_ITEM = ITEMS.registerSimpleBlockItem("storage_tank_drain_valve", STORAGE_TANK_DRAIN_VALVE);
+
+    public static final DeferredBlock<StorageTankFillValveBlock> STORAGE_TANK_FILL_VALVE = BLOCKS.registerBlock("storage_tank_fill_valve",
+            StorageTankFillValveBlock::new);
+    public static final DeferredItem<BlockItem> STORAGE_TANK_FILL_VALVE_ITEM = ITEMS.registerSimpleBlockItem("storage_tank_fill_valve", STORAGE_TANK_FILL_VALVE);
+
     // === Pipe Gates ===
     public static final DeferredBlock<PipeGateBlock> BASIC_GATE = BLOCKS.registerBlock("basic_gate",
             p -> new PipeGateBlock(GateTier.BASIC, false, p.strength(0.5f).noOcclusion()));
@@ -602,6 +615,14 @@ public class RefineryMod {
                     () -> new BlockEntityType<>(SmelterPortBlockEntity::new,
                             SMELTER_INPUT_PORT.get(), SMELTER_OUTPUT_PORT.get(), SMELTER_FUEL_PORT.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageTankBlockEntity>> STORAGE_TANK_DRAIN_VALVE_BE =
+            BLOCK_ENTITY_TYPES.register("storage_tank_drain_valve",
+                    () -> new BlockEntityType<>(StorageTankBlockEntity::new, STORAGE_TANK_DRAIN_VALVE.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageTankFillValveBlockEntity>> STORAGE_TANK_FILL_VALVE_BE =
+            BLOCK_ENTITY_TYPES.register("storage_tank_fill_valve",
+                    () -> new BlockEntityType<>(StorageTankFillValveBlockEntity::new, STORAGE_TANK_FILL_VALVE.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -665,6 +686,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<FeedingTroughMenu>> FEEDING_TROUGH_MENU =
             MENUS.register("feeding_trough", () -> new MenuType<>(FeedingTroughMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<StorageTankMenu>> STORAGE_TANK_MENU =
+            MENUS.register("storage_tank", () -> new MenuType<>(StorageTankMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
@@ -739,6 +763,9 @@ public class RefineryMod {
                         output.accept(SMELTER_INPUT_PORT_ITEM.get());
                         output.accept(SMELTER_OUTPUT_PORT_ITEM.get());
                         output.accept(SMELTER_FUEL_PORT_ITEM.get());
+                        output.accept(STORAGE_TANK_CASING_ITEM.get());
+                        output.accept(STORAGE_TANK_DRAIN_VALVE_ITEM.get());
+                        output.accept(STORAGE_TANK_FILL_VALVE_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
                         output.accept(BASIC_GATE_ITEM.get());
                         output.accept(IRON_GATE_ITEM.get());
@@ -1204,5 +1231,15 @@ public class RefineryMod {
                     if (controller == null || be.getPortType() != SmelterPortBlock.PortType.ENERGY_FUEL) return null;
                     return controller.energyStorage;
                 });
+
+        // Capabilities on Multiblock Liquid Storage Tank
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, STORAGE_TANK_DRAIN_VALVE_BE.get(),
+                (be, side) -> be.getFluidTank());
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, STORAGE_TANK_FILL_VALVE_BE.get(),
+                (be, side) -> be.getFluidHandler());
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, STORAGE_TANK_DRAIN_VALVE_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
     }
 }

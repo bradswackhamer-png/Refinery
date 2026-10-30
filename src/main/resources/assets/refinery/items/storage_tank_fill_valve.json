@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "refinery:item/storage_tank_fill_valve"
+  }
+}

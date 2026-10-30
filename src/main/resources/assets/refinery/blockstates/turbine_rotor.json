@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "refinery:block/turbine_rotor" }
+    "assembled=false": { "model": "refinery:block/turbine_rotor" },
+    "assembled=true": { "model": "refinery:block/invisible" }
   }
 }

@@ -87,6 +87,13 @@ public class FoundryPortBlockEntity extends BlockEntity implements WorldlyContai
     }
 
     @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (this.portType != FoundryPortBlock.PortType.INPUT) return false;
+        BlastFurnaceControllerBlockEntity controller = getController();
+        return controller != null && controller.canPlaceItem(slot, stack);
+    }
+
+    @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
         if (this.portType != FoundryPortBlock.PortType.OUTPUT) return false;
         BlastFurnaceControllerBlockEntity controller = getController();

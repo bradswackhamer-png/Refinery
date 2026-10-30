@@ -1,8 +1,12 @@
 {
   "variants": {
-    "facing=north": { "model": "refinery:block/turbine_water_port" },
-    "facing=south": { "model": "refinery:block/turbine_water_port", "y": 180 },
-    "facing=west": { "model": "refinery:block/turbine_water_port", "y": 270 },
-    "facing=east": { "model": "refinery:block/turbine_water_port", "y": 90 }
+    "facing=north,assembled=false": { "model": "refinery:block/turbine_water_port" },
+    "facing=north,assembled=true": { "model": "refinery:block/invisible" },
+    "facing=south,assembled=false": { "model": "refinery:block/turbine_water_port", "y": 180 },
+    "facing=south,assembled=true": { "model": "refinery:block/invisible", "y": 180 },
+    "facing=west,assembled=false": { "model": "refinery:block/turbine_water_port", "y": 270 },
+    "facing=west,assembled=true": { "model": "refinery:block/invisible", "y": 270 },
+    "facing=east,assembled=false": { "model": "refinery:block/turbine_water_port", "y": 90 },
+    "facing=east,assembled=true": { "model": "refinery:block/invisible", "y": 90 }
   }
 }

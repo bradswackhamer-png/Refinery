@@ -158,6 +158,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     public void disassemble() {
         if (this.assembled) {
             this.assembled = false;
+            updateMemberBlockStates(false);
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState state = getBlockState();
                 if (state.getBlock() instanceof SteamTurbineControllerBlock) {
@@ -167,6 +168,42 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
                 }
             }
             setChanged();
+            syncToClient();
+        }
+    }
+
+    private void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        Direction facing = (getBlockState().getBlock() instanceof SteamTurbineControllerBlock && getBlockState().hasProperty(SteamTurbineControllerBlock.FACING))
+                ? getBlockState().getValue(SteamTurbineControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x() == 0 && req.y() == 0 && req.z() == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x(), req.y(), req.z(), facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(SteamTurbineControllerBlock.ASSEMBLED)) {
+                if (targetState.getValue(SteamTurbineControllerBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(SteamTurbineControllerBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
         }
     }
 
@@ -263,6 +300,8 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         BlockState currentState = getBlockState();
         if (!(currentState.getBlock() instanceof SteamTurbineControllerBlock)) return;
 
+        updateMemberBlockStates(valid);
+
         boolean blockAssembled = currentState.getValue(SteamTurbineControllerBlock.ASSEMBLED);
         if (valid != this.assembled || blockAssembled != valid) {
             this.assembled = valid;
@@ -280,6 +319,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
             }
             this.level.setBlock(this.worldPosition, newState, 3);
             setChanged();
+            syncToClient();
         }
     }
 
@@ -287,6 +327,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         boolean formed = checkStructure(true, player);
         if (formed) {
             this.assembled = true;
+            updateMemberBlockStates(true);
             this.blueprintProjectionTicks = 0;
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -301,6 +342,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
             }
         } else {
             this.assembled = false;
+            updateMemberBlockStates(false);
             this.blueprintProjectionTicks = 600; // 30 seconds
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
@@ -314,6 +356,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}

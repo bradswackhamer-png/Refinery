@@ -4,6 +4,99 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.7] - 2026-10-30
+
+### Fixed
+- **Industrial Fluid Discharge Survival Drop**: Added the missing block loot table definitions (`data/refinery/loot_table/blocks/fluid_discharge.json` and `loot_tables/blocks/fluid_discharge.json`) so the Industrial Fluid Discharge block drops itself properly when mined or broken in survival.
+- **Storage Tank Item Icons & Held Models**: Added missing item definitions for the Glass-Fused-to-Steel storage tank components (`assets/refinery/items/storage_tank_casing.json`, `storage_tank_drain_valve.json`, and `storage_tank_fill_valve.json`), resolving missing GUI inventory icons and black/purple checkerboard held models.
+
+### Changed
+- **Blast Furnace Fuel & Iron Strict Restrictions**:
+  - Restricted iron input sources strictly to **Iron Ingot** (`minecraft:iron_ingot`) and **Block of Iron** (`minecraft:iron_block`). Raw iron, ores, and dusts are no longer accepted.
+  - Restricted fuel sources strictly to **Coal** (`minecraft:coal`) and **Block of Coal** (`minecraft:coal_block`). Charcoal, coal dust, petroleum tar, bitumen, and other burnables are no longer accepted.
+  - Implemented unit conversion for blocks: 1 Block of Iron adds 9 iron units (yielding 9 steel ingots); 1 Block of Coal adds 9 fuel units (fueling 9 smelting operations).
+  - Partial iron and fuel units are persistently stored in NBT and safely drop as blocks and ingots/coal when broken.
+  - Updated GUI slot filters and port container insertion to strictly reject any other items from manual placement and automated piping.
+  - Updated Blast Smelter GUI tooltips to reflect the Iron Ingot/Block and Coal/Block requirements.
+
+---
+
+## [1.8.6] - 2026-10-30
+
+### Changed
+- **Sleek Industrial Access Ladder Redesign**:
+  - Replaced the bulky, chunky caged ladder with a clean, authentic industrial steel access ladder mounted directly up the North face of the tank.
+  - Features twin vertical stringer rails, standoff wall brackets connecting to the tank shell, distinct individual horizontal climbing rungs spaced every 3.5 units with hollow air between them (exposing the dark enamel tank panels behind), and smooth top walkthrough grab bars stepping onto the roof rim.
+  - Assembled storage tank casing blocks in the North ladder column (`relX == 0, relZ == -radius`) now implement `isLadder = true`, allowing players to physically climb the ladder to the roof of the tank.
+  - Updated all ladder stringers, rungs, and roof handrails to use a crisp, bright galvanized industrial steel texture swatch (`#D8DFE8`), eliminating messy textures and distorted UVs.
+  - Overhauled top roof guardrails to follow the octagonal profile of the tank with an open walkthrough entry at the ladder head.
+
+### Removed
+- **Exterior Red Standpipe**: Completely removed the vertical red pipe and flanged valves running down the side of the tank model.
+
+---
+
+## [1.8.5] - 2026-10-30
+
+### Added
+- **Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks**:
+  - Implemented multiblock industrial liquid storage tanks based on modern Glass-Fused-to-Steel / Enamel bolted tank engineering (Hebei Wansheng / enameltanks.com reference design).
+  - **Six Supported Multiblock Geometries & Capacities**:
+    - `3x3x3` (Capacity: 64,000 mB / 64 Buckets)
+    - `3x3x6` (Capacity: 256,000 mB / 256 Buckets)
+    - `3x3x9` (Capacity: 512,000 mB / 512 Buckets)
+    - `5x5x5` (Capacity: 1,000,000 mB / 1,000 Buckets)
+    - `5x5x7` (Capacity: 2,000,000 mB / 2,000 Buckets)
+    - `5x5x9` (Capacity: 4,000,000 mB / 4,000 Buckets)
+  - **Universal Fluid Acceptance & Storage**:
+    - Accepts and stores any fluid resource (Water, Lava, Crude Oil, Diesel, Gasoline, High-Pressure Steam, Ethanol, Molten Metals, etc.) with transactional rollback safety.
+  - **Top-Center Intake & Bottom-Center Drainage**:
+    - Top Center Fill Valve (`storage_tank_fill_valve`): accepts fluid inputs via pipes, pumps, or buckets and directs them to the tank interior.
+    - Bottom Center Drain Valve (`storage_tank_drain_valve`): master multiblock controller managing structure assembly, fluid storage, container interactions, and active pipe drainage.
+  - **Seamless Logistics Automation & Standard Pipe Support (No Extract Pipe Required)**:
+    - The bottom center drain valve actively auto-pushes fluid downwards into pipes underneath the tank floor and horizontally into neighbor pipes.
+    - Attaching a regular liquid pipe directly receives fluid without requiring an extraction pipe or mechanical puller.
+  - **Custom Industrial Storage Tank GUI**:
+    - Custom brushed-metal interface with two bucket transfer slots (fill and empty).
+    - Real-time animated sight glass fluid gauge displaying fluid level percentage, formatted fluid name, and exact amount/capacity readout.
+    - Quick "Dump / Flush" button to purge contents when re-tasking a tank for a different fluid.
+  - **Monolithic 3D Render & Holographic Blueprint Projection**:
+    - Monolithic rendering featuring gloss enamel bolted panels, concrete foundation ring curb, circumferential galvanized wind stiffener rings, white/galvanized caged safety ladder, intermediate rest landing platform, and top roof perimeter handrails.
+    - Holographic blueprint ghost projection showing exact block placement requirements and ghost guides when cycling target sizes with the Refinery Wrench.
+  - **Shaped Crafting Recipes & Loot Tables**:
+    - Added crafting recipes and loot tables for `storage_tank_casing`, `storage_tank_drain_valve`, and `storage_tank_fill_valve`.
+
+---
+
+## [1.8.4] - 2026-10-29
+
+### Changed
+- Mod update
+
+---
+
+## [1.8.4] - 2026-10-29
+
+### Added
+- **Monolithic 3D Steam Turbine Model & High-Resolution Textures**:
+  - Replaced the multiblock's individual block rendering with a high-fidelity monolithic 3D industrial steam turbine model based on heavy industrial turbine-generator skids (Elliott, Dresser-Rand, Siemens).
+  - **Structural Base Skid**: Electric blue (`#12569F`) heavy steel I-beam skid base with longitudinal runners, cross-beams, and anchor footing pads with foundation bolts.
+  - **Electric AC Generator / Alternator**: Cylindrical stator housing with horizontal cooling vents/ribs, end bell air intake cowl with perforated black mesh, and top rectangular terminal junction box with high-voltage hazard plate.
+  - **Intermediate Gearbox**: Cast speed-reduction gear casing with red lubrication tag plate ("Royal Purple" style), oil level sight glass, and flexible coupling guards.
+  - **Split Turbine Casing**: Heavy horizontally split cast turbine shell with curved dome, prominent bolted perimeter split flange, circular bearing inspection end-cap covers, and crane lifting eye lugs.
+  - **Steam Inlet Chest & Governor**: Front flanged steam inlet nozzle with circular bolt circle and dark steam bore (aligned with the Steam Port), throttle trip valve with red handwheel, and top governor valve actuator assembly with linkage arms.
+  - **Upright Control Console & Instrumentation**:
+    - Upper blue instrumentation box housing three analog dial gauges (Steam Pressure 0-600 PSI, Turbine RPM, and Condenser Vacuum) and digital LED readout window.
+    - Lower pale-grey electrical cabinet with 3D red emergency stop mushroom button, yellow bezel, rotary selector switches, status lamps, and wiring conduit.
+  - **Dynamic Operational Indicators**:
+    - Full-bright emissive green run indicator lamp and active power output display when the turbine is actively generating Forge Energy (`isActive = true`).
+    - Idle standby indicator lamp and resting dials when offline.
+  - **Seamless Multiblock Invisibility & Interaction Forwarding**:
+    - Turbine Casing, Turbine Rotor Shaft, and Turbine Port blocks dynamically convert to invisible, occlusion-free states when assembled, ensuring seamless rendering without light clipping or internal block occlusion.
+    - Right-clicking any constituent block in an assembled turbine forwards interactions to the controller menu or allows wrench toggling of blueprint holograms.
+
+---
+
 ## [1.8.2] - 2026-10-29
 
 ### Changed

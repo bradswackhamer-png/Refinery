@@ -58,6 +58,8 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
 
     private boolean assembled = false;
     private int progress = 0;
+    private int ironUnits = 0;
+    private int fuelUnits = 0;
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
     private int exportCooldown = 0;
@@ -111,7 +113,24 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
     }
 
     public NonNullList<ItemStack> getDrops() {
-        return this.items;
+        NonNullList<ItemStack> drops = NonNullList.create();
+        drops.addAll(this.items);
+        if (this.ironUnits >= 9) {
+            drops.add(new ItemStack(Items.IRON_BLOCK, this.ironUnits / 9));
+            int rem = this.ironUnits % 9;
+            if (rem > 0) drops.add(new ItemStack(Items.IRON_INGOT, rem));
+        } else if (this.ironUnits > 0) {
+            drops.add(new ItemStack(Items.IRON_INGOT, this.ironUnits));
+        }
+
+        if (this.fuelUnits >= 9) {
+            drops.add(new ItemStack(Items.COAL_BLOCK, this.fuelUnits / 9));
+            int rem = this.fuelUnits % 9;
+            if (rem > 0) drops.add(new ItemStack(Items.COAL, rem));
+        } else if (this.fuelUnits > 0) {
+            drops.add(new ItemStack(Items.COAL, this.fuelUnits));
+        }
+        return drops;
     }
 
     public void disassemble() {
@@ -216,21 +235,25 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
     }
 
     private boolean hasIngredients() {
-        boolean hasIron = false;
-        for (int slot : IRON_SLOTS) {
-            ItemStack stack = this.items.get(slot);
-            if (!stack.isEmpty() && isIronSource(stack)) {
-                hasIron = true;
-                break;
+        boolean hasIron = this.ironUnits > 0;
+        if (!hasIron) {
+            for (int slot : IRON_SLOTS) {
+                ItemStack stack = this.items.get(slot);
+                if (!stack.isEmpty() && isIronSource(stack)) {
+                    hasIron = true;
+                    break;
+                }
             }
         }
 
-        boolean hasFuel = false;
-        for (int slot : FUEL_SLOTS) {
-            ItemStack stack = this.items.get(slot);
-            if (!stack.isEmpty() && isFuelSource(stack)) {
-                hasFuel = true;
-                break;
+        boolean hasFuel = this.fuelUnits > 0;
+        if (!hasFuel) {
+            for (int slot : FUEL_SLOTS) {
+                ItemStack stack = this.items.get(slot);
+                if (!stack.isEmpty() && isFuelSource(stack)) {
+                    hasFuel = true;
+                    break;
+                }
             }
         }
 
@@ -238,22 +261,42 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
     }
 
     private void consumeIngredients() {
-        // Consume 1 Iron
-        for (int slot : IRON_SLOTS) {
-            ItemStack stack = this.items.get(slot);
-            if (!stack.isEmpty() && isIronSource(stack)) {
-                stack.shrink(1);
-                break;
+        // Ensure we have an active iron unit
+        if (this.ironUnits <= 0) {
+            for (int slot : IRON_SLOTS) {
+                ItemStack stack = this.items.get(slot);
+                if (!stack.isEmpty() && isIronSource(stack)) {
+                    if (stack.is(Items.IRON_BLOCK)) {
+                        this.ironUnits += 9;
+                    } else {
+                        this.ironUnits += 1;
+                    }
+                    stack.shrink(1);
+                    break;
+                }
             }
         }
+        if (this.ironUnits > 0) {
+            this.ironUnits--;
+        }
 
-        // Consume 1 Coal / Fuel
-        for (int slot : FUEL_SLOTS) {
-            ItemStack stack = this.items.get(slot);
-            if (!stack.isEmpty() && isFuelSource(stack)) {
-                stack.shrink(1);
-                break;
+        // Ensure we have an active fuel unit
+        if (this.fuelUnits <= 0) {
+            for (int slot : FUEL_SLOTS) {
+                ItemStack stack = this.items.get(slot);
+                if (!stack.isEmpty() && isFuelSource(stack)) {
+                    if (stack.is(Items.COAL_BLOCK)) {
+                        this.fuelUnits += 9;
+                    } else {
+                        this.fuelUnits += 1;
+                    }
+                    stack.shrink(1);
+                    break;
+                }
             }
+        }
+        if (this.fuelUnits > 0) {
+            this.fuelUnits--;
         }
     }
 
@@ -280,29 +323,14 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
         }
     }
 
-    public static final TagKey<Item> DUSTS_IRON = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dusts/iron"));
-    public static final TagKey<Item> DUSTS_COAL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dusts/coal"));
-    public static final TagKey<Item> DUSTS_CHARCOAL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "dusts/charcoal"));
-
     public static boolean isIronSource(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        if (stack.is(RefineryMod.IRON_DUST.get()) || stack.is(DUSTS_IRON)) return true;
-        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        if (id != null && id.getPath().contains("iron_dust")) return true;
-        return stack.is(Items.RAW_IRON) || stack.is(Items.IRON_INGOT)
-                || stack.is(Items.IRON_ORE) || stack.is(Items.DEEPSLATE_IRON_ORE)
-                || stack.is(Items.RAW_IRON_BLOCK);
+        return stack.is(Items.IRON_INGOT) || stack.is(Items.IRON_BLOCK);
     }
 
     public static boolean isFuelSource(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        if (stack.is(RefineryMod.COAL_DUST.get()) || stack.is(DUSTS_COAL) || stack.is(DUSTS_CHARCOAL)) return true;
-        if (stack.is(ItemTags.COALS) || stack.is(Items.COAL_BLOCK)
-                || stack.is(RefineryMod.TAR_ITEM.get()) || stack.is(RefineryMod.BITUMEN.get()) || stack.is(Items.CHARCOAL)) {
-            return true;
-        }
-        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen") || id.getPath().contains("coal_dust") || id.getPath().contains("charcoal_dust"));
+        return stack.is(Items.COAL) || stack.is(Items.COAL_BLOCK);
     }
 
     private void tryExportOutput(ServerLevel level) {
@@ -513,6 +541,8 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
         super.saveAdditional(output);
         output.putBoolean("assembled", this.assembled);
         output.putInt("progress", this.progress);
+        output.putInt("ironUnits", this.ironUnits);
+        output.putInt("fuelUnits", this.fuelUnits);
         ContainerHelper.saveAllItems(output, this.items);
     }
 
@@ -521,6 +551,8 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
         super.loadAdditional(input);
         this.assembled = input.getBooleanOr("assembled", false);
         this.progress = input.getIntOr("progress", 0);
+        this.ironUnits = input.getIntOr("ironUnits", 0);
+        this.fuelUnits = input.getIntOr("fuelUnits", 0);
         ContainerHelper.loadAllItems(input, this.items);
     }
 

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "assembled=false": { "model": "refinery:block/storage_tank_fill_valve" },
+    "assembled=true": { "model": "refinery:block/invisible" }
+  }
+}

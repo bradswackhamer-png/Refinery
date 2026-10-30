@@ -94,7 +94,7 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
 
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Blast Smelting Progress").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                    Component.literal("1 Raw Iron + 1 Coal -> 1 Steel Ingot").withStyle(ChatFormatting.WHITE),
+                    Component.literal("Iron + Coal -> Steel Ingot (1:1 or 9:9 for Blocks)").withStyle(ChatFormatting.WHITE),
                     Component.literal(this.menu.isSmelting() ? ("Forging: " + pct + "%") : "Status: Idle").withStyle(ChatFormatting.YELLOW)
             ), mouseX, mouseY);
         }
@@ -115,7 +115,7 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         else if (mouseX >= xo + 19 && mouseX <= xo + 57 && mouseY >= yo + 21 && mouseY <= yo + 59) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Iron Input Queue Buffer").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
-                    Component.literal("Accepts: Raw Iron, Iron Ingots, Iron Ore").withStyle(ChatFormatting.GRAY),
+                    Component.literal("Accepts: Iron Ingot, Block of Iron").withStyle(ChatFormatting.GRAY),
                     Component.literal("Pipes connect to Foundry Input Port").withStyle(ChatFormatting.BLUE)
             ), mouseX, mouseY);
         }
@@ -124,7 +124,7 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         else if (mouseX >= xo + 61 && mouseX <= xo + 99 && mouseY >= yo + 21 && mouseY <= yo + 59) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Fuel Input Queue Buffer").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                    Component.literal("Accepts: Coal, Charcoal, Petroleum Tar").withStyle(ChatFormatting.GRAY),
+                    Component.literal("Accepts: Coal, Block of Coal").withStyle(ChatFormatting.GRAY),
                     Component.literal("Pipes connect to Foundry Input Port").withStyle(ChatFormatting.BLUE)
             ), mouseX, mouseY);
         }

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "assembled=false": { "model": "refinery:block/storage_tank_casing" },
+    "assembled=true": { "model": "refinery:block/invisible" }
+  }
+}

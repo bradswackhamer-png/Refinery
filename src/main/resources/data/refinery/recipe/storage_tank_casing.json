@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SGS",
+    "GIG",
+    "SGS"
+  ],
+  "key": {
+    "S": "refinery:steel_plate",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_block"
+  },
+  "result": {
+    "id": "refinery:storage_tank_casing",
+    "count": 4
+  }
+}

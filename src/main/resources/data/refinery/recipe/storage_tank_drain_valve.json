@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SPS",
+    "PCP",
+    "SHS"
+  ],
+  "key": {
+    "S": "refinery:steel_plate",
+    "P": "minecraft:iron_bars",
+    "C": "refinery:storage_tank_casing",
+    "H": "minecraft:hopper"
+  },
+  "result": {
+    "id": "refinery:storage_tank_drain_valve",
+    "count": 1
+  }
+}
