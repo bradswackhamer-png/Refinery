@@ -79,6 +79,9 @@ public abstract class AbstractFluidPumpBlock extends Block implements EntityBloc
             InteractionHand hand,
             BlockHitResult hitResult
     ) {
+        if (stack.getItem() instanceof com.refinery.item.RefineryWrenchItem) {
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
+        }
         if (player.isShiftKeyDown()) {
             if (level.getBlockEntity(pos) instanceof AbstractFluidPumpBlockEntity pumpBe) {
                 if (!level.isClientSide()) {

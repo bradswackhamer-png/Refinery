@@ -85,9 +85,9 @@ public class RefineryWrenchItem extends Item {
                 BlockPos targetPos = hit.getBlockPos();
                 if (!targetPos.equals(linked)) {
                     if (!level.isClientSide()) {
-                        if (level.getBlockEntity(linked) instanceof FluidPumpBlockEntity pumpBe) {
+                        if (level.getBlockEntity(linked) instanceof AbstractFluidPumpBlockEntity pumpBe) {
                             double dist = Math.sqrt(linked.distSqr(targetPos));
-                            if (dist <= FluidPumpBlockEntity.MAX_DISTANCE) {
+                            if (dist <= AbstractFluidPumpBlockEntity.MAX_DISTANCE) {
                                 pumpBe.setTargetPos(targetPos);
                                 clearLinkedPump(stack);
                                 player.sendSystemMessage(
@@ -98,7 +98,7 @@ public class RefineryWrenchItem extends Item {
                             } else {
                                 player.sendSystemMessage(
                                         Component.literal(String.format("§c[Refinery] Target is too far from Fluid Pump! Maximum distance is %.0f blocks.",
-                                                FluidPumpBlockEntity.MAX_DISTANCE))
+                                                AbstractFluidPumpBlockEntity.MAX_DISTANCE))
                                 );
                             }
                         } else {
@@ -122,7 +122,7 @@ public class RefineryWrenchItem extends Item {
         ItemStack stack = context.getItemInHand();
 
         // 1. Shift + Right-Click on Fluid Pump: Select pump for linking (or double shift-click to dismantle)
-        if (state.getBlock() instanceof FluidPumpBlock) {
+        if (state.getBlock() instanceof AbstractFluidPumpBlock) {
             if (player != null && player.isShiftKeyDown()) {
                 BlockPos alreadyLinked = getLinkedPump(stack);
                 if (alreadyLinked != null && alreadyLinked.equals(pos)) {
@@ -152,9 +152,9 @@ public class RefineryWrenchItem extends Item {
         BlockPos linkedPumpPos = getLinkedPump(stack);
         if (linkedPumpPos != null && !pos.equals(linkedPumpPos)) {
             if (!level.isClientSide()) {
-                if (level.getBlockEntity(linkedPumpPos) instanceof FluidPumpBlockEntity pumpBe) {
+                if (level.getBlockEntity(linkedPumpPos) instanceof AbstractFluidPumpBlockEntity pumpBe) {
                     double dist = Math.sqrt(linkedPumpPos.distSqr(pos));
-                    if (dist <= FluidPumpBlockEntity.MAX_DISTANCE) {
+                    if (dist <= AbstractFluidPumpBlockEntity.MAX_DISTANCE) {
                         pumpBe.setTargetPos(pos);
                         clearLinkedPump(stack);
                         if (player != null) {
@@ -167,7 +167,7 @@ public class RefineryWrenchItem extends Item {
                     } else if (player != null) {
                         player.sendSystemMessage(
                                 Component.literal(String.format("§c[Refinery] Target is too far from Fluid Pump! Maximum distance is %.0f blocks (current: %.1fm).",
-                                        FluidPumpBlockEntity.MAX_DISTANCE, dist))
+                                        AbstractFluidPumpBlockEntity.MAX_DISTANCE, dist))
                         );
                     }
                 } else {

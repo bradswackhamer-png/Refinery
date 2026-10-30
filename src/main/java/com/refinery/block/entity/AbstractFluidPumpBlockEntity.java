@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -30,7 +31,9 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -63,7 +66,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
     }
 
     protected @Nullable BlockPos targetPos = null;
-    protected boolean infiniteWater = false;
+    protected boolean infiniteWater = true;
     protected RedstoneMode redstoneMode = RedstoneMode.IGNORED;
     protected PumpStatus status = PumpStatus.IDLE;
 
@@ -207,8 +210,13 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
             return false;
         }
 
-        // Drain the contiguous source block
-        level.setBlock(blockToDrain, Blocks.AIR.defaultBlockState(), 3);
+        // Drain the contiguous source block safely (protect waterlogged blocks)
+        BlockState drainState = level.getBlockState(blockToDrain);
+        if (drainState.hasProperty(BlockStateProperties.WATERLOGGED) && drainState.getValue(BlockStateProperties.WATERLOGGED)) {
+            level.setBlock(blockToDrain, drainState.setValue(BlockStateProperties.WATERLOGGED, false), 3);
+        } else {
+            level.setBlock(blockToDrain, Blocks.AIR.defaultBlockState(), 3);
+        }
         consumePower();
         this.currentFluid = fluidToPump;
         this.lastPumpedFluid = fluidToPump;
@@ -238,6 +246,12 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
 
         while (!queue.isEmpty() && searched++ < MAX_SEARCH) {
             BlockPos current = queue.poll();
+
+            // Safety: Never drain water from any BlockEntity (pipes, machines, tanks, etc.)
+            if (level.getBlockEntity(current) != null) {
+                continue;
+            }
+
             FluidState fs = level.getFluidState(current);
 
             boolean isMatchingSource;
@@ -289,8 +303,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
                 Direction.NORTH,
                 Direction.SOUTH,
                 Direction.EAST,
-                Direction.WEST,
-                Direction.DOWN
+                Direction.WEST
         };
 
         for (Direction dir : dirs) {
@@ -399,19 +412,104 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
         return 8;
     }
 
-    public ResourceHandler<FluidResource> getFluidHandler(@Nullable Direction side) {
-        return new SingleFluidHandler(
-                () -> this.currentFluid,
-                () -> this.fluidAmount,
-                amt -> {
-                    this.fluidAmount = amt;
-                    if (amt <= 0) this.currentFluid = Fluids.EMPTY;
-                },
-                TANK_CAPACITY,
-                false,
-                true,
-                this::setChanged
-        );
+    private final PumpFluidHandler fluidHandler = new PumpFluidHandler();
+
+    public @Nullable ResourceHandler<FluidResource> getFluidHandler(@Nullable Direction side) {
+        if (side == Direction.DOWN) {
+            return null; // Skid / base mounting face has no fluid port
+        }
+        return this.fluidHandler;
+    }
+
+    private record PumpFluidSnapshot(Fluid fluid, Fluid lastFluid, int amount) {}
+
+    private class PumpFluidHandler extends SnapshotJournal<PumpFluidSnapshot> implements ResourceHandler<FluidResource> {
+        @Override
+        public int size() {
+            return 1;
+        }
+
+        @Override
+        public FluidResource getResource(int index) {
+            if (index != 0 || currentFluid == Fluids.EMPTY) return FluidResource.EMPTY;
+            return FluidResource.of(currentFluid);
+        }
+
+        @Override
+        public long getAmountAsLong(int index) {
+            return index == 0 ? fluidAmount : 0L;
+        }
+
+        @Override
+        public int getAmountAsInt(int index) {
+            return index == 0 ? fluidAmount : 0;
+        }
+
+        @Override
+        public long getCapacityAsLong(int index, FluidResource resource) {
+            return TANK_CAPACITY;
+        }
+
+        @Override
+        public int getCapacityAsInt(int index, FluidResource resource) {
+            return TANK_CAPACITY;
+        }
+
+        @Override
+        public boolean isValid(int index, FluidResource resource) {
+            if (index != 0 || resource.isEmpty()) return false;
+            return currentFluid == Fluids.EMPTY || resource.getFluid() == currentFluid;
+        }
+
+        @Override
+        public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            if (index != 0 || amount <= 0 || resource.isEmpty()) return 0;
+            if (currentFluid != Fluids.EMPTY && resource.getFluid() != currentFluid) return 0;
+
+            int space = TANK_CAPACITY - fluidAmount;
+            int toInsert = Math.min(space, amount);
+            if (toInsert <= 0) return 0;
+
+            updateSnapshots(transaction);
+            if (currentFluid == Fluids.EMPTY) {
+                currentFluid = resource.getFluid();
+                lastPumpedFluid = resource.getFluid();
+            }
+            fluidAmount += toInsert;
+            setChanged();
+            return toInsert;
+        }
+
+        @Override
+        public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            if (index != 0 || amount <= 0 || fluidAmount <= 0 || currentFluid == Fluids.EMPTY) return 0;
+            if (!resource.isEmpty() && resource.getFluid() != currentFluid) return 0;
+
+            int toExtract = Math.min(fluidAmount, amount);
+            if (toExtract <= 0) return 0;
+
+            updateSnapshots(transaction);
+            fluidAmount -= toExtract;
+            if (fluidAmount <= 0) {
+                fluidAmount = 0;
+                currentFluid = Fluids.EMPTY;
+            }
+            setChanged();
+            return toExtract;
+        }
+
+        @Override
+        protected PumpFluidSnapshot createSnapshot() {
+            return new PumpFluidSnapshot(currentFluid, lastPumpedFluid, fluidAmount);
+        }
+
+        @Override
+        protected void revertToSnapshot(PumpFluidSnapshot snapshot) {
+            currentFluid = snapshot.fluid;
+            lastPumpedFluid = snapshot.lastFluid;
+            fluidAmount = snapshot.amount;
+            setChanged();
+        }
     }
 
     @Override
@@ -452,7 +550,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
         String lastFluidKey = input.getStringOr("lastPumpedFluid", "minecraft:empty");
         this.lastPumpedFluid = BuiltInRegistries.FLUID.getOptional(net.minecraft.resources.Identifier.parse(lastFluidKey)).orElse(Fluids.EMPTY);
 
-        this.infiniteWater = input.getBooleanOr("infiniteWater", false);
+        this.infiniteWater = input.getBooleanOr("infiniteWater", true);
         this.redstoneMode = RedstoneMode.values()[Math.clamp(input.getIntOr("redstoneMode", 0), 0, RedstoneMode.values().length - 1)];
 
         if (input.getBooleanOr("hasTarget", false)) {

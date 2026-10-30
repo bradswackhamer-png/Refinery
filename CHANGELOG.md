@@ -4,6 +4,26 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.2] - 2026-10-29
+
+### Changed
+- Mod update
+
+---
+
+## [1.8.2] - 2026-10-29
+
+### Fixed
+- **Fluid Pump Suction Hose Linking via Refinery Wrench**: Fixed an issue where sneak-right-clicking a Coal Fluid Pump (or any pump variant extending `AbstractFluidPumpBlock`) with the Refinery Wrench dismantled the pump instead of selecting it for 3D suction hose linking. Added double-sneak-click confirmation for deliberate pump dismantling.
+- **Fluid Pump Backflow & Pipe Draining**:
+  - Prevented fluid back-draining from pipe networks into or out of fluid pumps: pumps now implement a robust transactional `SnapshotJournal` fluid handler accepting returning fluid of the same type without leaking or stalling pipe parcels.
+  - Disabled pump discharge downward (`Direction.DOWN`) into mounting bases and skid frames.
+  - Added BFS tile-entity protection so the pump's contiguous source scanner never targets or drains water from adjacent pipes, waterlogged pipes, tanks, or machines.
+  - Protected waterlogged blocks during finite source drainage by unsetting the `WATERLOGGED` block state property rather than replacing blocks with air.
+  - Changed default fluid pump operating mode to `[INFINITE WATER]` (`true`) so base water sources are preserved automatically upon placement.
+
+---
+
 ## [1.8.0] - 2026-10-29
 
 ### Added

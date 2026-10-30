@@ -162,10 +162,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.0.jar`
+`refinery-1.8.2.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.0 (NeoForge 26.3)`
+`Industrial Refinery 1.8.2 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -181,9 +181,21 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.8.0
+# Industrial Refinery v1.8.2
 
-### What's New in v1.8.0:
+### What's New in v1.8.2:
+- **Fluid Pump Wrench Linking Mode**:
+  - Fixed an issue where sneak-right-clicking a Coal Fluid Pump (or any pump variant extending `AbstractFluidPumpBlock`) with the Refinery Wrench dismantled the pump instead of selecting it for 3D suction hose linking.
+  - Added double-sneak-click confirmation on the same pump block to dismantle and retrieve it.
+  - Shift-right-clicking any block or fluid source in the world properly anchors the intake point and deploys the animated 3D suction hose.
+- **Pipe Back-Drain & Backflow Prevention**:
+  - Implemented transactional `SnapshotJournal` fluid capability on all pump variants: pumps now safely accept returning fluid of the same type without leaking or stalling pipe parcels.
+  - Disabled pump discharge downward (`Direction.DOWN`) into mounting bases and skid frames.
+  - Added BFS tile-entity protection so contiguous source searching never targets or drains water from adjacent pipes, waterlogged pipes, tanks, or machines.
+  - Protected waterlogged blocks during finite source drainage by unsetting the `WATERLOGGED` block state property rather than replacing blocks with air.
+  - Changed default fluid pump operating mode to `[INFINITE WATER]` (`true`) so base water sources are preserved automatically upon placement.
+
+### Previous v1.8.0 Highlights:
 - **Livestock Feeding Trough (`refinery:feeding_trough`)**:
   - Added a 2-block-wide monolithic multiblock feed bunk designed for automated livestock breeding and animal farming.
   - **Monolithic 3D Model**: High-detail formed weathered galvanized sheet steel feed bunk featuring realistic zinc spangle crystal flakes, rolled top safety flanges, four heavy-gauge steel divider cross-struts, end bulkheads with cleanout slots, and corner skid feet.
