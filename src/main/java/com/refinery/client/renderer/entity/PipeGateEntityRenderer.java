@@ -161,10 +161,10 @@ public class PipeGateEntityRenderer extends EntityRenderer<PipeGateEntity, PipeG
         switch (dir) {
             case NORTH -> poseStack.rotateDegrees(Axis.YP, 180f);
             case SOUTH -> {}
-            case WEST -> poseStack.rotateDegrees(Axis.YP, 270f);
-            case EAST -> poseStack.rotateDegrees(Axis.YP, 90f);
-            case UP -> poseStack.rotateDegrees(Axis.XP, 270f);
-            case DOWN -> poseStack.rotateDegrees(Axis.XP, 90f);
+            case WEST -> poseStack.rotateDegrees(Axis.YP, 90f);
+            case EAST -> poseStack.rotateDegrees(Axis.YP, 270f);
+            case UP -> poseStack.rotateDegrees(Axis.XP, 90f);
+            case DOWN -> poseStack.rotateDegrees(Axis.XP, 270f);
         }
 
         Identifier texture = getTexture(state);

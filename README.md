@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.24 (Auto Harvester GUI Synchronization & Gate Saddle Alignment)](#version-1824-auto-harvester-gui-synchronization--gate-saddle-alignment)
    - [Version 1.8.23 (Quartz Merge Pipe Suite & Selectable Output Routing)](#version-1823-quartz-merge-pipe-suite--selectable-output-routing)
    - [Version 1.8.22 (Void Pipe Shaped Crafting Parity & Gate Curvature Fix)](#version-1822-void-pipe-shaped-crafting-parity--gate-curvature-fix)
    - [Version 1.8.21 (Pipe Gate Orientation, Extended Dead-Ends, & Conveyor Occlusion Fix)](#version-1821-pipe-gate-orientation-extended-dead-ends--conveyor-occlusion-fix)
@@ -1638,6 +1639,16 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.24 (Auto Harvester GUI Synchronization & Gate Saddle Alignment)
+- **Auto Harvester Client GUI Synchronization**:
+  - Fully merged and stabilized PR #1 (`GUI-Fix`), ensuring instantaneous client-to-server updates when toggling power or clicking radius buttons in the Auto Harvester menu.
+  - Eliminated duplicate packet/tag registration methods in `AutoHarvesterBlockEntity` to ensure clean build compilation.
+- **Pipe Gate Rotation & Saddle Alignment**:
+  - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces.
+  - Curved gate clamp plates wrap flush and securely around 12-sided pipe cylinders without bending backwards into open air.
 
 ---
 

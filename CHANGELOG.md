@@ -4,6 +4,17 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.24] - 2026-10-31
+
+### Fixed
+- **Auto Harvester Client GUI Synchronization & Clean Merge**:
+  - Successfully verified and merged PR #1 (`GUI-Fix`), synchronizing client and server state when toggling harvester power or adjusting working radius (+/-) buttons.
+  - Resolved merge duplication by removing redundant `getUpdateTag` / `getUpdatePacket` methods and duplicate imports in `AutoHarvesterBlockEntity.java`, restoring clean compilation.
+- **Pipe Gate Rotation & Saddle Alignment**:
+  - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces. Curved pipe gate saddles now wrap snugly around round pipe cylinders rather than curving backwards inside-out.
+
+---
+
 ## [1.8.23] - 2026-10-31
 
 ### Added

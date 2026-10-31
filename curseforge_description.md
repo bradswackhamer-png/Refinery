@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.12.jar`
+`refinery-1.8.24.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.12 (NeoForge 26.3)`
+`Industrial Refinery 1.8.24 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,9 +215,15 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.8.12
+# Industrial Refinery v1.8.24
 
-### What's New in v1.8.12:
+### What's New in v1.8.24:
+- **Auto Harvester Client GUI Synchronization**:
+  - Fully merged and stabilized PR #1 (`GUI-Fix`), ensuring instantaneous client-to-server updates when toggling power or clicking radius buttons in the Auto Harvester menu.
+  - Eliminated duplicate packet/tag registration methods in `AutoHarvesterBlockEntity` to ensure clean build compilation.
+- **Pipe Gate Rotation & Saddle Alignment**:
+  - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces.
+  - Curved gate clamp plates wrap flush and securely around 12-sided pipe cylinders without bending backwards into open air.
 - **Native Industrial 3D Monolithic Pipe Infrastructure (`refinery` namespace)**:
   - Built-in, fully autonomous native industrial pipe infrastructure directly integrated into Industrial Refinery, giving complete control over physical geometry, rendering, and logic without external mod dependencies.
   - **100% Round & Perfectly Seamless Geometry**:

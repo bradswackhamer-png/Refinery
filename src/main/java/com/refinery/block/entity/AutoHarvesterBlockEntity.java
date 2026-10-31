@@ -4,9 +4,6 @@ import com.refinery.RefineryMod;
 import com.refinery.block.AutoHarvesterBlock;
 import com.refinery.compat.LogisticsPipeCompat;
 import com.refinery.menu.AutoHarvesterMenu;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -695,16 +692,6 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
             setChanged();
             syncToClient();
         }
-    }
-
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return this.saveWithoutMetadata(registries);
-    }
-
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public void increaseRadius() {
