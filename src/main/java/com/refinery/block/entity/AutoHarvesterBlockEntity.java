@@ -4,6 +4,9 @@ import com.refinery.RefineryMod;
 import com.refinery.block.AutoHarvesterBlock;
 import com.refinery.compat.LogisticsPipeCompat;
 import com.refinery.menu.AutoHarvesterMenu;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -109,17 +112,8 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                 case 0 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0xFFFF0000) | (value & 0xFFFF);
                 case 1 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 2 -> AutoHarvesterBlockEntity.this.working = (value != 0);
-                case 4 -> {
-                    AutoHarvesterBlockEntity.this.enabled = (value != 0);
-                    AutoHarvesterBlockEntity.this.setChanged();
-                    AutoHarvesterBlockEntity.this.syncToClient();
-                }
-                case 5 -> {
-                    AutoHarvesterBlockEntity.this.radius = Math.clamp(value, MIN_RADIUS, MAX_RADIUS);
-                    AutoHarvesterBlockEntity.this.scanIndex = 0;
-                    AutoHarvesterBlockEntity.this.setChanged();
-                    AutoHarvesterBlockEntity.this.syncToClient();
-                }
+                case 4 -> AutoHarvesterBlockEntity.this.setEnabled(value != 0);
+                case 5 -> AutoHarvesterBlockEntity.this.setRadius(value);
             }
         }
 
@@ -701,6 +695,16 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
             setChanged();
             syncToClient();
         }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public void increaseRadius() {
