@@ -83,16 +83,35 @@ public class AutoHarvesterMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (this.container instanceof AutoHarvesterBlockEntity be) {
-            switch (id) {
-                case 0 -> be.toggleEnabled();
-                case 1 -> be.decreaseRadius();
-                case 2 -> be.increaseRadius();
-                default -> { return false; }
+        switch (id) {
+            case 0 -> {
+                boolean newEnabled = !isEnabled();
+                this.data.set(4, newEnabled ? 1 : 0);
+                if (this.container instanceof AutoHarvesterBlockEntity be) {
+                    be.setEnabled(newEnabled);
+                }
+                return true;
             }
-            return true;
+            case 1 -> {
+                int newRadius = Math.max(AutoHarvesterBlockEntity.MIN_RADIUS, getRadius() - 1);
+                this.data.set(5, newRadius);
+                if (this.container instanceof AutoHarvesterBlockEntity be) {
+                    be.setRadius(newRadius);
+                }
+                return true;
+            }
+            case 2 -> {
+                int newRadius = Math.min(AutoHarvesterBlockEntity.MAX_RADIUS, getRadius() + 1);
+                this.data.set(5, newRadius);
+                if (this.container instanceof AutoHarvesterBlockEntity be) {
+                    be.setRadius(newRadius);
+                }
+                return true;
+            }
+            default -> {
+                return false;
+            }
         }
-        return false;
     }
 
     @Override

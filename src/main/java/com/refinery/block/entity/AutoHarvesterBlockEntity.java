@@ -4,6 +4,9 @@ import com.refinery.RefineryMod;
 import com.refinery.block.AutoHarvesterBlock;
 import com.refinery.compat.LogisticsPipeCompat;
 import com.refinery.menu.AutoHarvesterMenu;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -102,8 +105,8 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                 case 0 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0xFFFF0000) | (value & 0xFFFF);
                 case 1 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 2 -> AutoHarvesterBlockEntity.this.working = (value != 0);
-                case 4 -> AutoHarvesterBlockEntity.this.enabled = (value != 0);
-                case 5 -> AutoHarvesterBlockEntity.this.radius = value;
+                case 4 -> AutoHarvesterBlockEntity.this.setEnabled(value != 0);
+                case 5 -> AutoHarvesterBlockEntity.this.setRadius(value);
             }
         }
 
@@ -643,6 +646,9 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         if (this.enabled != enabled) {
             this.enabled = enabled;
             setChanged();
+            if (this.level != null && !this.level.isClientSide()) {
+                this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
+            }
         }
     }
 
@@ -660,7 +666,20 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
             this.radius = clamped;
             this.scanIndex = 0;
             setChanged();
+            if (this.level != null && !this.level.isClientSide()) {
+                this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
+            }
         }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public void increaseRadius() {

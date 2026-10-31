@@ -144,6 +144,7 @@ public class AutoHarvesterScreen extends AbstractContainerScreen<AutoHarvesterMe
             // Power Switch clicked (xo + 122..166, yo + 18..32)
             if (mouseX >= xo + 122 && mouseX <= xo + 166 && mouseY >= yo + 18 && mouseY <= yo + 32) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 0);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
@@ -153,6 +154,7 @@ public class AutoHarvesterScreen extends AbstractContainerScreen<AutoHarvesterMe
             // Decrease Radius clicked (xo + 122..135, yo + 36..50)
             if (mouseX >= xo + 122 && mouseX <= xo + 135 && mouseY >= yo + 36 && mouseY <= yo + 50) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 1);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 1);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
@@ -162,6 +164,7 @@ public class AutoHarvesterScreen extends AbstractContainerScreen<AutoHarvesterMe
             // Increase Radius clicked (xo + 153..166, yo + 36..50)
             if (mouseX >= xo + 153 && mouseX <= xo + 166 && mouseY >= yo + 36 && mouseY <= yo + 50) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 2);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 2);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
