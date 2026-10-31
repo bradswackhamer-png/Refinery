@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
@@ -78,6 +79,16 @@ public class SlopedConveyorBeltBlock extends Block implements EntityBlock {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return Shapes.empty();
+    }
+
+    @Override
+    protected boolean useShapeForLightOcclusion(BlockState state) {
+        return false;
     }
 
     @Override

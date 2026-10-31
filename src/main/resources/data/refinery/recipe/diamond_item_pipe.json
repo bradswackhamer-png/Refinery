@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MGM"
+  ],
+  "key": {
+    "M": "minecraft:diamond",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:diamond_item_pipe"
+,    "count": 10
+  }
+}

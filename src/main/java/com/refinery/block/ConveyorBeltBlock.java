@@ -34,6 +34,7 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
@@ -72,6 +73,16 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
     }
 
     @Override
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return Shapes.empty();
+    }
+
+    @Override
+    protected boolean useShapeForLightOcclusion(BlockState state) {
+        return false;
+    }
+
+    @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;
     }
@@ -82,8 +93,8 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         BlockPos currentPos = context.getClickedPos();
         Level level = context.getLevel();
 
-        boolean front = isBeltMatching(level, currentPos.relative(facing), facing);
-        boolean back = isBeltMatching(level, currentPos.relative(facing.getOpposite()), facing);
+        boolean front = isBeltMatchingFront(level, currentPos, facing);
+        boolean back = isBeltMatchingBack(level, currentPos, facing);
         boolean powered = level.hasNeighborSignal(currentPos);
 
         return defaultBlockState()
@@ -143,20 +154,9 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
             RandomSource random
     ) {
         Direction facing = state.getValue(FACING);
-
-        if (direction == facing) {
-            boolean front = neighborState.getBlock() instanceof ConveyorBeltBlock
-                    && neighborState.getValue(FACING) == facing;
-            return state.setValue(CONNECTED_FRONT, front);
-        }
-
-        if (direction == facing.getOpposite()) {
-            boolean back = neighborState.getBlock() instanceof ConveyorBeltBlock
-                    && neighborState.getValue(FACING) == facing;
-            return state.setValue(CONNECTED_BACK, back);
-        }
-
-        return super.updateShape(state, levelReader, scheduledTicks, currentPos, direction, neighborPos, neighborState, random);
+        boolean front = isBeltMatchingFront(levelReader, currentPos, facing);
+        boolean back = isBeltMatchingBack(levelReader, currentPos, facing);
+        return state.setValue(CONNECTED_FRONT, front).setValue(CONNECTED_BACK, back);
     }
 
     @Override
@@ -178,16 +178,55 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         }
     }
 
-    public static BlockState updateConnections(BlockState state, Level level, BlockPos pos) {
+    public static BlockState updateConnections(BlockState state, LevelReader level, BlockPos pos) {
         Direction facing = state.getValue(FACING);
-        boolean front = isBeltMatching(level, pos.relative(facing), facing);
-        boolean back = isBeltMatching(level, pos.relative(facing.getOpposite()), facing);
+        boolean front = isBeltMatchingFront(level, pos, facing);
+        boolean back = isBeltMatchingBack(level, pos, facing);
         return state.setValue(CONNECTED_FRONT, front).setValue(CONNECTED_BACK, back);
     }
 
-    private static boolean isBeltMatching(Level level, BlockPos pos, Direction facing) {
-        BlockState neighbor = level.getBlockState(pos);
-        return neighbor.getBlock() instanceof ConveyorBeltBlock && neighbor.getValue(FACING) == facing;
+    private static boolean isBeltMatchingFront(LevelReader level, BlockPos pos, Direction facing) {
+        if (level == null) return false;
+        BlockPos frontPos = pos.relative(facing);
+        BlockState neighbor = level.getBlockState(frontPos);
+        if (neighbor.getBlock() instanceof ConveyorBeltBlock && neighbor.getValue(FACING) == facing) {
+            return true;
+        }
+        if (neighbor.getBlock() instanceof RightAngleConveyorBeltBlock && neighbor.getValue(RightAngleConveyorBeltBlock.FACING) == facing) {
+            return true;
+        }
+        if (neighbor.getBlock() instanceof SlopedConveyorBeltBlock && neighbor.getValue(SlopedConveyorBeltBlock.FACING) == facing
+                && neighbor.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.UP) {
+            return true;
+        }
+        BlockState neighborBelow = level.getBlockState(frontPos.below());
+        if (neighborBelow.getBlock() instanceof SlopedConveyorBeltBlock && neighborBelow.getValue(SlopedConveyorBeltBlock.FACING) == facing
+                && neighborBelow.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.DOWN) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isBeltMatchingBack(LevelReader level, BlockPos pos, Direction facing) {
+        if (level == null) return false;
+        BlockPos backPos = pos.relative(facing.getOpposite());
+        BlockState neighbor = level.getBlockState(backPos);
+        if (neighbor.getBlock() instanceof ConveyorBeltBlock && neighbor.getValue(FACING) == facing) {
+            return true;
+        }
+        if (neighbor.getBlock() instanceof RightAngleConveyorBeltBlock && RightAngleConveyorBeltBlock.getExitDirection(neighbor) == facing) {
+            return true;
+        }
+        if (neighbor.getBlock() instanceof SlopedConveyorBeltBlock && neighbor.getValue(SlopedConveyorBeltBlock.FACING) == facing
+                && neighbor.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.DOWN) {
+            return true;
+        }
+        BlockState neighborBelow = level.getBlockState(backPos.below());
+        if (neighborBelow.getBlock() instanceof SlopedConveyorBeltBlock && neighborBelow.getValue(SlopedConveyorBeltBlock.FACING) == facing
+                && neighborBelow.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.UP) {
+            return true;
+        }
+        return false;
     }
 
     @Override

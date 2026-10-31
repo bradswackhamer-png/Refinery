@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/pipe/gold_pipe"
+  }
+}

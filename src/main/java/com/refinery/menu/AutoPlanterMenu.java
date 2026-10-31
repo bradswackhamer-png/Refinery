@@ -88,16 +88,37 @@ public class AutoPlanterMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (this.container instanceof AutoPlanterBlockEntity be) {
-            switch (id) {
-                case 0 -> be.toggleEnabled();
-                case 1 -> be.decreaseRadius();
-                case 2 -> be.increaseRadius();
-                default -> { return false; }
+        switch (id) {
+            case 0 -> {
+                boolean newEnabled = !isEnabled();
+                this.data.set(4, newEnabled ? 1 : 0);
+                if (this.container instanceof AutoPlanterBlockEntity be) {
+                    be.setEnabled(newEnabled);
+                }
+                return true;
             }
-            return true;
+            case 1 -> {
+                int r = getRadius();
+                if (r > AutoPlanterBlockEntity.MIN_RADIUS) {
+                    this.data.set(5, r - 1);
+                    if (this.container instanceof AutoPlanterBlockEntity be) {
+                        be.setRadius(r - 1);
+                    }
+                }
+                return true;
+            }
+            case 2 -> {
+                int r = getRadius();
+                if (r < AutoPlanterBlockEntity.MAX_RADIUS) {
+                    this.data.set(5, r + 1);
+                    if (this.container instanceof AutoPlanterBlockEntity be) {
+                        be.setRadius(r + 1);
+                    }
+                }
+                return true;
+            }
+            default -> { return false; }
         }
-        return false;
     }
 
     @Override

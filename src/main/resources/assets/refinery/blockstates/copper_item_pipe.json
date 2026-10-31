@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/copper_item_pipe" }
+  }
+}

@@ -5,9 +5,12 @@ import com.refinery.block.AutoPlanterBlock;
 import com.refinery.menu.AutoPlanterMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -95,8 +98,17 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                 case 0 -> AutoPlanterBlockEntity.this.energy = (AutoPlanterBlockEntity.this.energy & 0xFFFF0000) | (value & 0xFFFF);
                 case 1 -> AutoPlanterBlockEntity.this.energy = (AutoPlanterBlockEntity.this.energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 2 -> AutoPlanterBlockEntity.this.working = (value != 0);
-                case 4 -> AutoPlanterBlockEntity.this.enabled = (value != 0);
-                case 5 -> AutoPlanterBlockEntity.this.radius = value;
+                case 4 -> {
+                    AutoPlanterBlockEntity.this.enabled = (value != 0);
+                    AutoPlanterBlockEntity.this.setChanged();
+                    AutoPlanterBlockEntity.this.syncToClient();
+                }
+                case 5 -> {
+                    AutoPlanterBlockEntity.this.radius = Math.clamp(value, MIN_RADIUS, MAX_RADIUS);
+                    AutoPlanterBlockEntity.this.scanIndex = 0;
+                    AutoPlanterBlockEntity.this.setChanged();
+                    AutoPlanterBlockEntity.this.syncToClient();
+                }
             }
         }
 
@@ -397,6 +409,7 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         if (this.enabled != enabled) {
             this.enabled = enabled;
             setChanged();
+            syncToClient();
         }
     }
 
@@ -414,6 +427,7 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
             this.radius = clamped;
             this.scanIndex = 0;
             setChanged();
+            syncToClient();
         }
     }
 
@@ -427,6 +441,22 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         if (this.radius > MIN_RADIUS) {
             setRadius(this.radius - 1);
         }
+    }
+
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override
@@ -449,6 +479,7 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
         this.working = input.getBooleanOr("working", false);
         this.enabled = input.getBooleanOr("enabled", true);
         this.radius = Math.clamp(input.getIntOr("radius", DEFAULT_RADIUS), MIN_RADIUS, MAX_RADIUS);
+        this.items.clear();
         ContainerHelper.loadAllItems(input, this.items);
     }
 

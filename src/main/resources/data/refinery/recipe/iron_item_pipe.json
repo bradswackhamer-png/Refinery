@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MGM"
+  ],
+  "key": {
+    "M": "minecraft:iron_ingot",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:iron_item_pipe"
+,    "count": 10
+  }
+}

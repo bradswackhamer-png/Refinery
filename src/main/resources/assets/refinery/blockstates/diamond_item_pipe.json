@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/diamond_item_pipe" }
+  }
+}

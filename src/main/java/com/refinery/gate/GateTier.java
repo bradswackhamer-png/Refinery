@@ -1,6 +1,7 @@
 package com.refinery.gate;
 
 public enum GateTier {
+    BLANK(0, 0, "Blank Gate", 0xFF555555),
     BASIC(1, 0, "Basic Gate", 0xFF8A8A8A),
     IRON(2, 2, "Iron Gate", 0xFFD8D8D8),
     GOLD(4, 4, "Gold Gate", 0xFFFFD700),

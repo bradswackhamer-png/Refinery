@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LGL"
+  ],
+  "key": {
+    "L": "minecraft:lava_bucket",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:void_pipe",
+    "count": 10
+  }
+}

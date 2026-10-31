@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.10.jar`
+`refinery-1.8.12.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.10 (NeoForge 26.3)`
+`Industrial Refinery 1.8.12 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,15 +215,48 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.8.10
+# Industrial Refinery v1.8.12
 
-### What's New in v1.8.10:
+### What's New in v1.8.12:
+- **Native Industrial 3D Monolithic Pipe Infrastructure (`refinery` namespace)**:
+  - Built-in, fully autonomous native industrial pipe infrastructure directly integrated into Industrial Refinery, giving complete control over physical geometry, rendering, and logic without external mod dependencies.
+  - **100% Round & Perfectly Seamless Geometry**:
+    - 12-sided faceted cylindrical geometry spanning normalized radius 0.20 (3.2 units).
+    - Straight runs across 10, 20, 50, or more blocks render as a single continuous, unbroken cylinder from coordinate 0.0 to 1.0 with mathematical boundary vertex alignment and zero visual joint lines or collar seams.
+    - Central multi-directional junction hubs dynamically form smooth 90° elbows, tees, and 4-way/6-way crosses with matching radial curvature.
+    - Bolted industrial flanges (Fitting 11) with 6 hex studs render strictly at machine, tank, pump, boiler, and container connection terminals.
+  - **Comprehensive Material Suite**:
+    - Industrial Steel Fluid Pipe & Item Pipe (1,000 mB / 8 items/t).
+    - High-Capacity Copper Fluid Pipe (2,000 mB / fast fluid transfer).
+    - Heavy Cast Iron Fluid Pipe (1,500 mB / resilient high-pressure fluid transfer).
+    - High-Speed Brass Item Pipe (16 items/t / high-throughput transport).
+    - Active Fluid Extractor Pipe & Active Item Extractor Pipe with automated directional machine extraction.
+    - Industrial Void Pipe (infinite sink for surplus fluids and items).
+  - **Live In-World 3D Item Transport Rendering**:
+    - Floating 3D item packets travel in real time along the central pipe axis with dynamic orientation, smooth progress interpolation, and gentle rotation.
+  - **Interactive Pipe Wrench Control**:
+    - Right-click pipe faces with the Refinery Wrench to manually toggle side connections open or disconnected.
+  - **Seamless Native Interoperability**:
+    - Full bidirectional compatibility with Industrial Refinery Multiblock Liquid Storage Tanks, Boilers, Pumps, Multismelters, Metal Presses, Grinders, and Pipe Gates.
+  - **Solid Monolithic Fitting Hub & Visual Refinements**:
+    - Replaced legacy corner quad patches with a solid 12-sided spherical fitting hub, eliminating floating square artifacts at tees and elbows.
+    - Fixed cylinder vertex winding and outward normal orientation, closing missing faces on 90° pipe elbows.
+    - Single standalone pipe blocks render as complete solid cylindrical segments with closed end caps.
+
+### Previous v1.8.11 Highlights:
+- **True Round 3D Monolithic Pipe Geometry (`Logistics Automation`)**:
+  - Replaced legacy cubic boxes with true 12-sided faceted cylindrical pipe geometry (`PipeGeometry.java`) matching the monolithic 3D machine aesthetic.
+  - **Seamless Straight Runs**: Pipes connecting to each other now share continuous cylindrical profiles (radius 3.2 units) with zero collar breaks, zero block-boundary seams, and zero dark holes. Consecutive pipes merge into a smooth continuous industrial pipeline.
+  - **Machine Connection Flanges**: Connections to external inventories, machines, tanks, and boilers (`ARM_EXTENDED`) feature authentic heavy bolted connection flanges (Fitting 11 Flange) with raised collar rims, machined hex bolts, and recessed gasket seals.
+  - **Multi-Axial Junction Core (`CORE`)**: Central junction seamlessly connects straight runs, smooth 90° elbows, and tee branches without square corners or protruding box faces.
+  - **Seamless Textures & LabPBR 1.3 Updates**: Longitudinal brushed metal texture wrapping around the cylindrical surface with physically accurate diffuse and specular cylindrical lighting. Intelligent logistics pipes feature flush illuminated status LEDs.
+  - **Automated Baking & Mod Jar Deployment**: Fully integrated into `scripts/generate_pipe_texture_pack.ps1` with Java 25 compilation directly updating the mod jar and resource pack.
+
+### Previous v1.8.10 Highlights:
 - **Logistics Automation Ultra-Realistic 3D Monolithic Pipe Pack**:
   - Full high-definition visual upgrade pack for the Logistics Automation (`logistics`) pipe network.
   - **Photorealistic 64x64 PBR Textures**: Replaces legacy textures with brushed anisotropic metals, ambient occlusion depth, hex socket screws, and crystalline viewports preserving live item/fluid transit visibility.
   - **LabPBR 1.3 Shader Standard**: Normal displacement maps (`_n.png`) and specular/roughness maps (`_s.png`) provide real-time 3D relief, metal reflections, and illuminated glows with modern shader packs.
-  - **3D Monolithic Block Models**: Chamfered 12-sided junction hubs, reinforced corner brackets, physical connection flanges with hex bolts, and mid-segment clamp sleeves.
-  - **Standalone Downloads**: Kept unbaked from the mod jar as standalone downloads with proper forward-slash zip structures (`resourcepacks/Logistics-UltraRealistic-3D-Pipes.zip`, `MC1.21.1.zip`, and `MC1.20.1.zip`), eliminating pack incompatibility warnings.
 
 ### Previous v1.8.9 Highlights:
 - **In-Place Conveyor Belt Rotation**:

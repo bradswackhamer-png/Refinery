@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/merge_fluid_pipe" }
+  }
+}

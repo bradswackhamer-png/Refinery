@@ -1,6 +1,7 @@
 # ==============================================================================
-# Ultra-Realistic 3D Monolithic Pipe Resource Pack Generator
-# For Logistics Automation (logistics mod)
+# Ultra-Realistic Industrial Cylindrical Pipe Resource Pack Generator
+# Based on Real Industrial Pipe Fittings (Elbows, Tees, Couplings)
+# For Minecraft 26.3 & Logistics Automation
 # ==============================================================================
 
 param(
@@ -23,21 +24,21 @@ $texturesItemDir = Join-Path $packPath "assets\logistics\textures\item\pipe"
 $modelsBlockDir = Join-Path $packPath "assets\logistics\models\block\pipe"
 $itemsDir = Join-Path $packPath "assets\logistics\items\pipe"
 
-Write-Host "Creating Resource Pack directories at: $packPath" -ForegroundColor Cyan
+Write-Host "Creating Resource Pack directories for Minecraft 26.3..." -ForegroundColor Cyan
 New-Item -ItemType Directory -Force -Path $texturesBlockDir | Out-Null
 New-Item -ItemType Directory -Force -Path $texturesItemDir | Out-Null
 New-Item -ItemType Directory -Force -Path $modelsBlockDir | Out-Null
 New-Item -ItemType Directory -Force -Path $itemsDir | Out-Null
 
 # ==============================================================================
-# 1. pack.mcmeta & pack.png
+# 1. pack.mcmeta (Strictly Formatted for Minecraft 26.3)
 # ==============================================================================
 $packMcmeta = @"
 {
   "pack": {
     "pack_format": 46,
     "supported_formats": [15, 65],
-    "description": "Ultra-Realistic 3D Monolithic Pipes for Logistics Automation"
+    "description": "Ultra-Realistic Industrial 3D Pipes for Logistics Automation"
   }
 }
 "@
@@ -45,40 +46,35 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText((Join-Path $packPath "pack.mcmeta"), $packMcmeta, $utf8NoBom)
 
 # ==============================================================================
-# Helper Drawing & PBR Functions
+# 2. PBR Normal & Specular Map Generator (LabPBR 1.3)
 # ==============================================================================
-
 function Save-ImageWithPBR(
     [System.Drawing.Bitmap]$colorBmp,
     [string]$basePath,
-    [float]$roughness = 0.35,
-    [float]$metalness = 0.9,
-    [float[,]]$customHeight = $null,
+    [float]$roughness = 0.28,
+    [float]$metalness = 0.92,
     [int]$emissiveMask = 0
 ) {
     $w = $colorBmp.Width
     $h = $colorBmp.Height
 
-    # 1. Save Base Color
+    # 1. Base Color
     $colorPath = "$basePath.png"
     $colorBmp.Save($colorPath, [System.Drawing.Imaging.ImageFormat]::Png)
 
-    # 2. Generate Height if not provided
-    $height = if ($customHeight -ne $null) { $customHeight } else {
-        $arr = New-Object 'float[]' ($w * $h)
-        for ($y = 0; $y -lt $h; $y++) {
-            for ($x = 0; $x -lt $w; $x++) {
-                $c = $colorBmp.GetPixel($x, $y)
-                $lum = (0.299 * $c.R + 0.587 * $c.G + 0.114 * $c.B) / 255.0
-                $arr[$y * $w + $x] = [float]($lum * ($c.A / 255.0))
-            }
-        }
-        $arr
-    }
-
-    # 3. Normal Map (_n.png) via Sobel filter
+    # 2. Normal Map (_n.png) via Sobel filter & cylindrical curvature
     $normBmp = New-Object System.Drawing.Bitmap($w, $h)
     $specBmp = New-Object System.Drawing.Bitmap($w, $h)
+
+    # Calculate height from luminance
+    $height = New-Object 'float[]' ($w * $h)
+    for ($y = 0; $y -lt $h; $y++) {
+        for ($x = 0; $x -lt $w; $x++) {
+            $c = $colorBmp.GetPixel($x, $y)
+            $lum = (0.299 * $c.R + 0.587 * $c.G + 0.114 * $c.B) / 255.0
+            $height[$y * $w + $x] = [float]$lum
+        }
+    }
 
     for ($y = 0; $y -lt $h; $y++) {
         $ym1 = if ($y -gt 0) { $y - 1 } else { $y }
@@ -87,22 +83,11 @@ function Save-ImageWithPBR(
             $xm1 = if ($x -gt 0) { $x - 1 } else { $x }
             $xp1 = if ($x -lt $w - 1) { $x + 1 } else { $x }
 
-            $h_xp1_ym1 = $height[$ym1 * $w + $xp1]
-            $h_xp1_y   = $height[$y * $w + $xp1]
-            $h_xp1_yp1 = $height[$yp1 * $w + $xp1]
-
-            $h_xm1_ym1 = $height[$ym1 * $w + $xm1]
-            $h_xm1_y   = $height[$y * $w + $xm1]
-            $h_xm1_yp1 = $height[$yp1 * $w + $xm1]
-
-            $h_x_ym1   = $height[$ym1 * $w + $x]
-            $h_x_yp1   = $height[$yp1 * $w + $x]
-
-            $dx = ($h_xp1_ym1 + 2.0 * $h_xp1_y + $h_xp1_yp1) -
-                  ($h_xm1_ym1 + 2.0 * $h_xm1_y + $h_xm1_yp1)
-            $dy = ($h_xm1_yp1 + 2.0 * $h_x_yp1 + $h_xp1_yp1) -
-                  ($h_xm1_ym1 + 2.0 * $h_x_ym1 + $h_xp1_ym1)
-            $dz = 0.333333
+            $dx = ($height[$ym1 * $w + $xp1] + 2.0 * $height[$y * $w + $xp1] + $height[$yp1 * $w + $xp1]) -
+                  ($height[$ym1 * $w + $xm1] + 2.0 * $height[$y * $w + $xm1] + $height[$yp1 * $w + $xm1])
+            $dy = ($height[$yp1 * $w + $xm1] + 2.0 * $height[$yp1 * $w + $x] + $height[$yp1 * $w + $xp1]) -
+                  ($height[$ym1 * $w + $xm1] + 2.0 * $height[$ym1 * $w + $x] + $height[$ym1 * $w + $xp1])
+            $dz = 0.25
 
             $len = [Math]::Sqrt($dx * $dx + $dy * $dy + $dz * $dz)
             $nx = ($dx / $len) * 0.5 + 0.5
@@ -116,29 +101,9 @@ function Save-ImageWithPBR(
             $normBmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb($na, $nr, $ng, $nb))
 
             # LabPBR Specular: R = smoothness, G = metalness, B = emissive
-            $origC = $colorBmp.GetPixel($x, $y)
-            $pixRough = $roughness
-            $pixMetal = $metalness
-            $emissiveVal = 0
-
-            # If pixel is transparent/glass
-            if ($origC.A -eq 0) {
-                $smooth = 0
-                $f0 = 0
-            } elseif ($origC.A -lt 100) {
-                # Glass
-                $smooth = 250
-                $f0 = 50 # Dielectric glass
-            } else {
-                $smooth = [Math]::Min(255, [Math]::Max(0, [int]((1.0 - $pixRough) * 255.0)))
-                $f0 = [Math]::Min(255, [Math]::Max(0, [int]($pixMetal * 255.0)))
-            }
-
-            if ($emissiveMask -gt 0) {
-                $emissiveVal = $emissiveMask
-            }
-
-            $specBmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $smooth, $f0, $emissiveVal))
+            $smooth = [Math]::Min(255, [Math]::Max(0, [int]((1.0 - $roughness) * 255.0)))
+            $f0 = [Math]::Min(255, [Math]::Max(0, [int]($metalness * 255.0)))
+            $specBmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $smooth, $f0, $emissiveMask))
         }
     }
 
@@ -148,429 +113,263 @@ function Save-ImageWithPBR(
     $specBmp.Dispose()
 }
 
-# Draw Hex Bolt / Socket Head Rivet
-function Draw-Bolt([System.Drawing.Graphics]$g, [int]$cx, [int]$cy, [int]$radius, [System.Drawing.Color]$headColor, [System.Drawing.Color]$socketColor) {
-    $rimPenLight = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(200, 255, 255, 255), 1.0)
-    $rimPenDark = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(180, 0, 0, 0), 1.0)
-    $headBrush = New-Object System.Drawing.SolidBrush($headColor)
-    $socketBrush = New-Object System.Drawing.SolidBrush($socketColor)
-
-    # Cast drop shadow
-    $shadowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(100, 0, 0, 0))
-    $g.FillEllipse($shadowBrush, $cx - $radius, $cy - $radius + 1, $radius * 2, $radius * 2)
-
-    # Bolt outer head
-    $g.FillEllipse($headBrush, $cx - $radius, $cy - $radius, $radius * 2, $radius * 2)
-    # Highlights & shadows
-    $g.DrawArc($rimPenLight, $cx - $radius, $cy - $radius, $radius * 2, $radius * 2, 180, 180)
-    $g.DrawArc($rimPenDark, $cx - $radius, $cy - $radius, $radius * 2, $radius * 2, 0, 180)
-
-    # Recessed Allen hex socket in center
-    $innerR = [Math]::Max(1, [int]($radius * 0.45))
-    $g.FillRectangle($socketBrush, $cx - $innerR, $cy - $innerR, $innerR * 2, $innerR * 2)
-
-    $rimPenLight.Dispose()
-    $rimPenDark.Dispose()
-    $headBrush.Dispose()
-    $socketBrush.Dispose()
-    $shadowBrush.Dispose()
-}
-
 # ==============================================================================
-# 2. GENERATE CORE TEXTURES (64x64)
+# 3. SOLID INDUSTRIAL CYLINDRICAL ARM TEXTURE GENERATOR
 # ==============================================================================
-Write-Host "Generating Ultra-Realistic 64x64 Monolithic Pipe Textures..." -ForegroundColor Green
-
-function Generate-CoreTexture(
+# Generates the solid cylindrical pipe arm matching the reference image.
+# Features:
+# - Top Half (Y = 0..31): Industrial Bolted Machine Flange (Fitting 11) for ARM_EXTENDED
+# - Bottom Half (Y = 32..63): 100% SEAMLESS brushed cylindrical pipe body
+#   Zero collar lines, zero vertical seams - straight pipe runs merge continuously
+function Generate-IndustrialArmTexture(
     [string]$name,
-    [System.Drawing.Color]$baseCol,
-    [System.Drawing.Color]$accentCol,
-    [float]$metalness = 0.9,
-    [float]$roughness = 0.3,
-    [string]$style = "standard", # "standard", "fluid", "logistics", "solid", "void", "gold_powered"
-    [string]$subText = ""
+    [float]$baseR, [float]$baseG, [float]$baseB,
+    [float]$roughness = 0.28,
+    [float]$metalness = 0.92,
+    [string]$style = "standard" # "standard", "fluid", "extractor", "powered", "void"
 ) {
     $bmp = New-Object System.Drawing.Bitmap(64, 64)
-    $g = [System.Drawing.Graphics]::FromImage($bmp)
-    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $g.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
-
-    $fw = 8 # Heavy 8-pixel monolithic frame border
-
-    # 1. Frame Fill
-    $baseBrush = New-Object System.Drawing.SolidBrush($baseCol)
-    # Top bar
-    $g.FillRectangle($baseBrush, 0, 0, 64, $fw)
-    # Bottom bar
-    $g.FillRectangle($baseBrush, 0, 64 - $fw, 64, $fw)
-    # Left bar
-    $g.FillRectangle($baseBrush, 0, $fw, $fw, 64 - $fw * 2)
-    # Right bar
-    $g.FillRectangle($baseBrush, 64 - $fw, $fw, $fw, 64 - $fw * 2)
-
-    # 2. Brushed Metal Texture / Grain
     $rand = New-Object System.Random(1337 + $name.GetHashCode())
-    for ($i = 0; $i -lt 120; $i++) {
-        $gx = $rand.Next(0, 64)
-        $gy = $rand.Next(0, 64)
-        $inFrame = ($gy -lt $fw) -or ($gy -ge (64 - $fw)) -or ($gx -lt $fw) -or ($gx -ge (64 - $fw))
-        if ($inFrame) {
-            $delta = $rand.Next(-22, 22)
-            $r = [Math]::Min(255, [Math]::Max(0, $baseCol.R + $delta))
-            $gCol = [Math]::Min(255, [Math]::Max(0, $baseCol.G + $delta))
-            $b = [Math]::Min(255, [Math]::Max(0, $baseCol.B + $delta))
-            $brushNoise = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(160, $r, $gCol, $b))
-            $gw = $rand.Next(1, 4)
-            $g.FillRectangle($brushNoise, $gx, $gy, $gw, 1)
-            $brushNoise.Dispose()
+
+    # =========================================================================
+    # Top Half (Y = 0..31): Industrial Bolted Machine Flange (Fitting 11)
+    # Used when connecting to machines / inventory endpoints via ARM_EXTENDED
+    # =========================================================================
+    for ($y = 0; $y -lt 32; $y++) {
+        for ($x = 0; $x -lt 64; $x++) {
+            $noise = ($rand.NextDouble() - 0.5) * 5.0
+            $br = [Math]::Min(255, [Math]::Max(0, [int]($baseR * 0.70 + $noise)))
+            $bg = [Math]::Min(255, [Math]::Max(0, [int]($baseG * 0.70 + $noise)))
+            $bb = [Math]::Min(255, [Math]::Max(0, [int]($baseB * 0.70 + $noise)))
+            $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $br, $bg, $bb))
         }
     }
 
-    # 3. 3D Bevel Highlights & Ambient Occlusion Shadows
-    $penLight = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(180, 255, 255, 255), 1.0)
-    $penDark = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(180, 0, 0, 0), 1.0)
-    $penInnerLight = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(90, 255, 255, 255), 1.0)
-    $penInnerDark = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(140, 0, 0, 0), 1.0)
+    # Left quadrant [X: 0..31, Y: 0..31]: Circular bolted face of the flange
+    $fcx = 15.5
+    $fcy = 15.5
+    for ($y = 0; $y -lt 32; $y++) {
+        for ($x = 0; $x -lt 32; $x++) {
+            $dx = $x - $fcx
+            $dy = $y - $fcy
+            $dist = [Math]::Sqrt($dx * $dx + $dy * $dy)
 
-    # Outer Bevel
-    $g.DrawLine($penLight, 0, 0, 63, 0) # Top outer
-    $g.DrawLine($penLight, 0, 0, 0, 63) # Left outer
-    $g.DrawLine($penDark, 0, 63, 63, 63) # Bottom outer
-    $g.DrawLine($penDark, 63, 0, 63, 63) # Right outer
+            if ($dist -lt 5.0) {
+                # Dark interior bore of the pipe
+                $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, 18, 20, 24))
+            } elseif ($dist -lt 7.0) {
+                # Dark rubber / graphite gasket seal ring
+                $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, 32, 34, 40))
+            } elseif ($dist -le 14.5) {
+                # Machined flat flange face with light bevel
+                $light = if ($dy -lt 0) { 1.15 } else { 0.90 }
+                # 6 machined hex bolt heads at radius ~11.0
+                $angle = [Math]::Atan2($dy, $dx)
+                $modAngle = [Math]::Abs([Math]::IEEERemainder($angle, [Math]::PI / 3.0))
+                $isBolt = ($dist -ge 9.5 -and $dist -le 12.5) -and ($modAngle -lt 0.22)
 
-    # Secondary Outer Chamfer
-    $g.DrawLine($penLight, 1, 1, 62, 1)
-    $g.DrawLine($penLight, 1, 1, 1, 62)
-    $g.DrawLine($penDark, 1, 62, 62, 62)
-    $g.DrawLine($penDark, 62, 1, 62, 62)
+                if ($isBolt) {
+                    $light = 1.45 # Bright specular highlight on bolt heads
+                }
+                if ($dist -ge 13.5) {
+                    $light = $light * 1.25 # Outer chamfer highlight
+                }
 
-    # Inner Frame Rim Bevel (Border of viewport)
-    $g.DrawLine($penInnerDark, $fw, $fw, 64 - $fw, $fw) # Top inner shadow
-    $g.DrawLine($penInnerDark, $fw, $fw, $fw, 64 - $fw) # Left inner shadow
-    $g.DrawLine($penInnerLight, $fw, 64 - $fw, 64 - $fw, 64 - $fw) # Bottom inner highlight
-    $g.DrawLine($penInnerLight, 64 - $fw, $fw, 64 - $fw, 64 - $fw) # Right inner highlight
-
-    # 4. Corner Reinforcement Gussets
-    $gussetBrush = New-Object System.Drawing.SolidBrush($accentCol)
-    # Triangular 45-degree corner fillets
-    [System.Drawing.Point[]]$gpts1 = @(
-        [System.Drawing.Point]::new($fw, $fw),
-        [System.Drawing.Point]::new($fw + 5, $fw),
-        [System.Drawing.Point]::new($fw, $fw + 5)
-    )
-    $g.FillPolygon($gussetBrush, $gpts1)
-
-    [System.Drawing.Point[]]$gpts2 = @(
-        [System.Drawing.Point]::new(64 - $fw, $fw),
-        [System.Drawing.Point]::new(64 - $fw - 5, $fw),
-        [System.Drawing.Point]::new(64 - $fw, $fw + 5)
-    )
-    $g.FillPolygon($gussetBrush, $gpts2)
-
-    [System.Drawing.Point[]]$gpts3 = @(
-        [System.Drawing.Point]::new($fw, 64 - $fw),
-        [System.Drawing.Point]::new($fw + 5, 64 - $fw),
-        [System.Drawing.Point]::new($fw, 64 - $fw - 5)
-    )
-    $g.FillPolygon($gussetBrush, $gpts3)
-
-    [System.Drawing.Point[]]$gpts4 = @(
-        [System.Drawing.Point]::new(64 - $fw, 64 - $fw),
-        [System.Drawing.Point]::new(64 - $fw - 5, 64 - $fw),
-        [System.Drawing.Point]::new(64 - $fw, 64 - $fw - 5)
-    )
-    $g.FillPolygon($gussetBrush, $gpts4)
-
-    # 5. Machined Industrial Hex Bolts in 4 corners
-    $boltColor = [System.Drawing.Color]::FromArgb(255, [Math]::Min(255, $baseCol.R + 40), [Math]::Min(255, $baseCol.G + 40), [Math]::Min(255, $baseCol.B + 40))
-    $socketColor = [System.Drawing.Color]::FromArgb(255, [Math]::Max(0, $baseCol.R - 50), [Math]::Max(0, $baseCol.G - 50), [Math]::Max(0, $baseCol.B - 50))
-    Draw-Bolt $g 4 4 2 $boltColor $socketColor
-    Draw-Bolt $g 59 4 2 $boltColor $socketColor
-    Draw-Bolt $g 4 59 2 $boltColor $socketColor
-    Draw-Bolt $g 59 59 2 $boltColor $socketColor
-
-    # 6. Center Viewport Styling
-    if ($style -eq "standard" -or $style -eq "fluid") {
-        # Transparent crystalline sight glass with subtle glare lines and blue refraction
-        $glassGlare = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(35, 210, 240, 255), 2.0)
-        $g.DrawLine($glassGlare, 12, 14, 28, 50)
-        $g.DrawLine($glassGlare, 16, 12, 32, 48)
-        $glassGlare.Dispose()
-
-        if ($style -eq "fluid") {
-            # Fluid pipe has reinforced circumferential pressure rings and fluid flow markings
-            $ringPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(220, $accentCol.R, $accentCol.G, $accentCol.B), 2.0)
-            $g.DrawRectangle($ringPen, $fw + 2, $fw + 2, 64 - $fw * 2 - 4, 64 - $fw * 2 - 4)
-            $ringPen.Dispose()
+                $rVal = [Math]::Min(255, [Math]::Max(0, [int]($baseR * $light)))
+                $gVal = [Math]::Min(255, [Math]::Max(0, [int]($baseG * $light)))
+                $bVal = [Math]::Min(255, [Math]::Max(0, [int]($baseB * $light)))
+                $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $rVal, $gVal, $bVal))
+            }
         }
-    } elseif ($style -eq "gold_powered") {
-        # Glowing energetic plasma conduits
-        $plasmaBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-            (New-Object System.Drawing.Point(32, 8)),
-            (New-Object System.Drawing.Point(32, 56)),
-            [System.Drawing.Color]::FromArgb(255, 255, 245, 170),
-            [System.Drawing.Color]::FromArgb(255, 255, 140, 20)
-        )
-        $g.FillEllipse($plasmaBrush, 18, 18, 28, 28)
-        $plasmaBrush.Dispose()
-        $coreGlow = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 240))
-        $g.FillEllipse($coreGlow, 26, 26, 12, 12)
-        $coreGlow.Dispose()
-    } elseif ($style -eq "void") {
-        # Swirling miniature cosmic singularity
-        [System.Drawing.Point[]]$voidPts = @(
-            [System.Drawing.Point]::new(12, 12),
-            [System.Drawing.Point]::new(52, 12),
-            [System.Drawing.Point]::new(52, 52),
-            [System.Drawing.Point]::new(12, 52)
-        )
-        $voidBrush = New-Object System.Drawing.Drawing2D.PathGradientBrush(,$voidPts)
-        $voidBrush.CenterColor = [System.Drawing.Color]::FromArgb(255, 10, 2, 20)
-        $voidBrush.SurroundColors = [System.Drawing.Color[]]@([System.Drawing.Color]::FromArgb(220, 150, 40, 240))
-        $g.FillEllipse($voidBrush, 12, 12, 40, 40)
-        $voidBrush.Dispose()
-        $singularity = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 0, 0, 0))
-        $g.FillEllipse($singularity, 24, 24, 16, 16)
-        $singularity.Dispose()
-    } elseif ($style -eq "logistics") {
-        # Monolithic cybernetic node interface
-        $nodePlate = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 30, 32, 38))
-        $g.FillRectangle($nodePlate, $fw + 2, $fw + 2, 64 - $fw * 2 - 4, 64 - $fw * 2 - 4)
-        $nodePlate.Dispose()
-
-        # Circuit traces
-        $tracePen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 60, 170, 255), 1.5)
-        $g.DrawLine($tracePen, 14, 32, 26, 32)
-        $g.DrawLine($tracePen, 26, 32, 32, 26)
-        $g.DrawLine($tracePen, 32, 26, 50, 26)
-        $g.DrawLine($tracePen, 26, 32, 32, 38)
-        $g.DrawLine($tracePen, 32, 38, 50, 38)
-        $tracePen.Dispose()
-
-        # Central illuminated optic core
-        $opticBrush = New-Object System.Drawing.SolidBrush($accentCol)
-        $g.FillEllipse($opticBrush, 27, 27, 10, 10)
-        $opticBrush.Dispose()
-        $opticCenter = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
-        $g.FillEllipse($opticCenter, 30, 30, 4, 4)
-        $opticCenter.Dispose()
-    } elseif ($style -eq "solid") {
-        # Heavy armor plate
-        $plateBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, [Math]::Max(0, $baseCol.R - 20), [Math]::Max(0, $baseCol.G - 20), [Math]::Max(0, $baseCol.B - 20)))
-        $g.FillRectangle($plateBrush, $fw, $fw, 64 - $fw * 2, 64 - $fw * 2)
-        $plateBrush.Dispose()
-
-        # Center embossed emblem / detail
-        $g.DrawRectangle($penLight, 20, 20, 24, 24)
-        $g.DrawRectangle($penDark, 21, 21, 22, 22)
     }
 
-    # Clean up GDI objects
-    $baseBrush.Dispose()
-    $gussetBrush.Dispose()
-    $penLight.Dispose()
-    $penDark.Dispose()
-    $penInnerLight.Dispose()
-    $penInnerDark.Dispose()
-    $g.Dispose()
+    # Right quadrant [X: 32..63, Y: 0..31]: Cylindrical flange collar rim
+    for ($y = 0; $y -lt 32; $y++) {
+        $ncy = ($y - 15.5) / 15.5
+        $ncy = [Math]::Max(-0.98, [Math]::Min(0.98, $ncy))
+        $ncz = [Math]::Sqrt([Math]::Max(0.0, 1.0 - $ncy * $ncy))
+        $diff = [Math]::Max(0.0, -$ncy * 0.65 + $ncz * 0.74)
+        $spec = [Math]::Pow([Math]::Max(0.0, -$ncy * 0.45 + $ncz * 0.89), 16.0) * 0.40
+        $flangeLight = 0.40 + 0.50 * $diff + $spec
 
-    # Save with LabPBR
+        for ($x = 32; $x -lt 64; $x++) {
+            $mult = $flangeLight
+            if ($x -eq 32 -or $x -eq 63) { $mult = $mult * 0.75 }
+            elseif ($x -eq 33 -or $x -eq 62) { $mult = $mult * 1.20 }
+            $noise = ($rand.NextDouble() - 0.5) * 4.0
+            $rVal = [Math]::Min(255, [Math]::Max(0, [int]($baseR * $mult + $noise)))
+            $gVal = [Math]::Min(255, [Math]::Max(0, [int]($baseG * $mult + $noise)))
+            $bVal = [Math]::Min(255, [Math]::Max(0, [int]($baseB * $mult + $noise)))
+            $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $rVal, $gVal, $bVal))
+        }
+    }
+
+    # =========================================================================
+    # Bottom Half (Y = 32..63): 100% SEAMLESS Brushed Cylindrical Pipe Body
+    # Straight pipe runs repeat seamlessly along X with ZERO collar lines or seams
+    # =========================================================================
+    for ($y = 32; $y -lt 64; $y++) {
+        $cy = ($y - 47.5) / 15.5
+        $cy = [Math]::Max(-0.98, [Math]::Min(0.98, $cy))
+        $cz = [Math]::Sqrt([Math]::Max(0.0, 1.0 - $cy * $cy))
+
+        $diffuse = [Math]::Max(0.0, -$cy * 0.65 + $cz * 0.74)
+        $specAngle = [Math]::Max(0.0, -$cy * 0.45 + $cz * 0.89)
+        $spec = [Math]::Pow($specAngle, 18.0) * 0.48
+        $ambient = 0.38 + [Math]::Max(0.0, $cy * 0.12)
+
+        $cylinderLight = $ambient + 0.50 * $diffuse + $spec
+
+        for ($x = 0; $x -lt 64; $x++) {
+            $grain = ($rand.NextDouble() - 0.5) * 6.0
+            $rCol = $baseR
+            $gCol = $baseG
+            $bCol = $baseB
+            $mult = $cylinderLight
+
+            if ($style -eq "powered") {
+                if ($y -ge 42 -and $y -le 46) {
+                    $rCol = 255.0; $gCol = 245.0; $bCol = 190.0
+                    $mult = 1.45
+                }
+            } elseif ($style -eq "void") {
+                if ($y -ge 44 -and $y -le 46) {
+                    $rCol = 180.0; $gCol = 50.0; $bCol = 255.0
+                    $mult = 1.30
+                }
+            }
+
+            $finalR = [Math]::Min(255, [Math]::Max(0, [int]($rCol * $mult + $grain)))
+            $finalG = [Math]::Min(255, [Math]::Max(0, [int]($gCol * $mult + $grain)))
+            $finalB = [Math]::Min(255, [Math]::Max(0, [int]($bCol * $mult + $grain)))
+            $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $finalR, $finalG, $finalB))
+        }
+    }
+
     $targetBase = Join-Path $texturesBlockDir $name
-    $emissive = if ($style -eq "gold_powered" -or $style -eq "void" -or $style -eq "logistics") { 255 } else { 0 }
-    Save-ImageWithPBR $bmp $targetBase $roughness $metalness $null $emissive
+    $emissive = if ($style -eq "powered" -or $style -eq "void") { 255 } else { 0 }
+    Save-ImageWithPBR $bmp $targetBase $roughness $metalness $emissive
     $bmp.Dispose()
 }
 
 # ==============================================================================
-# 3. GENERATE ARM TEXTURES (64x64)
+# 4. SOLID INDUSTRIAL FITTING CORE TEXTURE GENERATOR
 # ==============================================================================
-function Generate-ArmTexture(
+# Generates the solid industrial fitting core junction matching the arm body.
+# Seamlessly merges with pipe arms - no black holes, no square borders.
+# Intelligent logistics pipes feature high-tech illuminated indicator displays.
+function Generate-IndustrialCoreTexture(
     [string]$name,
-    [System.Drawing.Color]$baseCol,
-    [System.Drawing.Color]$accentCol,
-    [float]$metalness = 0.9,
-    [float]$roughness = 0.3,
-    [string]$style = "standard"
+    [float]$baseR, [float]$baseG, [float]$baseB,
+    [float]$roughness = 0.28,
+    [float]$metalness = 0.92,
+    [string]$style = "standard" # "standard", "provider", "requester", "supplier", "crafting", "process", "satellite", "fluid", "extractor", "powered", "void", "chassis"
 ) {
     $bmp = New-Object System.Drawing.Bitmap(64, 64)
-    $g = [System.Drawing.Graphics]::FromImage($bmp)
-    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $g.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
+    $rand = New-Object System.Random(2026 + $name.GetHashCode())
 
-    # Rows 0..15: Connection Flange at [0..15, 0..15]
-    $flangeBrush = New-Object System.Drawing.SolidBrush($accentCol)
-    $g.FillRectangle($flangeBrush, 0, 0, 16, 16)
-    $flangeBrush.Dispose()
+    # Fill entire core with matching brushed cast metal that merges seamlessly with arms
+    for ($y = 0; $y -lt 64; $y++) {
+        $cy = ($y - 31.5) / 31.5
+        $cy = [Math]::Max(-0.98, [Math]::Min(0.98, $cy))
+        $cz = [Math]::Sqrt([Math]::Max(0.0, 1.0 - $cy * $cy))
 
-    # Flange Bevels & 4 Mounting Bolt Holes
-    $penL = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(200, 255, 255, 255), 1.0)
-    $penD = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(200, 0, 0, 0), 1.0)
-    $g.DrawRectangle($penL, 0, 0, 15, 15)
-    $g.DrawRectangle($penD, 1, 1, 13, 13)
+        $diffuse = [Math]::Max(0.0, -$cy * 0.65 + $cz * 0.74)
+        $specAngle = [Math]::Max(0.0, -$cy * 0.45 + $cz * 0.89)
+        $spec = [Math]::Pow($specAngle, 16.0) * 0.42
+        $ambient = 0.38 + [Math]::Max(0.0, $cy * 0.12)
+        $light = $ambient + 0.50 * $diffuse + $spec
 
-    # 4 micro bolt holes
-    $holeBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 15, 15, 15))
-    $g.FillRectangle($holeBrush, 2, 2, 2, 2)
-    $g.FillRectangle($holeBrush, 12, 2, 2, 2)
-    $g.FillRectangle($holeBrush, 2, 12, 2, 2)
-    $g.FillRectangle($holeBrush, 12, 12, 2, 2)
-    $holeBrush.Dispose()
+        for ($x = 0; $x -lt 64; $x++) {
+            $grain = ($rand.NextDouble() - 0.5) * 5.0
+            $rCol = $baseR
+            $gCol = $baseG
+            $bCol = $baseB
 
-    # Rows 16..63: Pipe Conduit Body
-    $baseBrush = New-Object System.Drawing.SolidBrush($baseCol)
-
-    # Monolithic Collar Band at joint (y = 16..26)
-    $g.FillRectangle($baseBrush, 0, 16, 64, 10)
-    # Knurled grip grooves on collar
-    for ($gx = 2; $gx -lt 64; $gx += 4) {
-        $g.DrawLine($penD, $gx, 17, $gx, 25)
-        $g.DrawLine($penL, $gx + 1, 17, $gx + 1, 25)
+            $finalR = [Math]::Min(255, [Math]::Max(0, [int]($rCol * $light + $grain)))
+            $finalG = [Math]::Min(255, [Math]::Max(0, [int]($gCol * $light + $grain)))
+            $finalB = [Math]::Min(255, [Math]::Max(0, [int]($bCol * $light + $grain)))
+            $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, $finalR, $finalG, $finalB))
+        }
     }
 
-    # Pipe Wall Rails: Left (x=0..7) and Right (x=56..63) for y=27..63
-    $g.FillRectangle($baseBrush, 0, 27, 8, 37)
-    $g.FillRectangle($baseBrush, 56, 27, 8, 37)
+    # Intelligent Logistics Status Display Inset in the center [X: 22..41, Y: 22..41]
+    if ($style -ne "standard") {
+        $lensColor = switch ($style) {
+            "provider"  { [System.Drawing.Color]::FromArgb(255, 34, 197, 94) }  # Emerald Green
+            "requester" { [System.Drawing.Color]::FromArgb(255, 6, 182, 212) }  # Cyan
+            "supplier"  { [System.Drawing.Color]::FromArgb(255, 245, 158, 11) } # Amber Orange
+            "crafting"  { [System.Drawing.Color]::FromArgb(255, 234, 179, 8) }  # Yellow Gold
+            "process"   { [System.Drawing.Color]::FromArgb(255, 168, 85, 247) } # Purple
+            "satellite" { [System.Drawing.Color]::FromArgb(255, 59, 130, 246) } # Blue
+            "fluid"     { [System.Drawing.Color]::FromArgb(255, 37, 99, 235) }  # Hydraulic Cobalt
+            "extractor" { [System.Drawing.Color]::FromArgb(255, 239, 68, 68) }  # Crimson Red
+            "powered"   { [System.Drawing.Color]::FromArgb(255, 253, 224, 71) } # Radiant Gold
+            "void"      { [System.Drawing.Color]::FromArgb(255, 192, 38, 211) } # Void Violet
+            default     { [System.Drawing.Color]::FromArgb(255, 148, 163, 184) }
+        }
 
-    # Chamfers on the rails
-    $g.DrawLine($penL, 0, 16, 0, 63)
-    $g.DrawLine($penL, 1, 16, 1, 63)
-    $g.DrawLine($penD, 63, 16, 63, 63)
-    $g.DrawLine($penD, 62, 16, 62, 63)
-
-    # Inner rail bevels
-    $g.DrawLine($penD, 7, 27, 7, 63)
-    $g.DrawLine($penL, 8, 27, 8, 63)
-    $g.DrawLine($penD, 55, 27, 55, 63)
-    $g.DrawLine($penL, 56, 27, 56, 63)
-
-    # Intermediate reinforced collar ring at y = 46..50
-    $g.FillRectangle($baseBrush, 0, 46, 64, 5)
-    $g.DrawLine($penL, 0, 46, 63, 46)
-    $g.DrawLine($penD, 0, 50, 63, 50)
-
-    # Center Viewport Glass Glare (x=8..55, y=27..45 and 51..63)
-    if ($style -eq "standard" -or $style -eq "fluid") {
-        $glassGlare = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(35, 210, 240, 255), 2.0)
-        $g.DrawLine($glassGlare, 16, 28, 48, 44)
-        $g.DrawLine($glassGlare, 16, 52, 48, 62)
-        $glassGlare.Dispose()
-    } elseif ($style -eq "gold_powered") {
-        # Plasma flow strip in center
-        $flowBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-            (New-Object System.Drawing.Point(32, 27)),
-            (New-Object System.Drawing.Point(32, 63)),
-            [System.Drawing.Color]::FromArgb(255, 255, 230, 120),
-            [System.Drawing.Color]::FromArgb(255, 255, 120, 20)
-        )
-        $g.FillRectangle($flowBrush, 22, 27, 20, 37)
-        $flowBrush.Dispose()
+        for ($y = 22; $y -le 41; $y++) {
+            for ($x = 22; $x -le 41; $x++) {
+                if ($x -eq 22 -or $y -eq 22) {
+                    $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, 20, 22, 26))
+                } elseif ($x -eq 41 -or $y -eq 41) {
+                    $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, 220, 225, 235))
+                } elseif ($x -ge 26 -and $x -le 37 -and $y -ge 26 -and $y -le 37) {
+                    $dx = $x - 31.5
+                    $dy = $y - 31.5
+                    $d = [Math]::Sqrt($dx * $dx + $dy * $dy)
+                    if ($d -le 4.5) {
+                        $bmp.SetPixel($x, $y, $lensColor)
+                    } else {
+                        $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, 28, 30, 36))
+                    }
+                } else {
+                    $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255, 38, 42, 50))
+                }
+            }
+        }
     }
-
-    $baseBrush.Dispose()
-    $penL.Dispose()
-    $penD.Dispose()
-    $g.Dispose()
 
     $targetBase = Join-Path $texturesBlockDir $name
-    $emissive = if ($style -eq "gold_powered") { 255 } else { 0 }
-    Save-ImageWithPBR $bmp $targetBase $roughness $metalness $null $emissive
+    $emissive = if ($style -ne "standard") { 255 } else { 0 }
+    Save-ImageWithPBR $bmp $targetBase $roughness $metalness $emissive
     $bmp.Dispose()
 }
 
 # ==============================================================================
-# 4. BATCH GENERATION OF ALL PIPE TEXTURES
+# 5. BATCH GENERATION OF ALL SOLID INDUSTRIAL PIPES
 # ==============================================================================
+Write-Host "Generating Solid Industrial Pipes (Iron, Copper, Gold, Stone, Void)..." -ForegroundColor Green
 
-# Palette definitions
-$colCopper = [System.Drawing.Color]::FromArgb(255, 212, 118, 76)
-$colCopperExposed = [System.Drawing.Color]::FromArgb(255, 168, 116, 88)
-$colCopperWeathered = [System.Drawing.Color]::FromArgb(255, 108, 154, 124)
-$colCopperOxidized = [System.Drawing.Color]::FromArgb(255, 78, 172, 142)
-$colBrassGusset = [System.Drawing.Color]::FromArgb(255, 185, 140, 55)
+# PALETTES (Exact materials from user's reference images)
+# 1. Industrial Galvanized / Stainless Steel (Iron & Logistics Pipes)
+$steelR = 148.0; $steelG = 154.0; $steelB = 162.0
 
-$colStone = [System.Drawing.Color]::FromArgb(255, 72, 74, 78)
-$colStoneAccent = [System.Drawing.Color]::FromArgb(255, 42, 44, 48)
+# 2. Industrial Copper (Clean, Exposed, Weathered, Oxidized)
+$copperR = 192.0; $copperG = 108.0; $copperB = 68.0
+$expCopperR = 162.0; $expCopperG = 110.0; $expCopperB = 84.0
+$weaCopperR = 110.0; $weaCopperG = 150.0; $weaCopperB = 126.0
+$oxiCopperR = 76.0;  $oxiCopperG = 172.0; $oxiCopperB = 142.0
 
-$colGold = [System.Drawing.Color]::FromArgb(255, 245, 198, 62)
-$colGoldAccent = [System.Drawing.Color]::FromArgb(255, 200, 145, 30)
+# 3. Industrial Brass / Gold
+$goldR = 215.0; $goldG = 172.0; $goldB = 52.0
 
-$colLogistics = [System.Drawing.Color]::FromArgb(255, 52, 56, 64)
-$colLogisticsBlue = [System.Drawing.Color]::FromArgb(255, 50, 170, 255)
+# 4. Cast Iron / Ductile Iron (Stone Pipes)
+$stoneR = 72.0; $stoneG = 75.0; $stoneB = 82.0
 
-$colVoid = [System.Drawing.Color]::FromArgb(255, 28, 26, 32)
-$colVoidPurple = [System.Drawing.Color]::FromArgb(255, 160, 40, 240)
+# 5. Obsidian / Titanium Carbide (Void Pipes)
+$voidR = 34.0; $voidG = 34.0; $voidB = 40.0
 
-# A. Copper Transport Pipes
-Generate-CoreTexture "copper_pipe_core" $colCopper $colBrassGusset 0.92 0.28 "standard"
-Generate-CoreTexture "copper_pipe_core_exposed" $colCopperExposed $colBrassGusset 0.85 0.38 "standard"
-Generate-CoreTexture "copper_pipe_core_weathered" $colCopperWeathered $colBrassGusset 0.70 0.48 "standard"
-Generate-CoreTexture "copper_pipe_core_oxidized" $colCopperOxidized $colBrassGusset 0.55 0.58 "standard"
-
-Generate-ArmTexture "copper_pipe_arm" $colCopper $colBrassGusset 0.92 0.28 "standard"
-Generate-ArmTexture "copper_pipe_arm_exposed" $colCopperExposed $colBrassGusset 0.85 0.38 "standard"
-Generate-ArmTexture "copper_pipe_arm_weathered" $colCopperWeathered $colBrassGusset 0.70 0.48 "standard"
-Generate-ArmTexture "copper_pipe_arm_oxidized" $colCopperOxidized $colBrassGusset 0.55 0.58 "standard"
-
-# B. Copper Fluid Pipes
-Generate-CoreTexture "copper_fluid_pipe_core" $colCopper $colBrassGusset 0.92 0.28 "fluid"
-Generate-CoreTexture "copper_fluid_pipe_core_exposed" $colCopperExposed $colBrassGusset 0.85 0.38 "fluid"
-Generate-CoreTexture "copper_fluid_pipe_core_weathered" $colCopperWeathered $colBrassGusset 0.70 0.48 "fluid"
-Generate-CoreTexture "copper_fluid_pipe_core_oxidized" $colCopperOxidized $colBrassGusset 0.55 0.58 "fluid"
-
-Generate-ArmTexture "copper_fluid_pipe_arm" $colCopper $colBrassGusset 0.92 0.28 "fluid"
-Generate-ArmTexture "copper_fluid_pipe_arm_exposed" $colCopperExposed $colBrassGusset 0.85 0.38 "fluid"
-Generate-ArmTexture "copper_fluid_pipe_arm_weathered" $colCopperWeathered $colBrassGusset 0.70 0.48 "fluid"
-Generate-ArmTexture "copper_fluid_pipe_arm_oxidized" $colCopperOxidized $colBrassGusset 0.55 0.58 "fluid"
-
-# Specific Pipe Accents
-$colStoneBlue   = [System.Drawing.Color]::FromArgb(255, 30, 80, 140)
-$colGoldPowered = [System.Drawing.Color]::FromArgb(255, 255, 255, 200)
-$colGoldFluid   = [System.Drawing.Color]::FromArgb(255, 20, 140, 220)
-$colLogisticsEmerald = [System.Drawing.Color]::FromArgb(255, 60, 220, 120)
-$colLogisticsCobalt  = [System.Drawing.Color]::FromArgb(255, 40, 180, 240)
-$colLogisticsAmber   = [System.Drawing.Color]::FromArgb(255, 240, 160, 40)
-$colLogisticsGold    = [System.Drawing.Color]::FromArgb(255, 255, 215, 0)
-$colLogisticsOrange  = [System.Drawing.Color]::FromArgb(255, 255, 100, 50)
-$colLogisticsViolet  = [System.Drawing.Color]::FromArgb(255, 180, 70, 240)
-$colExtractorOrange  = [System.Drawing.Color]::FromArgb(255, 230, 80, 40)
-$colFilterAmber      = [System.Drawing.Color]::FromArgb(255, 200, 150, 40)
-$colInsertionGreen   = [System.Drawing.Color]::FromArgb(255, 40, 200, 80)
-$colMergerBlue       = [System.Drawing.Color]::FromArgb(255, 60, 140, 240)
-$colPassthruBlue     = [System.Drawing.Color]::FromArgb(255, 40, 85, 150)
-$colPassthruLight    = [System.Drawing.Color]::FromArgb(255, 80, 150, 240)
-$colBypassRed        = [System.Drawing.Color]::FromArgb(255, 140, 40, 40)
-$colBypassAmber      = [System.Drawing.Color]::FromArgb(255, 230, 180, 40)
-
-# C. Stone Pipes
-Generate-CoreTexture "stone_pipe_core" $colStone $colStoneAccent 0.30 0.65 "standard"
-Generate-ArmTexture "stone_pipe_arm" $colStone $colStoneAccent 0.30 0.65 "standard"
-Generate-CoreTexture "stone_fluid_pipe_core" $colStone $colStoneBlue 0.30 0.65 "fluid"
-Generate-ArmTexture "stone_fluid_pipe_arm" $colStone $colStoneBlue 0.30 0.65 "fluid"
-
-# D. Gold Pipes
-Generate-CoreTexture "gold_pipe_core" $colGold $colGoldAccent 0.95 0.20 "standard"
-Generate-ArmTexture "gold_pipe_arm" $colGold $colGoldAccent 0.95 0.20 "standard"
-Generate-CoreTexture "gold_pipe_core_powered" $colGold $colGoldPowered 0.95 0.15 "gold_powered"
-Generate-ArmTexture "gold_pipe_arm_powered" $colGold $colGoldPowered 0.95 0.15 "gold_powered"
-Generate-CoreTexture "gold_fluid_pipe_core" $colGold $colGoldFluid 0.95 0.20 "fluid"
-Generate-ArmTexture "gold_fluid_pipe_arm" $colGold $colGoldFluid 0.95 0.20 "fluid"
-
-# E. Void Pipes
-Generate-CoreTexture "void_pipe_core" $colVoid $colVoidPurple 0.40 0.50 "void"
-Generate-ArmTexture "void_pipe_arm" $colVoid $colVoidPurple 0.40 0.50 "void"
-Generate-CoreTexture "void_fluid_pipe_core" $colVoid $colVoidPurple 0.40 0.50 "void"
-Generate-ArmTexture "void_fluid_pipe_arm" $colVoid $colVoidPurple 0.40 0.50 "void"
-
-# F. Logistics Automation Network Pipes
-Generate-CoreTexture "basic_logistics_pipe_core" $colLogistics $colLogisticsBlue 0.88 0.32 "logistics"
-Generate-ArmTexture "logistics_pipe_arm" $colLogistics $colLogisticsBlue 0.88 0.32 "standard"
+# A. Stainless Steel & Logistics Network Pipes (Image 2 & 3 matching)
+Generate-IndustrialCoreTexture "basic_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "standard"
+Generate-IndustrialArmTexture "logistics_pipe_arm" $steelR $steelG $steelB 0.28 0.92 "standard"
 
 # Overlays (tinted in code)
 $coreOverlayBmp = New-Object System.Drawing.Bitmap(64, 64)
 $og = [System.Drawing.Graphics]::FromImage($coreOverlayBmp)
 $og.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
 $lensBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
-# 4 corner lenses
 $og.FillRectangle($lensBrush, 0, 0, 8, 8)
 $og.FillRectangle($lensBrush, 56, 0, 8, 8)
 $og.FillRectangle($lensBrush, 0, 56, 8, 8)
@@ -581,82 +380,61 @@ $coreOverlayBmp.Save((Join-Path $texturesBlockDir "logistics_pipe_core_overlay.p
 $coreOverlayBmp.Save((Join-Path $texturesBlockDir "logistics_pipe_arm_overlay.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 $coreOverlayBmp.Dispose()
 
-# G. Intelligent Logistics Pipes
-Generate-CoreTexture "provider_logistics_pipe_core" $colLogistics $colLogisticsEmerald 0.88 0.32 "logistics"
-Generate-CoreTexture "fluid_provider_pipe_core" $colLogistics $colLogisticsEmerald 0.88 0.32 "fluid"
-Generate-CoreTexture "requester_logistics_pipe_core" $colLogistics $colLogisticsCobalt 0.88 0.32 "logistics"
-Generate-CoreTexture "supplier_logistics_pipe_core" $colLogistics $colLogisticsAmber 0.88 0.32 "logistics"
-Generate-CoreTexture "fluid_supplier_pipe_core" $colLogistics $colLogisticsAmber 0.88 0.32 "fluid"
-Generate-CoreTexture "crafting_logistics_pipe_core" $colLogistics $colLogisticsGold 0.88 0.32 "logistics"
-Generate-CoreTexture "process_logistics_pipe_core" $colLogistics $colLogisticsOrange 0.88 0.32 "logistics"
-Generate-CoreTexture "satellite_logistics_pipe_core" $colLogistics $colLogisticsViolet 0.88 0.32 "logistics"
+# Intelligent Logistics Pipes (with high-tech glowing LED status indicator)
+Generate-IndustrialCoreTexture "provider_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "provider"
+Generate-IndustrialCoreTexture "requester_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "requester"
+Generate-IndustrialCoreTexture "supplier_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "supplier"
+Generate-IndustrialCoreTexture "crafting_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "crafting"
+Generate-IndustrialCoreTexture "process_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "process"
+Generate-IndustrialCoreTexture "satellite_logistics_pipe_core" $steelR $steelG $steelB 0.28 0.92 "satellite"
+Generate-IndustrialCoreTexture "fluid_provider_pipe_core" $steelR $steelG $steelB 0.28 0.92 "fluid"
+Generate-IndustrialCoreTexture "fluid_supplier_pipe_core" $steelR $steelG $steelB 0.28 0.92 "fluid"
 
-# H. Modular Chassis Pipes Mk1 to Mk5
-$chassisCol = [System.Drawing.Color]::FromArgb(255, 42, 45, 52)
+# Chassis Pipes Mk1 to Mk5 (Solid steel fitting with status LEDs on collar)
 for ($mk = 1; $mk -le 5; $mk++) {
-    $chassisBmp = New-Object System.Drawing.Bitmap(64, 64)
-    $cg = [System.Drawing.Graphics]::FromImage($chassisBmp)
-    $cg.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $cg.Clear([System.Drawing.Color]::FromArgb(255, $chassisCol.R, $chassisCol.G, $chassisCol.B))
-
-    # Heavy outer chamfer & rivets
-    $penL = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(200, 255, 255, 255), 1.0)
-    $penD = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(200, 0, 0, 0), 1.0)
-    $cg.DrawRectangle($penL, 0, 0, 63, 63)
-    $cg.DrawRectangle($penD, 1, 1, 61, 61)
-    $colSilver = [System.Drawing.Color]::Silver
-    $colDarkGray = [System.Drawing.Color]::DarkGray
-    Draw-Bolt $cg 5 5 2 $colSilver $colDarkGray
-    Draw-Bolt $cg 58 5 2 $colSilver $colDarkGray
-    Draw-Bolt $cg 5 58 2 $colSilver $colDarkGray
-    Draw-Bolt $cg 58 58 2 $colSilver $colDarkGray
-
-    # Modular Expansion Slots (number of slots = $mk)
-    $slotBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 18, 20, 24))
-    $goldPin = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 240, 190, 50))
-    $ledColor = switch ($mk) {
-        1 { [System.Drawing.Color]::FromArgb(255, 60, 180, 255) }
-        2 { [System.Drawing.Color]::FromArgb(255, 60, 220, 100) }
-        3 { [System.Drawing.Color]::FromArgb(255, 255, 200, 40) }
-        4 { [System.Drawing.Color]::FromArgb(255, 255, 100, 40) }
-        5 { [System.Drawing.Color]::FromArgb(255, 200, 60, 255) }
-    }
-    $ledBrush = New-Object System.Drawing.SolidBrush($ledColor)
-
-    $spacing = [int](36.0 / ($mk + 1))
-    for ($s = 1; $s -le $mk; $s++) {
-        $sy = 12 + $s * $spacing
-        $cg.FillRectangle($slotBrush, 14, $sy, 36, 6)
-        $cg.DrawRectangle($penD, 14, $sy, 36, 6)
-        # Gold bus pins
-        for ($p = 18; $p -lt 46; $p += 4) {
-            $cg.FillRectangle($goldPin, $p, $sy + 2, 2, 2)
-        }
-        # Status LED
-        $cg.FillEllipse($ledBrush, 44, $sy + 1, 4, 4)
-    }
-
-    $slotBrush.Dispose()
-    $goldPin.Dispose()
-    $ledBrush.Dispose()
-    $penL.Dispose()
-    $penD.Dispose()
-    $cg.Dispose()
-
-    Save-ImageWithPBR $chassisBmp (Join-Path $texturesBlockDir "chassis_logistics_pipe_mk$($mk)_core") 0.32 0.85 $null 255
-    $chassisBmp.Dispose()
+    Generate-IndustrialCoreTexture "chassis_logistics_pipe_mk$($mk)_core" $steelR $steelG $steelB 0.28 0.92 "standard"
 }
 
-# I. Functional Pipes: Extractor, Filter, Insertion, Merger, Passthrough, Bypass
-# Extractor
-Generate-CoreTexture "extractor_pipe_core" $colLogistics $colExtractorOrange 0.88 0.32 "standard"
-Generate-ArmTexture "extractor_pipe_arm" $colLogistics $colExtractorOrange 0.88 0.32 "standard"
-# Extractor Feature (Intake nozzle & Hazard stripes)
+# Functional Pipes: Extractor, Filter, Insertion, Merger, Passthrough, Bypass
+Generate-IndustrialCoreTexture "extractor_pipe_core" $steelR $steelG $steelB 0.28 0.92 "extractor"
+Generate-IndustrialArmTexture "extractor_pipe_arm" $steelR $steelG $steelB 0.28 0.92 "extractor"
+Generate-IndustrialCoreTexture "fluid_extractor_pipe_core" $copperR $copperG $copperB 0.28 0.92 "fluid"
+Generate-IndustrialArmTexture "fluid_extractor_pipe_arm" $copperR $copperG $copperB 0.28 0.92 "fluid"
+
+Generate-IndustrialCoreTexture "filter_pipe_core" $steelR $steelG $steelB 0.28 0.92 "standard"
+Generate-IndustrialArmTexture "filter_pipe_arm" $steelR $steelG $steelB 0.28 0.92 "standard"
+$coreOverlayBmp = New-Object System.Drawing.Bitmap(64, 64)
+$og = [System.Drawing.Graphics]::FromImage($coreOverlayBmp)
+$og.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
+$lensB = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
+$og.FillRectangle($lensB, 24, 24, 16, 16)
+$lensB.Dispose()
+$og.Dispose()
+$coreOverlayBmp.Save((Join-Path $texturesBlockDir "filter_pipe_overlay.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+$coreOverlayBmp.Dispose()
+
+Generate-IndustrialCoreTexture "insertion_pipe_core" $steelR $steelG $steelB 0.28 0.92 "standard"
+Generate-IndustrialArmTexture "insertion_pipe_arm" $steelR $steelG $steelB 0.28 0.92 "standard"
+Generate-IndustrialCoreTexture "insertion_fluid_pipe_core" $copperR $copperG $copperB 0.28 0.92 "fluid"
+Generate-IndustrialArmTexture "insertion_fluid_pipe_arm" $copperR $copperG $copperB 0.28 0.92 "fluid"
+
+Generate-IndustrialCoreTexture "merger_pipe_core" $steelR $steelG $steelB 0.28 0.92 "standard"
+Generate-IndustrialArmTexture "merger_pipe_arm" $steelR $steelG $steelB 0.28 0.92 "standard"
+Generate-IndustrialCoreTexture "merger_fluid_pipe_core" $copperR $copperG $copperB 0.28 0.92 "fluid"
+Generate-IndustrialArmTexture "merger_fluid_pipe_arm" $copperR $copperG $copperB 0.28 0.92 "fluid"
+
+Generate-IndustrialCoreTexture "passthru_pipe_core" 65.0 100.0 160.0 0.28 0.92 "standard"
+Generate-IndustrialArmTexture "passthru_pipe_arm" 65.0 100.0 160.0 0.28 0.92 "standard"
+
+Generate-IndustrialCoreTexture "bypass_fluid_pipe_core" 155.0 50.0 50.0 0.28 0.92 "fluid"
+Generate-IndustrialArmTexture "bypass_fluid_pipe_arm" 155.0 50.0 50.0 0.28 0.92 "fluid"
+
+# Feature Textures (Extractor hazard collar, Merger manifold)
 $featBmp = New-Object System.Drawing.Bitmap(64, 64)
 $fg = [System.Drawing.Graphics]::FromImage($featBmp)
-$fg.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
-$hazardYellow = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 240, 200, 30))
-$hazardBlack = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 30, 30, 30))
+$fg.Clear([System.Drawing.Color]::FromArgb(255, 30, 30, 32))
+$hazardYellow = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 240, 195, 25))
+$hazardBlack = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 30, 30, 32))
 $fg.FillRectangle($hazardYellow, 0, 16, 64, 48)
 for ($hx = -40; $hx -lt 100; $hx += 16) {
     [System.Drawing.Point[]]$hzPts = @(
@@ -674,86 +452,85 @@ Save-ImageWithPBR $featBmp (Join-Path $texturesBlockDir "extractor_pipe_feature"
 $featBmp.Save((Join-Path $texturesBlockDir "fluid_extractor_pipe_feature.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 $featBmp.Dispose()
 
-# Fluid Extractor
-Generate-CoreTexture "fluid_extractor_pipe_core" $colCopper $colExtractorOrange 0.90 0.30 "fluid"
-Generate-ArmTexture "fluid_extractor_pipe_arm" $colCopper $colExtractorOrange 0.90 0.30 "fluid"
-
-# Filter Pipe
-Generate-CoreTexture "filter_pipe_core" $colLogistics $colFilterAmber 0.88 0.32 "standard"
-Generate-ArmTexture "filter_pipe_arm" $colLogistics $colFilterAmber 0.88 0.32 "standard"
-$coreOverlayBmp = New-Object System.Drawing.Bitmap(64, 64)
-$og = [System.Drawing.Graphics]::FromImage($coreOverlayBmp)
-$og.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
-$lensB = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
-$og.FillRectangle($lensB, 24, 24, 16, 16)
-$lensB.Dispose()
-$og.Dispose()
-$coreOverlayBmp.Save((Join-Path $texturesBlockDir "filter_pipe_overlay.png"), [System.Drawing.Imaging.ImageFormat]::Png)
-$coreOverlayBmp.Dispose()
-
-# Insertion Pipe
-Generate-CoreTexture "insertion_pipe_core" $colLogistics $colInsertionGreen 0.88 0.32 "standard"
-Generate-ArmTexture "insertion_pipe_arm" $colLogistics $colInsertionGreen 0.88 0.32 "standard"
-Generate-CoreTexture "insertion_fluid_pipe_core" $colCopper $colInsertionGreen 0.90 0.30 "fluid"
-Generate-ArmTexture "insertion_fluid_pipe_arm" $colCopper $colInsertionGreen 0.90 0.30 "fluid"
-
-# Merger Pipe
-Generate-CoreTexture "merger_pipe_core" $colLogistics $colMergerBlue 0.88 0.32 "standard"
-Generate-ArmTexture "merger_pipe_arm" $colLogistics $colMergerBlue 0.88 0.32 "standard"
-Generate-CoreTexture "merger_fluid_pipe_core" $colCopper $colMergerBlue 0.90 0.30 "fluid"
-Generate-ArmTexture "merger_fluid_pipe_arm" $colCopper $colMergerBlue 0.90 0.30 "fluid"
-# Merger feature
 $mergerFeat = New-Object System.Drawing.Bitmap(64, 64)
 $mfg = [System.Drawing.Graphics]::FromImage($mergerFeat)
-$mfg.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
-$mBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 45, 50, 58))
-[System.Drawing.Point[]]$mfPts = @([System.Drawing.Point]::new(0, 16), [System.Drawing.Point]::new(64, 16), [System.Drawing.Point]::new(32, 48))
-$mfg.FillPolygon($mBrush, $mfPts)
-$mBrush.Dispose()
+$mfg.Clear([System.Drawing.Color]::FromArgb(255, 45, 50, 58))
 $mfg.Dispose()
 Save-ImageWithPBR $mergerFeat (Join-Path $texturesBlockDir "merger_pipe_feature") 0.35 0.85
 $mergerFeat.Save((Join-Path $texturesBlockDir "merger_fluid_pipe_feature.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 $mergerFeat.Dispose()
 
-# Passthrough Pipe
-Generate-CoreTexture "passthru_pipe_core" $colPassthruBlue $colPassthruLight 0.85 0.30 "standard"
-Generate-ArmTexture "passthru_pipe_arm" $colPassthruBlue $colPassthruLight 0.85 0.30 "standard"
+# B. Industrial Copper Pipes (Same geometry, warm copper metallic color)
+Generate-IndustrialCoreTexture "copper_pipe_core" $copperR $copperG $copperB 0.28 0.92 "standard"
+Generate-IndustrialCoreTexture "copper_pipe_core_exposed" $expCopperR $expCopperG $expCopperB 0.38 0.85 "standard"
+Generate-IndustrialCoreTexture "copper_pipe_core_weathered" $weaCopperR $weaCopperG $weaCopperB 0.48 0.70 "standard"
+Generate-IndustrialCoreTexture "copper_pipe_core_oxidized" $oxiCopperR $oxiCopperG $oxiCopperB 0.58 0.55 "standard"
 
-# Bypass Pipe
-Generate-CoreTexture "bypass_fluid_pipe_core" $colBypassRed $colBypassAmber 0.85 0.30 "fluid"
-Generate-ArmTexture "bypass_fluid_pipe_arm" $colBypassRed $colBypassAmber 0.85 0.30 "fluid"
+Generate-IndustrialArmTexture "copper_pipe_arm" $copperR $copperG $copperB 0.28 0.92 "standard"
+Generate-IndustrialArmTexture "copper_pipe_arm_exposed" $expCopperR $expCopperG $expCopperB 0.38 0.85 "standard"
+Generate-IndustrialArmTexture "copper_pipe_arm_weathered" $weaCopperR $weaCopperG $weaCopperB 0.48 0.70 "standard"
+Generate-IndustrialArmTexture "copper_pipe_arm_oxidized" $oxiCopperR $oxiCopperG $oxiCopperB 0.58 0.55 "standard"
 
-# J. Power Junction
+# Copper Fluid Pipes (With blue hydraulic pressure seal on collar)
+Generate-IndustrialCoreTexture "copper_fluid_pipe_core" $copperR $copperG $copperB 0.28 0.92 "fluid"
+Generate-IndustrialCoreTexture "copper_fluid_pipe_core_exposed" $expCopperR $expCopperG $expCopperB 0.38 0.85 "fluid"
+Generate-IndustrialCoreTexture "copper_fluid_pipe_core_weathered" $weaCopperR $weaCopperG $weaCopperB 0.48 0.70 "fluid"
+Generate-IndustrialCoreTexture "copper_fluid_pipe_core_oxidized" $oxiCopperR $oxiCopperG $oxiCopperB 0.58 0.55 "fluid"
+
+Generate-IndustrialArmTexture "copper_fluid_pipe_arm" $copperR $copperG $copperB 0.28 0.92 "fluid"
+Generate-IndustrialArmTexture "copper_fluid_pipe_arm_exposed" $expCopperR $expCopperG $expCopperB 0.38 0.85 "fluid"
+Generate-IndustrialArmTexture "copper_fluid_pipe_arm_weathered" $weaCopperR $weaCopperG $weaCopperB 0.48 0.70 "fluid"
+Generate-IndustrialArmTexture "copper_fluid_pipe_arm_oxidized" $oxiCopperR $oxiCopperG $oxiCopperB 0.58 0.55 "fluid"
+
+# C. Industrial Gold / Brass Pipes
+Generate-IndustrialCoreTexture "gold_pipe_core" $goldR $goldG $goldB 0.22 0.95 "standard"
+Generate-IndustrialArmTexture "gold_pipe_arm" $goldR $goldG $goldB 0.22 0.95 "standard"
+Generate-IndustrialCoreTexture "gold_pipe_core_powered" $goldR $goldG $goldB 0.15 0.95 "powered"
+Generate-IndustrialArmTexture "gold_pipe_arm_powered" $goldR $goldG $goldB 0.15 0.95 "powered"
+Generate-IndustrialCoreTexture "gold_fluid_pipe_core" $goldR $goldG $goldB 0.22 0.95 "fluid"
+Generate-IndustrialArmTexture "gold_fluid_pipe_arm" $goldR $goldG $goldB 0.22 0.95 "fluid"
+
+# D. Cast Iron / Ductile Iron (Stone Pipes)
+Generate-IndustrialCoreTexture "stone_pipe_core" $stoneR $stoneG $stoneB 0.45 0.75 "standard"
+Generate-IndustrialArmTexture "stone_pipe_arm" $stoneR $stoneG $stoneB 0.45 0.75 "standard"
+Generate-IndustrialCoreTexture "stone_fluid_pipe_core" $stoneR $stoneG $stoneB 0.45 0.75 "fluid"
+Generate-IndustrialArmTexture "stone_fluid_pipe_arm" $stoneR $stoneG $stoneB 0.45 0.75 "fluid"
+
+# E. Void Pipes (Obsidian Titanium-Carbide)
+Generate-IndustrialCoreTexture "void_pipe_core" $voidR $voidG $voidB 0.40 0.60 "void"
+Generate-IndustrialArmTexture "void_pipe_arm" $voidR $voidG $voidB 0.40 0.60 "void"
+Generate-IndustrialCoreTexture "void_fluid_pipe_core" $voidR $voidG $voidB 0.40 0.60 "void"
+Generate-IndustrialArmTexture "void_fluid_pipe_arm" $voidR $voidG $voidB 0.40 0.60 "void"
+
+# F. Power Junction
 $pjOff = New-Object System.Drawing.Bitmap(64, 64)
 $pjg = [System.Drawing.Graphics]::FromImage($pjOff)
-$pjg.Clear([System.Drawing.Color]::FromArgb(255, 35, 38, 44))
-$finBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 22, 24, 28))
+$pjg.Clear([System.Drawing.Color]::FromArgb(255, 38, 42, 48))
+$finBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 24, 26, 30))
 for ($fy = 8; $fy -lt 56; $fy += 6) {
     $pjg.FillRectangle($finBrush, 12, $fy, 40, 3)
 }
 $finBrush.Dispose()
 $pjg.Dispose()
-Save-ImageWithPBR $pjOff (Join-Path $texturesBlockDir "power_junction_off") 0.40 0.80
+Save-ImageWithPBR $pjOff (Join-Path $texturesBlockDir "power_junction_off") 0.35 0.85
 $pjOff.Dispose()
 
-# Power junction on
 $pjOn = New-Object System.Drawing.Bitmap(64, 64)
 $pjg = [System.Drawing.Graphics]::FromImage($pjOn)
-$pjg.Clear([System.Drawing.Color]::FromArgb(255, 35, 38, 44))
-$finBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 22, 24, 28))
+$pjg.Clear([System.Drawing.Color]::FromArgb(255, 38, 42, 48))
+$finBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 24, 26, 30))
 for ($fy = 8; $fy -lt 56; $fy += 6) {
     $pjg.FillRectangle($finBrush, 12, $fy, 40, 3)
 }
 $finBrush.Dispose()
-# Glowing electric arcs
-$arcBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 80, 210, 255))
+$arcBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 90, 215, 255))
 $pjg.FillRectangle($arcBrush, 14, 24, 36, 16)
 $arcBrush.Dispose()
 $pjg.Dispose()
-Save-ImageWithPBR $pjOn (Join-Path $texturesBlockDir "power_junction_on") 0.20 0.80 $null 255
+Save-ImageWithPBR $pjOn (Join-Path $texturesBlockDir "power_junction_on") 0.20 0.85 255
 $pjOn.Dispose()
 
-# Copy animation mcmeta
+# MCMETA for animated power junction
 $pjMeta = @"
 {
   "animation": {
@@ -764,18 +541,17 @@ $pjMeta = @"
 "@
 [System.IO.File]::WriteAllText((Join-Path $texturesBlockDir "power_junction_on.png.mcmeta"), $pjMeta, [System.Text.Encoding]::UTF8)
 
-# K. Pipe Markings
+# Pipe Markings & Fluid Packet
 $markBmp = New-Object System.Drawing.Bitmap(64, 64)
 $mg = [System.Drawing.Graphics]::FromImage($markBmp)
 $mg.Clear([System.Drawing.Color]::FromArgb(255, 220, 220, 220))
-$mPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 40, 40, 40), 2.0)
+$mPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 45, 50, 58), 3.0)
 $mg.DrawRectangle($mPen, 2, 2, 60, 60)
 $mPen.Dispose()
 $mg.Dispose()
-Save-ImageWithPBR $markBmp (Join-Path $texturesBlockDir "pipe_markings") 0.45 0.10
+Save-ImageWithPBR $markBmp (Join-Path $texturesBlockDir "pipe_markings") 0.35 0.20
 $markBmp.Dispose()
 
-# Fluid packet
 $pktBmp = New-Object System.Drawing.Bitmap(64, 64)
 $pkg = [System.Drawing.Graphics]::FromImage($pktBmp)
 $pkg.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
@@ -795,10 +571,9 @@ $pktBmp.Save((Join-Path $texturesBlockDir "fluid_packet.png"), [System.Drawing.I
 $pktBmp.Dispose()
 
 # ==============================================================================
-# 5. GENERATE ITEM MODULE TEXTURES (64x64)
+# 6. GENERATE ITEM MODULE TEXTURES (64x64)
 # ==============================================================================
-Write-Host "Generating Ultra-Realistic 64x64 Pipe Module Textures..." -ForegroundColor Green
-
+Write-Host "Generating Industrial Pipe Module Textures..." -ForegroundColor Green
 $moduleNames = @(
     "blank_module", "active_supplier_module", "crafter_module", "crafter_mkii_module", "crafter_mkiii_module",
     "enchantment_sink_module", "extractor_module", "extractor_module_mkii", "extractor_module_mkiii",
@@ -806,31 +581,30 @@ $moduleNames = @(
     "mod_item_sink_module", "passive_supplier_module", "polymorphic_sink_module", "provider_module",
     "provider_mkii_module", "quicksort_module", "terminus_module"
 )
-
 foreach ($modName in $moduleNames) {
     $mBmp = New-Object System.Drawing.Bitmap(64, 64)
     $mg = [System.Drawing.Graphics]::FromImage($mBmp)
     $mg.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
     $mg.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
 
-    # Circuit Board Substrate
-    $pcbBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 25, 45, 35))
+    # PCB Substrate
+    $pcbBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 30, 36, 44))
     $mg.FillRectangle($pcbBrush, 12, 8, 40, 48)
     $pcbBrush.Dispose()
 
-    # Gold Edge Connectors at bottom
+    # Gold Edge Pins
     $goldBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 235, 190, 50))
     for ($px = 16; $px -lt 48; $px += 4) {
         $mg.FillRectangle($goldBrush, $px, 52, 2, 4)
     }
     $goldBrush.Dispose()
 
-    # Integrated Circuit / Processor in center
-    $icBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 30, 32, 36))
+    # Center Chip
+    $icBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 20, 22, 26))
     $mg.FillRectangle($icBrush, 20, 16, 24, 24)
     $icBrush.Dispose()
 
-    # Module Identity Accent Icon / LED
+    # Accent LED
     $modAccent = switch -Wildcard ($modName) {
         "*crafter*" { [System.Drawing.Color]::FromArgb(255, 240, 200, 50) }
         "*extractor*" { [System.Drawing.Color]::FromArgb(255, 230, 70, 40) }
@@ -845,319 +619,196 @@ foreach ($modName in $moduleNames) {
     $mg.FillEllipse($accentBrush, 28, 24, 8, 8)
     $accentBrush.Dispose()
 
-    # PCB Traces
-    $tracePen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(180, 50, 180, 100), 1.0)
-    $mg.DrawLine($tracePen, 16, 12, 24, 12)
-    $mg.DrawLine($tracePen, 40, 12, 48, 12)
-    $mg.DrawLine($tracePen, 16, 44, 24, 44)
-    $mg.DrawLine($tracePen, 40, 44, 48, 44)
-    $tracePen.Dispose()
-
     $mg.Dispose()
     $mBmp.Save((Join-Path $texturesItemDir "$modName.png"), [System.Drawing.Imaging.ImageFormat]::Png)
     $mBmp.Dispose()
 }
 
 # ==============================================================================
-# 6. GENERATE PACK.PNG (256x256 High-Resolution Icon)
+# 7. GENERATE PACK.PNG (256x256 High-Resolution Icon)
 # ==============================================================================
-Write-Host "Generating Ultra-Realistic 256x256 pack.png Icon..." -ForegroundColor Cyan
+Write-Host "Generating Realistic pack.png Icon..." -ForegroundColor Cyan
 $packBmp = New-Object System.Drawing.Bitmap(256, 256)
 $pg = [System.Drawing.Graphics]::FromImage($packBmp)
 $pg.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 
-# Dark Industrial Slate Background with Carbon Weave
+# Industrial Slate Background
 $bgBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
     (New-Object System.Drawing.Point(0, 0)),
     (New-Object System.Drawing.Point(256, 256)),
-    [System.Drawing.Color]::FromArgb(255, 24, 26, 32),
-    [System.Drawing.Color]::FromArgb(255, 12, 14, 18)
+    [System.Drawing.Color]::FromArgb(255, 28, 30, 36),
+    [System.Drawing.Color]::FromArgb(255, 14, 15, 18)
 )
 $pg.FillRectangle($bgBrush, 0, 0, 256, 256)
 $bgBrush.Dispose()
 
-# Subtle Grid Overlay
-$gridPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(20, 255, 255, 255), 1.0)
+# Grid Lines
+$gridPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(25, 255, 255, 255), 1.0)
 for ($x = 0; $x -lt 256; $x += 16) { $pg.DrawLine($gridPen, $x, 0, $x, 256) }
 for ($y = 0; $y -lt 256; $y += 16) { $pg.DrawLine($gridPen, 0, $y, 256, $y) }
 $gridPen.Dispose()
 
-# Draw Isometric Monolithic 3D Pipe Junction
-# Central Core Flange Box
-$copperBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-    (New-Object System.Drawing.Point(88, 70)),
-    (New-Object System.Drawing.Point(168, 150)),
-    [System.Drawing.Color]::FromArgb(255, 235, 140, 90),
-    [System.Drawing.Color]::FromArgb(255, 150, 75, 45)
+# Draw 3D Industrial Tee Fitting (Matching Image 2 / Fitting 2 Tee)
+# Horizontal Main Pipe
+$pipeBrushH = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
+    (New-Object System.Drawing.Point(0, 96)),
+    (New-Object System.Drawing.Point(0, 160)),
+    [System.Drawing.Color]::FromArgb(255, 210, 215, 225),
+    [System.Drawing.Color]::FromArgb(255, 75, 80, 92)
 )
-# Pipe Arms extending in 4 directions
-$pg.FillRectangle($copperBrush, 28, 96, 60, 64)   # West arm
-$pg.FillRectangle($copperBrush, 168, 96, 60, 64)  # East arm
-$pg.FillRectangle($copperBrush, 96, 28, 64, 60)   # North arm
-$pg.FillRectangle($copperBrush, 96, 168, 64, 60)  # South arm
+$pg.FillRectangle($pipeBrushH, 20, 100, 216, 56)
 
-# Heavy Monolithic Center Manifold Hub
-$titaniumBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-    (New-Object System.Drawing.Point(80, 80)),
-    (New-Object System.Drawing.Point(176, 176)),
-    [System.Drawing.Color]::FromArgb(255, 68, 74, 86),
-    [System.Drawing.Color]::FromArgb(255, 34, 38, 46)
+# Vertical Branch Pipe (Tee branch going up)
+$pipeBrushV = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
+    (New-Object System.Drawing.Point(100, 0)),
+    (New-Object System.Drawing.Point(156, 0)),
+    [System.Drawing.Color]::FromArgb(255, 210, 215, 225),
+    [System.Drawing.Color]::FromArgb(255, 75, 80, 92)
 )
-$pg.FillRectangle($titaniumBrush, 80, 80, 96, 96)
+$pg.FillRectangle($pipeBrushV, 100, 30, 56, 75)
 
-# Outer Bevel and Bolt Details on Hub
-$hubPenL = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(220, 255, 255, 255), 2.0)
-$hubPenD = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(220, 0, 0, 0), 2.0)
-$pg.DrawRectangle($hubPenL, 80, 80, 95, 95)
-$pg.DrawRectangle($hubPenD, 82, 82, 91, 91)
-$colGoldBolt = [System.Drawing.Color]::Gold
-$colDarkGold = [System.Drawing.Color]::DarkGoldenrod
-Draw-Bolt $pg 90 90 4 $colGoldBolt $colDarkGold
-Draw-Bolt $pg 166 90 4 $colGoldBolt $colDarkGold
-Draw-Bolt $pg 90 166 4 $colGoldBolt $colDarkGold
-Draw-Bolt $pg 166 166 4 $colGoldBolt $colDarkGold
+# 3 Raised Coupling Collars (Left, Right, and Top branch of Tee)
+$collarBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 165, 172, 185))
+$collarPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 240, 245, 255), 2.0)
+$collarShadow = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 45, 48, 55), 2.0)
 
-# Glowing Holographic Center Optic Core
-[System.Drawing.Point[]]$glowPts = @(
-    [System.Drawing.Point]::new(100, 100),
-    [System.Drawing.Point]::new(156, 100),
-    [System.Drawing.Point]::new(156, 156),
-    [System.Drawing.Point]::new(100, 156)
-)
-$glowBrush = New-Object System.Drawing.Drawing2D.PathGradientBrush(,$glowPts)
-$glowBrush.CenterColor = [System.Drawing.Color]::FromArgb(255, 255, 255, 255)
-$glowBrush.SurroundColors = [System.Drawing.Color[]]@([System.Drawing.Color]::FromArgb(240, 50, 180, 255))
-$pg.FillEllipse($glowBrush, 104, 104, 48, 48)
-$glowBrush.Dispose()
+# Left collar
+$pg.FillRectangle($collarBrush, 24, 94, 20, 68)
+$pg.DrawRectangle($collarPen, 24, 94, 20, 68)
+# Right collar
+$pg.FillRectangle($collarBrush, 212, 94, 20, 68)
+$pg.DrawRectangle($collarPen, 212, 94, 20, 68)
+# Top branch collar
+$pg.FillRectangle($collarBrush, 94, 24, 68, 20)
+$pg.DrawRectangle($collarPen, 94, 24, 68, 20)
 
-# Typography Banner: "LOGISTICS PIPES" & "3D MONOLITHIC"
-$fontTitle = New-Object System.Drawing.Font("Arial", 13, [System.Drawing.FontStyle]::Bold)
+$pipeBrushH.Dispose()
+$pipeBrushV.Dispose()
+$collarBrush.Dispose()
+$collarPen.Dispose()
+$collarShadow.Dispose()
+
+# Typography
+$fontTitle = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
 $fontSub = New-Object System.Drawing.Font("Arial", 8, [System.Drawing.FontStyle]::Bold)
-$textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
-$goldText = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 245, 195, 60))
+$whiteBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 245, 248, 255))
+$goldBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 240, 195, 60))
 
-$pg.DrawString("LOGISTICS PIPES 3D", $fontTitle, $goldText, 32, 206)
-$pg.DrawString("ULTRA-REALISTIC MONOLITHIC EDITION", $fontSub, $textBrush, 22, 228)
+$pg.DrawString("INDUSTRIAL 3D PIPES", $fontTitle, $goldBrush, 36, 204)
+$pg.DrawString("REALISTIC FITTINGS - MC 26.3", $fontSub, $whiteBrush, 40, 226)
 
 $fontTitle.Dispose()
 $fontSub.Dispose()
-$textBrush.Dispose()
-$goldText.Dispose()
-$copperBrush.Dispose()
-$titaniumBrush.Dispose()
-$hubPenL.Dispose()
-$hubPenD.Dispose()
+$whiteBrush.Dispose()
+$goldBrush.Dispose()
 $pg.Dispose()
 
 $packBmp.Save((Join-Path $packPath "pack.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 $packBmp.Dispose()
 
 # ==============================================================================
-# 7. GENERATE 3D MONOLITHIC BLOCK MODELS (Enhanced JSON Models)
+# 8. COPY ORIGINAL JSON BLOCK & ITEM MODELS
 # ==============================================================================
-Write-Host "Generating Ultra-Detailed 3D Monolithic Block Models..." -ForegroundColor Green
-
-# 3D Monolithic Pipe Core Base Model
-$modelPipeCore = @"
-{
-  "parent": "block/block",
-  "display": {
-    "gui": {
-      "rotation": [30, -50, 0],
-      "scale": [0.8, 0.8, 0.8]
-    },
-    "fixed": {
-      "rotation": [90, 0, 0],
-      "translation": [0, -2.5, 0]
-    },
-    "ground": {
-      "scale": [0.3, 0.3, 0.3]
-    }
-  },
-  "elements": [
-    {
-      "name": "monolithic_core_body",
-      "from": [4.0, 4.0, 4.0],
-      "to": [12.0, 12.0, 12.0],
-      "faces": {
-        "north": { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "east":  { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "south": { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "west":  { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "up":    { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "down":  { "uv": [0, 0, 16, 16], "texture": "#texture" }
-      }
-    },
-    {
-      "name": "reinforced_collar_north",
-      "from": [3.8, 3.8, 3.8],
-      "to": [12.2, 12.2, 4.5],
-      "faces": {
-        "north": { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "east":  { "uv": [0, 0, 2, 16], "texture": "#texture" },
-        "west":  { "uv": [14, 0, 16, 16], "texture": "#texture" },
-        "up":    { "uv": [0, 0, 16, 2], "texture": "#texture" },
-        "down":  { "uv": [0, 14, 16, 16], "texture": "#texture" }
-      }
-    },
-    {
-      "name": "reinforced_collar_south",
-      "from": [3.8, 3.8, 11.5],
-      "to": [12.2, 12.2, 12.2],
-      "faces": {
-        "south": { "uv": [0, 0, 16, 16], "texture": "#texture" },
-        "east":  { "uv": [14, 0, 16, 16], "texture": "#texture" },
-        "west":  { "uv": [0, 0, 2, 16], "texture": "#texture" },
-        "up":    { "uv": [0, 14, 16, 16], "texture": "#texture" },
-        "down":  { "uv": [0, 0, 16, 2], "texture": "#texture" }
-      }
-    }
-  ]
-}
-"@
-[System.IO.File]::WriteAllText((Join-Path $modelsBlockDir "pipe_core.json"), $modelPipeCore, [System.Text.Encoding]::UTF8)
-
-# 3D Monolithic Pipe Arm Base Model (with physical flange & extruded collar)
-$modelPipeArm = @"
-{
-  "parent": "block/block",
-  "display": {
-    "gui": {
-      "rotation": [30, -50, 0],
-      "scale": [0.8, 0.8, 0.8]
-    },
-    "fixed": {
-      "rotation": [90, 0, 0],
-      "translation": [0, -2.5, 0]
-    },
-    "ground": {
-      "scale": [0.3, 0.3, 0.3]
-    }
-  },
-  "elements": [
-    {
-      "name": "arm_tube",
-      "from": [4.0, 4.0, 0.0],
-      "to": [12.0, 12.0, 4.0],
-      "faces": {
-        "north": { "uv": [0, 0, 2, 2], "texture": "#texture" },
-        "east":  { "uv": [0, 8, 16, 16], "rotation": 90, "texture": "#texture" },
-        "south": { "uv": [0, 0, 2, 2], "texture": "#texture" },
-        "west":  { "uv": [0, 8, 16, 16], "rotation": 270, "texture": "#texture" },
-        "up":    { "uv": [0, 8, 16, 16], "texture": "#texture" },
-        "down":  { "uv": [0, 8, 16, 16], "rotation": 180, "texture": "#texture" }
-      }
-    },
-    {
-      "name": "connection_flange",
-      "from": [3.5, 3.5, 0.0],
-      "to": [12.5, 12.5, 1.2],
-      "faces": {
-        "north": { "uv": [0, 0, 2, 2], "texture": "#texture" },
-        "east":  { "uv": [0, 8, 4, 16], "rotation": 90, "texture": "#texture" },
-        "south": { "uv": [0, 0, 2, 2], "texture": "#texture" },
-        "west":  { "uv": [0, 8, 4, 16], "rotation": 270, "texture": "#texture" },
-        "up":    { "uv": [0, 8, 16, 12], "texture": "#texture" },
-        "down":  { "uv": [0, 8, 16, 12], "rotation": 180, "texture": "#texture" }
-      }
-    },
-    {
-      "name": "reinforcement_collar",
-      "from": [3.8, 3.8, 2.2],
-      "to": [12.2, 12.2, 3.2],
-      "faces": {
-        "east":  { "uv": [8, 8, 12, 16], "rotation": 90, "texture": "#texture" },
-        "west":  { "uv": [8, 8, 12, 16], "rotation": 270, "texture": "#texture" },
-        "up":    { "uv": [0, 10, 16, 14], "texture": "#texture" },
-        "down":  { "uv": [0, 10, 16, 14], "rotation": 180, "texture": "#texture" }
-      }
-    }
-  ]
-}
-"@
-[System.IO.File]::WriteAllText((Join-Path $modelsBlockDir "pipe_arm.json"), $modelPipeArm, [System.Text.Encoding]::UTF8)
-
-# Copy all original pipe JSON model references to the pack
 Get-ChildItem -Path "logistics\assets\logistics\models\block\pipe" -Filter "*.json" | ForEach-Object {
     $dest = Join-Path $modelsBlockDir $_.Name
-    if (-not (Test-Path $dest)) {
-        Copy-Item -Path $_.FullName -Destination $dest -Force
-    }
+    Copy-Item -Path $_.FullName -Destination $dest -Force
 }
-
-# Copy all item model definitions to the pack
 Get-ChildItem -Path "logistics\assets\logistics\items\pipe" -Filter "*.json" | ForEach-Object {
     $dest = Join-Path $itemsDir $_.Name
     Copy-Item -Path $_.FullName -Destination $dest -Force
 }
 
 # ==============================================================================
-# 8. CREATE ZIP ARCHIVES FOR INSTANT RESOURCE PACK INSTALLATION
-# (Using Java jar CLI to ensure strictly standard forward slashes '/')
+# 9. CREATE STANDALONE ZIP DOWNLOAD FOR MINECRAFT 26.3
+# (Strictly standard forward slashes '/' via Java jar archiver)
 # ==============================================================================
+# ==============================================================================
+# 9. COMPILE MONOLITHIC 3D PIPE GEOMETRY & BAKE INTO MOD JAR
+# ==============================================================================
+Write-Host "Compiling 3D Monolithic Pipe Geometry with Java 25..." -ForegroundColor Cyan
+$javac25 = "C:\Program Files\Eclipse Adoptium\jdk-25.0.4.101-hotspot\bin\javac.exe"
+$neoforgeJar = "C:\Users\swack\.gradle\caches\modules-2\files-2.1\net.neoforged\neoforge\26.3.0.99\215117e7a679a38b75f88b5d4254adaffd596452\neoforge-26.3.0.99-universal.jar"
+$mcJar = "C:\Users\swack\.gradle\caches\neoformruntime\intermediate_results\recompile_4a012532b093b2c64a99e2595f975d9ac89b08e2_output.jar"
+$cp = "logistics;$neoforgeJar;$mcJar"
+$geomSource = Join-Path $scriptDir "PipeGeometry.java"
+
+if (Test-Path $javac25) {
+    & $javac25 -cp $cp -d "logistics" $geomSource
+    # Clean up obsolete inner classes
+    Remove-Item -Path "logistics\com\logistics\pipe\render\model\PipeGeometry`$*.class" -Force -ErrorAction SilentlyContinue
+    Write-Host "Successfully compiled PipeGeometry into logistics/" -ForegroundColor Green
+} else {
+    Write-Host "Java 25 compiler not found at $javac25" -ForegroundColor Yellow
+}
+
+# Sync generated textures directly into the mod directory (Baking into the mod)
+Write-Host "Baking textures directly into logistics mod assets..." -ForegroundColor Cyan
+$logisticsTexDir = Join-Path $projectDir "logistics\assets\logistics\textures\block\pipe"
+Copy-Item -Path "$texturesBlockDir\*" -Destination $logisticsTexDir -Recurse -Force
+
+# ==============================================================================
+# 10. CREATE STANDALONE ZIP & DEPLOY TO CURSEFORGE INSTANCE
+# ==============================================================================
+$resourcepacksDir = Join-Path $projectDir "resourcepacks"
+New-Item -ItemType Directory -Force -Path $resourcepacksDir | Out-Null
+$zipPath = Join-Path $resourcepacksDir "Logistics-UltraRealistic-3D-Pipes.zip"
+
 if ($CreateZip) {
-    Write-Host "Packaging standalone Resource Packs with standard forward slashes..." -ForegroundColor Cyan
-    $resourcepacksDir = Join-Path $projectDir "resourcepacks"
-
-    # Universal / MC 1.21.4+ (pack_format: 46, supported_formats: [15, 65])
-    $zipUniversal = Join-Path $resourcepacksDir "Logistics-UltraRealistic-3D-Pipes.zip"
-    if (Test-Path $zipUniversal) { Remove-Item -Path $zipUniversal -Force }
-    & jar -c -M -f $zipUniversal -C $packPath .
-
-    # MC 1.21 - 1.21.1 Native (pack_format: 34, supported_formats: [15, 65])
-    $mcmeta121 = @"
-{
-  "pack": {
-    "pack_format": 34,
-    "supported_formats": [15, 65],
-    "description": "Ultra-Realistic 3D Monolithic Pipes for Logistics Automation"
-  }
-}
-"@
-    [System.IO.File]::WriteAllText((Join-Path $packPath "pack.mcmeta"), $mcmeta121, $utf8NoBom)
-    $zip121 = Join-Path $resourcepacksDir "Logistics-UltraRealistic-3D-Pipes-MC1.21.1.zip"
-    if (Test-Path $zip121) { Remove-Item -Path $zip121 -Force }
-    & jar -c -M -f $zip121 -C $packPath .
-
-    # MC 1.20 - 1.20.1 Native (pack_format: 15)
-    $mcmeta120 = @"
-{
-  "pack": {
-    "pack_format": 15,
-    "description": "Ultra-Realistic 3D Monolithic Pipes for Logistics Automation"
-  }
-}
-"@
-    [System.IO.File]::WriteAllText((Join-Path $packPath "pack.mcmeta"), $mcmeta120, $utf8NoBom)
-    $zip120 = Join-Path $resourcepacksDir "Logistics-UltraRealistic-3D-Pipes-MC1.20.1.zip"
-    if (Test-Path $zip120) { Remove-Item -Path $zip120 -Force }
-    & jar -c -M -f $zip120 -C $packPath .
-
-    # Restore Universal pack.mcmeta for the directory pack
-    [System.IO.File]::WriteAllText((Join-Path $packPath "pack.mcmeta"), $packMcmeta, $utf8NoBom)
+    Write-Host "Packaging standalone Resource Pack for Minecraft 26.3..." -ForegroundColor Cyan
+    if (Test-Path $zipPath) { Remove-Item -Path $zipPath -Force }
+    & jar -c -M -f $zipPath -C $packPath .
 }
 
-# ==============================================================================
-# 9. STANDALONE DOWNLOAD ONLY: DO NOT BAKE INTO MOD
-# ==============================================================================
-# Clean any old baked resource packs from mod resources if they exist
+# Deploy to CurseForge 26.3 instance if present
+$cfInstanceDir = "C:\Users\swack\curseforge\minecraft\Instances\26.3"
+if (Test-Path $cfInstanceDir) {
+    Write-Host "Deploying to active CurseForge 26.3 instance..." -ForegroundColor Magenta
+
+    # 1. Build baked logistics jar with round 3D monolithic geometry & textures
+    $builtLogisticsJar = Join-Path $projectDir "build\logistics-0.8.12+mc26.3.neoforge.jar"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $builtLogisticsJar) | Out-Null
+    if (Test-Path $builtLogisticsJar) { Remove-Item -Path $builtLogisticsJar -Force }
+    & jar -c -M -f $builtLogisticsJar -C "logistics" .
+    Write-Host "Built baked logistics mod jar at: $builtLogisticsJar" -ForegroundColor Green
+
+    $cfModsDir = Join-Path $cfInstanceDir "mods"
+    if (Test-Path $cfModsDir) {
+        $cfLogisticsJar = Join-Path $cfModsDir "logistics-0.8.12+mc26.3.neoforge.jar"
+        try {
+            Copy-Item -Path $builtLogisticsJar -Destination $cfLogisticsJar -Force -ErrorAction Stop
+            Write-Host "Successfully updated logistics mod jar in CurseForge instance!" -ForegroundColor Green
+        } catch {
+            Write-Host "Minecraft is currently running (locking $cfLogisticsJar)." -ForegroundColor Yellow
+            $stagedJar = "$cfLogisticsJar.staged"
+            Copy-Item -Path $builtLogisticsJar -Destination $stagedJar -Force
+            Write-Host "Staged updated jar at $stagedJar. Close Minecraft to allow instant replacement." -ForegroundColor Yellow
+        }
+    }
+
+    # 2. Deploy Resource Pack zip and unpacked folder
+    $cfRpDir = Join-Path $cfInstanceDir "resourcepacks"
+    if (Test-Path $cfRpDir) {
+        try {
+            Copy-Item -Path $zipPath -Destination (Join-Path $cfRpDir "Logistics-UltraRealistic-3D-Pipes.zip") -Force
+            $cfUnpacked = Join-Path $cfRpDir "Logistics-UltraRealistic-3D-Pipes"
+            if (Test-Path $cfUnpacked) { Remove-Item -Path $cfUnpacked -Recurse -Force }
+            Copy-Item -Path $packPath -Destination $cfUnpacked -Recurse -Force
+            Write-Host "Updated Resource Pack in CurseForge instance (press F3+T in game to reload)!" -ForegroundColor Green
+        } catch {
+            Write-Host "Could not deploy resource pack: $_" -ForegroundColor Yellow
+        }
+    }
+}
+
+# Ensure mod resources remain clean
 $modPackDir = Join-Path $projectDir "src\main\resources\resourcepacks"
 if (Test-Path $modPackDir) {
-    Write-Host "Ensuring mod resources are clean (not baking into mod)..." -ForegroundColor Yellow
     Remove-Item -Path $modPackDir -Recurse -Force
 }
 
-# Update extracted logistics mod reference assets for dev/workspace preview if requested
-if ($InstallToMod) {
-    Write-Host "Updating local reference mod assets..." -ForegroundColor Cyan
-    $logisticsAssets = Join-Path $projectDir "logistics\assets\logistics"
-    Copy-Item -Path "$packPath\assets\logistics\*" -Destination $logisticsAssets -Recurse -Force
-}
-
 Write-Host "=================================================================" -ForegroundColor Green
-Write-Host " Ultra-Realistic 3D Monolithic Pipe Pack Successfully Generated!" -ForegroundColor Green
-Write-Host " Pack Folder: $packPath" -ForegroundColor Green
-Write-Host " Universal Zip: $zipUniversal" -ForegroundColor Green
-Write-Host " MC 1.21.1 Zip: $zip121" -ForegroundColor Green
-Write-Host " MC 1.20.1 Zip: $zip120" -ForegroundColor Green
+Write-Host " Industrial 3D Monolithic Pipe Pack Successfully Generated!" -ForegroundColor Green
+Write-Host " Folder: $packPath" -ForegroundColor Green
+Write-Host " Zip:    $zipPath" -ForegroundColor Green
+Write-Host " Mod:    $cfLogisticsJar" -ForegroundColor Green
 Write-Host "=================================================================" -ForegroundColor Green

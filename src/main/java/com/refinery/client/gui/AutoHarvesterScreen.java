@@ -125,8 +125,8 @@ public class AutoHarvesterScreen extends AbstractContainerScreen<AutoHarvesterMe
         graphics.text(this.font, Component.literal("+"), xo + 157, yo + 39, plusColor, false);
 
         // 3. Area Label underneath (x: 122..166, y: 53)
-        int diameter = radius * 2 + 1;
-        String areaStr = diameter + "x" + diameter;
+        int width = radius * 2 + 1;
+        String areaStr = width + "x" + radius;
         int areaW = this.font.width(areaStr);
         graphics.text(this.font, Component.literal(areaStr), xo + 144 - areaW / 2, yo + 53, 0xFF888888, false);
     }
@@ -202,35 +202,36 @@ public class AutoHarvesterScreen extends AbstractContainerScreen<AutoHarvesterMe
             return;
         }
 
-        // Decrease Radius Hover (x: 122..135, y: 36..50)
+        // Decrease Range Hover (x: 122..135, y: 36..50)
         if (mouseX >= xo + 122 && mouseX <= xo + 135 && mouseY >= yo + 36 && mouseY <= yo + 50) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
-                    Component.literal("Decrease Work Radius").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
-                    Component.literal("Reduces radius by 1 block (min: 1)").withStyle(ChatFormatting.GRAY)
+                    Component.literal("Decrease Work Range").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
+                    Component.literal("Reduces forward harvest distance by 1 block (min: 1)").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);
             return;
         }
 
-        // Increase Radius Hover (x: 153..166, y: 36..50)
+        // Increase Range Hover (x: 153..166, y: 36..50)
         if (mouseX >= xo + 153 && mouseX <= xo + 166 && mouseY >= yo + 36 && mouseY <= yo + 50) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
-                    Component.literal("Increase Work Radius").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
-                    Component.literal("Increases radius by 1 block (max: 9)").withStyle(ChatFormatting.GRAY)
+                    Component.literal("Increase Work Range").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
+                    Component.literal("Increases forward harvest distance by 1 block (max: 9)").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);
             return;
         }
 
-        // Radius Display / Area Hover (x: 136..152, y: 36..64 or x: 122..166, y: 51..64)
+        // Range Display / Area Hover (x: 136..152, y: 36..64 or x: 122..166, y: 51..64)
         if ((mouseX >= xo + 136 && mouseX <= xo + 152 && mouseY >= yo + 36 && mouseY <= yo + 64) ||
             (mouseX >= xo + 122 && mouseX <= xo + 166 && mouseY >= yo + 51 && mouseY <= yo + 64)) {
             int r = this.menu.getRadius();
-            int dim = r * 2 + 1;
-            int area = dim * dim;
+            int width = r * 2 + 1;
+            int area = width * r;
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Work Coverage").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                    Component.literal(String.format("Radius: %d blocks in all directions", r)).withStyle(ChatFormatting.WHITE),
-                    Component.literal(String.format("Total Area: %dx%d (%d blocks / m²)", dim, dim, area)).withStyle(ChatFormatting.YELLOW),
-                    Component.literal("Configurable up to 9 blocks (100m+ area)").withStyle(ChatFormatting.GRAY)
+                    Component.literal(String.format("Forward Depth: %d blocks in front", r)).withStyle(ChatFormatting.WHITE),
+                    Component.literal(String.format("Coverage: %dx%d (%d blocks) in front of machine", width, r, area)).withStyle(ChatFormatting.YELLOW),
+                    Component.literal("Harvests exclusively in front (never behind)").withStyle(ChatFormatting.GREEN),
+                    Component.literal("Scans horizontal area up to 4 blocks vertically").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);
             return;
         }

@@ -53,6 +53,7 @@ public class LogisticsPipeCompat {
 
     public static boolean isLogisticsPipe(BlockEntity be) {
         if (be == null) return false;
+        if (be instanceof com.refinery.block.entity.IndustrialPipeBlockEntity) return true;
         init();
         return (itemPipeClass != null && itemPipeClass.isInstance(be)) ||
                (fluidPipeClass != null && fluidPipeClass.isInstance(be));
@@ -60,18 +61,27 @@ public class LogisticsPipeCompat {
 
     public static boolean isLogisticsItemPipe(BlockEntity be) {
         if (be == null) return false;
+        if (be instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipe && pipe.getPipeType().handlesItems()) return true;
         init();
         return itemPipeClass != null && itemPipeClass.isInstance(be);
     }
 
     public static boolean isLogisticsFluidPipe(BlockEntity be) {
         if (be == null) return false;
+        if (be instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipe && pipe.getPipeType().handlesFluid()) return true;
         init();
         return fluidPipeClass != null && fluidPipeClass.isInstance(be);
     }
 
     public static boolean injectItemIntoPipe(BlockEntity pipeBe, Direction fromDir, ItemStack stack) {
-        if (pipeBe == null || stack == null || stack.isEmpty() || !isLogisticsItemPipe(pipeBe)) return false;
+        if (pipeBe == null || stack == null || stack.isEmpty()) return false;
+        if (pipeBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipe) {
+            Direction toDir = fromDir.getOpposite();
+            pipe.getTravelingItems().add(new com.refinery.block.entity.IndustrialPipeBlockEntity.TravelingItem(stack, fromDir, toDir, 0.05f));
+            pipe.setChanged();
+            return true;
+        }
+        if (!isLogisticsItemPipe(pipeBe)) return false;
         init();
 
         // 1. First try forceAddItemMethod (takes TravelingItem and fromDir, bypasses normal pipe intake restrictions)
@@ -105,7 +115,11 @@ public class LogisticsPipeCompat {
     }
 
     public static boolean hasTravelingItems(BlockEntity pipeBe) {
-        if (pipeBe == null || getTravelingItemsMethod == null || !isLogisticsItemPipe(pipeBe)) return false;
+        if (pipeBe == null) return false;
+        if (pipeBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipe) {
+            return !pipe.getTravelingItems().isEmpty();
+        }
+        if (getTravelingItemsMethod == null || !isLogisticsItemPipe(pipeBe)) return false;
         try {
             Object result = getTravelingItemsMethod.invoke(pipeBe);
             if (result instanceof List<?> list) {
@@ -117,7 +131,11 @@ public class LogisticsPipeCompat {
     }
 
     public static long getFluidMilliBuckets(BlockEntity pipeBe) {
-        if (pipeBe == null || totalMilliBucketsMethod == null || !isLogisticsFluidPipe(pipeBe)) return 0;
+        if (pipeBe == null) return 0;
+        if (pipeBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipe) {
+            return pipe.getFluidTank().getAmount();
+        }
+        if (totalMilliBucketsMethod == null || !isLogisticsFluidPipe(pipeBe)) return 0;
         try {
             Object result = totalMilliBucketsMethod.invoke(pipeBe);
             if (result instanceof Number num) {

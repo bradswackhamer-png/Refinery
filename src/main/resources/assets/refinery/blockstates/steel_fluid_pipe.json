@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/steel_fluid_pipe" }
+  }
+}

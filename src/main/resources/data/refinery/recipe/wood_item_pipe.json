@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MGM"
+  ],
+  "key": {
+    "M": "#minecraft:planks",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:wood_item_pipe"
+,    "count": 10
+  }
+}

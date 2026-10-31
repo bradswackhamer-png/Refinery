@@ -93,24 +93,26 @@ public class AutoHarvesterMenu extends AbstractContainerMenu {
                 return true;
             }
             case 1 -> {
-                int newRadius = Math.max(AutoHarvesterBlockEntity.MIN_RADIUS, getRadius() - 1);
-                this.data.set(5, newRadius);
-                if (this.container instanceof AutoHarvesterBlockEntity be) {
-                    be.setRadius(newRadius);
+                int r = getRadius();
+                if (r > AutoHarvesterBlockEntity.MIN_RADIUS) {
+                    this.data.set(5, r - 1);
+                    if (this.container instanceof AutoHarvesterBlockEntity be) {
+                        be.setRadius(r - 1);
+                    }
                 }
                 return true;
             }
             case 2 -> {
-                int newRadius = Math.min(AutoHarvesterBlockEntity.MAX_RADIUS, getRadius() + 1);
-                this.data.set(5, newRadius);
-                if (this.container instanceof AutoHarvesterBlockEntity be) {
-                    be.setRadius(newRadius);
+                int r = getRadius();
+                if (r < AutoHarvesterBlockEntity.MAX_RADIUS) {
+                    this.data.set(5, r + 1);
+                    if (this.container instanceof AutoHarvesterBlockEntity be) {
+                        be.setRadius(r + 1);
+                    }
                 }
                 return true;
             }
-            default -> {
-                return false;
-            }
+            default -> { return false; }
         }
     }
 

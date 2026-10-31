@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "refinery:copper_item_pipe",
+    "refinery:tar"
+  ],
+  "result": {
+    "id": "refinery:copper_fluid_pipe",
+    "count": 1
+  }
+}

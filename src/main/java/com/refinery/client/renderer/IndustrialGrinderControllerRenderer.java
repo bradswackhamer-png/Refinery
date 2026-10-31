@@ -78,7 +78,11 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
             if (!inputItem.isEmpty()) {
                 this.itemModelResolver.updateForTopItem(state.activeItemState, inputItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
                 state.hasActiveItem = true;
+            } else {
+                this.itemModelResolver.updateForTopItem(state.activeItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
             }
+        } else if (be.getLevel() != null) {
+            this.itemModelResolver.updateForTopItem(state.activeItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
         }
 
         // Extract output item on right discharge conveyor
@@ -95,7 +99,11 @@ public class IndustrialGrinderControllerRenderer implements BlockEntityRenderer<
             if (!outputItem.isEmpty()) {
                 this.itemModelResolver.updateForTopItem(state.outputItemState, outputItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
                 state.hasOutputItem = true;
+            } else {
+                this.itemModelResolver.updateForTopItem(state.outputItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
             }
+        } else if (be.getLevel() != null) {
+            this.itemModelResolver.updateForTopItem(state.outputItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
         }
 
         // Blueprint diagnostic hologram
