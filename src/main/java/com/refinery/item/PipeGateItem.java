@@ -60,6 +60,7 @@ public class PipeGateItem extends BlockItem {
             if (!level.isClientSide()) {
                 PipeGateEntity gate = new PipeGateEntity(RefineryMod.PIPE_GATE_ENTITY.get(), level, clickedPos, clickedFace, this.tier, this.autarchic);
                 level.addFreshEntity(gate);
+                gate.notifyPipes();
                 level.playSound(null, clickedPos, SoundEvents.METAL_PLACE, SoundSource.BLOCKS, 1.0f, 1.2f);
                 if (player != null && !player.getAbilities().instabuild) {
                     context.getItemInHand().shrink(1);

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BGB"
+  ],
+  "key": {
+    "B": "minecraft:gold_ingot",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:brass_item_pipe",
+    "count": 10
+  }
+}

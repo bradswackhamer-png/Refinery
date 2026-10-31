@@ -585,6 +585,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
             this.cookProgress[i] = input.getIntOr("CookProgress_" + i, 0);
         }
+        this.items.clear();
         ContainerHelper.loadAllItems(input, this.items);
     }
 

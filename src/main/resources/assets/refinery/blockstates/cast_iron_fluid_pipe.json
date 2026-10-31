@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/cast_iron_fluid_pipe" }
+  }
+}

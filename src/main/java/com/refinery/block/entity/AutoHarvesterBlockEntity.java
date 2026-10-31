@@ -6,9 +6,12 @@ import com.refinery.compat.LogisticsPipeCompat;
 import com.refinery.menu.AutoHarvesterMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,7 +41,11 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -102,8 +109,17 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                 case 0 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0xFFFF0000) | (value & 0xFFFF);
                 case 1 -> AutoHarvesterBlockEntity.this.energy = (AutoHarvesterBlockEntity.this.energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 2 -> AutoHarvesterBlockEntity.this.working = (value != 0);
-                case 4 -> AutoHarvesterBlockEntity.this.enabled = (value != 0);
-                case 5 -> AutoHarvesterBlockEntity.this.radius = value;
+                case 4 -> {
+                    AutoHarvesterBlockEntity.this.enabled = (value != 0);
+                    AutoHarvesterBlockEntity.this.setChanged();
+                    AutoHarvesterBlockEntity.this.syncToClient();
+                }
+                case 5 -> {
+                    AutoHarvesterBlockEntity.this.radius = Math.clamp(value, MIN_RADIUS, MAX_RADIUS);
+                    AutoHarvesterBlockEntity.this.scanIndex = 0;
+                    AutoHarvesterBlockEntity.this.setChanged();
+                    AutoHarvesterBlockEntity.this.syncToClient();
+                }
             }
         }
 
@@ -161,28 +177,27 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         boolean harvestedSomething = false;
         int checks = 0;
 
-        int diameter = this.radius * 2 + 1;
-        int totalPositions = diameter * diameter * Y_LEVELS;
+        Direction rightDir = facing.getClockWise();
+
+        int forwardRange = this.radius; // The X number of blocks in front of itself
+        int lateralRange = this.radius;
+        int lateralWidth = lateralRange * 2 + 1;
+        int totalPositions = forwardRange * lateralWidth * Y_LEVELS;
 
         // Scan up to 16 positions per tick
         while (checks < 16) {
             checks++;
             this.scanIndex = (this.scanIndex + 1) % totalPositions;
 
-            // Coordinate math: radius in all directions
             int col = this.scanIndex / Y_LEVELS;
             int dyIdx = this.scanIndex % Y_LEVELS;
 
-            int dx = (col % diameter) - this.radius;
-            int dz = (col / diameter) - this.radius;
+            // forwardDist: strictly 1 to forwardRange in front of the harvester (never <= 0, never behind!)
+            int forwardDist = (col / lateralWidth) + 1;
+            int lateralDist = (col % lateralWidth) - lateralRange;
             int dy = dyIdx - 2; // -2, -1, 0, 1
 
-            // Do not target the harvester itself or the block directly underneath
-            if (dx == 0 && dz == 0 && (dy == 0 || dy == -1)) {
-                continue;
-            }
-
-            BlockPos targetPos = pos.offset(dx, dy, dz);
+            BlockPos targetPos = pos.relative(facing, forwardDist).relative(rightDir, lateralDist).above(dy);
             BlockState targetState = level.getBlockState(targetPos);
 
             if (isMatureCrop(targetState, level, targetPos)) {
@@ -536,15 +551,19 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
     private void tryExportItems(ServerLevel level, BlockPos pos, Direction facing) {
         if (isEmpty()) return;
 
-        // Auto-eject targets: directly behind or directly below
-        BlockPos[] targets = new BlockPos[]{
-                pos.relative(facing.getOpposite()),
-                pos.below()
+        // Auto-eject targets: any connected pipe or container on all accessible faces (behind, below, sides, top)
+        Direction[] candidateDirs = new Direction[]{
+                facing.getOpposite(),
+                Direction.DOWN,
+                facing.getClockWise(),
+                facing.getCounterClockWise(),
+                Direction.UP
         };
 
-        for (BlockPos targetPos : targets) {
+        for (Direction exportDir : candidateDirs) {
+            BlockPos targetPos = pos.relative(exportDir);
             BlockEntity targetBE = level.getBlockEntity(targetPos);
-            Direction targetSide = targetPos.equals(pos.below()) ? Direction.UP : facing;
+            Direction targetSide = exportDir.getOpposite();
             if (targetBE != null && LogisticsPipeCompat.isLogisticsItemPipe(targetBE)) {
                 for (int i = 0; i < INVENTORY_SIZE; i++) {
                     ItemStack sourceStack = this.items.get(i);
@@ -568,6 +587,25 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
                             setChanged();
                             targetContainer.setChanged();
                             return; // Exported 1 stack per cycle
+                        }
+                    }
+                }
+            } else {
+                ResourceHandler<ItemResource> handler = level.getCapability(Capabilities.Item.BLOCK, targetPos, targetSide);
+                if (handler != null) {
+                    for (int i = 0; i < INVENTORY_SIZE; i++) {
+                        ItemStack sourceStack = this.items.get(i);
+                        if (!sourceStack.isEmpty()) {
+                            try (Transaction tx = Transaction.openRoot()) {
+                                int inserted = handler.insert(ItemResource.of(sourceStack), sourceStack.getCount(), tx);
+                                if (inserted > 0) {
+                                    tx.commit();
+                                    sourceStack.shrink(inserted);
+                                    if (sourceStack.isEmpty()) this.items.set(i, ItemStack.EMPTY);
+                                    setChanged();
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
@@ -643,6 +681,7 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         if (this.enabled != enabled) {
             this.enabled = enabled;
             setChanged();
+            syncToClient();
         }
     }
 
@@ -660,6 +699,7 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
             this.radius = clamped;
             this.scanIndex = 0;
             setChanged();
+            syncToClient();
         }
     }
 
@@ -673,6 +713,22 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         if (this.radius > MIN_RADIUS) {
             setRadius(this.radius - 1);
         }
+    }
+
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override
@@ -695,6 +751,7 @@ public class AutoHarvesterBlockEntity extends BlockEntity implements MenuProvide
         this.working = input.getBooleanOr("working", false);
         this.enabled = input.getBooleanOr("enabled", true);
         this.radius = Math.clamp(input.getIntOr("radius", DEFAULT_RADIUS), MIN_RADIUS, MAX_RADIUS);
+        this.items.clear();
         ContainerHelper.loadAllItems(input, this.items);
     }
 

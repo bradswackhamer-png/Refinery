@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "refinery:steel_item_pipe",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "refinery:steel_fluid_pipe",
+    "count": 1
+  }
+}

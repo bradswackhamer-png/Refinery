@@ -261,6 +261,9 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                         this.progress = 0;
                         boolean isOilSand = isOilSand(input);
                         input.shrink(1);
+                        if (input.isEmpty()) {
+                            this.items.set(inputSlot, ItemStack.EMPTY);
+                        }
                         addOutput(output.copy());
 
                         // Oil Sand has 50% chance to yield 1 Petroleum Tar
@@ -869,6 +872,12 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     }
 
     @Override
+    public void setChanged() {
+        super.setChanged();
+        syncToClient();
+    }
+
+    @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putBoolean("assembled", this.assembled);
@@ -884,6 +893,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         this.energy = input.getIntOr("energy", 0);
         this.energyStorage.set(this.energy);
         this.progress = input.getIntOr("progress", 0);
+        this.items.clear();
         ContainerHelper.loadAllItems(input, this.items);
     }
 
@@ -932,14 +942,17 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         ItemStack result = ContainerHelper.removeItem(this.items, slot, amount);
         if (!result.isEmpty()) {
             setChanged();
-            syncToClient();
         }
         return result;
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int slot) {
-        return ContainerHelper.takeItem(this.items, slot);
+        ItemStack result = ContainerHelper.takeItem(this.items, slot);
+        if (!result.isEmpty()) {
+            setChanged();
+        }
+        return result;
     }
 
     @Override
@@ -947,7 +960,6 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         this.items.set(slot, stack);
         stack.limitSize(this.getMaxStackSize(stack));
         setChanged();
-        syncToClient();
     }
 
     @Override
@@ -963,7 +975,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     @Override
     public void clearContent() {
         this.items.clear();
-        syncToClient();
+        setChanged();
     }
 
     // === MenuProvider Implementation ===

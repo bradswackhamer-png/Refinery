@@ -14,5 +14,7 @@ public class PipeGateRenderState extends EntityRenderState {
     public boolean autarchic = false;
     public boolean active = false;
     public boolean powered = false;
+    public float curveFactorX = 0.7f;
+    public float curveFactorY = 0.7f;
     public final ItemStackRenderState item = new ItemStackRenderState();
 }

@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/fluid_extractor_pipe" }
+  }
+}

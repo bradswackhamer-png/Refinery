@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "refinery:steel_fluid_pipe",
+    "minecraft:piston"
+  ],
+  "result": {
+    "id": "refinery:fluid_extractor_pipe",
+    "count": 1
+  }
+}

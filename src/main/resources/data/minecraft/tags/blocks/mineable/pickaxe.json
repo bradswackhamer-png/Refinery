@@ -47,6 +47,14 @@
     "refinery:coal_fluid_pump",
     "refinery:diesel_fluid_pump",
     "refinery:electric_fluid_pump",
-    "refinery:fluid_discharge"
+    "refinery:fluid_discharge",
+    "refinery:steel_fluid_pipe",
+    "refinery:copper_fluid_pipe",
+    "refinery:cast_iron_fluid_pipe",
+    "refinery:steel_item_pipe",
+    "refinery:brass_item_pipe",
+    "refinery:fluid_extractor_pipe",
+    "refinery:item_extractor_pipe",
+    "refinery:void_pipe"
   ]
 }

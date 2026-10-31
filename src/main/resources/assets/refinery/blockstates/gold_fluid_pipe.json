@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/gold_fluid_pipe" }
+  }
+}

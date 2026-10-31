@@ -177,7 +177,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     public void snapToPipe(BlockPos pipePos, Direction face) {
         this.entityData.set(DATA_PIPE_POS, pipePos);
         this.entityData.set(DATA_FACING, face);
-        double dist = 0.28; // Snaps directly to the 8x8 pipe collar within the 1x1x1 block
+        double dist = 0.202; // Sits flush on round pipe cylinder (R = 0.200)
         double cx = pipePos.getX() + 0.5 + face.getStepX() * dist;
         double cy = pipePos.getY() + 0.5 + face.getStepY() * dist;
         double cz = pipePos.getZ() + 0.5 + face.getStepZ() * dist;
@@ -320,7 +320,16 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             }
         }
 
-        // 4. Default: Open programming GUI
+        // 4. Blank Gate: Connection blocker feedback (no programming menu needed)
+        if (getTier() == GateTier.BLANK) {
+            if (!level().isClientSide() && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("§7[§6Pipe Blank§7] §fConnection blocked on this side"), true);
+                level().playSound(null, blockPosition(), SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.7f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // 5. Default: Open programming GUI
         if (!level().isClientSide() && player instanceof net.minecraft.server.level.ServerPlayer sp) {
             sp.openMenu(this, buf -> buf.writeInt(getId()));
         }
@@ -346,6 +355,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         GateTier tier = getTier();
         boolean aut = isAutarchic();
         return switch (tier) {
+            case BLANK -> new ItemStack(RefineryMod.BLANK_GATE_ITEM.get());
             case BASIC -> new ItemStack(aut ? RefineryMod.BASIC_AUTARCHIC_GATE_ITEM.get() : RefineryMod.BASIC_GATE_ITEM.get());
             case IRON -> new ItemStack(aut ? RefineryMod.IRON_AUTARCHIC_GATE_ITEM.get() : RefineryMod.IRON_GATE_ITEM.get());
             case GOLD -> new ItemStack(aut ? RefineryMod.GOLD_AUTARCHIC_GATE_ITEM.get() : RefineryMod.GOLD_GATE_ITEM.get());
@@ -353,16 +363,37 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         };
     }
 
+    public void notifyPipes() {
+        if (level() == null) return;
+        BlockPos pos = getPipePos();
+        Direction face = getAttachedFace();
+        if (pos != null) {
+            BlockEntity be = level().getBlockEntity(pos);
+            if (be instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipeBe) {
+                pipeBe.updateConnections();
+            }
+            if (face != null) {
+                BlockEntity neighborBe = level().getBlockEntity(pos.relative(face));
+                if (neighborBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity neighborPipe) {
+                    neighborPipe.updateConnections();
+                }
+            }
+        }
+    }
+
     @Override
     public void remove(RemovalReason reason) {
-        if (!level().isClientSide() && this.entityData.get(DATA_POWERED)) {
-            BlockPos pipePos = getPipePos();
-            POWERED_GATE_POSITIONS.remove(new LevelPos(level().dimension(), pipePos.immutable()));
-            notifyRedstoneNeighbors(level(), pipePos);
-            PipeAndTarget pat = findPipeAndInventory(level(), pipePos, getAttachedFace());
-            if (pat != null && !pat.pipePos().equals(pipePos)) {
-                POWERED_GATE_POSITIONS.remove(new LevelPos(level().dimension(), pat.pipePos().immutable()));
-                notifyRedstoneNeighbors(level(), pat.pipePos());
+        if (!level().isClientSide()) {
+            notifyPipes();
+            if (this.entityData.get(DATA_POWERED)) {
+                BlockPos pipePos = getPipePos();
+                POWERED_GATE_POSITIONS.remove(new LevelPos(level().dimension(), pipePos.immutable()));
+                notifyRedstoneNeighbors(level(), pipePos);
+                PipeAndTarget pat = findPipeAndInventory(level(), pipePos, getAttachedFace());
+                if (pat != null && !pat.pipePos().equals(pipePos)) {
+                    POWERED_GATE_POSITIONS.remove(new LevelPos(level().dimension(), pat.pipePos().immutable()));
+                    notifyRedstoneNeighbors(level(), pat.pipePos());
+                }
             }
         }
         super.remove(reason);

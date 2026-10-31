@@ -602,6 +602,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         this.energy = input.getIntOr("energy", 0);
         this.energyStorage.set(this.energy);
         this.progress = input.getIntOr("progress", 0);
+        this.items.clear();
         ContainerHelper.loadAllItems(input, this.items);
     }
 

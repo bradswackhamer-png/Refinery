@@ -151,14 +151,16 @@ public class PipeGateBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         // In-world upgrade using Autarchic Chipset
-        if (!autarchic && stack.is(RefineryMod.AUTARCHIC_CHIPSET.get())) {
+        if (!autarchic && tier != GateTier.BLANK && stack.is(RefineryMod.AUTARCHIC_CHIPSET.get())) {
             if (!level.isClientSide()) {
                 Block newBlock = switch (tier) {
                     case BASIC -> RefineryMod.BASIC_AUTARCHIC_GATE.get();
                     case IRON -> RefineryMod.IRON_AUTARCHIC_GATE.get();
                     case GOLD -> RefineryMod.GOLD_AUTARCHIC_GATE.get();
                     case DIAMOND -> RefineryMod.DIAMOND_AUTARCHIC_GATE.get();
+                    default -> null;
                 };
+                if (newBlock == null) return InteractionResult.PASS;
 
                 BlockEntity oldBe = level.getBlockEntity(pos);
                 BlockState newState = newBlock.defaultBlockState()

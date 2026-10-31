@@ -46,9 +46,9 @@ public class SlopedConveyorBeltModel {
     ) {
         boolean isUp = slope == SlopedConveyorBeltBlock.SlopeDirection.UP;
 
-        // Heights in meters (blocks)
-        float yLow = 0.22f;
-        float yHigh = 1.18f;
+        // Heights in meters (blocks) - perfectly aligned to 4.6px (0.2875) horizontal conveyor belt height
+        float yLow = 0.2875f;
+        float yHigh = 1.2875f;
 
         float yEntry = isUp ? yLow : yHigh;
         float yExit  = isUp ? yHigh : yLow;
@@ -71,10 +71,10 @@ public class SlopedConveyorBeltModel {
         // Cross-brace
         emitBox(m, c, 0.09f, legHeight * 0.5f - 0.02f, legZ - 0.03f, 0.91f, legHeight * 0.5f + 0.02f, legZ + 0.03f, UV_ALUMINUM_RAIL, light, overlay);
 
-        // 5. Rollers at both ends
+        // 5. Rollers at both ends (tucked cleanly under the belt)
         float rollAngle = isRunning ? (animTime * 0.25f) : 0.0f;
-        emitRoller(m, c, 0.11f, 0.89f, 0.08f, yEntry, 0.04f, rollAngle, light, overlay);
-        emitRoller(m, c, 0.11f, 0.89f, 0.92f, yExit, 0.04f, rollAngle, light, overlay);
+        emitRoller(m, c, 0.11f, 0.89f, 0.08f, yEntry - 0.04f, 0.04f, rollAngle, light, overlay);
+        emitRoller(m, c, 0.11f, 0.89f, 0.92f, yExit - 0.04f, 0.04f, rollAngle, light, overlay);
 
         // 6. Animated Inclined Belt Top
         renderAnimatedBelt(m, c, yEntry, yExit, isRunning, animTime, light, overlay);
@@ -90,10 +90,10 @@ public class SlopedConveyorBeltModel {
             int light,
             int overlay
     ) {
-        float x0 = 0.11f;
-        float x1 = 0.89f;
-        float z0 = 0.05f;
-        float z1 = 0.95f;
+        float x0 = 0.10f;
+        float x1 = 0.90f;
+        float z0 = 0.0f;
+        float z1 = 1.0f;
 
         float u0 = UV_BLACK_BELT.u0();
         float u1 = UV_BLACK_BELT.u1();

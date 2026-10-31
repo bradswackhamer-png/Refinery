@@ -70,11 +70,11 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
             t = Math.max(0.0, Math.min(1.0, t));
 
             // Surface height:
-            // UP: from y + 0.25 at t=0 to y + 1.25 at t=1
-            // DOWN: from y + 1.25 at t=0 to y + 0.25 at t=1
+            // UP: from y + 0.2875 at t=0 to y + 1.2875 at t=1
+            // DOWN: from y + 1.2875 at t=0 to y + 0.2875 at t=1
             double targetY = slope == SlopedConveyorBeltBlock.SlopeDirection.UP
-                    ? pos.getY() + 0.25 + t * 0.95
-                    : pos.getY() + 1.20 - t * 0.95;
+                    ? pos.getY() + 0.2875 + t * 1.0
+                    : pos.getY() + 1.2875 - t * 1.0;
 
             double diffY = targetY - itemEntity.getY();
             double velY = Math.max(-0.15, Math.min(0.20, diffY * 0.45));

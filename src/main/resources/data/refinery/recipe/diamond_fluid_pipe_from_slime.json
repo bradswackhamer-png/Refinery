@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "refinery:diamond_item_pipe",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "refinery:diamond_fluid_pipe",
+    "count": 1
+  }
+}

@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.10.jar`
+`refinery-1.8.23.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.10 (NeoForge 26.3)`
+`Industrial Refinery 1.8.23 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,15 +215,146 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.8.10
+# Industrial Refinery v1.8.23
 
-### What's New in v1.8.10:
+### What's New in v1.8.23:
+- **Quartz Merge Pipe (`refinery:merge_pipe`, `refinery:merge_item_pipe`, `refinery:merge_fluid_pipe`)**:
+  - Selectable Output Direction: Right-clicking any face (empty hand or wrench) sets that face as the sole OUTPUT; all other connections automatically become unidirectional INPUTS.
+  - Cycle through branches: Clicking the active output face cycles across connected branches with action bar status display and audio click feedback.
+  - Directional Indicator: Renders an illuminated golden collar band on the selected output arm.
+  - Item & Fluid Merging: All items and fluids from any input branch are routed strictly into the designated output.
+  - Crafting: `[Quartz, Glass, Quartz]` -> 10x Merge Pipes. Waterproof with Tar or Slime Ball to get Merge Fluid Pipe.
+
+# Industrial Refinery v1.8.22
+
+### What's New in v1.8.22:
+- **Void Pipe Shaped Crafting Parity & Instant Destruction**:
+  - Added shaped crafting recipe: `[Lava Bucket, Glass, Lava Bucket]` producing **10x Void Pipes** (`refinery:void_pipe`). Empty buckets remain in the crafting grid upon crafting.
+  - Zero-bottleneck fluid insertion capability handler accepting and destroying 100% of inserted fluid volumes without buffer limits or backlog.
+  - Immediate item destruction on insertion from hoppers/containers and pipe traveling networks.
+- **Pipe Gate Rotation & Saddle Hugging Fix**:
+  - Corrected `WEST` (270°) and `EAST` (90°) rotation in `PipeGateEntityRenderer`, guaranteeing gate saddle clamp plates curve tightly around the pipe cylinder instead of curving backwards inside-out.
+
+# Industrial Refinery v1.8.21
+
+### What's New in v1.8.21:
+- **Pipe Gate Saddle Hugging & Rotation Fix**:
+  - Corrected `PipeGateEntityRenderer` rotational mappings for `EAST` (270°) and `WEST` (90°) faces. Gate saddle clamp plates now hug the pipe circumference snugly rather than flaring outwards/inverted into the air.
+  - Extended dead-end single-arm pipe cylinders in `IndustrialPipeModel` to `0.80f` (and from `0.20f`), matching standalone pipe geometry and ensuring gates centered at `0.50f` are fully supported without hanging off the pipe end.
+- **Conveyor Belt & Pipe Floor Occlusion Resolution**:
+  - Overrode `getOcclusionShape(BlockState)` to return `Shapes.empty()` and `useShapeForLightOcclusion(BlockState)` to return `false` across `ConveyorBeltBlock`, `SlopedConveyorBeltBlock`, `RightAngleConveyorBeltBlock`, and `IndustrialPipeBlock`. Chunk meshing no longer culls floor tiles underneath conveyor belts or pipes.
+- **Sloped Conveyor Connection Snapping & Roller Alignment**:
+  - Fixed `ConveyorBeltBlock.updateShape` to properly evaluate `isBeltMatchingFront` and `isBeltMatchingBack` with `LevelReader`, keeping horizontal conveyors connected to sloped conveyors without retracting their belts or leaving un-animated gaps.
+  - Lowered roller centers in `SlopedConveyorBeltModel` (`yEntry - 0.04f`, `yExit - 0.04f`) so rollers sit cleanly beneath the belt rather than protruding through the top carrying surface.
+
+# Industrial Refinery v1.8.20
+
+### What's New in v1.8.20:
+- **Comprehensive Pipe System (Wood, Copper, Iron, Steel, Gold, Diamond, Emerald)**:
+  - 7 material tiers with dedicated models, textures, item definitions, and recipes.
+  - Wood active extraction, Copper/Iron/Steel bandwidth scaling, Gold insertion prioritization, Diamond 54-slot directional filtering GUI, Emerald round-robin cyclic routing.
+  - Shapeless Tar/Slime Ball fluid pipe conversion. Auto-working mod machines.
+
+# Industrial Refinery v1.8.17
+
+### What's New in v1.8.17:
+- **Auto Harvester Directional Front-Only Harvest Geometry**:
+  - Re-architected `AutoHarvesterBlockEntity` scanning coordinate mathematics to orient strictly in front of the machine's horizontal facing direction (`facing`).
+  - Completely eliminated backward scanning: the harvester now scans forward distance `1 .. radius` directly in front of itself (`pos.relative(facing, forwardDist).relative(rightDir, lateralDist).above(dy)`), completely preventing the machine from ever harvesting crops, trees, or blocks behind it or directly underneath its housing.
+  - The working range setting ($X$) directly controls the forward reach (1 to 9 blocks deep in front of the machine), centered laterally across $(2X + 1)$ blocks.
+  - Updated `AutoHarvesterScreen` GUI label and tooltips to clearly communicate forward depth and front-only coverage (e.g. `11x5 in front`), removing confusing 360-degree radius descriptions.
+
+# Industrial Refinery v1.8.16
+
+### What's New in v1.8.16:
+- **Auto Planter & Auto Harvester GUI Button Controls & State Sync**:
+  - Resolved an issue where clicking the Power ON/OFF toggle and the working range radius `[-]` / `[+]` buttons in both the Auto Planter and Auto Harvester GUIs failed to respond or update the working parameters.
+  - Fixed client/server menu button dispatch in `AutoPlanterMenu` and `AutoHarvesterMenu`: `clickMenuButton` now immediately updates `this.data` slots (slot 4 for enabled toggle, slot 5 for radius), ensuring client-side GUI state and server state remain synchronized whether the container is a client `SimpleContainer` or a server block entity.
+  - Added immediate optimistic client-side UI feedback in `AutoPlanterScreen` and `AutoHarvesterScreen` mouse click handlers so button state, LED indicators, and radius dimensions update instantly upon clicking.
+  - Implemented block entity network packet synchronization (`syncToClient()`, `getUpdatePacket()`, and `getUpdateTag()`) in `AutoPlanterBlockEntity` and `AutoHarvesterBlockEntity`, ensuring block entity state changes sync immediately across all connected clients.
+  - Added inventory clearance (`this.items.clear()`) prior to loading items from NBT in `loadAdditional` to prevent ghost item retention.
+
+# Industrial Refinery v1.8.15
+
+### What's New in v1.8.15:
+- **Industrial Grinder (Rock Crusher) Empty Inventory Item Rendering**:
+  - Fixed an issue where the Industrial Grinder continued rendering 3D item models of the last crushed item between its spinning hopper blades even when the input inventory was completely empty.
+  - Added explicit container clearing (`this.items.clear()`) in `IndustrialGrinderControllerBlockEntity.loadAdditional` prior to loading NBT items, preventing stale items from lingering on the client when slots are emptied on the server.
+  - Overrode `setChanged()` to immediately synchronize block entity data packets to tracking clients whenever items are added or removed through player GUI interaction, hopper transfer, or automation piping.
+  - Updated `IndustrialGrinderControllerRenderer` to explicitly clear active and output item render states when slots are empty or unpopulated.
+  - Applied the same inventory load clearance fix to the Metal Press and Multi-Smelter controllers to eliminate ghost item rendering across all industrial multiblock machinery.
+
+# Industrial Refinery v1.8.14
+
+### What's New in v1.8.14:
+- **Pipe Blank Gate (`refinery:blank_gate`)**:
+  - Inexpensive, accessible gate tier (`GateTier.BLANK`) that acts as an industrial pipe blanking plate and flow stopper.
+  - Attaches to any pipe face to immediately disconnect the pipe on that side, preventing adjacent pipes, tanks, or machines from joining together and stopping fluid/item transfer.
+  - Neighboring pipes automatically recognize the blank and disconnect their opposing face in real time.
+  - Right-clicking the blank gate provides on-screen status feedback ("Connection blocked on this side").
+  - Dismantling with a wrench or mining it pops off the item and restores pipe connections.
+  - Highly accessible crafting recipe: 1 Iron Ingot crafts 4 Pipe Blank Gates.
+- **3D Curved Pipe Gate Saddle Geometry**:
+  - All pipe gates now dynamically contour and follow the cylindrical curvature of round pipes when attached!
+  - Replaced flat card rendering with `CurvedPipeGateModel`, which renders a custom 3D saddle clamp wrapping tightly around the pipe's 12-sided cylindrical profile ($R = 0.200$).
+  - Dynamically calculates the pipe's orientation (curving across horizontal or vertical axes, or dome saddle across junction hubs) with sealed beveled rims and 4 corner hex mounting clamp bolts.
+- **Logistics Automation Recipe Parity**:
+  - Re-aligned all 8 pipe recipes to match Logistics Automation standard crafting:
+    - Item/transport pipes crafted via `["MGM"]` (Material + Glass + Material) yielding 8 pipes per craft.
+    - Fluid pipes craftable shapelessly from transport pipes with slime balls or petroleum tar/bitumen.
+    - Extractor pipes crafted from Planks + Glass yielding 8 pipes.
+    - Void pipes crafted from Obsidian + Glass + Ender Pearl yielding 8 pipes.
+
+### Previous v1.8.13 Highlights:
+- **Eliminated All Texture Flickering and Z-Fighting on Native 3D Pipes**:
+  - Switched pipe render type from `RenderTypes.entityCutout` to `RenderTypes.entitySolid`, ensuring rock-solid depth buffer writing and preventing alpha-test jitter.
+  - Resolved intersecting and coplanar surface Z-fighting between cylinder arms and junction fittings:
+    - Cylinder arms now terminate cleanly at `0.5 ± 0.08` inside the fitting hub, preventing internal face collision and intersection while remaining fully enclosed within the hub radius (`0.228`).
+    - Fixed warped and sheared non-planar quads on vertical (Y-axis) cylinders by correcting vertex pairing and counter-clockwise outward normal winding.
+    - Removed redundant center junction rendering from standalone (unconnected) pipes, rendering them as clean, solid capped cylinders with zero overlapping surfaces.
+    - Formatted non-degenerate latitude quads and polar fans on the junction fitting hub, eliminating zero-area quads and UV gradient artifacts.
+    - Inset machine connection flanges by `0.001` to eliminate coplanar face collision with adjacent machine blocks.
+
+### Previous v1.8.12 Highlights:
+- **Native Industrial 3D Monolithic Pipe Infrastructure (`refinery` namespace)**:
+  - Built-in, fully autonomous native industrial pipe infrastructure directly integrated into Industrial Refinery, giving complete control over physical geometry, rendering, and logic without external mod dependencies.
+  - **100% Round & Perfectly Seamless Geometry**:
+    - 12-sided faceted cylindrical geometry spanning normalized radius 0.20 (3.2 units).
+    - Straight runs across 10, 20, 50, or more blocks render as a single continuous, unbroken cylinder from coordinate 0.0 to 1.0 with mathematical boundary vertex alignment and zero visual joint lines or collar seams.
+    - Central multi-directional junction hubs dynamically form smooth 90° elbows, tees, and 4-way/6-way crosses with matching radial curvature.
+    - Bolted industrial flanges (Fitting 11) with 6 hex studs render strictly at machine, tank, pump, boiler, and container connection terminals.
+  - **Comprehensive Material Suite**:
+    - Industrial Steel Fluid Pipe & Item Pipe (1,000 mB / 8 items/t).
+    - High-Capacity Copper Fluid Pipe (2,000 mB / fast fluid transfer).
+    - Heavy Cast Iron Fluid Pipe (1,500 mB / resilient high-pressure fluid transfer).
+    - High-Speed Brass Item Pipe (16 items/t / high-throughput transport).
+    - Active Fluid Extractor Pipe & Active Item Extractor Pipe with automated directional machine extraction.
+    - Industrial Void Pipe (infinite sink for surplus fluids and items).
+  - **Live In-World 3D Item Transport Rendering**:
+    - Floating 3D item packets travel in real time along the central pipe axis with dynamic orientation, smooth progress interpolation, and gentle rotation.
+  - **Interactive Pipe Wrench Control**:
+    - Right-click pipe faces with the Refinery Wrench to manually toggle side connections open or disconnected.
+  - **Seamless Native Interoperability**:
+    - Full bidirectional compatibility with Industrial Refinery Multiblock Liquid Storage Tanks, Boilers, Pumps, Multismelters, Metal Presses, Grinders, and Pipe Gates.
+  - **Solid Monolithic Fitting Hub & Visual Refinements**:
+    - Replaced legacy corner quad patches with a solid 12-sided spherical fitting hub, eliminating floating square artifacts at tees and elbows.
+    - Fixed cylinder vertex winding and outward normal orientation, closing missing faces on 90° pipe elbows.
+    - Single standalone pipe blocks render as complete solid cylindrical segments with closed end caps.
+
+### Previous v1.8.11 Highlights:
+- **True Round 3D Monolithic Pipe Geometry (`Logistics Automation`)**:
+  - Replaced legacy cubic boxes with true 12-sided faceted cylindrical pipe geometry (`PipeGeometry.java`) matching the monolithic 3D machine aesthetic.
+  - **Seamless Straight Runs**: Pipes connecting to each other now share continuous cylindrical profiles (radius 3.2 units) with zero collar breaks, zero block-boundary seams, and zero dark holes. Consecutive pipes merge into a smooth continuous industrial pipeline.
+  - **Machine Connection Flanges**: Connections to external inventories, machines, tanks, and boilers (`ARM_EXTENDED`) feature authentic heavy bolted connection flanges (Fitting 11 Flange) with raised collar rims, machined hex bolts, and recessed gasket seals.
+  - **Multi-Axial Junction Core (`CORE`)**: Central junction seamlessly connects straight runs, smooth 90° elbows, and tee branches without square corners or protruding box faces.
+  - **Seamless Textures & LabPBR 1.3 Updates**: Longitudinal brushed metal texture wrapping around the cylindrical surface with physically accurate diffuse and specular cylindrical lighting. Intelligent logistics pipes feature flush illuminated status LEDs.
+  - **Automated Baking & Mod Jar Deployment**: Fully integrated into `scripts/generate_pipe_texture_pack.ps1` with Java 25 compilation directly updating the mod jar and resource pack.
+
+### Previous v1.8.10 Highlights:
 - **Logistics Automation Ultra-Realistic 3D Monolithic Pipe Pack**:
   - Full high-definition visual upgrade pack for the Logistics Automation (`logistics`) pipe network.
   - **Photorealistic 64x64 PBR Textures**: Replaces legacy textures with brushed anisotropic metals, ambient occlusion depth, hex socket screws, and crystalline viewports preserving live item/fluid transit visibility.
   - **LabPBR 1.3 Shader Standard**: Normal displacement maps (`_n.png`) and specular/roughness maps (`_s.png`) provide real-time 3D relief, metal reflections, and illuminated glows with modern shader packs.
-  - **3D Monolithic Block Models**: Chamfered 12-sided junction hubs, reinforced corner brackets, physical connection flanges with hex bolts, and mid-segment clamp sleeves.
-  - **Standalone Downloads**: Kept unbaked from the mod jar as standalone downloads with proper forward-slash zip structures (`resourcepacks/Logistics-UltraRealistic-3D-Pipes.zip`, `MC1.21.1.zip`, and `MC1.20.1.zip`), eliminating pack incompatibility warnings.
 
 ### Previous v1.8.9 Highlights:
 - **In-Place Conveyor Belt Rotation**:
@@ -449,6 +580,31 @@ When uploading your `.jar` file to CurseForge, use these values:
   - Circular front boiler door, glowing burner sight-glass viewport, arched ash door, overhead steam manifold header with valves, exhaust stack, ICI Caldaie style control cabinet, and feed-water booster pumps.
 - **Custom Industrial Small Boiler GUI Overhaul & Realignment**:
   - Dark gunmetal steel panel with recessed water & steam buffer gauges, 2x2 fuel buffer, redstone lamp, combustion flame viewport, meltdown hazard bar, and real-time status badge.
+
+### Recent v1.8.20 Highlights:
+- **Comprehensive Pipe System (Wood, Copper, Iron, Steel, Gold, Diamond, Emerald)**:
+  - **Wood Pipes**: Act as extraction pipes, automatically extracting items and fluids from chests, containers, and external machines into the pipe network.
+  - **Copper, Iron, and Steel Pipes**: Progression tier triplet where Iron and Steel dramatically increase item travel speed (1.75x and 2.5x) and fluid bandwidth (1,000 mB/t and 2,000 mB/t).
+  - **Gold Pipes (Insertion)**: Automatically prioritize inserting items into adjacent inventories/machines until completely full before passing items down the line.
+  - **Diamond Pipes (Sorting)**: Features an interactive 54-slot sorting GUI (9 filter slots for each of the 6 directions: Down, Up, North, South, West, East). Directs matching items to filtered routes, using unconfigured routes for overflow/defaults.
+  - **Emerald Pipes (Round-Robin)**: Cycles items evenly across all connected outgoing pipe branches.
+- **Crafting & Waterproofing**:
+  - `[Material, Glass, Material]` in a crafting table crafts **10x Item Pipes** across all tiers.
+  - Placing any Item Pipe into a crafting grid with **Tar** or a **Slime Ball** converts it into its corresponding Fluid Pipe.
+  - All mod machines are natively configured to auto-work and auto-eject into any connected pipe or container without needing extraction pipes.
+
+### Previous v1.8.19 Highlights:
+- **Pipe Gate Inverted Curvature & Overhang**:
+  - Corrected `PipeGateEntityRenderer` PoseStack orientation matrices for `EAST`, `WEST`, `UP`, and `DOWN` faces so curved gates hug round pipes tightly rather than curling backwards into the air.
+  - Implemented exact multi-axis pipe contour detection: gates on flat cylinder end-caps render flat while gates on pipe sides curve smoothly around the pipe.
+  - Extended single-arm terminal pipe cylinders in `IndustrialPipeModel` to `0.66f` (or from `0.34f`): gates centered at `0.5f` now sit fully supported on the pipe cylinder without hanging off into thin air.
+  - Refined gate plate dimensions in `CurvedPipeGateModel` to `0.125f` half-width (`4x4` pixels), perfectly enclosing the gate within the pipe length.
+- **Conveyor Belt Neighbor Occlusion & Transparent Floor Voids**:
+  - Registered all conveyor blocks (`CONVEYOR_BELT`, `SLOPED_CONVEYOR_BELT`, `RIGHT_ANGLE_CONVEYOR_BELT`) with `.noOcclusion()` and overrode `useShapeForLightOcclusion(BlockState)`. Completely eliminates chunk mesher neighbor face culling that caused floor tiles underneath and beside conveyors to render as transparent void holes.
+- **Sloped Conveyor Belt Animated Canvas Gap & Height Misalignment**:
+  - Extended animated black tread canvas bounds in `SlopedConveyorBeltModel` to `z0 = 0.0f .. z1 = 1.0f`, eliminating the wide, un-animated brown slider-bed spot exposed at transitions.
+  - Adjusted slope transition heights to `yLow = 0.2875f` (4.6px) and `yHigh = 1.2875f` (16 + 4.6px) to match horizontal conveyor belts seamlessly.
+  - Updated `ConveyorBeltBlock.updateConnections`: horizontal conveyors now recognize adjacent `SlopedConveyorBeltBlock` (climbing and descending) and `RightAngleConveyorBeltBlock` neighbors, automatically retracting terminal end-caps to create a continuous conveyor run.
 
 ### Previous v1.5.11 Highlights:
 - **Planter & Harvester GUI On/Off Power Switch**:
