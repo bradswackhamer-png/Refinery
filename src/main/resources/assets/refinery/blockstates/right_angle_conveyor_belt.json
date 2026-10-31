@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north,powered=false,turn=right": { "model": "refinery:block/right_angle_conveyor_belt" },
+    "facing=north,powered=false,turn=left":  { "model": "refinery:block/right_angle_conveyor_belt" },
+    "facing=north,powered=true,turn=right":  { "model": "refinery:block/right_angle_conveyor_belt" },
+    "facing=north,powered=true,turn=left":   { "model": "refinery:block/right_angle_conveyor_belt" },
+    "facing=south,powered=false,turn=right": { "model": "refinery:block/right_angle_conveyor_belt", "y": 180 },
+    "facing=south,powered=false,turn=left":  { "model": "refinery:block/right_angle_conveyor_belt", "y": 180 },
+    "facing=south,powered=true,turn=right":  { "model": "refinery:block/right_angle_conveyor_belt", "y": 180 },
+    "facing=south,powered=true,turn=left":   { "model": "refinery:block/right_angle_conveyor_belt", "y": 180 },
+    "facing=west,powered=false,turn=right":  { "model": "refinery:block/right_angle_conveyor_belt", "y": 270 },
+    "facing=west,powered=false,turn=left":   { "model": "refinery:block/right_angle_conveyor_belt", "y": 270 },
+    "facing=west,powered=true,turn=right":   { "model": "refinery:block/right_angle_conveyor_belt", "y": 270 },
+    "facing=west,powered=true,turn=left":    { "model": "refinery:block/right_angle_conveyor_belt", "y": 270 },
+    "facing=east,powered=false,turn=right":  { "model": "refinery:block/right_angle_conveyor_belt", "y": 90 },
+    "facing=east,powered=false,turn=left":   { "model": "refinery:block/right_angle_conveyor_belt", "y": 90 },
+    "facing=east,powered=true,turn=right":   { "model": "refinery:block/right_angle_conveyor_belt", "y": 90 },
+    "facing=east,powered=true,turn=left":    { "model": "refinery:block/right_angle_conveyor_belt", "y": 90 }
+  }
+}

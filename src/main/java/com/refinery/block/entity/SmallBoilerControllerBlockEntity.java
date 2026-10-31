@@ -4,6 +4,7 @@ import com.refinery.RefineryMod;
 import com.refinery.block.BoilerFireboxBlock;
 import com.refinery.block.BoilerPortBlock;
 import com.refinery.block.SmallBoilerControllerBlock;
+import com.refinery.fluid.RefineryFluids;
 import com.refinery.menu.SmallBoilerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,6 +34,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -311,10 +315,54 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
         // Update Firebox LIT blockstate in the center
         updateFireboxState(serverLevel, isActive);
 
+        // Auto-transfer steam to adjacent pipes/handlers without requiring extraction pipes
+        if (this.steamAmount > 0) {
+            pushSteamFromPos(serverLevel, pos);
+            Direction facing = state.getValue(SmallBoilerControllerBlock.FACING);
+            BlockPos steamPortPos = getRelativePos(0, 0, 2, facing);
+            pushSteamFromPos(serverLevel, steamPortPos);
+        }
+
         if (wasActive != isActive) {
             BlockState latest = getBlockState();
             if (latest.getBlock() instanceof SmallBoilerControllerBlock) {
                 level.setBlock(pos, latest.setValue(SmallBoilerControllerBlock.ACTIVE, isActive), 3);
+            }
+        }
+    }
+
+    private void pushSteamFromPos(ServerLevel level, BlockPos origin) {
+        if (this.steamAmount <= 0) return;
+        FluidResource resource = FluidResource.of(RefineryFluids.STEAM_SOURCE.get());
+
+        for (Direction dir : Direction.values()) {
+            BlockPos target = origin.relative(dir);
+            BlockEntity targetBE = level.getBlockEntity(target);
+            if (targetBE instanceof BoilerPortBlockEntity portBE && this.worldPosition.equals(portBE.getControllerPos())) {
+                continue;
+            }
+            if (targetBE instanceof IBoilerController boiler && this.worldPosition.equals(boiler.getPosition())) {
+                continue;
+            }
+
+            var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, dir.getOpposite());
+            if (handler != null) {
+                int toPush = Math.min(this.steamAmount, 1000);
+                int inserted = 0;
+                try (Transaction tx = Transaction.openRoot()) {
+                    for (int i = 0; i < handler.size(); i++) {
+                        int space = toPush - inserted;
+                        if (space <= 0) break;
+                        int ins = handler.insert(i, resource, space, tx);
+                        inserted += ins;
+                    }
+                    if (inserted > 0) {
+                        tx.commit();
+                        this.steamAmount -= inserted;
+                        setChanged();
+                        if (this.steamAmount <= 0) break;
+                    }
+                }
             }
         }
     }

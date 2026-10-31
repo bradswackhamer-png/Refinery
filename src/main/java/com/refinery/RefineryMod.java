@@ -337,6 +337,14 @@ public class RefineryMod {
             ConveyorBeltBlock::new);
     public static final DeferredItem<BlockItem> CONVEYOR_BELT_ITEM = ITEMS.registerSimpleBlockItem("conveyor_belt", CONVEYOR_BELT);
 
+    public static final DeferredBlock<SlopedConveyorBeltBlock> SLOPED_CONVEYOR_BELT = BLOCKS.registerBlock("sloped_conveyor_belt",
+            SlopedConveyorBeltBlock::new);
+    public static final DeferredItem<BlockItem> SLOPED_CONVEYOR_BELT_ITEM = ITEMS.registerSimpleBlockItem("sloped_conveyor_belt", SLOPED_CONVEYOR_BELT);
+
+    public static final DeferredBlock<RightAngleConveyorBeltBlock> RIGHT_ANGLE_CONVEYOR_BELT = BLOCKS.registerBlock("right_angle_conveyor_belt",
+            RightAngleConveyorBeltBlock::new);
+    public static final DeferredItem<BlockItem> RIGHT_ANGLE_CONVEYOR_BELT_ITEM = ITEMS.registerSimpleBlockItem("right_angle_conveyor_belt", RIGHT_ANGLE_CONVEYOR_BELT);
+
     // === Livestock Feeding Trough (2-Block Multiblock) ===
     public static final DeferredBlock<FeedingTroughBlock> FEEDING_TROUGH = BLOCKS.registerBlock("feeding_trough",
             FeedingTroughBlock::new);
@@ -602,6 +610,14 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("conveyor_belt",
                     () -> new BlockEntityType<>(ConveyorBeltBlockEntity::new, CONVEYOR_BELT.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SlopedConveyorBeltBlockEntity>> SLOPED_CONVEYOR_BELT_BE =
+            BLOCK_ENTITY_TYPES.register("sloped_conveyor_belt",
+                    () -> new BlockEntityType<>(SlopedConveyorBeltBlockEntity::new, SLOPED_CONVEYOR_BELT.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RightAngleConveyorBeltBlockEntity>> RIGHT_ANGLE_CONVEYOR_BELT_BE =
+            BLOCK_ENTITY_TYPES.register("right_angle_conveyor_belt",
+                    () -> new BlockEntityType<>(RightAngleConveyorBeltBlockEntity::new, RIGHT_ANGLE_CONVEYOR_BELT.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FeedingTroughBlockEntity>> FEEDING_TROUGH_BE =
             BLOCK_ENTITY_TYPES.register("feeding_trough",
                     () -> new BlockEntityType<>(FeedingTroughBlockEntity::new, FEEDING_TROUGH.get()));
@@ -756,6 +772,8 @@ public class RefineryMod {
                         output.accept(FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_DISCHARGE_ITEM.get());
                         output.accept(CONVEYOR_BELT_ITEM.get());
+                        output.accept(SLOPED_CONVEYOR_BELT_ITEM.get());
+                        output.accept(RIGHT_ANGLE_CONVEYOR_BELT_ITEM.get());
                         output.accept(FEEDING_TROUGH_ITEM.get());
                         output.accept(MULTI_SMELTER_CONTROLLER_ITEM.get());
                         output.accept(SMELTER_CASING_ITEM.get());
@@ -1207,6 +1225,10 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Item.BLOCK, FLUID_PUMP_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, CONVEYOR_BELT_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, SLOPED_CONVEYOR_BELT_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, RIGHT_ANGLE_CONVEYOR_BELT_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, FEEDING_TROUGH_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be.getMaster()));

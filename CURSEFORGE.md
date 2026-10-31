@@ -90,7 +90,7 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
     - Seamless UV texture scrolling animation smoothly moves the top belt forward and bottom return belt backward.
     - Precision brushed stainless steel cylindrical end rollers physically rotate around their axles at exact belt surface velocity.
     - Real-time physical item centering and smooth propulsion along the conveyor line.
-    - Player and mob conveyance with sneak/crouch stability.
+    - Item-only conveyance without player or mob interference.
   - **Intelligent Seamless Snapping**:
     - Placing conveyors in a row automatically snaps them together into a continuous, seamless belt assembly.
     - Intermediate end terminals open up, seamlessly joining side rails, T-slots, and belt surfaces with zero gaps or visible seams.
@@ -98,9 +98,19 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
   - **Automated Machine & Container Integration**:
     - Items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, furnaces, and machines via the NeoForge item transfer system.
     - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
-  - **Redstone & Wrench Automation**:
+  - **Redstone & In-Place Rotation Controls**:
     - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
-    - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
+    - Right-click with a Wrench rotates conveyor orientation clockwise; Sneak-Right-Click with a Wrench rotates counter-clockwise.
+    - Sneak-Right-Click with an empty hand also rotates orientation clockwise.
+- **Sloped Conveyor Belt (`refinery:sloped_conveyor_belt`)**:
+  - Transports items smoothly up or down 1-block elevations with height-interpolating slope physics and centered tracking.
+  - Automatically transitions items to adjacent conveyors, chests, and machine inventories at the upper and lower terminals.
+  - Right-click with a wrench or sneak-empty-hand to rotate facing; Sneak-Right-Click with a wrench to toggle elevation incline between `UP` and `DOWN`.
+- **Right-Angle Conveyor Belt (`refinery:right_angle_conveyor_belt`)**:
+  - 90-degree corner conveyor for clean factory turn routing with zero item spillage.
+  - Two-phase corner vectoring: guides incoming items into center, then turns velocity 90 degrees toward the exit.
+  - 3D monolithic model with curved aluminum rails and 8-segment animated curved belt.
+  - Right-click with a wrench or sneak-empty-hand to rotate facing; Sneak-Right-Click with a wrench to toggle turn direction between `RIGHT` and `LEFT`.
 
 ### 🛢️ 7. Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks
 - **Industrial Bulk Liquid Storage**: High-capacity Glass-Fused-to-Steel (GFS) / Enamel bolted industrial liquid storage tanks based on modern municipal and petroleum tank engineering.
@@ -186,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.7.jar`
+`refinery-1.8.10.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.7 (NeoForge 26.3)`
+`Industrial Refinery 1.8.10 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -205,9 +215,41 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.8.7
+# Industrial Refinery v1.8.10
 
-### What's New in v1.8.7:
+### What's New in v1.8.10:
+- **Logistics Automation Ultra-Realistic 3D Monolithic Pipe Pack**:
+  - Full high-definition visual upgrade pack for the Logistics Automation (`logistics`) pipe network.
+  - **Photorealistic 64x64 PBR Textures**: Replaces legacy textures with brushed anisotropic metals, ambient occlusion depth, hex socket screws, and crystalline viewports preserving live item/fluid transit visibility.
+  - **LabPBR 1.3 Shader Standard**: Normal displacement maps (`_n.png`) and specular/roughness maps (`_s.png`) provide real-time 3D relief, metal reflections, and illuminated glows with modern shader packs.
+  - **3D Monolithic Block Models**: Chamfered 12-sided junction hubs, reinforced corner brackets, physical connection flanges with hex bolts, and mid-segment clamp sleeves.
+  - **Standalone Downloads**: Kept unbaked from the mod jar as standalone downloads with proper forward-slash zip structures (`resourcepacks/Logistics-UltraRealistic-3D-Pipes.zip`, `MC1.21.1.zip`, and `MC1.20.1.zip`), eliminating pack incompatibility warnings.
+
+### Previous v1.8.9 Highlights:
+- **In-Place Conveyor Belt Rotation**:
+  - Rotate any standard conveyor belt in-place without breaking it: right-click with a Wrench rotates clockwise, sneak-right-click with a Wrench rotates counter-clockwise, and sneak-right-click with an empty hand rotates clockwise.
+  - Connected mesh geometry dynamically updates instantly with neighboring conveyors upon rotation.
+- **Sloped Conveyor Belt (`refinery:sloped_conveyor_belt`)**:
+  - Added sloped conveyor belts for moving items up or down 1-block elevations.
+  - Continuous height-interpolating physics elevates or lowers items smoothly along the incline while centering items.
+  - Seamlessly transfers items onto adjacent conveyors, inventories, and machines at the top and bottom ends.
+  - Implements `Container` and NeoForge `Item` capabilities for automatic loading by hoppers, harvesters, and the crusher.
+  - Configure incline with a wrench: right-click rotates direction, sneak-right-click toggles between `UP` and `DOWN`.
+- **Right-Angle Conveyor Belt (`refinery:right_angle_conveyor_belt`)**:
+  - Added 90-degree corner conveyors to route items cleanly around factory turns without bottlenecks.
+  - Features two-phase travel physics that guides items to the corner center and vectors velocity smoothly into the turn exit.
+  - Monolithic 3D model with curved aluminum guide rails and an 8-segment curved animated conveyor belt surface.
+  - Configure turn with a wrench: right-click rotates facing, sneak-right-click toggles between `RIGHT` and `LEFT`.
+- **Industrial Grinder (Crusher) Direct Conveyor Auto-Export**:
+  - The Industrial Grinder multiblock now automatically ejects processed items directly from its output slots onto any conveyor belt snapped to its right-side discharge chute or adjacent positions (as well as adjacent chests and item capabilities) every 4 ticks.
+
+### Previous v1.8.8 Highlights:
+- **Direct Fluid Auto-Transfer for Steam Boilers & Steam Turbines (No Extract Pipes Required)**:
+  - Enabled active fluid auto-push directly into regular liquid pipes and adjacent fluid handlers for all steam boilers and the steam turbine, matching the seamless logistics behavior of the multiblock liquid storage tanks.
+  - Dedicated Steam Output Ports (`boiler_steam_port`) and Turbine Water Output Ports (`turbine_water_port`) actively transfer fluids directly into adjacent pipes without requiring extraction servos or powered extraction pipes.
+  - Facilitates 100% plug-and-play closed-loop Rankine power cycles.
+
+### Previous v1.8.7 Highlights:
 - **Industrial Fluid Discharge Survival Drop**:
   - Added missing block loot table definitions so the Industrial Fluid Discharge block drops itself properly when mined or broken in survival.
 - **Storage Tank Item Icons & Held Models**:

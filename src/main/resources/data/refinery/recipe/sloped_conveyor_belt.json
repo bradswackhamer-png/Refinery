@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "refinery:conveyor_belt",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    " C",
+    "I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:sloped_conveyor_belt"
+  }
+}

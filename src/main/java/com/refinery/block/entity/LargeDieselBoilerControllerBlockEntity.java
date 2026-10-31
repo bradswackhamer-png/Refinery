@@ -33,6 +33,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -310,12 +313,56 @@ public class LargeDieselBoilerControllerBlockEntity extends BlockEntity implemen
             }
         }
 
+        // Auto-transfer steam to adjacent pipes/handlers without requiring extraction pipes
+        if (this.steamAmount > 0) {
+            pushSteamFromPos(serverLevel, pos);
+            Direction facing = state.getValue(LargeDieselBoilerControllerBlock.FACING);
+            BlockPos steamPortPos = getRelativePos(0, 0, 4, facing);
+            pushSteamFromPos(serverLevel, steamPortPos);
+        }
+
         if (wasBurning != this.isBurning) {
             BlockState latest = getBlockState();
             if (latest.getBlock() instanceof LargeDieselBoilerControllerBlock) {
                 level.setBlock(pos, latest.setValue(LargeDieselBoilerControllerBlock.ACTIVE, this.isBurning), 3);
             }
             syncToClient();
+        }
+    }
+
+    private void pushSteamFromPos(ServerLevel level, BlockPos origin) {
+        if (this.steamAmount <= 0) return;
+        FluidResource resource = FluidResource.of(RefineryFluids.STEAM_SOURCE.get());
+
+        for (Direction dir : Direction.values()) {
+            BlockPos target = origin.relative(dir);
+            BlockEntity targetBE = level.getBlockEntity(target);
+            if (targetBE instanceof BoilerPortBlockEntity portBE && this.worldPosition.equals(portBE.getControllerPos())) {
+                continue;
+            }
+            if (targetBE instanceof IBoilerController boiler && this.worldPosition.equals(boiler.getPosition())) {
+                continue;
+            }
+
+            var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, dir.getOpposite());
+            if (handler != null) {
+                int toPush = Math.min(this.steamAmount, 1000);
+                int inserted = 0;
+                try (Transaction tx = Transaction.openRoot()) {
+                    for (int i = 0; i < handler.size(); i++) {
+                        int space = toPush - inserted;
+                        if (space <= 0) break;
+                        int ins = handler.insert(i, resource, space, tx);
+                        inserted += ins;
+                    }
+                    if (inserted > 0) {
+                        tx.commit();
+                        this.steamAmount -= inserted;
+                        setChanged();
+                        if (this.steamAmount <= 0) break;
+                    }
+                }
+            }
         }
     }
 

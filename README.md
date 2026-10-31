@@ -27,6 +27,8 @@
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Conveyors, Pipes, & Interfacing](#8-automation-conveyors-pipes--interfacing)
    - [Industrial Belt Conveyor](#industrial-belt-conveyor)
+   - [Sloped Conveyor Belt](#sloped-conveyor-belt)
+   - [Right-Angle Conveyor Belt](#right-angle-conveyor-belt)
    - [Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks](#glass-fused-to-steel-gfs-multiblock-liquid-storage-tanks)
 9. [Crude Oil World Generation & Retrogen](#9-crude-oil-world-generation--retrogen)
    - [In-World Fluid Crude Oil](#in-world-fluid-crude-oil)
@@ -51,6 +53,9 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.10 (Logistics Automation Ultra-Realistic 3D Monolithic Pipe Resource Pack)](#version-1810-logistics-automation-ultra-realistic-3d-monolithic-pipe-resource-pack)
+   - [Version 1.8.9 (Conveyor In-Place Rotation, Sloped & Right-Angle Conveyors, Crusher Auto-Export)](#version-189-conveyor-in-place-rotation-sloped--right-angle-conveyors-crusher-auto-export)
+   - [Version 1.8.8 (Steam Turbine & Boiler Fluid Auto-Transfer)](#version-188-steam-turbine--boiler-fluid-auto-transfer)
    - [Version 1.8.7 (Blast Furnace Input Restrictions & Fluid Discharge Drop Fix)](#version-187-blast-furnace-input-restrictions--fluid-discharge-drop-fix)
    - [Version 1.8.6 (Storage Tank Ladder & Visual Clean-up)](#version-186-storage-tank-ladder--visual-clean-up)
    - [Version 1.8.5 (Glass-Fused-to-Steel Multiblock Liquid Storage Tanks)](#version-185-glass-fused-to-steel-multiblock-liquid-storage-tanks)
@@ -481,7 +486,7 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
   - **Crusher Box & Drive System**: Central eccentric jaw/cone crushing box fitted with side flywheels, counterweights, and belt-drive housings.
   - **Open-Top Feed Hopper with 3D Spinning Crusher Blades**: Deep open-top flared hopper bowl housing twin counter-rotating 3D toothed shredder rotors. When grinding, the 3D blades spin and pull the actual loaded input material down into the crushing throat.
   - **Top Hopper Direct Item Intake**: In addition to the GUI and ports, the top hopper acts as an open physical intake—items dropped into the top hopper bowl (from standalone conveyors, droppers, or players) or pushed via hoppers/pipes are automatically loaded into the grinder.
-  - **Inclined Output Discharge Conveyor**: Angled right-side discharge conveyor with an empty chevron belt that dynamically displays the actual crushed output material climbing the belt as products are unloaded.
+  - **Inclined Output Discharge Conveyor & Automatic Export**: Angled right-side discharge conveyor with an empty chevron belt that dynamically displays the actual crushed output material climbing the belt as products are unloaded. **Direct Auto-Export**: The grinder automatically ejects finished crushed items directly onto any conveyor belt snapped to the output chute or adjacent positions (as well as adjacent chests and item capabilities) every 4 ticks without requiring hoppers or extract servos!
   - **Member Block Occlusion**: Surrounding member blocks automatically turn invisible without culling adjacent floor faces and forward wrench/hand interactions directly to the controller.
 - **Custom Industrial GUI**: Dark gunmetal steel panel with 2-slot raw feed tray, 4-slot crushed output collection bay, central animated crushing chamber indicator, and real-time status header badge (`ONLINE`, `CRUSHING`, `IDLE`, `UNFORMED`).
 - **Core Functionality**:
@@ -640,8 +645,31 @@ A modular low-profile belt conveyor system for high-throughput factory automatio
   - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
 - **Redstone & Wrench Automation**:
   - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
-  - Right-click or Sneak-Right-Click with the **Refinery Wrench** rotates the conveyor orientation with instant neighbor re-connection.
+  - **In-Place Rotation**: Right-click with the **Refinery Wrench** rotates the conveyor orientation clockwise; Sneak-Right-Click with the Wrench rotates counter-clockwise.
+  - Sneak-Right-Click with an empty hand also rotates orientation clockwise.
+  - Visual connection geometry instantly recalculates and joins with adjacent conveyors upon rotation.
 - **Crafting Recipe**: 3 Petroleum Tar + 1 Redstone Dust + 5 Iron Ingots produce 4 Industrial Conveyor Belts.
+
+### Sloped Conveyor Belt (`refinery:sloped_conveyor_belt`)
+An inclined modular conveyor engineered to transport items vertically up or down elevations:
+- **Inclined Motion & Physics**: Elevates or lowers items smoothly along a 1-block incline (1:1 vertical rise per horizontal block) with continuous velocity clamping and perpendicular alignment along the belt center.
+- **Top & Bottom Terminal Handoff**: Automatically transitions items onto adjacent conveyors, chests, and machine inventories positioned at either the upper or lower terminal elevation.
+- **Container & Capability Support**: Implements `Container` and NeoForge `Item` capabilities, allowing hoppers, auto-harvesters, droppers, and the Industrial Grinder to feed items directly onto the incline.
+- **Monolithic 3D Incline Model**: Features inclined extruded aluminum side rails, galvanized steel slider deck, vertical structural stanchion legs, dual steel rollers, and animated scrolling vulcanized belt top.
+- **Controls & Wrench Configuration**:
+  - Right-click with a Wrench or Sneak-Right-Click with an empty hand to rotate facing clockwise.
+  - Sneak-Right-Click with a Wrench to toggle elevation incline between `UP` (climbing) and `DOWN` (descending).
+- **Crafting Recipe**: 1 Industrial Conveyor Belt + 1 Iron Ingot placed diagonally produces 1 Sloped Conveyor Belt.
+
+### Right-Angle Conveyor Belt (`refinery:right_angle_conveyor_belt`)
+A specialized 90-degree corner conveyor designed for seamless turn routing in factory layouts:
+- **Two-Phase Corner Routing**: Smoothly accepts incoming items along the entry axis, guides them toward the turntable center, and vectors velocity 90 degrees outward toward the exit terminal with zero spills or dead stops.
+- **Exit Handoff**: Injects items directly into adjacent downstream conveyors or machine inventories at the corner exit.
+- **Monolithic 3D Corner Model**: Includes L-shaped outer aluminum guide rails, corner support bracket, entry and exit steel rollers, and an 8-segment curved animated conveyor belt surface that wraps around the 90-degree turn.
+- **Controls & Wrench Configuration**:
+  - Right-click with a Wrench or Sneak-Right-Click with an empty hand to rotate entry facing clockwise.
+  - Sneak-Right-Click with a Wrench to toggle corner turn direction between `RIGHT` (clockwise) and `LEFT` (counter-clockwise).
+- **Crafting Recipe**: 3 Industrial Conveyor Belts arranged in an "L" pattern produce 3 Right-Angle Conveyor Belts.
 
 ### Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks
 Engineered for bulk storage of any liquid resource, modeled after real-world Glass-Fused-to-Steel (GFS) enamel bolted industrial storage tanks.
@@ -1092,6 +1120,41 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 
 ## 13. Engineering Changelog & Version History
+
+### Version 1.8.10 (Logistics Automation Ultra-Realistic 3D Monolithic Pipe Resource Pack)
+- **Ultra-Realistic 3D Monolithic Pipe Visual Overhaul (`Logistics Automation`)**:
+  - High-definition 64x64 procedural PBR texture pack and 3D geometric block model suite designed for Logistics Automation (`logistics` namespace pipes).
+  - **Photorealistic PBR Materials**: Features brushed metal anisotropic grain, directional ambient occlusion chamfers, machined hex socket-head bolts, and crystalline tempered viewports preserving live item/liquid transit visibility.
+  - **Full LabPBR 1.3 Shader Compliance**: Includes baked normal displacement maps (`_n.png`) and specular/roughness/metallic maps (`_s.png`) for real-time parallax depth and lighting reflections with modern shader packs (Iris, Oculus, Complementary, BSL, SEUS).
+  - **Extruded 3D Monolithic Block Geometry**: Enhanced core manifold junction hubs with 12-sided corner stanchions, physical connection flanges with mounting bolt studs, and mid-segment clamp sleeves.
+  - **Standalone Downloads & Compatibility**: Kept strictly as separate standalone resource pack downloads (not baked into the mod jar) with forward-slash zip entries: `resourcepacks/Logistics-UltraRealistic-3D-Pipes.zip` (Universal), `Logistics-UltraRealistic-3D-Pipes-MC1.21.1.zip` (MC 1.21.1), and `Logistics-UltraRealistic-3D-Pipes-MC1.20.1.zip` (MC 1.20.1).
+
+### Version 1.8.9 (Conveyor In-Place Rotation, Sloped & Right-Angle Conveyors, Crusher Auto-Export)
+- **In-Place Conveyor Belt Rotation**:
+  - Rotate any standard conveyor belt in-place without breaking it: right-click with a Wrench rotates clockwise, sneak-right-click with a Wrench rotates counter-clockwise, and sneak-right-click with an empty hand rotates clockwise.
+  - Connected mesh geometry dynamically updates instantly with neighboring conveyors upon rotation.
+- **Sloped Conveyor Belt (`refinery:sloped_conveyor_belt`)**:
+  - Added sloped conveyor belts for moving items up or down 1-block elevations.
+  - Continuous height-interpolating physics elevates or lowers items smoothly along the incline while centering items.
+  - Seamlessly transfers items onto adjacent conveyors, inventories, and machines at the top and bottom ends.
+  - Implements `Container` and NeoForge `Item` capabilities for automatic loading by hoppers, harvesters, and the crusher.
+  - Configure incline with a wrench: right-click rotates direction, sneak-right-click toggles between `UP` and `DOWN`.
+- **Right-Angle Conveyor Belt (`refinery:right_angle_conveyor_belt`)**:
+  - Added 90-degree corner conveyors to route items cleanly around factory turns without bottlenecks.
+  - Features two-phase travel physics that guides items to the corner center and vectors velocity smoothly into the turn exit.
+  - Monolithic 3D model with curved aluminum guide rails and an 8-segment curved animated conveyor belt surface.
+  - Configure turn with a wrench: right-click rotates facing, sneak-right-click toggles between `RIGHT` and `LEFT`.
+- **Industrial Grinder (Crusher) Direct Conveyor Auto-Export**:
+  - The Industrial Grinder multiblock now automatically ejects processed items directly from its output slots onto any conveyor belt snapped to its right-side discharge chute or adjacent positions (as well as adjacent chests and item capabilities) every 4 ticks.
+
+### Version 1.8.8 (Steam Turbine & Boiler Fluid Auto-Transfer)
+- **Active Fluid Transfer to Pipes (No Extraction Servos / Powered Pipes Needed)**:
+  - Added active auto-push fluid transfers to adjacent regular liquid pipes and fluid handlers for all steam boilers and the steam turbine, matching the liquid storage tank drainage behavior.
+  - **Steam Boilers (Small & Large, Solid-Fuel & Diesel)**:
+    - Dedicated Steam Output Ports (`boiler_steam_port`) and Boiler Controllers now actively push produced Steam (up to 1,000 mB/t) directly into connected pipes or tanks.
+  - **Steam Turbine Generator**:
+    - Dedicated Turbine Water Output Ports (`turbine_water_port`) and Turbine Controllers now actively push condensed Water (up to 1,000 mB/t) directly into connected pipes or tanks.
+  - Streamlines closed-loop Rankine thermodynamic power plants: run simple liquid pipes between boiler steam outputs and turbine steam inputs, and return water lines straight into boiler water inputs with zero power or servos required!
 
 ### Version 1.8.7 (Blast Furnace Input Restrictions & Fluid Discharge Drop Fix)
 - **Industrial Fluid Discharge Survival Drop Fix**:

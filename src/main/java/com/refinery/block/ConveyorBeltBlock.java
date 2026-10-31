@@ -1,10 +1,18 @@
 package com.refinery.block;
 
+import com.refinery.RefineryMod;
 import com.refinery.block.entity.ConveyorBeltBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -23,6 +31,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -82,6 +91,44 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
                 .setValue(CONNECTED_FRONT, front)
                 .setValue(CONNECTED_BACK, back)
                 .setValue(POWERED, powered);
+    }
+
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.is(RefineryMod.REFINERY_WRENCH.get()) || stack.getItem().toString().contains("wrench")) {
+            if (!level.isClientSide()) {
+                Direction currentFacing = state.getValue(FACING);
+                Direction newFacing = player.isShiftKeyDown() ? currentFacing.getCounterClockWise() : currentFacing.getClockWise();
+                BlockState newState = state.setValue(FACING, newFacing);
+                newState = updateConnections(newState, level, pos);
+                level.setBlock(pos, newState, 3);
+                level.playSound(null, pos, SoundEvents.ITEM_FRAME_ROTATE_ITEM, SoundSource.BLOCKS, 0.8f, 1.2f);
+                player.sendSystemMessage(Component.literal("§6[Conveyor]§r Direction: §e" + newFacing.getName().toUpperCase()));
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        if (player.isShiftKeyDown()) {
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (player.isShiftKeyDown()) {
+            if (!level.isClientSide()) {
+                Direction currentFacing = state.getValue(FACING);
+                Direction newFacing = currentFacing.getClockWise();
+                BlockState newState = state.setValue(FACING, newFacing);
+                newState = updateConnections(newState, level, pos);
+                level.setBlock(pos, newState, 3);
+                level.playSound(null, pos, SoundEvents.ITEM_FRAME_ROTATE_ITEM, SoundSource.BLOCKS, 0.8f, 1.0f);
+                player.sendSystemMessage(Component.literal("§6[Conveyor]§r Direction: §e" + newFacing.getName().toUpperCase()));
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return super.useWithoutItem(state, level, pos, player, hitResult);
     }
 
     @Override

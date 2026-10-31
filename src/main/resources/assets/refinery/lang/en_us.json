@@ -42,6 +42,8 @@
   "block.refinery.electric_fluid_pump": "Electric Fluid Pump",
   "block.refinery.fluid_discharge": "Industrial Fluid Discharge",
   "block.refinery.conveyor_belt": "Industrial Conveyor Belt",
+  "block.refinery.sloped_conveyor_belt": "Sloped Conveyor Belt",
+  "block.refinery.right_angle_conveyor_belt": "Right-Angle Conveyor Belt",
   "block.refinery.feeding_trough": "Livestock Feeding Trough",
   "container.refinery.feeding_trough": "Livestock Feeding Trough",
 

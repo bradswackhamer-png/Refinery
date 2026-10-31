@@ -2,8 +2,10 @@ package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
 import com.refinery.block.BoilerPortBlock;
+import com.refinery.fluid.RefineryFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +14,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 public class BoilerPortBlockEntity extends BlockEntity implements WorldlyContainer {
@@ -76,6 +81,50 @@ public class BoilerPortBlockEntity extends BlockEntity implements WorldlyContain
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         this.controllerPos = input.getLong("controllerPos").map(BlockPos::of).orElse(null);
+    }
+
+    /**
+     * Auto-pushes steam into adjacent fluid handlers or regular liquid pipes!
+     * When attaching a regular fluid pipe adjacent to the STEAM_OUT port,
+     * steam flows directly into the pipe without requiring an extract pipe.
+     */
+    public void tick(ServerLevel level, BlockPos pos, BlockState state) {
+        if (this.portType != BoilerPortBlock.PortType.STEAM_OUT) return;
+        IBoilerController controller = getController();
+        if (controller == null || !controller.isAssembled() || controller.getSteamAmount() <= 0) return;
+
+        FluidResource resource = FluidResource.of(RefineryFluids.STEAM_SOURCE.get());
+
+        for (Direction dir : Direction.values()) {
+            BlockPos target = pos.relative(dir);
+            BlockEntity targetBE = level.getBlockEntity(target);
+            if (targetBE instanceof BoilerPortBlockEntity portBE && this.controllerPos != null && this.controllerPos.equals(portBE.getControllerPos())) {
+                continue;
+            }
+            if (targetBE instanceof IBoilerController boiler && this.controllerPos != null && this.controllerPos.equals(boiler.getPosition())) {
+                continue;
+            }
+
+            var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, dir.getOpposite());
+            if (handler != null) {
+                int toPush = Math.min(controller.getSteamAmount(), 1000);
+                int inserted = 0;
+                try (Transaction tx = Transaction.openRoot()) {
+                    for (int i = 0; i < handler.size(); i++) {
+                        int space = toPush - inserted;
+                        if (space <= 0) break;
+                        int ins = handler.insert(i, resource, space, tx);
+                        inserted += ins;
+                    }
+                    if (inserted > 0) {
+                        tx.commit();
+                        controller.drainSteam(inserted);
+                        setChanged();
+                        if (controller.getSteamAmount() <= 0) break;
+                    }
+                }
+            }
+        }
     }
 
     // === Container & WorldlyContainer Delegation (for FUEL_IN ports) ===

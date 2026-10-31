@@ -39,7 +39,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -56,6 +59,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
     private int progress = 0;
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
+    private int exportCooldown = 0;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
@@ -181,6 +185,12 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         boolean wasActive = state.getValue(IndustrialGrinderControllerBlock.ACTIVE);
         boolean isActive = false;
 
+        // Auto-export finished crushed items from Output Port / Chute to adjacent conveyor or container
+        if (--this.exportCooldown <= 0) {
+            this.exportCooldown = 5;
+            tryExportOutput(serverLevel);
+        }
+
         // Check if any dropped ItemEntities fell into the top hopper bowl (Y = 2..3 above base)
         Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
         BlockPos hopperCenter = getRelativePos(0, 2, 1, facing);
@@ -291,6 +301,62 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                 level.setBlock(pos, latest.setValue(IndustrialGrinderControllerBlock.ACTIVE, isActive), 3);
             }
             syncToClient();
+        }
+    }
+
+    private void tryExportOutput(ServerLevel level) {
+        Direction facing = getBlockState().getValue(IndustrialGrinderControllerBlock.FACING);
+        // Output Port is located at relative (1, 0, 0)
+        BlockPos portPos = getRelativePos(1, 0, 0, facing);
+
+        // Candidate targets:
+        // 1. Right side of the port (where the inclined discharge chute ends)
+        // 2. Front of the port
+        // 3. Below the port
+        // 4. Rear of the port
+        // 5. Front of the controller itself
+        // 6. Below the controller
+        BlockPos[] targets = new BlockPos[]{
+                portPos.relative(facing.getClockWise()),
+                portPos.relative(facing.getOpposite()),
+                portPos.below(),
+                portPos.relative(facing),
+                this.worldPosition.relative(facing.getOpposite()),
+                this.worldPosition.below()
+        };
+
+        for (int slot = 4; slot <= 7; slot++) {
+            ItemStack sourceStack = this.items.get(slot);
+            if (sourceStack.isEmpty()) continue;
+
+            for (BlockPos targetPos : targets) {
+                BlockEntity targetBE = level.getBlockEntity(targetPos);
+                if (targetBE instanceof Container targetContainer) {
+                    ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(targetContainer, sourceStack.copy());
+                    if (remainder.getCount() != sourceStack.getCount()) {
+                        this.items.set(slot, remainder);
+                        setChanged();
+                        targetContainer.setChanged();
+                        return;
+                    }
+                } else {
+                    var handler = level.getCapability(Capabilities.Item.BLOCK, targetPos, Direction.UP);
+                    if (handler != null) {
+                        try (Transaction tx = Transaction.openRoot()) {
+                            int inserted = handler.insert(ItemResource.of(sourceStack), sourceStack.getCount(), tx);
+                            if (inserted > 0) {
+                                tx.commit();
+                                sourceStack.shrink(inserted);
+                                if (sourceStack.isEmpty()) {
+                                    this.items.set(slot, ItemStack.EMPTY);
+                                }
+                                setChanged();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

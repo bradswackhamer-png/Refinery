@@ -4,6 +4,70 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.10] - 2026-10-30
+
+### Added
+- **Ultra-Realistic 3D Monolithic Pipe Resource Pack (`Logistics Automation`)**:
+  - Comprehensive high-definition 3D Monolithic visual overhaul texture pack designed specifically for Logistics Automation (`logistics` namespace pipes).
+  - **Ultra-Realistic 64x64 Photorealistic PBR Textures**:
+    - Replaced legacy 8x8 textures with ultra-crisp 64x64 anisotropic brushed metal surfaces, directional ambient occlusion bevels, and CNC-machined hex bolts with recessed sockets.
+    - Crystalline transparent inspection viewports with optical glare highlights and internal conduit rails, preserving full live in-world visibility of traveling item packets and fluid flows.
+    - Full material suite coverage: Copper Transport & Fluid Pipes (Clean, Exposed, Weathered, and fully Oxidized verdigris), Stone Basalt & Ceramic Pipes, Titanium-Gold Accelerator & Electrified Pipes, Monolithic Void Singularities, and High-Tech Chassis Pipes (MkI through MkV).
+  - **Full LabPBR 1.3 Shader Standard Support**:
+    - Includes baked normal maps (`_n.png`) with true geometric relief, surface depth, bolt protrusions, and chamfered edges for real-time parallax in shader packs (Iris, Oculus, Complementary, BSL, SEUS).
+    - Includes specular maps (`_s.png`) with accurate perceptual roughness, metallic F0 reflectance, and emissive channels for glowing power coils, LEDs, and laser optics.
+  - **Enhanced 3D Monolithic Block Models**:
+    - 3D physical block models featuring chamfered 12-sided junction hubs, reinforced corner stanchions, physical connection flanges with hex-head bolt studs, and mid-segment clamp sleeves.
+  - **Standalone Downloads & Universal Compatibility**:
+    - Distributed strictly as separate standalone resource pack downloads (kept unbaked from the mod jar to eliminate any mod loader validation conflicts):
+      - `resourcepacks/Logistics-UltraRealistic-3D-Pipes.zip` (Universal for MC 1.21.4+ / NeoForge 26.3, formats 15-65).
+      - `resourcepacks/Logistics-UltraRealistic-3D-Pipes-MC1.21.1.zip` (Native for MC 1.21 - 1.21.1, format 34).
+      - `resourcepacks/Logistics-UltraRealistic-3D-Pipes-MC1.20.1.zip` (Native for MC 1.20 - 1.20.1, format 15).
+    - Fixed archive entry path separators to strictly use standard forward slashes (`/`), resolving "broken or incompatible" warnings in Minecraft's pack repository.
+
+---
+
+## [1.8.9] - 2026-10-30
+
+### Added
+- **Sloped Conveyor Belt (`refinery:sloped_conveyor_belt`)**:
+  - Low-profile extruded aluminum conveyor designed to smoothly transit items up or down elevations (1 block vertical rise per block run).
+  - Features continuous height-interpolating slope physics that elevates or lowers items along the incline, clamping velocities and centering items along the belt bed.
+  - Seamlessly transfers items to adjacent conveyors, storage chests, and machine inventories positioned at either the top or bottom terminal.
+  - Implements `Container` and NeoForge `Item` capability for automated item loading by hoppers, harvesters, and crushers.
+  - Monolithic 3D rendering with sloped guide rails, support stanchions, rollers, and animated scrolling belt.
+  - Right-click with a wrench to rotate direction clockwise; Shift-right-click with a wrench to toggle elevation incline between `UP` and `DOWN`; Shift-right-click with an empty hand to rotate direction.
+- **Right-Angle Conveyor Belt (`refinery:right_angle_conveyor_belt`)**:
+  - High-efficiency 90-degree corner conveyor for turning logistics lines cleanly around corners without dead spots or item spillages.
+  - Supports two-phase corner physics: incoming travel along entry facing toward center, followed by smooth 90-degree velocity vectoring into the exit direction.
+  - Monolithic 3D model with extruded aluminum curved outer guide rails, corner bracket, cylindrical rollers, and an 8-segment curved animated scrolling belt top.
+  - Right-click with a wrench or shift-empty-hand to rotate facing; Shift-right-click with a wrench to toggle corner turn direction between `RIGHT` and `LEFT`.
+
+### Changed
+- **Conveyor Belt In-Place Rotation**:
+  - Players can now easily re-orient any standard Conveyor Belt in-place without having to break and replace it.
+  - Right-click with a Wrench rotates clockwise; Shift-right-click with a Wrench rotates counter-clockwise.
+  - Shift-right-click with an empty hand also rotates clockwise.
+  - Belt connection geometry dynamically re-snaps to adjacent conveyors immediately upon rotation.
+- **Industrial Grinder (Crusher) Direct Auto-Export**:
+  - The Industrial Grinder multiblock controller now automatically extracts crushed ores and byproducts from its output slots and ejects them directly onto any conveyor belt snapped to its discharge chute or adjacent positions.
+  - Also auto-pushes items into adjacent chests and inventory capabilities every 4 ticks without requiring external extract pipes or hoppers.
+
+---
+
+## [1.8.8] - 2026-10-30
+
+### Changed
+- **Direct Fluid Auto-Transfer for Steam Boilers & Steam Turbines (No Extract Pipes Required)**:
+  - Enabled active fluid auto-push directly into regular liquid pipes and adjacent fluid handlers for all steam boilers and the steam turbine, matching the seamless logistics behavior of the multiblock liquid storage tanks.
+  - **Steam Boilers (Small & Large, Solid-Fuel & Diesel)**:
+    - Dedicated Steam Output Ports (`boiler_steam_port`) and Boiler Controllers now actively transfer generated Steam (up to 1,000 mB/t) directly into adjacent pipes without requiring extraction servos or powered extraction pipes.
+  - **Steam Turbine Generator**:
+    - Dedicated Turbine Water Output Ports (`turbine_water_port`) and Turbine Controllers now actively transfer condensed Water (up to 1,000 mB/t) directly into adjacent pipes without requiring extraction pipes.
+  - Facilitates 100% plug-and-play closed-loop Rankine power cycles: standard liquid pipes now route steam from boiler ports directly into turbine steam inputs, and return condensed water seamlessly back into boiler water inputs.
+
+---
+
 ## [1.8.7] - 2026-10-30
 
 ### Fixed
