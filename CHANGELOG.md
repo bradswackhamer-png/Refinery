@@ -4,6 +4,18 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.50] - 2026-11-01
+
+### Changed
+- **Sloped & Corner Conveyor Belt Controls Unified**:
+  - **Normal Right-Click** (with wrench or empty hand): Rotates conveyor direction clockwise (`NORTH` $\rightarrow$ `EAST` $\rightarrow$ `SOUTH` $\rightarrow$ `WEST`).
+  - **Sneak Right-Click** (Shift + Right-Click with wrench or empty hand):
+    - **Sloped Conveyor Belt**: Toggles incline elevation between `UP` and `DOWN`, allowing the conveyor belt to smoothly move items downhill instead of uphill.
+    - **Right-Angle Conveyor Belt**: Toggles turn direction between `RIGHT` and `LEFT`.
+  - Fixed empty-hand right-click behavior so players do not need to hold a wrench or sneak to rotate conveyors, while shift-right-click reliably toggles the slope/turn.
+
+---
+
 ## [1.8.49] - 2026-11-01
 
 ### Added

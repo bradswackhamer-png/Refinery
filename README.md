@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.50 (Sloped & Corner Conveyor Belt Controls Unified)](#version-1850-sloped--corner-conveyor-belt-controls-unified)
    - [Version 1.8.49 (Creative Fluid Pump, 2x Pump Output, & 200-Block Fluid Discharge Range)](#version-1849-creative-fluid-pump-2x-pump-output--200-block-fluid-discharge-range)
    - [Version 1.8.48 (Boiler Meltdown Raid Siren Alarm Countdown)](#version-1848-boiler-meltdown-raid-siren-alarm-countdown)
    - [Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)](#version-1847-boiler-infinite-water-draw--phantom-fluid-voiding-fix)
@@ -1672,6 +1673,16 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.50 (Sloped & Corner Conveyor Belt Controls Unified)
+- **Unified Conveyor Belt Player Controls**:
+  - **Normal Right-Click** (with wrench or empty hand): Rotates conveyor direction clockwise (`NORTH` $\rightarrow$ `EAST` $\rightarrow$ `SOUTH` $\rightarrow$ `WEST`).
+  - **Sneak Right-Click** (Shift + Right-Click with wrench or empty hand):
+    - **Sloped Conveyor Belt**: Toggles incline elevation between `UP` and `DOWN`, allowing conveyors to easily route items downhill instead of uphill.
+    - **Right-Angle Conveyor Belt**: Toggles turn direction between `RIGHT` and `LEFT`.
+  - Empty-hand normal right-click now rotates conveyors reliably without needing a wrench, and shift-right-click smoothly changes elevation or turn direction.
 
 ---
 

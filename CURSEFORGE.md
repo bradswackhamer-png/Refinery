@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.49.jar`
+`refinery-1.8.50.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.49 (NeoForge 26.3)`
+`Industrial Refinery 1.8.50 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,16 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.50
+
+### What's New in v1.8.50:
+- **Unified Sloped & Corner Conveyor Belt Controls**:
+  - **Normal Right-Click** (with wrench or empty hand): Rotates conveyor direction clockwise (`NORTH` -> `EAST` -> `SOUTH` -> `WEST`).
+  - **Sneak Right-Click** (Shift + Right-Click with wrench or empty hand):
+    - **Sloped Conveyor Belt**: Toggles incline elevation between `UP` and `DOWN`, allowing conveyors to seamlessly carry items downhill instead of uphill.
+    - **Right-Angle Conveyor Belt**: Toggles turn direction between `RIGHT` and `LEFT`.
+  - Empty-hand normal right-click now rotates conveyors reliably without needing a wrench, and shift-right-click smoothly changes elevation or turn direction.
+
 # Industrial Refinery v1.8.49
 
 ### What's New in v1.8.49:

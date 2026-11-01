@@ -221,17 +221,24 @@ public class SlopedConveyorBeltBlock extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (player.isShiftKeyDown()) {
-            if (!level.isClientSide()) {
+        if (!level.isClientSide()) {
+            if (player.isShiftKeyDown()) {
+                // Sneak + Right Click: Toggle Slope UP <-> DOWN
+                SlopeDirection cur = state.getValue(SLOPE);
+                SlopeDirection next = cur == SlopeDirection.UP ? SlopeDirection.DOWN : SlopeDirection.UP;
+                level.setBlock(pos, state.setValue(SLOPE, next), 3);
+                level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
+                player.sendSystemMessage(Component.literal("§6[Conveyor]§r Incline: §e" + next.name()));
+            } else {
+                // Normal Right Click: Rotate Direction Clockwise
                 Direction currentFacing = state.getValue(FACING);
                 Direction newFacing = currentFacing.getClockWise();
                 level.setBlock(pos, state.setValue(FACING, newFacing), 3);
                 level.playSound(null, pos, SoundEvents.ITEM_FRAME_ROTATE_ITEM, SoundSource.BLOCKS, 0.8f, 1.0f);
                 player.sendSystemMessage(Component.literal("§6[Conveyor]§r Direction: §e" + newFacing.getName().toUpperCase()));
             }
-            return InteractionResult.SUCCESS;
         }
-        return super.useWithoutItem(state, level, pos, player, hitResult);
+        return InteractionResult.SUCCESS;
     }
 
     @Override

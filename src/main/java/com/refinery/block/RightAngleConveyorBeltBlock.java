@@ -153,8 +153,18 @@ public class RightAngleConveyorBeltBlock extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (player.isShiftKeyDown()) {
-            if (!level.isClientSide()) {
+        if (!level.isClientSide()) {
+            if (player.isShiftKeyDown()) {
+                // Sneak + Right Click: Toggle Turn LEFT <-> RIGHT
+                TurnDirection cur = state.getValue(TURN);
+                TurnDirection next = cur == TurnDirection.RIGHT ? TurnDirection.LEFT : TurnDirection.RIGHT;
+                BlockState newState = state.setValue(TURN, next);
+                level.setBlock(pos, newState, 3);
+                Direction exit = getExitDirection(newState);
+                level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
+                player.sendSystemMessage(Component.literal("§6[Conveyor]§r Turn: §e" + next.name() + " (Exits " + exit.name().toUpperCase() + ")"));
+            } else {
+                // Normal Right Click: Rotate Direction Clockwise
                 Direction currentFacing = state.getValue(FACING);
                 Direction newFacing = currentFacing.getClockWise();
                 BlockState newState = state.setValue(FACING, newFacing);
@@ -163,9 +173,8 @@ public class RightAngleConveyorBeltBlock extends Block implements EntityBlock {
                 level.playSound(null, pos, SoundEvents.ITEM_FRAME_ROTATE_ITEM, SoundSource.BLOCKS, 0.8f, 1.0f);
                 player.sendSystemMessage(Component.literal("§6[Conveyor]§r Direction: §e" + newFacing.name().toUpperCase() + " -> " + exit.name().toUpperCase()));
             }
-            return InteractionResult.SUCCESS;
         }
-        return super.useWithoutItem(state, level, pos, player, hitResult);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
