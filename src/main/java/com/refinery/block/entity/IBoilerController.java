@@ -13,6 +13,9 @@ public interface IBoilerController {
     int getSteamAmount();
     void setWaterAmount(int amt);
     void setSteamAmount(int amt);
+    int getTankCapacity();
+    void syncToClient();
+    void setChanged();
     Container getFuelContainer();
     boolean canInsertFuel(ItemStack stack);
 

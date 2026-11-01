@@ -53,7 +53,13 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
-<<<<<<< HEAD
+   - [Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)](#version-1847-boiler-infinite-water-draw--phantom-fluid-voiding-fix)
+   - [Version 1.8.46 (Storage Tank Valve Isolation & Side Connection Prevention)](#version-1846-storage-tank-valve-isolation--side-connection-prevention)
+   - [Version 1.8.45 (Pipe Fluid Capacity Reduction 250â€“500 mB & High-Speed Flow)](#version-1845-pipe-fluid-capacity-reduction-250500-mb--high-speed-flow)
+   - [Version 1.8.44 (Diamond Sorting Pipe Filter Retention Across Restarts)](#version-1844-diamond-sorting-pipe-filter-retention-across-restarts)
+   - [Version 1.8.43 (Terrain Loading Deadlock Fix with C2ME)](#version-1843-terrain-loading-deadlock-fix-with-c2me)
+   - [Version 1.8.42 (Minecraft 26.3 Worldgen Feature Migration & en_us.json Fix)](#version-1842-minecraft-263-worldgen-feature-migration--en_usjson-fix)
+   - [Version 1.8.41 (Minecraft Bootstrap Block Registration Fix)](#version-1841-minecraft-bootstrap-block-registration-fix)
    - [Version 1.8.40 (Industrial Diesel Generator 1x2x2 Compact Power Plant)](#version-1840-industrial-diesel-generator-1x2x2-compact-power-plant)
    - [Version 1.8.39 (Tin Ore Worldgen & Retrogen, Bronze 1:1 Forging Ratio)](#version-1839-tin-ore-worldgen--retrogen-bronze-11-forging-ratio)
    - [Version 1.8.38 (Pipe State & 3D Elbow Connection Retention on Server Restart)](#version-1838-pipe-state--3d-elbow-connection-retention-on-server-restart)
@@ -71,9 +77,7 @@
    - [Version 1.8.26 (Diamond Pipe 3D Color-Coded Connection Bands & Whitelist GUI Legend)](#version-1826-diamond-pipe-3d-color-coded-connection-bands--whitelist-gui-legend)
    - [Version 1.8.25 (Minecraft 26.3 GUI Mouse Button Fix & Text Alpha Visibility)](#version-1825-minecraft-263-gui-mouse-button-fix--text-alpha-visibility)
    - [Version 1.8.24 (Auto Harvester GUI Synchronization & Gate Saddle Alignment)](#version-1824-auto-harvester-gui-synchronization--gate-saddle-alignment)
-=======
    - [Version 1.8.24 (Complete In-Game Localization & Translation Key Fix)](#version-1824-complete-in-game-localization--translation-key-fix)
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
    - [Version 1.8.23 (Quartz Merge Pipe Suite & Selectable Output Routing)](#version-1823-quartz-merge-pipe-suite--selectable-output-routing)
    - [Version 1.8.22 (Void Pipe Shaped Crafting Parity & Gate Curvature Fix)](#version-1822-void-pipe-shaped-crafting-parity--gate-curvature-fix)
    - [Version 1.8.21 (Pipe Gate Orientation, Extended Dead-Ends, & Conveyor Occlusion Fix)](#version-1821-pipe-gate-orientation-extended-dead-ends--conveyor-occlusion-fix)
@@ -1669,7 +1673,65 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ---
 
-<<<<<<< HEAD
+### Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)
+- **Resolved Infinite Water Drain**:
+  - Fixed an issue where Steam Boilers and Diesel Boilers continuously drained connected water tanks and pipes even when full at 16,000 mB.
+  - Corrected `BOILER_PORT_BE` capability registration which erroneously reported a static 64,000 mB capacity on Small Boilers (16,000 mB actual), causing the fluid transaction handler to report 48,000 mB available space and void incoming water while accepting it from upstream pipes.
+  - Dynamically bound port capacity to `controller.getTankCapacity()` across all small (16,000 mB) and large (64,000 mB) boilers.
+- **Fail-Safe Transaction Math**:
+  - Updated `SingleFluidHandler` insertion and extraction logic to verify actual difference in internal fluid levels, preventing phantom liquid voiding or over-reporting accepted amounts.
+  - Added real-time client block synchronization when fluids enter or leave boiler ports.
+
+---
+
+### Version 1.8.46 (Storage Tank Valve Isolation & Side Connection Prevention)
+- **Casing Wall Fluid Isolation**:
+  - Removed fluid capability registration and machine recognition from `refinery:storage_tank_casing`. Liquid pipes running adjacent to storage tank perimeter walls will no longer snap or connect horizontally into the casing.
+- **Strict Valve Directionality**:
+  - Multiblock liquid storage tanks now only accept liquid from the top **Fill Valve** (`refinery:storage_tank_fill_valve`) and only export liquid from the bottom **Drain Valve** (`refinery:storage_tank_drain_valve`).
+  - Fill valve handlers strictly reject extraction (`extract = 0`), and drain valve handlers strictly reject insertion (`insert = 0`).
+- **Targeted Drain Auto-Export**:
+  - Auto-export push from the multiblock tank is restricted to direct neighbors of the Drain Valve, preventing active discharge into side casing walls.
+
+---
+
+### Version 1.8.45 (Pipe Fluid Capacity Reduction 250â€“500 mB & High-Speed Flow)
+- **Pipe Fluid Capacity Reduction (250â€“500 mB)**:
+  - Scaled down pipe internal fluid storage from 1,000â€“8,000 mB to compact **250â€“500 mB** per block, preventing pipelines from hoarding large reservoirs of liquid.
+- **High-Throughput Material Transfer Rates**:
+  - Transfer rates are decoupled from capacity and boosted significantly by material tier (Wood: 100 mB/t, Copper: 250 mB/t, Iron: 500 mB/t, Gold: 800 mB/t, Diamond: 1,000 mB/t, Steel: 1,500 mB/t).
+  - Streamlined pipe-to-pipe fluid equalization, allowing liquids to surge swiftly through long runs directly into consumers.
+
+---
+### Version 1.8.44 (Diamond Sorting Pipe Filter Retention Across Restarts)
+- **Diamond Sorting Pipe Filter Retention Fix**:
+  - Resolved filter loss across restarts in Diamond Sorting Pipes (efinery:diamond_item_pipe).
+  - Fixed an internal container list truncation issue during loadAdditional where clearContent() reduced the NonNullList size to 0, rejecting all restored filter items.
+  - Direction filters (6 directions $\times$ 9 slots) now save and restore faithfully under dedicated NBT list records with live network sync and safety drops on block break.
+
+---
+### Version 1.8.43 (Terrain Loading Deadlock Fix with C2ME)
+- **Terrain Loading Deadlock Fix (TinRetrogenHandler)**:
+  - Fixed an issue where worlds with C2ME (Concurrent Chunk Management Engine) got permanently stuck on the "Loading Terrain" screen.
+  - Eliminated the custom ChunkEvent.Load listener that attempted synchronous block checks across chunk borders. Tin Ore generation is now handled cleanly through Minecraft's native worldgen feature pipeline.
+
+---
+### Version 1.8.42 (Minecraft 26.3 Worldgen Feature Migration & en_us.json Fix)
+- **Minecraft 26.3 Worldgen Feature Migration (`worldgen/feature/`)**:
+  - In Minecraft 26.3, configured features are resolved from `data/<namespace>/worldgen/feature/` under registry `minecraft:worldgen/feature`.
+  - Migrated `ore_tin.json` from legacy `configured_feature/` to `worldgen/feature/` and inlined target configuration, resolving fatal `Unbound values in registry ResourceKey[minecraft:root / minecraft:worldgen/feature]: [refinery:ore_tin]` when loading world saves.
+- **Language Localization Parsing**:
+  - Resolved merge conflict in `en_us.json`, restoring compatibility with Jade and language loaders.
+
+---
+
+### Version 1.8.41 (Minecraft Bootstrap Block Registration Fix)
+- **Minecraft Bootstrap Block Registration Fix (`Block id not set`)**:
+  - Resolved fatal `NullPointerException: Block id not set` occurring during mod bootstrap registry dispatch.
+  - Corrected block registration supplier lambdas for `tin_ore`, `deepslate_tin_ore`, `raw_tin_block`, `tin_block`, and `bronze_block` to chain onto the NeoForge-provided `Properties` instance rather than instantiating detached property objects.
+
+---
+
 ### Version 1.8.40 (Industrial Diesel Generator 1x2x2 Compact Power Plant)
 - **Industrial Diesel Generator (1x2x2 Compact Power Plant)**:
   - Added the **Industrial Diesel Generator** (`refinery:diesel_generator`): a heavy-duty containerized sound-attenuated diesel power plant producing FE/RF from refined Diesel.
@@ -1857,7 +1919,6 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Pipe Gate Rotation & Saddle Alignment**:
   - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces.
   - Curved gate clamp plates wrap flush and securely around 12-sided pipe cylinders without bending backwards into open air.
-=======
 ### Version 1.8.24 (Complete In-Game Localization & Translation Key Fix)
 - **Complete In-Game Localization & Translation Key Resolution (n_us.json)**:
   - Fixed an issue where multiple items, blocks, and tooltips displayed raw registry/variable keys (such as item.refinery.coal_dust and 	ooltip.refinery.coal_dust.desc) in GUI containers and player inventories.
@@ -1873,7 +1934,7 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
     - **Multi-Smelter & Fermenter**: Multi-Smelter Controller, Casing, Chamber, Ports, and Industrial Fermenter.
   - Added localized names for all fluid types, fluid blocks, and buckets (Crude Oil, Steam, Molten Iron/Gold/Copper/Tin/Bronze/Glass, Ethanol) and GUI container titles.
   - Cleaned up duplicate client network sync methods in AutoHarvesterBlockEntity.
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
+
 
 ---
 

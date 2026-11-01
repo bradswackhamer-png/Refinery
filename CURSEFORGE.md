@@ -196,14 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-<<<<<<< HEAD
-`refinery-1.8.40.jar`
-=======
-`refinery-1.8.24.jar`
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
+`refinery-1.8.47.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.40 (NeoForge 26.3)`
+`Industrial Refinery 1.8.47 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -219,6 +215,27 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.47
+
+### What's New in v1.8.47:
+- **Boiler Infinite Water Draw & Phantom Voiding Fix**:
+  - Resolved an issue where Steam Boilers and Diesel Boilers continuously drew water from tanks and pipes even when full.
+  - Dynamically bound boiler port capacity to the controller's actual tank capacity (`controller.getTankCapacity()`, 16,000 mB for small boilers, 64,000 mB for large boilers) instead of a hardcoded 64,000 mB limit.
+  - Hardened `SingleFluidHandler` insertion and extraction math to measure internal fluid change, preventing handlers from reporting higher acceptance than what the machine actually stored.
+  - Added immediate client block updates upon fluid transfers.
+
+---
+
+# Industrial Refinery v1.8.46
+
+### What's New in v1.8.46:
+- **Storage Tank Valve Isolation & Side Connection Prevention**:
+  - Removed fluid capability registration and fluid machine detection from `refinery:storage_tank_casing`. Pipes routed along storage tank walls no longer connect or pull fluid through casing blocks.
+  - Strict valve directionality: the **Fill Valve** (`refinery:storage_tank_fill_valve`) only accepts fluid input (`insert` only), and the **Drain Valve** (`refinery:storage_tank_drain_valve`) only outputs fluid (`extract` only).
+  - Restricted auto-export scans to immediate neighbors of the Drain Valve, preventing active discharge through exterior casing walls.
+
+---
+
 # Industrial Refinery v1.8.40
 
 ### What's New in v1.8.40:

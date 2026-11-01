@@ -4,7 +4,77 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-<<<<<<< HEAD
+## [1.8.47] - 2026-11-01
+
+### Fixed
+- **Steam Boiler Infinite Water Draw & Phantom Fluid Voiding**:
+  - Fixed a critical bug where Steam Boilers and Diesel Boilers continuously drained connected water tanks and pipes even when their internal water tanks were 100% full.
+  - The boiler port capability handler (`BOILER_PORT_BE`) previously hardcoded a 64,000 mB capacity for all boilers regardless of boiler size. When attached to Small Boilers (16,000 mB capacity), the handler reported 48,000 mB of remaining space, accepting fluid transactions and falsely returning full acceptance to upstream pipes while the boiler controller clamped and discarded the excess water.
+  - Port fluid handlers now dynamically query the controller's true capacity (`controller.getTankCapacity()`).
+  - Hardened `SingleFluidHandler.insert(...)` and `extract(...)` to measure actual difference in stored fluid before and after mutation, guaranteeing handlers never return higher insertion values than what was actually accepted by the container.
+  - Added real-time client block updates and synchronization (`syncToClient()`) upon fluid insertion and extraction through boiler ports.
+
+---
+
+## [1.8.46] - 2026-11-01
+
+### Fixed
+- **Storage Tank Valve Isolation & Side Connection Prevention**:
+  - Removed fluid capability registration from `refinery:storage_tank_casing`. Liquid pipes running adjacent to storage tank perimeter walls will no longer create unwanted branch connections or pull fluid directly through casing blocks.
+  - Enforced strict unidirectional valve roles: the **Fill Valve** (`refinery:storage_tank_fill_valve`) only accepts fluid input (`insert` only, `extract = 0`), and the **Drain Valve** (`refinery:storage_tank_drain_valve`) only outputs fluid (`extract` only, `insert = 0`).
+  - Restricted the multiblock tank's auto-export scanning to only target blocks directly adjacent to the Drain Valve itself rather than scanning the entire outer casing perimeter and bottom floor.
+
+---
+
+## [1.8.45] - 2026-11-01
+
+### Changed
+- **Pipe Fluid Capacity Reduction (250â€“500 mB) & High-Speed Throughput**:
+  - Reduced the internal fluid capacity across all industrial pipes from 1,000â€“8,000 mB down to **250â€“500 mB** per block (Wood/Cast Iron: 250 mB, Copper: 300 mB, Brass: 350 mB, Iron: 400 mB, Gold/Quartz: 400 mB, Diamond/Emerald: 500 mB, Steel: 500 mB).
+  - High-throughput transfer rates scaling by material tier (Copper: 250 mB/t, Iron: 500 mB/t, Gold: 800 mB/t, Steel: 1,500 mB/t). Fluids travel rapidly downstream to boilers, tanks, and machines without hoarding dozens of buckets inside pipeline runs.
+  - Clamped deserialized fluid amounts on chunk load to ensure existing pipes cleanly conform to new capacity limits.
+
+---
+## [1.8.44] - 2026-11-01
+
+### Fixed
+- **Diamond Sorting Pipe Filter Retention Across Server Restarts**:
+  - Fixed an issue where items placed into the 54 direction filter slots of the Diamond Sorting Pipe (efinery:diamond_item_pipe) disappeared after server restart or chunk reload.
+  - In loadAdditional, calling clearContent() on SimpleContainer truncated its internal NonNullList to size 0, causing ContainerHelper.loadAllItems to discard every filter slot due to isValidInContainer size checks.
+  - Added dedicated DiamondFilters NBT list serialization via ItemStackWithSlot.CODEC with backward-compatible fallback, pre-sizing to 54 slots on load without truncating the container.
+  - Added preRemoveSideEffects to drop filter contents when the Diamond Pipe is dismantled, and real-time block update broadcasting on setChanged().
+
+---
+## [1.8.43] - 2026-11-01
+
+### Fixed
+- **Loading Terrain Deadlock with C2ME (TinRetrogenHandler)**:
+  - Removed synchronous ChunkEvent.Load ore injection in TinRetrogenHandler.
+  - In instances with concurrent chunk managers like C2ME, querying or modifying blockstates via serverLevel.getBlockState(...) inside chunk load events triggers recursive blocking chunk requests (ServerChunkCache.getChunkBlocking), deadlocking the terrain loading phase.
+  - Subterranean Tin Ore generation is cleanly handled through Minecraft's native worldgen feature pipeline (worldgen/feature/ore_tin.json, worldgen/placed_feature/ore_tin.json, and 
+eoforge/biome_modifier/add_tin_ore.json).
+
+---
+## [1.8.42] - 2026-11-01
+
+### Fixed
+- **Minecraft 26.3 World Loading Crash (Unbound values in registry ... [refinery:ore_tin])**:
+  - In Minecraft 26.3 (1.21.4+), configured features are resolved via minecraft:worldgen/feature (loaded from data/<namespace>/worldgen/feature/), replacing legacy configured_feature.
+  - Moved ore_tin.json from worldgen/configured_feature/ to worldgen/feature/ and inlined its target configuration to match 26.3's feature codec.
+- **Language File Conflict Resolution (en_us.json)**:
+  - Resolved merge conflict markers in ssets/refinery/lang/en_us.json that triggered a MalformedJsonException during Jade and client language loading.
+
+---
+
+## [1.8.41] - 2026-11-01
+
+### Fixed
+- **Minecraft Bootstrap Block Registration Crash (Block id not set)**:
+  - In NeoForge 26.3.0.48+, blocks strictly require a ResourceKey assigned via Properties.setId(...) provided by NeoForge's egisterBlock(name, func) callback parameter p.
+  - Updated TIN_ORE, DEEPSLATE_TIN_ORE, RAW_TIN_BLOCK, TIN_BLOCK, and BRONZE_BLOCK to chain onto p directly rather than creating detached copies with ofFullCopy(...).
+
+---
+
 ## [1.8.40] - 2026-11-01
 
 ### Added
@@ -261,7 +331,7 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Resolved merge duplication by removing redundant `getUpdateTag` / `getUpdatePacket` methods and duplicate imports in `AutoHarvesterBlockEntity.java`, restoring clean compilation.
 - **Pipe Gate Rotation & Saddle Alignment**:
   - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces. Curved pipe gate saddles now wrap snugly around round pipe cylinders rather than curving backwards inside-out.
-=======
+
 ## [1.8.24] - 2026-11-01
 
 ### Fixed
@@ -280,7 +350,6 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Added localized names for all fluid types, fluid blocks, and fluid buckets: Crude Oil, Steam, Molten Iron, Molten Gold, Molten Copper, Molten Tin, Molten Bronze, Molten Glass, and Biofuel (Ethanol).
   - Added proper GUI container title translations (`container.refinery.*` and `gui.refinery.gate`).
   - Resolved duplicate client sync method declarations in `AutoHarvesterBlockEntity`.
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
 
 ---
 

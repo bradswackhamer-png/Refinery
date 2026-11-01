@@ -115,6 +115,11 @@ public class LargeDieselBoilerControllerBlockEntity extends BlockEntity implemen
     }
 
     @Override
+    public int getTankCapacity() {
+        return TANK_CAPACITY;
+    }
+
+    @Override
     public int getDieselAmount() {
         return this.dieselAmount;
     }

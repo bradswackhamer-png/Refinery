@@ -329,40 +329,12 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
         this.cachedExportTargets.clear();
         if (!this.assembled) return;
 
-        int r = this.tankSize.getRadius();
-        int h = this.tankSize.getHeight();
-        BlockPos base = this.worldPosition;
-
-        // 1. Underneath the tank floor (y = -1)
-        for (int dx = -r; dx <= r; dx++) {
-            for (int dz = -r; dz <= r; dz++) {
-                BlockPos target = base.offset(dx, -1, dz);
-                checkAndAddTarget(level, target, Direction.UP);
-            }
-        }
-
-        // 2. Around the 4 vertical perimeter walls (y in 0..h-1)
-        for (int y = 0; y < h; y++) {
-            // North face (z = -r - 1)
-            for (int dx = -r; dx <= r; dx++) {
-                BlockPos target = base.offset(dx, y, -r - 1);
-                checkAndAddTarget(level, target, Direction.SOUTH);
-            }
-            // South face (z = +r + 1)
-            for (int dx = -r; dx <= r; dx++) {
-                BlockPos target = base.offset(dx, y, r + 1);
-                checkAndAddTarget(level, target, Direction.NORTH);
-            }
-            // West face (x = -r - 1)
-            for (int dz = -r; dz <= r; dz++) {
-                BlockPos target = base.offset(-r - 1, y, dz);
-                checkAndAddTarget(level, target, Direction.EAST);
-            }
-            // East face (x = +r + 1)
-            for (int dz = -r; dz <= r; dz++) {
-                BlockPos target = base.offset(r + 1, y, dz);
-                checkAndAddTarget(level, target, Direction.WEST);
-            }
+        // Multiblock tanks only export fluid directly from the drain valve itself (not casing walls)
+        BlockPos drainPos = this.worldPosition;
+        for (Direction dir : Direction.values()) {
+            if (dir == Direction.UP) continue; // UP leads inside the tank interior cavity
+            BlockPos target = drainPos.relative(dir);
+            checkAndAddTarget(level, target, dir.getOpposite());
         }
     }
 

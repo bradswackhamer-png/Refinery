@@ -291,7 +291,16 @@
   "tooltip.refinery.wrench.desc_4": "§dShift-right-click Refinery blocks to instantly dismantle & retrieve.",
   "tooltip.refinery.tar.desc": "§7Viscous petroleum residue. Burns as fuel or crafts torches.",
   "tooltip.refinery.sulfur_dust.desc": "§eRefined mineral byproduct. Used in gunpowder and chemistry.",
-<<<<<<< HEAD
+  "tooltip.refinery.bitumen.desc": "§7Heavy hydrocarbon cake. Smelt into petroleum tar or craft into asphalt.",
+  "tooltip.refinery.iron_dust.desc": "§7Finely ground iron ore byproduct. Smelt into Iron Ingot.",
+  "tooltip.refinery.gold_dust.desc": "§7Finely ground gold ore byproduct. Smelt into Gold Ingot.",
+  "tooltip.refinery.copper_dust.desc": "§7Finely ground copper ore byproduct. Smelt into Copper Ingot.",
+  "tooltip.refinery.coal_dust.desc": "§7Finely milled coal powder. Burns efficiently as fuel or in metallurgy.",
+  "tooltip.refinery.steel_ingot.desc": "§7High-tensile structural alloy. Used for heavy industrial frames and machinery.",
+  "tooltip.refinery.steel_plate.desc": "§7Reinforced steel plate stamped in the Metal Press. Essential for high-pressure boilers and turbines.",
+  "tooltip.refinery.iron_plate.desc": "§7Standard industrial iron plate stamped in the Metal Press.",
+  "tooltip.refinery.copper_plate.desc": "§7Conductive stamped copper plate. Used in electrical and fluid handling systems.",
+  "tooltip.refinery.gold_plate.desc": "§7Corrosion-proof stamped gold plate. Used in advanced electronics and logic gates.",
 
   "block.refinery.tin_ore": "Tin Ore",
   "block.refinery.deepslate_tin_ore": "Deepslate Tin Ore",
@@ -324,22 +333,4 @@
   "tooltip.refinery.diesel_generator.desc_1": "§7Heavy containerized sound-attenuated diesel power plant (1x2x2).",
   "tooltip.refinery.diesel_generator.desc_2": "§6Generates 256 FE/t from Diesel with smart idling and auto-push.",
   "tooltip.refinery.diesel_generator.desc_3": "§eConfigurable Redstone control: Always On, Active High, or Active Low backup."
-=======
-  "tooltip.refinery.bitumen.desc": "§7Heavy hydrocarbon cake. Smelt into petroleum tar or craft into asphalt.",
-  "tooltip.refinery.iron_dust.desc": "§7Finely ground iron ore byproduct. Smelt into Iron Ingot.",
-  "tooltip.refinery.gold_dust.desc": "§7Finely ground gold ore byproduct. Smelt into Gold Ingot.",
-  "tooltip.refinery.copper_dust.desc": "§7Finely ground copper ore byproduct. Smelt into Copper Ingot.",
-  "tooltip.refinery.steel_ingot.desc": "§7High-tensile structural alloy. Used for heavy industrial frames and machinery.",
-  "tooltip.refinery.steel_plate.desc": "§7Reinforced steel plate stamped in the Metal Press. Essential for high-pressure boilers and turbines.",
-  "tooltip.refinery.tin_dust.desc": "§7Finely pulverized tin particles. Smelt into Tin Ingot or combine into Bronze.",
-  "tooltip.refinery.tin_ingot.desc": "§7Soft malleable metal ingot. Used for alloys and structural plating.",
-  "tooltip.refinery.tin_plate.desc": "§7Pressed tin sheet. Used in specialized casings and light industrial components.",
-  "tooltip.refinery.bronze_dust.desc": "§7Powdered copper-tin alloy blend. Smelt into Bronze Ingot.",
-  "tooltip.refinery.bronze_ingot.desc": "§7Durable copper-tin alloy ingot. Used in heavy industrial machinery.",
-  "tooltip.refinery.bronze_plate.desc": "§7Heavy stamped bronze plate. Highly corrosion resistant.",
-  "tooltip.refinery.coal_dust.desc": "§7Finely milled coal powder. Burns efficiently as fuel or in metallurgy.",
-  "tooltip.refinery.iron_plate.desc": "§7Standard industrial iron plate stamped in the Metal Press.",
-  "tooltip.refinery.copper_plate.desc": "§7Conductive stamped copper plate. Used in electrical and fluid handling systems.",
-  "tooltip.refinery.gold_plate.desc": "§7Corrosion-proof stamped gold plate. Used in advanced electronics and logic gates."
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
 }
