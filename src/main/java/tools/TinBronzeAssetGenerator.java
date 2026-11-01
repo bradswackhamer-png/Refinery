@@ -26,7 +26,7 @@ public class TinBronzeAssetGenerator {
         new File(ASSETS + "lang").mkdirs();
         new File(DATA + "refinery/recipe").mkdirs();
         new File(DATA + "refinery/loot_table/blocks").mkdirs();
-        new File(DATA + "refinery/worldgen/configured_feature").mkdirs();
+        new File(DATA + "refinery/worldgen/feature").mkdirs();
         new File(DATA + "refinery/worldgen/placed_feature").mkdirs();
         new File(DATA + "refinery/neoforge/biome_modifier").mkdirs();
         new File(DATA + "c/tags/block/ores").mkdirs();
@@ -647,37 +647,31 @@ public class TinBronzeAssetGenerator {
     }
 
     private static void generateWorldgen() throws Exception {
-        // Configured Feature
+        // Worldgen Feature (Minecraft 26.3 uses worldgen/feature instead of configured_feature)
         String cfg = """
         {
           "type": "minecraft:ore",
-          "config": {
-            "discard_chance_on_air_exposure": 0.0,
-            "size": 10,
-            "targets": [
-              {
-                "state": {
-                  "Name": "refinery:tin_ore"
-                },
-                "target": {
-                  "predicate_type": "minecraft:tag_match",
-                  "tag": "minecraft:stone_ore_replaceables"
-                }
-              },
-              {
-                "state": {
-                  "Name": "refinery:deepslate_tin_ore"
-                },
-                "target": {
-                  "predicate_type": "minecraft:tag_match",
-                  "tag": "minecraft:deepslate_ore_replaceables"
-                }
+          "discard_chance_on_air_exposure": 0.0,
+          "size": 10,
+          "targets": [
+            {
+              "state": "refinery:tin_ore",
+              "target": {
+                "predicate_type": "minecraft:tag_match",
+                "tag": "minecraft:stone_ore_replaceables"
               }
-            ]
-          }
+            },
+            {
+              "state": "refinery:deepslate_tin_ore",
+              "target": {
+                "predicate_type": "minecraft:tag_match",
+                "tag": "minecraft:deepslate_ore_replaceables"
+              }
+            }
+          ]
         }
         """;
-        Files.writeString(Paths.get(DATA + "refinery/worldgen/configured_feature/ore_tin.json"), cfg);
+        Files.writeString(Paths.get(DATA + "refinery/worldgen/feature/ore_tin.json"), cfg);
 
         // Placed Feature (Identical frequency and height range to Vanilla Copper: 16 count, triangle -16 to 112)
         String placed = """

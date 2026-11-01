@@ -115,15 +115,22 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
     }
 
     @Override
+    public int getTankCapacity() {
+        return TANK_CAPACITY;
+    }
+
+    @Override
     public void setWaterAmount(int amt) {
         this.waterAmount = Math.clamp(amt, 0, TANK_CAPACITY);
         setChanged();
+        syncToClient();
     }
 
     @Override
     public void setSteamAmount(int amt) {
         this.steamAmount = Math.clamp(amt, 0, TANK_CAPACITY);
         setChanged();
+        syncToClient();
     }
 
     @Override
@@ -131,7 +138,10 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
         int space = TANK_CAPACITY - this.waterAmount;
         int toAdd = Math.min(space, amount);
         this.waterAmount += toAdd;
-        if (toAdd > 0) setChanged();
+        if (toAdd > 0) {
+            setChanged();
+            syncToClient();
+        }
         return toAdd;
     }
 
@@ -139,7 +149,10 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
     public int drainSteam(int amount) {
         int toDrain = Math.min(this.steamAmount, amount);
         this.steamAmount -= toDrain;
-        if (toDrain > 0) setChanged();
+        if (toDrain > 0) {
+            setChanged();
+            syncToClient();
+        }
         return toDrain;
     }
 

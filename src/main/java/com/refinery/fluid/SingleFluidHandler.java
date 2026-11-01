@@ -15,7 +15,7 @@ public class SingleFluidHandler extends SnapshotJournal<Integer> implements Reso
     private final Supplier<Fluid> fluidSupplier;
     private final IntSupplier amountGetter;
     private final IntConsumer amountSetter;
-    private final int capacity;
+    private final IntSupplier capacitySupplier;
     private final boolean canInsert;
     private final boolean canExtract;
     private final Runnable onChanged;
@@ -27,13 +27,27 @@ public class SingleFluidHandler extends SnapshotJournal<Integer> implements Reso
                               boolean canInsert,
                               boolean canExtract,
                               Runnable onChanged) {
+        this(fluidSupplier, amountGetter, amountSetter, () -> capacity, canInsert, canExtract, onChanged);
+    }
+
+    public SingleFluidHandler(Supplier<Fluid> fluidSupplier,
+                              IntSupplier amountGetter,
+                              IntConsumer amountSetter,
+                              IntSupplier capacitySupplier,
+                              boolean canInsert,
+                              boolean canExtract,
+                              Runnable onChanged) {
         this.fluidSupplier = fluidSupplier;
         this.amountGetter = amountGetter;
         this.amountSetter = amountSetter;
-        this.capacity = capacity;
+        this.capacitySupplier = capacitySupplier;
         this.canInsert = canInsert;
         this.canExtract = canExtract;
         this.onChanged = onChanged;
+    }
+
+    public int getCapacity() {
+        return this.capacitySupplier.getAsInt();
     }
 
     @Override
@@ -61,12 +75,12 @@ public class SingleFluidHandler extends SnapshotJournal<Integer> implements Reso
 
     @Override
     public long getCapacityAsLong(int index, FluidResource resource) {
-        return capacity;
+        return getCapacity();
     }
 
     @Override
     public int getCapacityAsInt(int index, FluidResource resource) {
-        return capacity;
+        return getCapacity();
     }
 
     @Override
@@ -84,14 +98,16 @@ public class SingleFluidHandler extends SnapshotJournal<Integer> implements Reso
         if (!resource.isEmpty() && resource.getFluid() != fluid) return 0;
 
         int current = amountGetter.getAsInt();
-        int space = capacity - current;
+        int space = getCapacity() - current;
         int toInsert = Math.min(space, amount);
         if (toInsert <= 0) return 0;
 
         updateSnapshots(transaction);
         amountSetter.accept(current + toInsert);
-        if (onChanged != null) onChanged.run();
-        return toInsert;
+        int after = amountGetter.getAsInt();
+        int actualInserted = Math.max(0, after - current);
+        if (onChanged != null && actualInserted > 0) onChanged.run();
+        return actualInserted;
     }
 
     @Override
@@ -106,8 +122,10 @@ public class SingleFluidHandler extends SnapshotJournal<Integer> implements Reso
 
         updateSnapshots(transaction);
         amountSetter.accept(current - toExtract);
-        if (onChanged != null) onChanged.run();
-        return toExtract;
+        int after = amountGetter.getAsInt();
+        int actualExtracted = Math.max(0, current - after);
+        if (onChanged != null && actualExtracted > 0) onChanged.run();
+        return actualExtracted;
     }
 
     @Override

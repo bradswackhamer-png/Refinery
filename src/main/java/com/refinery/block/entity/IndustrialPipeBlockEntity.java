@@ -1,6 +1,8 @@
 package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
+import com.refinery.block.StorageTankDrainValveBlock;
+import com.refinery.block.StorageTankFillValveBlock;
 import com.refinery.block.pipe.IndustrialPipeMaterial;
 import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.block.pipe.PipeConnectionType;
@@ -9,6 +11,7 @@ import com.refinery.menu.DiamondPipeMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -18,6 +21,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -296,10 +301,14 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         if (level.getCapability(Capabilities.Fluid.BLOCK, pos, side) != null) return true;
         if (level.getCapability(Capabilities.Fluid.BLOCK, pos, null) != null) return true;
 
-        return state.getBlock() instanceof com.refinery.block.StorageTankCasingBlock ||
-               state.getBlock() instanceof com.refinery.block.StorageTankDrainValveBlock ||
-               state.getBlock() instanceof com.refinery.block.StorageTankFillValveBlock ||
-               state.getBlock() instanceof com.refinery.block.BoilerPortBlock ||
+        if (state.getBlock() instanceof com.refinery.block.StorageTankDrainValveBlock) {
+            return state.getValue(StorageTankDrainValveBlock.ASSEMBLED);
+        }
+        if (state.getBlock() instanceof com.refinery.block.StorageTankFillValveBlock) {
+            return state.getValue(StorageTankFillValveBlock.ASSEMBLED);
+        }
+
+        return state.getBlock() instanceof com.refinery.block.BoilerPortBlock ||
                state.getBlock() instanceof com.refinery.block.RefineryPortBlock;
     }
 
@@ -516,9 +525,10 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                             }
                             return;
                         }
-                        int diff = (this.fluidTank.getAmount() - otherPipe.fluidTank.getAmount()) / 2;
-                        if (diff > 5) {
-                            int pushAmt = Math.min(diff, material.getTransferRate() / 2);
+                        int diff = this.fluidTank.getAmount() - otherPipe.fluidTank.getAmount();
+                        if (diff > 1) {
+                            int toEqualize = (diff + 1) / 2;
+                            int pushAmt = Math.min(toEqualize, material.getTransferRate());
                             try (Transaction tx = Transaction.openRoot()) {
                                 int accepted = otherPipe.fluidTank.insert(0, fluidRes, pushAmt, tx);
                                 if (accepted > 0) {
@@ -858,6 +868,22 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         internalItem = ItemStack.EMPTY;
     }
 
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level != null && !level.isClientSide() && getMaterial() == IndustrialPipeMaterial.DIAMOND) {
+            Containers.dropContents(level, pos, this.diamondFilters);
+        }
+    }
+
     // === Persistence & Sync ===
 
     @Override
@@ -869,8 +895,16 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         output.putInt("RoundRobinIndex", roundRobinIndex);
         output.putInt("MergeOutput", mergeOutput.get3DDataValue());
 
-        if (material == IndustrialPipeMaterial.DIAMOND) {
-            ContainerHelper.saveAllItems(output, this.diamondFilters.getItems());
+        if (getMaterial() == IndustrialPipeMaterial.DIAMOND) {
+            NonNullList<ItemStack> items = this.diamondFilters.getItems();
+            var filterList = output.list("DiamondFilters", ItemStackWithSlot.CODEC);
+            for (int i = 0; i < items.size(); i++) {
+                ItemStack stack = items.get(i);
+                if (!stack.isEmpty()) {
+                    filterList.add(new ItemStackWithSlot(i, stack));
+                }
+            }
+            ContainerHelper.saveAllItems(output, items);
         }
 
         Fluid fl = fluidTank.getStoredFluid();
@@ -894,16 +928,33 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         this.roundRobinIndex = input.getIntOr("RoundRobinIndex", 0);
         this.mergeOutput = Direction.from3DDataValue(input.getIntOr("MergeOutput", Direction.NORTH.get3DDataValue()));
 
-        if (material == IndustrialPipeMaterial.DIAMOND) {
-            this.diamondFilters.clearContent();
-            ContainerHelper.loadAllItems(input, this.diamondFilters.getItems());
+        if (getMaterial() == IndustrialPipeMaterial.DIAMOND) {
+            NonNullList<ItemStack> items = this.diamondFilters.getItems();
+            while (items.size() < 54) {
+                items.add(ItemStack.EMPTY);
+            }
+            for (int i = 0; i < items.size(); i++) {
+                items.set(i, ItemStack.EMPTY);
+            }
+
+            var filterList = input.listOrEmpty("DiamondFilters", ItemStackWithSlot.CODEC);
+            boolean loaded = false;
+            for (ItemStackWithSlot entry : filterList) {
+                if (entry.isValidInContainer(items.size())) {
+                    items.set(entry.slot(), entry.stack());
+                    loaded = true;
+                }
+            }
+            if (!loaded) {
+                ContainerHelper.loadAllItems(input, items);
+            }
         }
 
         String flId = input.getStringOr("Fluid", "");
         if (!flId.isEmpty()) {
             Fluid fl = BuiltInRegistries.FLUID.get(Identifier.tryParse(flId)).map(net.minecraft.core.Holder::value).orElse(Fluids.EMPTY);
             fluidTank.setStoredFluid(fl);
-            fluidTank.setAmount(amt);
+            fluidTank.setAmount(Math.min(amt, getMaterial().getFluidCapacity()));
         } else {
             fluidTank.setStoredFluid(Fluids.EMPTY);
         }

@@ -16,3 +16,17 @@
     2. `assets/<namespace>/models/item/<item_id>.json` (parent `minecraft:item/generated` with layer texture, or block model parent).
     3. `assets/<namespace>/textures/item/<item_id>.png` (the actual sprite texture).
   - Never omit `assets/<namespace>/items/<item_id>.json`. Without it, items fail to resolve their model, resulting in missing or invisible held items and broken inventory GUI icons.
+
+## NeoForge 26.3.0.48+ Block Registration & Property Constraints
+
+- **Strict Retention of `BlockBehaviour.Properties` Parameter (`p`)**:
+  - In NeoForge 26.3.0.48+, blocks strictly require a `ResourceKey` / block ID assigned via `Properties.setId(...)`.
+  - When using `DeferredRegister.Blocks.registerBlock(String name, Function<BlockBehaviour.Properties, ? extends Block> func)`, the supplier lambda receives `p` with `setId(...)` already configured.
+  - **NEVER** instantiate detached properties via `BlockBehaviour.Properties.ofFullCopy(...)` or `BlockBehaviour.Properties.of()`, as this discards the block ID and triggers a fatal bootstrap crash: `NullPointerException: Block id not set`.
+  - Always mutate and pass `p` directly: `p -> new Block(p.sound(...).strength(...))` or `MyBlock::new` where the block constructor chains onto the passed `Properties`.
+
+## Minecraft 26.3+ (1.21.4+) Worldgen Feature Directory
+
+- **`worldgen/feature/` Replaces Legacy `worldgen/configured_feature/`**:
+  - In Minecraft 26.3 / 1.21.4+, configured features are loaded from `data/<namespace>/worldgen/feature/<name>.json` into `minecraft:worldgen/feature` (with inlined configuration parameters).
+  - Do NOT place feature definitions in `worldgen/configured_feature/`; doing so will leave feature keys unbound and crash world/save loading with `IllegalStateException: Unbound values in registry ResourceKey[minecraft:root / minecraft:worldgen/feature]`.

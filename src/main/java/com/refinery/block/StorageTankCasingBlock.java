@@ -102,17 +102,6 @@ public class StorageTankCasingBlock extends Block {
         return super.playerWillDestroy(level, pos, state, player);
     }
 
-    @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation orientation, boolean isMoving) {
-        super.neighborChanged(state, level, pos, neighborBlock, orientation, isMoving);
-        if (!level.isClientSide() && state.getValue(ASSEMBLED)) {
-            StorageTankBlockEntity controller = findNearbyController(level, pos);
-            if (controller != null) {
-                controller.refreshExportTargets();
-            }
-        }
-    }
-
     public static StorageTankBlockEntity findNearbyController(Level level, BlockPos pos) {
         // Searches up to 3 blocks horizontally and 10 blocks downward/upward for the bottom drain valve
         for (int dy = 0; dy >= -10; dy--) {

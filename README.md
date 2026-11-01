@@ -53,7 +53,13 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
-   - [Version 1.8.41 (Pipe Logic Gate Comparison Conditions)](#version-1841-pipe-logic-gate-comparison-conditions)
+   - [Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)](#version-1847-boiler-infinite-water-draw--phantom-fluid-voiding-fix)
+   - [Version 1.8.46 (Storage Tank Valve Isolation & Side Connection Prevention)](#version-1846-storage-tank-valve-isolation--side-connection-prevention)
+   - [Version 1.8.45 (Pipe Fluid Capacity Reduction 250â€“500 mB & High-Speed Flow)](#version-1845-pipe-fluid-capacity-reduction-250500-mb--high-speed-flow)
+   - [Version 1.8.44 (Diamond Sorting Pipe Filter Retention Across Restarts)](#version-1844-diamond-sorting-pipe-filter-retention-across-restarts)
+   - [Version 1.8.43 (Terrain Loading Deadlock Fix with C2ME)](#version-1843-terrain-loading-deadlock-fix-with-c2me)
+   - [Version 1.8.42 (Minecraft 26.3 Worldgen Feature Migration & en_us.json Fix)](#version-1842-minecraft-263-worldgen-feature-migration--en_usjson-fix)
+   - [Version 1.8.41 (Minecraft Bootstrap Block Registration Fix)](#version-1841-minecraft-bootstrap-block-registration-fix)
    - [Version 1.8.40 (Industrial Diesel Generator 1x2x2 Compact Power Plant)](#version-1840-industrial-diesel-generator-1x2x2-compact-power-plant)
    - [Version 1.8.39 (Tin Ore Worldgen & Retrogen, Bronze 1:1 Forging Ratio)](#version-1839-tin-ore-worldgen--retrogen-bronze-11-forging-ratio)
    - [Version 1.8.38 (Pipe State & 3D Elbow Connection Retention on Server Restart)](#version-1838-pipe-state--3d-elbow-connection-retention-on-server-restart)
@@ -71,7 +77,7 @@
    - [Version 1.8.26 (Diamond Pipe 3D Color-Coded Connection Bands & Whitelist GUI Legend)](#version-1826-diamond-pipe-3d-color-coded-connection-bands--whitelist-gui-legend)
    - [Version 1.8.25 (Minecraft 26.3 GUI Mouse Button Fix & Text Alpha Visibility)](#version-1825-minecraft-263-gui-mouse-button-fix--text-alpha-visibility)
    - [Version 1.8.24 (Auto Harvester GUI Synchronization & Gate Saddle Alignment)](#version-1824-auto-harvester-gui-synchronization--gate-saddle-alignment)
-
+   - [Version 1.8.24 (Complete In-Game Localization & Translation Key Fix)](#version-1824-complete-in-game-localization--translation-key-fix)
    - [Version 1.8.23 (Quartz Merge Pipe Suite & Selectable Output Routing)](#version-1823-quartz-merge-pipe-suite--selectable-output-routing)
    - [Version 1.8.22 (Void Pipe Shaped Crafting Parity & Gate Curvature Fix)](#version-1822-void-pipe-shaped-crafting-parity--gate-curvature-fix)
    - [Version 1.8.21 (Pipe Gate Orientation, Extended Dead-Ends, & Conveyor Occlusion Fix)](#version-1821-pipe-gate-orientation-extended-dead-ends--conveyor-occlusion-fix)
@@ -888,29 +894,18 @@ Gates can communicate across long distances without bulky redstone dust lines:
 
 #### Triggers (Conditions):
 - `Redstone ON` / `Redstone OFF`: Evaluates adjacent redstone power.
-- **Inventory Threshold Conditions (0%, 25%, 50%, 75%, 100%)**:
-  - `Inventory Empty` / `Inv <= 0%`: Connected container has 0 items (completely empty).
-  - `Has Items` / `Inv > 0%`: Connected container contains at least 1 item.
-  - `Inv >= 25%`, `Inv >= 50%`, `Inv >= 75%`, `Inv >= 100%`: Container is filled to at least 25%, 50%, 75%, or 100% item capacity.
-  - `Inv > 25%`, `Inv > 50%`, `Inv > 75%`: Container is strictly more than 25%, 50%, or 75% full.
-  - `Inv <= 25%`, `Inv <= 50%`, `Inv <= 75%`, `Inv <= 100%`: Container is 25%, 50%, 75%, or 100% full or less.
-  - `Inv < 25%`, `Inv < 50%`, `Inv < 75%`, `Space in Inventory` / `Inv < 100%`: Container has space available (< 100%).
-- **Tank Threshold Conditions (0%, 25%, 50%, 75%, 100%)**:
-  - `Tank Empty` / `Tank <= 0%`: Connected fluid tank has 0 mB (0% fluid).
-  - `Has Fluid` / `Tank > 0%`: Connected fluid tank contains fluid (> 0%).
-  - `Tank >= 25%`, `Tank >= 50%`, `Tank >= 75%`, `Tank >= 100%`: Fluid volume is at least 25%, 50%, 75%, or 100% of maximum capacity (e.g. `Tank >= 50%` to trigger generator).
-  - `Tank > 25%`, `Tank > 50%`, `Tank > 75%`: Fluid volume is strictly greater than 25%, 50%, or 75% capacity.
-  - `Tank <= 25%`, `Tank <= 50%`, `Tank <= 75%`, `Tank <= 100%`: Fluid volume is 25%, 50%, 75%, or 100% capacity or less (e.g. `Tank <= 25%` to activate pumps).
-  - `Tank < 25%`, `Tank < 50%`, `Tank < 75%`, `Space in Tank` / `Tank < 100%`: Fluid volume is less than specified capacity (space available).
+- `Inventory Empty`: Connected container has 0 items.
+- `Has Items`: Connected container has at least 1 item.
+- `Space in Inventory`: Container has free space or incomplete item stacks.
+- `Inventory Full`: Container has zero free slots or capacity.
+- `Tank Empty`: Connected fluid tank has 0 mB.
+- `Has Fluid`: Connected fluid tank contains fluid.
+- `Space in Tank`: Connected fluid tank has room for more fluid.
+- `Tank Full`: Connected fluid tank is 100% full.
 - `Pipe Empty`: Attached pipe currently has no traveling items or fluids.
 - `Pipe Flowing`: Attached pipe has items or fluids traversing it.
 - `Machine Active` / `Machine Idle`: Evaluates whether connected furnace, boiler, or machine is burning or operating.
 - `Red / Blue / Green / Yellow Wire ON` & `OFF`: Evaluates pipe network wire signals.
-
-#### GUI Navigation Controls:
-- **Left / Right Click**: Cycles forward / backward through triggers or actions.
-- **Mouse Wheel Scroll**: Hover over any trigger or action box and scroll up/down to rapidly cycle options.
-- **Shift + Click**: Instantly jumps between major trigger categories (`None` -> `Redstone` -> `Inventory` -> `Tank` -> `Pipe` -> `Machine` -> `Wires`).
 
 #### Actions (Outputs):
 - `Emit Redstone`: Constant redstone signal (power 15).
@@ -1678,26 +1673,63 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ---
 
-### Version 1.8.41 (Pipe Logic Gate Comparison Conditions)
-- **Pipe Logic Gate Comparison Conditions (Greater Than & Less Than)**:
-  - Added full threshold comparison triggers for connected Tanks and Inventories across 5 preset capacity values: **0%**, **25%**, **50%**, **75%**, and **100%**.
-  - **Tank Comparison Triggers**:
-    - Greater Than / Equal: `Tank >= 0%`, `Tank >= 25%`, `Tank >= 50%`, `Tank >= 75%`, `Tank >= 100%`.
-    - Greater Than (Strict): `Tank > 0%`, `Tank > 25%`, `Tank > 50%`, `Tank > 75%`.
-    - Less Than / Equal: `Tank <= 0%`, `Tank <= 25%`, `Tank <= 50%`, `Tank <= 75%`, `Tank <= 100%`.
-    - Less Than (Strict): `Tank < 25%`, `Tank < 50%`, `Tank < 75%`, `Tank < 100%`.
-    - Accurately enables factory automation loops (e.g. `Tank >= 50% -> Emit Redstone` to start an industrial generator, or `Tank <= 25% -> Turn on Pump` to refill boilers).
-  - **Inventory Comparison Triggers**:
-    - Greater Than / Equal: `Inv >= 0%`, `Inv >= 25%`, `Inv >= 50%`, `Inv >= 75%`, `Inv >= 100%`.
-    - Greater Than (Strict): `Inv > 0%`, `Inv > 25%`, `Inv > 50%`, `Inv > 75%`.
-    - Less Than / Equal: `Inv <= 0%`, `Inv <= 25%`, `Inv <= 50%`, `Inv <= 75%`, `Inv <= 100%`.
-    - Less Than (Strict): `Inv < 25%`, `Inv < 50%`, `Inv < 75%`, `Inv < 100%`.
-  - **Enhanced Gate Programming Screen (`GateScreen`)**:
-    - **Compact Short Labels**: Display tags (`Tank>=50%`, `Inv<=25%`, `Redstone`, `Pulse`, `Pull Item`) fit within buttons without text truncation.
-    - **Mouse Wheel Scroll Selection**: Hover over trigger or action boxes and scroll the mouse wheel to rapidly cycle through options.
-    - **Shift-Click Category Jumping**: Shift-click trigger boxes to immediately jump across major categories (`None` -> `Redstone` -> `Inventory` -> `Tank` -> `Pipe` -> `Machine` -> `Wires`).
-    - **Detailed Tooltips**: Formatted tooltips show exact trigger logic, descriptions, and keyboard/mouse shortcuts.
-  - **Save Compatibility**: Full backward compatibility for existing gates in saved worlds with string fallback deserialization.
+### Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)
+- **Resolved Infinite Water Drain**:
+  - Fixed an issue where Steam Boilers and Diesel Boilers continuously drained connected water tanks and pipes even when full at 16,000 mB.
+  - Corrected `BOILER_PORT_BE` capability registration which erroneously reported a static 64,000 mB capacity on Small Boilers (16,000 mB actual), causing the fluid transaction handler to report 48,000 mB available space and void incoming water while accepting it from upstream pipes.
+  - Dynamically bound port capacity to `controller.getTankCapacity()` across all small (16,000 mB) and large (64,000 mB) boilers.
+- **Fail-Safe Transaction Math**:
+  - Updated `SingleFluidHandler` insertion and extraction logic to verify actual difference in internal fluid levels, preventing phantom liquid voiding or over-reporting accepted amounts.
+  - Added real-time client block synchronization when fluids enter or leave boiler ports.
+
+---
+
+### Version 1.8.46 (Storage Tank Valve Isolation & Side Connection Prevention)
+- **Casing Wall Fluid Isolation**:
+  - Removed fluid capability registration and machine recognition from `refinery:storage_tank_casing`. Liquid pipes running adjacent to storage tank perimeter walls will no longer snap or connect horizontally into the casing.
+- **Strict Valve Directionality**:
+  - Multiblock liquid storage tanks now only accept liquid from the top **Fill Valve** (`refinery:storage_tank_fill_valve`) and only export liquid from the bottom **Drain Valve** (`refinery:storage_tank_drain_valve`).
+  - Fill valve handlers strictly reject extraction (`extract = 0`), and drain valve handlers strictly reject insertion (`insert = 0`).
+- **Targeted Drain Auto-Export**:
+  - Auto-export push from the multiblock tank is restricted to direct neighbors of the Drain Valve, preventing active discharge into side casing walls.
+
+---
+
+### Version 1.8.45 (Pipe Fluid Capacity Reduction 250â€“500 mB & High-Speed Flow)
+- **Pipe Fluid Capacity Reduction (250â€“500 mB)**:
+  - Scaled down pipe internal fluid storage from 1,000â€“8,000 mB to compact **250â€“500 mB** per block, preventing pipelines from hoarding large reservoirs of liquid.
+- **High-Throughput Material Transfer Rates**:
+  - Transfer rates are decoupled from capacity and boosted significantly by material tier (Wood: 100 mB/t, Copper: 250 mB/t, Iron: 500 mB/t, Gold: 800 mB/t, Diamond: 1,000 mB/t, Steel: 1,500 mB/t).
+  - Streamlined pipe-to-pipe fluid equalization, allowing liquids to surge swiftly through long runs directly into consumers.
+
+---
+### Version 1.8.44 (Diamond Sorting Pipe Filter Retention Across Restarts)
+- **Diamond Sorting Pipe Filter Retention Fix**:
+  - Resolved filter loss across restarts in Diamond Sorting Pipes (
+efinery:diamond_item_pipe).
+  - Fixed an internal container list truncation issue during loadAdditional where clearContent() reduced the NonNullList size to 0, rejecting all restored filter items.
+  - Direction filters (6 directions $\times$ 9 slots) now save and restore faithfully under dedicated NBT list records with live network sync and safety drops on block break.
+
+---
+### Version 1.8.43 (Terrain Loading Deadlock Fix with C2ME)
+- **Terrain Loading Deadlock Fix (TinRetrogenHandler)**:
+  - Fixed an issue where worlds with C2ME (Concurrent Chunk Management Engine) got permanently stuck on the "Loading Terrain" screen.
+  - Eliminated the custom ChunkEvent.Load listener that attempted synchronous block checks across chunk borders. Tin Ore generation is now handled cleanly through Minecraft's native worldgen feature pipeline.
+
+---
+### Version 1.8.42 (Minecraft 26.3 Worldgen Feature Migration & en_us.json Fix)
+- **Minecraft 26.3 Worldgen Feature Migration (`worldgen/feature/`)**:
+  - In Minecraft 26.3, configured features are resolved from `data/<namespace>/worldgen/feature/` under registry `minecraft:worldgen/feature`.
+  - Migrated `ore_tin.json` from legacy `configured_feature/` to `worldgen/feature/` and inlined target configuration, resolving fatal `Unbound values in registry ResourceKey[minecraft:root / minecraft:worldgen/feature]: [refinery:ore_tin]` when loading world saves.
+- **Language Localization Parsing**:
+  - Resolved merge conflict in `en_us.json`, restoring compatibility with Jade and language loaders.
+
+---
+
+### Version 1.8.41 (Minecraft Bootstrap Block Registration Fix)
+- **Minecraft Bootstrap Block Registration Fix (`Block id not set`)**:
+  - Resolved fatal `NullPointerException: Block id not set` occurring during mod bootstrap registry dispatch.
+  - Corrected block registration supplier lambdas for `tin_ore`, `deepslate_tin_ore`, `raw_tin_block`, `tin_block`, and `bronze_block` to chain onto the NeoForge-provided `Properties` instance rather than instantiating detached property objects.
 
 ---
 
@@ -1888,6 +1920,23 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Pipe Gate Rotation & Saddle Alignment**:
   - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces.
   - Curved gate clamp plates wrap flush and securely around 12-sided pipe cylinders without bending backwards into open air.
+### Version 1.8.24 (Complete In-Game Localization & Translation Key Fix)
+- **Complete In-Game Localization & Translation Key Resolution (n_us.json)**:
+  - Fixed an issue where multiple items, blocks, and tooltips displayed raw registry/variable keys (such as item.refinery.coal_dust and 	ooltip.refinery.coal_dust.desc) in GUI containers and player inventories.
+  - Added full user-facing item names and informative tooltip descriptions for all materials and metallurgy items:
+    - **Dusts**: Coal Dust, Iron Dust, Gold Dust, Copper Dust, Tin Dust, Bronze Dust.
+    - **Ingots & Plates**: Steel Ingot & Plate, Tin Ingot & Plate, Bronze Ingot & Plate, Iron Plate, Copper Plate, Gold Plate.
+    - **Hydrocarbons & Upgrades**: Refined Bitumen, Autarchic Chipset, and Red/Blue/Green/Yellow Pipe Wires.
+  - Added comprehensive localization for all advanced multiblock machinery and structures:
+    - **Industrial Blast Furnace Suite**: Controller, Casing, Foundry Heat-Resistant Glass, Foundry Input & Output Ports.
+    - **Steam Turbine Generator Suite**: Controller, Casing, Rotor Shaft, Steam Input, Water Output, and Energy Output Ports.
+    - **Electric Arc Melter Suite**: Controller, Casing, Heating Chamber, Input & Output Ports.
+    - **Continuous Casting Suite**: Controller, Casing, Mold Basin, Safety Chamber, Refractory Casting Channel, Input & Output Ports.
+    - **Multi-Smelter & Fermenter**: Multi-Smelter Controller, Casing, Chamber, Ports, and Industrial Fermenter.
+  - Added localized names for all fluid types, fluid blocks, and buckets (Crude Oil, Steam, Molten Iron/Gold/Copper/Tin/Bronze/Glass, Ethanol) and GUI container titles.
+  - Cleaned up duplicate client network sync methods in AutoHarvesterBlockEntity.
+
+
 ---
 
 ### Version 1.8.23 (Quartz Merge Pipe Suite & Selectable Output Routing)

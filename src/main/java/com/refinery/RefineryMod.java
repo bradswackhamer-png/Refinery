@@ -25,6 +25,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
@@ -316,23 +317,23 @@ public class RefineryMod {
 
     // === Tin & Bronze Ores & Blocks ===
     public static final DeferredBlock<Block> TIN_ORE = BLOCKS.registerBlock("tin_ore",
-            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_ORE)));
+            p -> new Block(p.sound(SoundType.STONE).strength(3.0f, 3.0f).requiresCorrectToolForDrops()));
     public static final DeferredItem<BlockItem> TIN_ORE_ITEM = ITEMS.registerSimpleBlockItem("tin_ore", TIN_ORE);
 
     public static final DeferredBlock<Block> DEEPSLATE_TIN_ORE = BLOCKS.registerBlock("deepslate_tin_ore",
-            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_COPPER_ORE)));
+            p -> new Block(p.sound(SoundType.DEEPSLATE).strength(4.5f, 3.0f).requiresCorrectToolForDrops()));
     public static final DeferredItem<BlockItem> DEEPSLATE_TIN_ORE_ITEM = ITEMS.registerSimpleBlockItem("deepslate_tin_ore", DEEPSLATE_TIN_ORE);
 
     public static final DeferredBlock<Block> RAW_TIN_BLOCK = BLOCKS.registerBlock("raw_tin_block",
-            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.RAW_COPPER_BLOCK)));
+            p -> new Block(p.sound(SoundType.STONE).strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
     public static final DeferredItem<BlockItem> RAW_TIN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("raw_tin_block", RAW_TIN_BLOCK);
 
     public static final DeferredBlock<Block> TIN_BLOCK = BLOCKS.registerBlock("tin_block",
-            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+            p -> new Block(p.sound(SoundType.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
     public static final DeferredItem<BlockItem> TIN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("tin_block", TIN_BLOCK);
 
     public static final DeferredBlock<Block> BRONZE_BLOCK = BLOCKS.registerBlock("bronze_block",
-            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+            p -> new Block(p.sound(SoundType.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops()));
     public static final DeferredItem<BlockItem> BRONZE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("bronze_block", BRONZE_BLOCK);
 
     public static final DeferredBlock<FermenterBlock> FERMENTER = BLOCKS.registerBlock("fermenter",
@@ -1050,7 +1051,6 @@ public class RefineryMod {
 
         // Register game event bus listeners (Retrogen & Commands)
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.worldgen.OilRetrogenHandler::onChunkLoad);
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.worldgen.TinRetrogenHandler::onChunkLoad);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.command.RefineryCommands::registerCommands);
 
         LOGGER.info("Industrial Refinery Mod initialized for Minecraft 26.3 NeoForge 26.3.0.48!");
@@ -1152,28 +1152,37 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, BOILER_PORT_BE.get(),
                 (be, side) -> {
                     var controller = be.getController();
-                    if (controller == null) return null;
+                    if (controller == null || !controller.isAssembled()) return null;
                     return switch (be.getPortType()) {
                         case WATER_IN -> new SingleFluidHandler(
                                 () -> net.minecraft.world.level.material.Fluids.WATER,
                                 controller::getWaterAmount,
                                 controller::setWaterAmount,
-                                64000,
-                                true, false, () -> {});
+                                controller::getTankCapacity,
+                                true, false, () -> {
+                                    controller.setChanged();
+                                    controller.syncToClient();
+                                });
                         case STEAM_OUT -> new SingleFluidHandler(
                                 RefineryFluids.STEAM_SOURCE::get,
                                 controller::getSteamAmount,
                                 controller::setSteamAmount,
-                                64000,
-                                false, true, () -> {});
+                                controller::getTankCapacity,
+                                false, true, () -> {
+                                    controller.setChanged();
+                                    controller.syncToClient();
+                                });
                         case FUEL_IN -> {
                             if (controller.isDieselBoiler()) {
                                 yield new SingleFluidHandler(
                                         RefineryFluids.DIESEL_SOURCE::get,
                                         controller::getDieselAmount,
                                         controller::setDieselAmount,
-                                        64000,
-                                        true, false, () -> {});
+                                        controller::getTankCapacity,
+                                        true, false, () -> {
+                                            controller.setChanged();
+                                            controller.syncToClient();
+                                        });
                             }
                             yield null;
                         }
@@ -1458,16 +1467,8 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STORAGE_TANK_DRAIN_VALVE_BE.get(),
                 (be, side) -> be.isAssembled() ? be.getExportOnlyHandler() : null);
 
-        event.registerBlock(Capabilities.Fluid.BLOCK,
-                (level, pos, state, be, side) -> {
-                    if (!state.getValue(StorageTankCasingBlock.ASSEMBLED)) return null;
-                    StorageTankBlockEntity controller = StorageTankCasingBlock.findNearbyController(level, pos);
-                    return controller != null && controller.isAssembled() ? controller.getExportOnlyHandler() : null;
-                },
-                STORAGE_TANK_CASING.get());
-
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STORAGE_TANK_FILL_VALVE_BE.get(),
-                (be, side) -> be.getFluidHandler());
+                (be, side) -> be.getMasterTank() != null ? be.getFluidHandler() : null);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, STORAGE_TANK_DRAIN_VALVE_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
