@@ -942,38 +942,7 @@ public class AssetGenerator {
     }
 
     private static void generateLang() throws Exception {
-        writeJson(ASSETS + "lang/en_us.json", """
-        {
-          "itemGroup.refinery": "Industrial Refinery",
-
-          "block.refinery.refinery_controller": "Refinery Controller",
-          "block.refinery.reinforced_casing": "Reinforced Refinery Casing",
-          "block.refinery.combustion_chamber": "Refinery Combustion Chamber",
-          "block.refinery.distillation_column": "Distillation Column",
-          "block.refinery.heat_exchanger": "Refinery Heat Exchanger",
-
-          "block.refinery.crude_oil_port": "Crude Oil Input Port",
-          "block.refinery.diesel_port": "Diesel Output Port",
-          "block.refinery.gas_port": "Gas Output Port",
-          "block.refinery.byproduct_port": "Byproduct Output Port",
-
-          "item.refinery.refinery_wrench": "Refinery Wrench",
-          "item.refinery.tar": "Petroleum Tar",
-          "item.refinery.sulfur_dust": "Sulfur Dust",
-          "item.refinery.diesel_bucket": "Diesel Bucket",
-          "item.refinery.gasoline_bucket": "Gasoline Bucket",
-
-          "fluid.refinery.diesel": "Diesel",
-          "fluid.refinery.gasoline": "Gasoline / Petroleum Gas",
-
-          "container.refinery.controller": "Industrial Petroleum Refinery",
-
-          "tooltip.refinery.wrench.desc_1": "§7Right-click blocks to rotate facing.",
-          "tooltip.refinery.wrench.desc_2": "§6Right-click Controller to toggle 3D Blueprint Projection!",
-          "tooltip.refinery.tar.desc": "§7Viscous petroleum residue. Burns as fuel or crafts torches.",
-          "tooltip.refinery.sulfur_dust.desc": "§eRefined mineral byproduct. Used in gunpowder and chemistry."
-        }
-        """);
+        // lang/en_us.json is maintained directly in src/main/resources/assets/refinery/lang/en_us.json
     }
 
     private static void writeJson(String path, String content) throws Exception {
