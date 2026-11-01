@@ -4,6 +4,27 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.24] - 2026-11-01
+
+### Fixed
+- **Complete In-Game Localization & Translation Key Fix (`en_us.json`)**:
+  - Resolved missing item names and raw translation keys (such as `item.refinery.coal_dust`, `tooltip.refinery.coal_dust.desc`) displayed in inventory tooltips and GUI containers.
+  - Added user-facing item translations and hover tooltips for all metallurgy and material items:
+    - **Dusts**: Coal Dust, Iron Dust, Gold Dust, Copper Dust, Tin Dust, Bronze Dust.
+    - **Ingots & Plates**: Steel Ingot & Plate, Tin Ingot & Plate, Bronze Ingot & Plate, Iron Plate, Copper Plate, Gold Plate.
+    - **Hydrocarbons & Upgrades**: Refined Bitumen, Autarchic Chipset, and Red/Blue/Green/Yellow Pipe Wires.
+  - Added complete block and item localization for all advanced multiblock machinery and structures:
+    - **Industrial Blast Furnace Suite**: Controller, Casing, Foundry Heat-Resistant Glass, Foundry Input & Output Ports.
+    - **Steam Turbine Generator Suite**: Controller, Casing, Rotor Shaft, Steam Input, Water Output, and Energy Output Ports.
+    - **Electric Arc Melter Suite**: Controller, Casing, Heating Chamber, Input & Output Ports.
+    - **Continuous Casting Suite**: Controller, Casing, Mold Basin, Safety Chamber, Refractory Casting Channel, Input & Output Ports.
+    - **Multi-Smelter & Fermenter**: Multi-Smelter Controller, Casing, Chamber, Ports, and Industrial Fermenter.
+  - Added localized names for all fluid types, fluid blocks, and fluid buckets: Crude Oil, Steam, Molten Iron, Molten Gold, Molten Copper, Molten Tin, Molten Bronze, Molten Glass, and Biofuel (Ethanol).
+  - Added proper GUI container title translations (`container.refinery.*` and `gui.refinery.gate`).
+  - Resolved duplicate client sync method declarations in `AutoHarvesterBlockEntity`.
+
+---
+
 ## [1.8.23] - 2026-10-31
 
 ### Added

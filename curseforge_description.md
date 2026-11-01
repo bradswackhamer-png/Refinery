@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.12.jar`
+`refinery-1.8.24.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.12 (NeoForge 26.3)`
+`Industrial Refinery 1.8.24 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
