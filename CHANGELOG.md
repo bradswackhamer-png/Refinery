@@ -4,7 +4,33 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-<<<<<<< HEAD
+## [1.8.41] - 2026-11-01
+
+### Added
+- **Pipe Logic Gate Comparison Conditions (Greater Than & Less Than)**:
+  - Added full threshold comparison triggers for connected Tanks and Inventories across 5 preset capacity values: **0%**, **25%**, **50%**, **75%**, and **100%**.
+  - **Tank Comparison Triggers**:
+    - Greater Than / Equal: Tank >= 0%, Tank >= 25%, Tank >= 50%, Tank >= 75%, Tank >= 100%.
+    - Greater Than (Strict): Tank > 0%, Tank > 25%, Tank > 50%, Tank > 75%.
+    - Less Than / Equal: Tank <= 0%, Tank <= 25%, Tank <= 50%, Tank <= 75%, Tank <= 100%.
+    - Less Than (Strict): Tank < 25%, Tank < 50%, Tank < 75%, Tank < 100%.
+    - Enables precise automated liquid control feedback loops (e.g. Tank >= 50% -> Emit Redstone to start an industrial generator, or Tank <= 25% -> Turn on Pump to refill boilers or tanks).
+  - **Inventory Comparison Triggers**:
+    - Greater Than / Equal: Inv >= 0%, Inv >= 25%, Inv >= 50%, Inv >= 75%, Inv >= 100%.
+    - Greater Than (Strict): Inv > 0%, Inv > 25%, Inv > 50%, Inv > 75%.
+    - Less Than / Equal: Inv <= 0%, Inv <= 25%, Inv <= 50%, Inv <= 75%, Inv <= 100%.
+    - Less Than (Strict): Inv < 25%, Inv < 50%, Inv < 75%, Inv < 100%.
+    - Calculated using vanilla comparator fullness metrics factoring in individual item stack size limits.
+  - **Enhanced Gate Programming Screen (GateScreen)**:
+    - **Compact Short Labels**: Buttons display concise formatted labels (Tank>=50%, Inv<=25%, Redstone, Pulse, Pull Item) that fit cleanly without clipping.
+    - **Mouse Wheel Scroll Selection**: Hovering over any trigger or action box and scrolling the mouse wheel rapidly steps forward or backward through options.
+    - **Shift-Click Category Jumping**: Holding Shift while clicking any trigger box instantly jumps between categories (None -> Redstone -> Inventory -> Tank -> Pipe -> Machine -> Wires).
+    - **Expanded Informative Tooltips**: Tooltips display full trigger/action names, comprehensive condition descriptions, and navigation shortcuts.
+  - **Full Parity & Backward Compatibility**:
+    - Preserved exact ordinal mappings (0..22) for all classic BuildCraft triggers and actions in PipeGateEntity and PipeGateBlockEntity.
+    - Added string name serialization fallback ensuring seamless world migration and save-file safety.
+
+---
 ## [1.8.40] - 2026-11-01
 
 ### Added
@@ -261,8 +287,6 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Resolved merge duplication by removing redundant `getUpdateTag` / `getUpdatePacket` methods and duplicate imports in `AutoHarvesterBlockEntity.java`, restoring clean compilation.
 - **Pipe Gate Rotation & Saddle Alignment**:
   - Corrected `PipeGateEntityRenderer` rotational mappings for `WEST` (90°), `EAST` (270°), `UP` (90°), and `DOWN` (270°) faces. Curved pipe gate saddles now wrap snugly around round pipe cylinders rather than curving backwards inside-out.
-=======
-## [1.8.24] - 2026-11-01
 
 ### Fixed
 - **Complete In-Game Localization & Translation Key Fix (`en_us.json`)**:
@@ -280,7 +304,6 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Added localized names for all fluid types, fluid blocks, and fluid buckets: Crude Oil, Steam, Molten Iron, Molten Gold, Molten Copper, Molten Tin, Molten Bronze, Molten Glass, and Biofuel (Ethanol).
   - Added proper GUI container title translations (`container.refinery.*` and `gui.refinery.gate`).
   - Resolved duplicate client sync method declarations in `AutoHarvesterBlockEntity`.
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
 
 ---
 

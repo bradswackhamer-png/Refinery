@@ -90,6 +90,21 @@ public class GateMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
+        if (id >= 100) {
+            int slot = (id - 100) / 4;
+            int actionType = (id - 100) % 4;
+            if (gateHost != null && slot >= 0 && slot < gateHost.getTier().getSlots()) {
+                if (actionType == 0) {
+                    gateHost.cycleTriggerCategory(slot, true);
+                    return true;
+                } else if (actionType == 1) {
+                    gateHost.cycleTriggerCategory(slot, false);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         int slot = id / 4;
         int actionType = id % 4;
 

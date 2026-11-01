@@ -196,14 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-<<<<<<< HEAD
-`refinery-1.8.40.jar`
-=======
-`refinery-1.8.24.jar`
->>>>>>> c8f2f8e119265403c9ac5ed444df29088ce8651b
+`refinery-1.8.41.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.40 (NeoForge 26.3)`
+`Industrial Refinery 1.8.41 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -219,6 +215,31 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.41
+
+### What's New in v1.8.41:
+- **Pipe Logic Gate Comparison Conditions (Greater Than & Less Than)**:
+  - Added full threshold comparison triggers for connected Tanks and Inventories across 5 preset capacity values: **0%**, **25%**, **50%**, **75%**, and **100%**.
+  - **Tank Comparison Triggers**:
+    - Greater Than / Equal: `Tank >= 0%`, `Tank >= 25%`, `Tank >= 50%`, `Tank >= 75%`, `Tank >= 100%`.
+    - Greater Than (Strict): `Tank > 0%`, `Tank > 25%`, `Tank > 50%`, `Tank > 75%`.
+    - Less Than / Equal: `Tank <= 0%`, `Tank <= 25%`, `Tank <= 50%`, `Tank <= 75%`, `Tank <= 100%`.
+    - Less Than (Strict): `Tank < 25%`, `Tank < 50%`, `Tank < 75%`, `Tank < 100%`.
+    - Accurately enables factory automation loops (e.g. `Tank >= 50% -> Emit Redstone` to start generators, or `Tank <= 25% -> Turn on Pump` to refill boilers).
+  - **Inventory Comparison Triggers**:
+    - Greater Than / Equal: `Inv >= 0%`, `Inv >= 25%`, `Inv >= 50%`, `Inv >= 75%`, `Inv >= 100%`.
+    - Greater Than (Strict): `Inv > 0%`, `Inv > 25%`, `Inv > 50%`, `Inv > 75%`.
+    - Less Than / Equal: `Inv <= 0%`, `Inv <= 25%`, `Inv <= 50%`, `Inv <= 75%`, `Inv <= 100%`.
+    - Less Than (Strict): `Inv < 25%`, `Inv < 50%`, `Inv < 75%`, `Inv < 100%`.
+  - **Enhanced Gate Screen (`GateScreen`)**:
+    - **Compact Short Labels**: Display tags (`Tank>=50%`, `Inv<=25%`, `Redstone`, `Pulse`, `Pull Item`) fit within buttons without text truncation.
+    - **Mouse Wheel Scroll Selection**: Hover over trigger or action boxes and scroll the mouse wheel to rapidly cycle through options.
+    - **Shift-Click Category Jumping**: Shift-click trigger boxes to immediately jump across major categories (`None` -> `Redstone` -> `Inventory` -> `Tank` -> `Pipe` -> `Machine` -> `Wires`).
+    - **Detailed Tooltips**: Formatted tooltips show exact trigger logic, descriptions, and keyboard/mouse shortcuts.
+  - **Save Compatibility**: Full backward compatibility for existing gates in saved worlds with string fallback deserialization.
+
+---
+
 # Industrial Refinery v1.8.40
 
 ### What's New in v1.8.40:
