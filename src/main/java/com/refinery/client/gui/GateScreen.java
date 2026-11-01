@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.refinery.gate.GateAction;
 import com.refinery.gate.GateTier;
 import com.refinery.gate.GateTrigger;
@@ -118,6 +119,12 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
         int slots = menu.getTier().getSlots();
         boolean twoColumns = slots > 4;
 
+        boolean rightClick = (button == InputConstants.MOUSE_BUTTON_RIGHT);
+        boolean leftClick = (button == InputConstants.MOUSE_BUTTON_LEFT || button == 0);
+        if (!leftClick && !rightClick) {
+            return super.mouseClicked(event, isDouble);
+        }
+
         for (int i = 0; i < slots; i++) {
             int col = (twoColumns && i >= 4) ? 1 : 0;
             int row = twoColumns ? (i % 4) : i;
@@ -127,8 +134,9 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
 
             // Trigger box clicked (left: slotX + 11 to + 53, top: slotY + 2 to + 19)
             if (mouseX >= slotX + 11 && mouseX <= slotX + 53 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
-                int buttonId = i * 4 + (button == 1 ? 1 : 0);
+                int buttonId = i * 4 + (rightClick ? 1 : 0);
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, buttonId);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
@@ -137,8 +145,9 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
 
             // Action box clicked (left: slotX + 62 to + 100, top: slotY + 2 to + 19)
             if (mouseX >= slotX + 62 && mouseX <= slotX + 100 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
-                int buttonId = i * 4 + (button == 1 ? 3 : 2);
+                int buttonId = i * 4 + (rightClick ? 3 : 2);
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, buttonId);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }

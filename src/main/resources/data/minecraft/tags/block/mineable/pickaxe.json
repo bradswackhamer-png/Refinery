@@ -61,6 +61,12 @@
         "refinery:brass_item_pipe",
         "refinery:fluid_extractor_pipe",
         "refinery:item_extractor_pipe",
-        "refinery:void_pipe"
+        "refinery:void_pipe",
+        "refinery:tin_ore",
+        "refinery:deepslate_tin_ore",
+        "refinery:raw_tin_block",
+        "refinery:tin_block",
+        "refinery:bronze_block",
+        "refinery:diesel_generator"
     ]
 }

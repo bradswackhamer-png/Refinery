@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.redstone.Orientation;
+import org.jspecify.annotations.Nullable;
 
 public class StorageTankCasingBlock extends Block {
     public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
@@ -98,6 +100,17 @@ public class StorageTankCasingBlock extends Block {
             }
         }
         return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation orientation, boolean isMoving) {
+        super.neighborChanged(state, level, pos, neighborBlock, orientation, isMoving);
+        if (!level.isClientSide() && state.getValue(ASSEMBLED)) {
+            StorageTankBlockEntity controller = findNearbyController(level, pos);
+            if (controller != null) {
+                controller.refreshExportTargets();
+            }
+        }
     }
 
     public static StorageTankBlockEntity findNearbyController(Level level, BlockPos pos) {

@@ -22,12 +22,20 @@ public class ElectricFluidPumpBlockEntity extends AbstractFluidPumpBlockEntity {
 
     private int energy = 0;
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 500, 0) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1000, 0) {
         @Override
         public void set(int amount) {
             super.set(amount);
             ElectricFluidPumpBlockEntity.this.energy = amount;
             setChanged();
+        }
+
+        @Override
+        public int insert(int maxReceive, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+            int inserted = super.insert(maxReceive, transaction);
+            ElectricFluidPumpBlockEntity.this.energy = this.energy;
+            setChanged();
+            return inserted;
         }
     };
 

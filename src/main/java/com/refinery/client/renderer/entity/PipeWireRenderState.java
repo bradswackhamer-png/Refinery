@@ -1,7 +1,6 @@
 package com.refinery.client.renderer.entity;
 
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -17,8 +16,6 @@ public class PipeWireRenderState extends EntityRenderState {
     public boolean signalGreen = false;
     public boolean signalYellow = false;
 
-    public final ItemStackRenderState redItem = new ItemStackRenderState();
-    public final ItemStackRenderState blueItem = new ItemStackRenderState();
-    public final ItemStackRenderState greenItem = new ItemStackRenderState();
-    public final ItemStackRenderState yellowItem = new ItemStackRenderState();
+    // Directional connectivity for each of the 4 colors (6 directions: D, U, N, S, W, E)
+    public final boolean[][] connections = new boolean[4][6];
 }

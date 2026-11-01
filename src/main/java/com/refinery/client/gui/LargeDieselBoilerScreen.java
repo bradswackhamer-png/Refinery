@@ -35,20 +35,20 @@ public class LargeDieselBoilerScreen extends AbstractContainerScreen<LargeDiesel
 
         if (!assembled) {
             statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0x882222;
+            statusColor = 0xFF882222;
         } else if (overheat > 0) {
             statusText = Component.literal("OVERHEATING!").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xEF4444;
+            statusColor = 0xFFEF4444;
         } else if (burning) {
             statusText = Component.literal("FIRING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xEA580C;
+            statusColor = 0xFFEA580C;
         } else {
             statusText = Component.literal("IDLE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0x228822;
+            statusColor = 0xFF228822;
         }
 
         graphics.text(this.font, statusText, 106, 6, statusColor, false);
-        graphics.text(this.font, Component.literal("HEAVY DIESEL").withStyle(ChatFormatting.GOLD), 14, 6, 0xD97706, false);
+        graphics.text(this.font, Component.literal("HEAVY DIESEL").withStyle(ChatFormatting.GOLD), 14, 6, 0xFFD97706, false);
     }
 
     @Override

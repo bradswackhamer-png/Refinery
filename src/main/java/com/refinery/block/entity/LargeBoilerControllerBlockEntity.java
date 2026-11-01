@@ -153,13 +153,32 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
         return SmallBoilerControllerBlockEntity.getFuelDuration(stack) > 0;
     }
 
+    private final List<BlockPos> structurePositions = new ArrayList<>();
+
     public boolean hasRedstone() {
         if (this.level == null) return false;
-        return this.level.hasNeighborSignal(this.worldPosition) || this.level.getBestNeighborSignal(this.worldPosition) > 0;
+        if (this.level.hasNeighborSignal(this.worldPosition) || this.level.getBestNeighborSignal(this.worldPosition) > 0) {
+            return true;
+        }
+        if (this.assembled) {
+            if (this.structurePositions.isEmpty()) {
+                Direction facing = getBlockState().getValue(LargeBoilerControllerBlock.FACING);
+                for (BlueprintRequirement req : getRequirements()) {
+                    this.structurePositions.add(getRelativePos(req.x, req.y, req.z, facing));
+                }
+            }
+            for (int i = 0; i < this.structurePositions.size(); i++) {
+                BlockPos targetPos = this.structurePositions.get(i);
+                if (this.level.hasNeighborSignal(targetPos) || this.level.getBestNeighborSignal(targetPos) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean isBurning() {
-        return this.burnTime > 0;
+        return this.burnTime > 0 && hasRedstone();
     }
 
     public int getOverheatTicks() {
@@ -179,6 +198,7 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
 
     public void disassemble() {
         this.assembled = false;
+        this.structurePositions.clear();
         updateMemberBlockStates(false);
         if (this.level != null && !this.level.isClientSide()) {
             BlockState state = getBlockState();
@@ -249,8 +269,8 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
             }
         }
 
-        // Active Boiling & Overheat Check
-        if (this.burnTime > 0) {
+        // Active Boiling & Overheat Check (Only operates while redstone signal is present)
+        if (redstonePowered && this.burnTime > 0) {
             isActive = true;
 
             if (this.waterAmount >= WATER_CONSUMPTION && (TANK_CAPACITY - this.steamAmount) >= STEAM_PRODUCTION) {

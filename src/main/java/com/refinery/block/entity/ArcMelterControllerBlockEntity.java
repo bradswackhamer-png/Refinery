@@ -323,23 +323,25 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         String path = id.getPath();
 
         // 1. Iron Dust -> Molten Iron
-        if (input.is(RefineryMod.IRON_DUST.get()) || input.is(Items.RAW_IRON) || path.contains("iron_dust")) {
+        if (input.is(RefineryMod.IRON_DUST.get()) || input.is(Items.RAW_IRON) || input.is(Items.IRON_INGOT) || path.contains("iron_dust")) {
             return RefineryFluids.MOLTEN_IRON_SOURCE.get();
         }
         // 2. Gold Dust -> Molten Gold
-        if (input.is(RefineryMod.GOLD_DUST.get()) || input.is(Items.RAW_GOLD) || path.contains("gold_dust")) {
+        if (input.is(RefineryMod.GOLD_DUST.get()) || input.is(Items.RAW_GOLD) || input.is(Items.GOLD_INGOT) || path.contains("gold_dust")) {
             return RefineryFluids.MOLTEN_GOLD_SOURCE.get();
         }
         // 3. Copper Dust -> Molten Copper
-        if (input.is(RefineryMod.COPPER_DUST.get()) || input.is(Items.RAW_COPPER) || path.contains("copper_dust")) {
+        if (input.is(RefineryMod.COPPER_DUST.get()) || input.is(Items.RAW_COPPER) || input.is(Items.COPPER_INGOT) || path.contains("copper_dust")) {
             return RefineryFluids.MOLTEN_COPPER_SOURCE.get();
         }
         // 4. Tin Dust -> Molten Tin
-        if (input.is(RefineryMod.TIN_DUST.get()) || path.contains("tin_dust")) {
+        if (input.is(RefineryMod.TIN_DUST.get()) || input.is(RefineryMod.RAW_TIN.get()) || input.is(RefineryMod.TIN_INGOT.get())
+                || input.is(RefineryMod.TIN_ORE_ITEM.get()) || input.is(RefineryMod.DEEPSLATE_TIN_ORE_ITEM.get())
+                || path.contains("tin_dust") || path.contains("raw_tin") || path.contains("tin_ingot") || path.contains("tin_ore")) {
             return RefineryFluids.MOLTEN_TIN_SOURCE.get();
         }
         // 5. Bronze Dust -> Molten Bronze
-        if (input.is(RefineryMod.BRONZE_DUST.get()) || path.contains("bronze_dust")) {
+        if (input.is(RefineryMod.BRONZE_DUST.get()) || input.is(RefineryMod.BRONZE_INGOT.get()) || path.contains("bronze_dust") || path.contains("bronze_ingot")) {
             return RefineryFluids.MOLTEN_BRONZE_SOURCE.get();
         }
         // 6. Sand & Quartz -> Molten Glass

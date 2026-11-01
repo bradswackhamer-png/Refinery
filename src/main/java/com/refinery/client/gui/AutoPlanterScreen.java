@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.refinery.menu.AutoPlanterMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -39,22 +40,23 @@ public class AutoPlanterScreen extends AbstractContainerScreen<AutoPlanterMenu> 
 
         if (!enabled) {
             statusText = Component.literal("DISABLED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xAA2222;
+            statusColor = 0xFFAA2222;
         } else if (energy < 2) {
             statusText = Component.literal("NO POWER").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xAA2222;
+            statusColor = 0xFFAA2222;
         } else if (working) {
-            statusText = Component.literal("PLANTING").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD);
-            statusColor = 0x22AA22;
+            statusText = Component.literal("PLANTING").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
+            statusColor = 0xFF15803D;
         } else if (seeds == 0) {
             statusText = Component.literal("NO SEEDS").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xCC8800;
+            statusColor = 0xFFCC8800;
         } else {
-            statusText = Component.literal("SCANNING").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
-            statusColor = 0xCCCC22;
+            statusText = Component.literal("SCANNING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+            statusColor = 0xFFB45309;
         }
 
-        graphics.text(this.font, statusText, 115, 6, statusColor, false);
+        int statusW = this.font.width(statusText);
+        graphics.text(this.font, statusText, 144 - statusW / 2, 64, statusColor, false);
     }
 
     @Override
@@ -143,7 +145,7 @@ public class AutoPlanterScreen extends AbstractContainerScreen<AutoPlanterMenu> 
         double mouseY = event.y();
         int button = event.button();
 
-        if (button == 0) { // Left-click
+        if (button == InputConstants.MOUSE_BUTTON_LEFT || button == 0) { // Left-click
             int xo = this.leftPos;
             int yo = this.topPos;
 
@@ -241,8 +243,9 @@ public class AutoPlanterScreen extends AbstractContainerScreen<AutoPlanterMenu> 
             return;
         }
 
-        // Header Status Hover (x: 110..170, y: 4..16)
-        if (mouseX >= xo + 110 && mouseX <= xo + 170 && mouseY >= yo + 4 && mouseY <= yo + 16) {
+        // Work Status Hover (x: 114..172, y: 62..74 or header x: 110..170, y: 4..16)
+        if ((mouseX >= xo + 114 && mouseX <= xo + 172 && mouseY >= yo + 62 && mouseY <= yo + 74) ||
+            (mouseX >= xo + 110 && mouseX <= xo + 170 && mouseY >= yo + 4 && mouseY <= yo + 16)) {
             int r = this.menu.getRadius();
             int dim = r * 2 + 1;
             graphics.setComponentTooltipForNextFrame(this.font, List.of(

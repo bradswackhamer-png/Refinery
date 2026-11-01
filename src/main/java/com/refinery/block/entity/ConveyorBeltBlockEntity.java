@@ -102,8 +102,15 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
         }
 
         BlockPos frontPos = pos.relative(facing);
+        BlockState frontState = level.getBlockState(frontPos);
         // Do not insert into another conveyor belt (allow smooth physical handoff)
-        if (level.getBlockState(frontPos).getBlock() instanceof ConveyorBeltBlock) {
+        if (frontState.getBlock() instanceof ConveyorBeltBlock
+                || frontState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock
+                || frontState.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock) {
+            return;
+        }
+        BlockState frontBelowState = level.getBlockState(frontPos.below());
+        if (frontBelowState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock) {
             return;
         }
 

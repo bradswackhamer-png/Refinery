@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.refinery.menu.StorageTankMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -33,14 +34,14 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         super.extractLabels(graphics, mouseX, mouseY);
 
         // Header Title
-        graphics.text(this.font, Component.literal("STORAGE TANK").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 8, 6, 0x374151, false);
+        graphics.text(this.font, Component.literal("STORAGE TANK").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 8, 6, 0xFF374151, false);
 
         boolean assembled = this.menu.isAssembled();
         if (assembled) {
             String sizeName = this.menu.getTankSize().getDisplayName();
-            graphics.text(this.font, Component.literal("[" + sizeName + "]").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD), 95, 6, 0x15803D, false);
+            graphics.text(this.font, Component.literal("[" + sizeName + "]").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD), 95, 6, 0xFF15803D, false);
         } else {
-            graphics.text(this.font, Component.literal("[UNFORMED]").withStyle(ChatFormatting.RED, ChatFormatting.BOLD), 105, 6, 0xDC2626, false);
+            graphics.text(this.font, Component.literal("[UNFORMED]").withStyle(ChatFormatting.RED, ChatFormatting.BOLD), 105, 6, 0xFFDC2626, false);
         }
 
         // Fluid Information on the right side of the gauge (x: 74)
@@ -50,17 +51,17 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
 
         if (amount > 0 && fluid != Fluids.EMPTY) {
             String fluidName = getFluidDisplayName(fluid);
-            graphics.text(this.font, Component.literal(fluidName).withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 75, 19, 0x1F2937, false);
-            graphics.text(this.font, Component.literal(String.format("%,d", amount) + " mB").withStyle(ChatFormatting.BLUE), 75, 30, 0x2563EB, false);
-            graphics.text(this.font, Component.literal("/ " + String.format("%,d", cap) + " mB").withStyle(ChatFormatting.GRAY), 75, 40, 0x6B7280, false);
+            graphics.text(this.font, Component.literal(fluidName).withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 75, 19, 0xFF1F2937, false);
+            graphics.text(this.font, Component.literal(String.format("%,d", amount) + " mB").withStyle(ChatFormatting.BLUE), 75, 30, 0xFF2563EB, false);
+            graphics.text(this.font, Component.literal("/ " + String.format("%,d", cap) + " mB").withStyle(ChatFormatting.GRAY), 75, 40, 0xFF6B7280, false);
         } else {
-            graphics.text(this.font, Component.literal("EMPTY").withStyle(ChatFormatting.GRAY), 75, 22, 0x9CA3AF, false);
-            graphics.text(this.font, Component.literal("0 / " + String.format("%,d", cap) + " mB").withStyle(ChatFormatting.DARK_GRAY), 75, 34, 0x6B7280, false);
+            graphics.text(this.font, Component.literal("EMPTY").withStyle(ChatFormatting.GRAY), 75, 22, 0xFF9CA3AF, false);
+            graphics.text(this.font, Component.literal("0 / " + String.format("%,d", cap) + " mB").withStyle(ChatFormatting.DARK_GRAY), 75, 34, 0xFF6B7280, false);
         }
 
         // Flush button label
         if (amount > 0) {
-            graphics.text(this.font, Component.literal("FLUSH").withStyle(ChatFormatting.RED), 84, 56, 0xFFFFFF, false);
+            graphics.text(this.font, Component.literal("FLUSH").withStyle(ChatFormatting.RED), 84, 56, 0xFFFFFFFF, false);
         }
     }
 
@@ -128,9 +129,10 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         int yo = this.topPos;
 
         // Flush Button click (x: 76..122, y: 52..68)
-        if (event.button() == 0 && this.menu.getFluidAmount() > 0) {
+        if ((event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == 0) && this.menu.getFluidAmount() > 0) {
             if (event.x() >= xo + 76 && event.x() <= xo + 122 && event.y() >= yo + 52 && event.y() <= yo + 68) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 0);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
                     if (this.minecraft.getSoundManager() != null) {
                         this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY, 1.0f));

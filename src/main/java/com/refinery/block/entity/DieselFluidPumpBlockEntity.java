@@ -144,21 +144,89 @@ public class DieselFluidPumpBlockEntity extends AbstractFluidPumpBlockEntity imp
         return this.items;
     }
 
+    private final DieselFuelHandler fuelHandler = new DieselFuelHandler();
+
+    private class DieselFuelHandler extends net.neoforged.neoforge.transfer.transaction.SnapshotJournal<Integer> implements ResourceHandler<FluidResource> {
+        @Override
+        public int size() {
+            return 1;
+        }
+
+        @Override
+        public FluidResource getResource(int index) {
+            if (index != 0 || dieselAmount <= 0) return FluidResource.EMPTY;
+            return FluidResource.of(RefineryFluids.DIESEL_SOURCE.get());
+        }
+
+        @Override
+        public long getAmountAsLong(int index) {
+            return index == 0 ? dieselAmount : 0L;
+        }
+
+        @Override
+        public int getAmountAsInt(int index) {
+            return index == 0 ? dieselAmount : 0;
+        }
+
+        @Override
+        public long getCapacityAsLong(int index, FluidResource resource) {
+            return DIESEL_CAPACITY;
+        }
+
+        @Override
+        public int getCapacityAsInt(int index, FluidResource resource) {
+            return DIESEL_CAPACITY;
+        }
+
+        @Override
+        public boolean isValid(int index, FluidResource resource) {
+            if (index != 0 || resource.isEmpty()) return false;
+            net.minecraft.world.level.material.Fluid f = resource.getFluid();
+            return f == RefineryFluids.DIESEL_SOURCE.get()
+                    || f == RefineryFluids.GASOLINE_SOURCE.get()
+                    || f == RefineryFluids.ETHANOL_SOURCE.get();
+        }
+
+        @Override
+        public int insert(int index, FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+            if (index != 0 || amount <= 0 || !isValid(0, resource)) return 0;
+            int space = DIESEL_CAPACITY - dieselAmount;
+            int toInsert = Math.min(space, amount);
+            if (toInsert <= 0) return 0;
+
+            updateSnapshots(transaction);
+            dieselAmount += toInsert;
+            setChanged();
+            return toInsert;
+        }
+
+        @Override
+        public int extract(int index, FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+            return 0; // Fuel tank is insert-only (consumes fuel, does not discharge fuel into pipes)
+        }
+
+        @Override
+        protected Integer createSnapshot() {
+            return dieselAmount;
+        }
+
+        @Override
+        protected void revertToSnapshot(Integer snapshot) {
+            dieselAmount = snapshot;
+            setChanged();
+        }
+    }
+
     @Override
-    public ResourceHandler<FluidResource> getFluidHandler(@Nullable Direction side) {
-        SingleFluidHandler outputHandler = (SingleFluidHandler) super.getFluidHandler(side);
-
-        SingleFluidHandler dieselHandler = new SingleFluidHandler(
-                RefineryFluids.DIESEL_SOURCE::get,
-                () -> this.dieselAmount,
-                amt -> this.dieselAmount = amt,
-                DIESEL_CAPACITY,
-                true,
-                false,
-                this::setChanged
-        );
-
-        return new MultiFluidHandler(outputHandler, dieselHandler);
+    public @Nullable ResourceHandler<FluidResource> getFluidHandler(@Nullable Direction side) {
+        if (side == Direction.DOWN) {
+            return null; // Skid / base mounting face has no fluid port
+        }
+        ResourceHandler<FluidResource> outputHandler = super.getFluidHandler(side);
+        if (outputHandler == null) {
+            return this.fuelHandler;
+        }
+        return new MultiFluidHandler(outputHandler, this.fuelHandler);
     }
 
     // === WorldlyContainer Implementation ===

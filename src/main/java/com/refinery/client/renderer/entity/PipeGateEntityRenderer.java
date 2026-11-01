@@ -99,51 +99,51 @@ public class PipeGateEntityRenderer extends EntityRenderer<PipeGateEntity, PipeG
                 boolean xRun = connWest || connEast;
 
                 int activeAxes = (verticalRun ? 1 : 0) + (zRun ? 1 : 0) + (xRun ? 1 : 0);
-
                 if (activeAxes == 0) {
-                    // Standalone pipe: IndustrialPipeModel renders standalone pipes along Z axis
-                    if (face.getAxis() != Direction.Axis.Z) {
-                        if (face.getAxis() == Direction.Axis.X) {
-                            state.curveFactorX = 0.0f;
-                            state.curveFactorY = 1.0f;
-                        } else if (face.getAxis() == Direction.Axis.Y) {
-                            state.curveFactorX = 1.0f;
-                            state.curveFactorY = 0.0f;
-                        }
+                    // Standalone unconnected pipe renders along Z axis
+                    zRun = true;
+                }
+
+                // Map world pipe axes onto the gate's local X and Y axes for the attached face:
+                // - NORTH / SOUTH (Z face): local X = World X, local Y = World Y
+                // - WEST / EAST   (X face): local X = World Z, local Y = World Y
+                // - UP / DOWN     (Y face): local X = World X, local Y = World Z
+                boolean runAlongLocalX;
+                boolean runAlongLocalY;
+                switch (face.getAxis()) {
+                    case Z -> {
+                        runAlongLocalX = xRun;
+                        runAlongLocalY = verticalRun;
                     }
-                } else if (activeAxes == 1) {
-                    Direction.Axis pipeAxis = verticalRun ? Direction.Axis.Y : (zRun ? Direction.Axis.Z : Direction.Axis.X);
-                    if (face.getAxis() != pipeAxis) {
-                        if (face.getAxis() == Direction.Axis.Y) {
-                            if (pipeAxis == Direction.Axis.Z) {
-                                state.curveFactorX = 1.0f;
-                                state.curveFactorY = 0.0f;
-                            } else {
-                                state.curveFactorX = 0.0f;
-                                state.curveFactorY = 1.0f;
-                            }
-                        } else if (face.getAxis() == Direction.Axis.Z) {
-                            if (pipeAxis == Direction.Axis.Y) {
-                                state.curveFactorX = 1.0f;
-                                state.curveFactorY = 0.0f;
-                            } else {
-                                state.curveFactorX = 0.0f;
-                                state.curveFactorY = 1.0f;
-                            }
-                        } else if (face.getAxis() == Direction.Axis.X) {
-                            if (pipeAxis == Direction.Axis.Y) {
-                                state.curveFactorX = 1.0f;
-                                state.curveFactorY = 0.0f;
-                            } else {
-                                state.curveFactorX = 0.0f;
-                                state.curveFactorY = 1.0f;
-                            }
-                        }
+                    case X -> {
+                        runAlongLocalX = zRun;
+                        runAlongLocalY = verticalRun;
                     }
-                } else {
-                    // Center fitting hub for corners, tees, crosses
+                    case Y -> {
+                        runAlongLocalX = xRun;
+                        runAlongLocalY = zRun;
+                    }
+                    default -> {
+                        runAlongLocalX = false;
+                        runAlongLocalY = false;
+                    }
+                }
+
+                if (runAlongLocalX && !runAlongLocalY) {
+                    // Pipe cylinder runs along gate's local X -> saddle curves across local Y
+                    state.curveFactorX = 0.0f;
+                    state.curveFactorY = 1.0f;
+                } else if (runAlongLocalY && !runAlongLocalX) {
+                    // Pipe cylinder runs along gate's local Y -> saddle curves across local X
+                    state.curveFactorX = 1.0f;
+                    state.curveFactorY = 0.0f;
+                } else if (runAlongLocalX && runAlongLocalY) {
+                    // Multi-axis junction in both perpendicular axes -> spherical hub contour
                     state.curveFactorX = 0.7f;
                     state.curveFactorY = 0.7f;
+                } else {
+                    state.curveFactorX = 0.0f;
+                    state.curveFactorY = 0.0f;
                 }
             }
         }
@@ -157,14 +157,15 @@ public class PipeGateEntityRenderer extends EntityRenderer<PipeGateEntity, PipeG
         poseStack.pushPose();
 
         Direction dir = state.direction;
-        // Orient the gate plate to face outwards from the pipe
+        // Orient the gate plate so local +Z (front face) points outward along dir
+        // and local -Z (concave saddle) wraps inward toward the pipe center
         switch (dir) {
             case NORTH -> poseStack.rotateDegrees(Axis.YP, 180f);
             case SOUTH -> {}
-            case WEST -> poseStack.rotateDegrees(Axis.YP, 90f);
-            case EAST -> poseStack.rotateDegrees(Axis.YP, 270f);
-            case UP -> poseStack.rotateDegrees(Axis.XP, 90f);
-            case DOWN -> poseStack.rotateDegrees(Axis.XP, 270f);
+            case WEST -> poseStack.rotateDegrees(Axis.YP, 270f);
+            case EAST -> poseStack.rotateDegrees(Axis.YP, 90f);
+            case UP -> poseStack.rotateDegrees(Axis.XP, 270f);
+            case DOWN -> poseStack.rotateDegrees(Axis.XP, 90f);
         }
 
         Identifier texture = getTexture(state);

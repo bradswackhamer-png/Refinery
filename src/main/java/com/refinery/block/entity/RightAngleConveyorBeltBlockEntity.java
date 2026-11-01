@@ -114,8 +114,14 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
         }
 
         BlockPos exitPos = pos.relative(exitDir);
-        if (level.getBlockState(exitPos).getBlock() instanceof ConveyorBeltBlock
-                || level.getBlockState(exitPos).getBlock() instanceof RightAngleConveyorBeltBlock) {
+        BlockState exitState = level.getBlockState(exitPos);
+        if (exitState.getBlock() instanceof ConveyorBeltBlock
+                || exitState.getBlock() instanceof RightAngleConveyorBeltBlock
+                || exitState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock) {
+            return;
+        }
+        BlockState exitBelowState = level.getBlockState(exitPos.below());
+        if (exitBelowState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock) {
             return;
         }
 

@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -30,9 +31,13 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class SlopedConveyorBeltBlock extends Block implements EntityBlock {
 
@@ -58,6 +63,69 @@ public class SlopedConveyorBeltBlock extends Block implements EntityBlock {
 
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 
+    // Pre-computed 4-tier stepped collision shapes for players and mobs
+    private static final Map<Direction, VoxelShape> UP_SHAPES = new EnumMap<>(Direction.class);
+    private static final Map<Direction, VoxelShape> DOWN_SHAPES = new EnumMap<>(Direction.class);
+
+    static {
+        // Step heights in pixels: 5, 8, 12, 16
+        // NORTH: Entry is SOUTH (z: 12..16, h: 5), exit is NORTH (z: 0..4, h: 16)
+        UP_SHAPES.put(Direction.NORTH, Shapes.or(
+                Block.box(0.0, 0.0, 12.0, 16.0, 5.0, 16.0),
+                Block.box(0.0, 0.0, 8.0, 16.0, 8.0, 12.0),
+                Block.box(0.0, 0.0, 4.0, 16.0, 12.0, 8.0),
+                Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 4.0)
+        ));
+        DOWN_SHAPES.put(Direction.NORTH, Shapes.or(
+                Block.box(0.0, 0.0, 12.0, 16.0, 16.0, 16.0),
+                Block.box(0.0, 0.0, 8.0, 16.0, 12.0, 12.0),
+                Block.box(0.0, 0.0, 4.0, 16.0, 8.0, 8.0),
+                Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 4.0)
+        ));
+
+        // SOUTH: Entry is NORTH (z: 0..4, h: 5), exit is SOUTH (z: 12..16, h: 16)
+        UP_SHAPES.put(Direction.SOUTH, Shapes.or(
+                Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 4.0),
+                Block.box(0.0, 0.0, 4.0, 16.0, 8.0, 8.0),
+                Block.box(0.0, 0.0, 8.0, 16.0, 12.0, 12.0),
+                Block.box(0.0, 0.0, 12.0, 16.0, 16.0, 16.0)
+        ));
+        DOWN_SHAPES.put(Direction.SOUTH, Shapes.or(
+                Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 4.0),
+                Block.box(0.0, 0.0, 4.0, 16.0, 12.0, 8.0),
+                Block.box(0.0, 0.0, 8.0, 16.0, 8.0, 12.0),
+                Block.box(0.0, 0.0, 12.0, 16.0, 5.0, 16.0)
+        ));
+
+        // WEST: Entry is EAST (x: 12..16, h: 5), exit is WEST (x: 0..4, h: 16)
+        UP_SHAPES.put(Direction.WEST, Shapes.or(
+                Block.box(12.0, 0.0, 0.0, 16.0, 5.0, 16.0),
+                Block.box(8.0, 0.0, 0.0, 12.0, 8.0, 16.0),
+                Block.box(4.0, 0.0, 0.0, 8.0, 12.0, 16.0),
+                Block.box(0.0, 0.0, 0.0, 4.0, 16.0, 16.0)
+        ));
+        DOWN_SHAPES.put(Direction.WEST, Shapes.or(
+                Block.box(12.0, 0.0, 0.0, 16.0, 16.0, 16.0),
+                Block.box(8.0, 0.0, 0.0, 12.0, 12.0, 16.0),
+                Block.box(4.0, 0.0, 0.0, 8.0, 8.0, 16.0),
+                Block.box(0.0, 0.0, 0.0, 4.0, 5.0, 16.0)
+        ));
+
+        // EAST: Entry is WEST (x: 0..4, h: 5), exit is EAST (x: 12..16, h: 16)
+        UP_SHAPES.put(Direction.EAST, Shapes.or(
+                Block.box(0.0, 0.0, 0.0, 4.0, 5.0, 16.0),
+                Block.box(4.0, 0.0, 0.0, 8.0, 8.0, 16.0),
+                Block.box(8.0, 0.0, 0.0, 12.0, 12.0, 16.0),
+                Block.box(12.0, 0.0, 0.0, 16.0, 16.0, 16.0)
+        ));
+        DOWN_SHAPES.put(Direction.EAST, Shapes.or(
+                Block.box(0.0, 0.0, 0.0, 4.0, 16.0, 16.0),
+                Block.box(4.0, 0.0, 0.0, 8.0, 12.0, 16.0),
+                Block.box(8.0, 0.0, 0.0, 12.0, 8.0, 16.0),
+                Block.box(12.0, 0.0, 0.0, 16.0, 5.0, 16.0)
+        ));
+    }
+
     public SlopedConveyorBeltBlock(Properties properties) {
         super(properties);
         registerDefaultState(this.stateDefinition.any()
@@ -73,12 +141,22 @@ public class SlopedConveyorBeltBlock extends Block implements EntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        Direction facing = state.getValue(FACING);
+        SlopeDirection slope = state.getValue(SLOPE);
+        Map<Direction, VoxelShape> map = (slope == SlopeDirection.UP) ? UP_SHAPES : DOWN_SHAPES;
+        return map.getOrDefault(facing, SHAPE);
     }
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        // Items must pass through smoothly without colliding with block walls or step ledges
+        if (context instanceof EntityCollisionContext ecc && ecc.getEntity() instanceof ItemEntity) {
+            return Shapes.empty();
+        }
+        Direction facing = state.getValue(FACING);
+        SlopeDirection slope = state.getValue(SLOPE);
+        Map<Direction, VoxelShape> map = (slope == SlopeDirection.UP) ? UP_SHAPES : DOWN_SHAPES;
+        return map.getOrDefault(facing, SHAPE);
     }
 
     @Override

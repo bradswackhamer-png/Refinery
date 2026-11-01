@@ -2,12 +2,10 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     "#c:ingots/copper",
-    "#c:ingots/copper",
-    "#c:ingots/copper",
     "#c:ingots/tin"
   ],
   "result": {
     "id": "refinery:bronze_ingot",
-    "count": 4
+    "count": 2
   }
 }

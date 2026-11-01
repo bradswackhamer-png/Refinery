@@ -1,8 +1,13 @@
 package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
+import com.refinery.block.ConveyorBeltBlock;
 import com.refinery.block.GrinderPortBlock;
 import com.refinery.block.IndustrialGrinderControllerBlock;
+import com.refinery.block.RightAngleConveyorBeltBlock;
+import com.refinery.block.SlopedConveyorBeltBlock;
+import com.refinery.block.pipe.IndustrialPipeBlock;
+import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.menu.IndustrialGrinderMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -191,10 +196,17 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             tryExportOutput(serverLevel);
         }
 
-        // Check if any dropped ItemEntities fell into the top hopper bowl (Y = 2..3 above base)
+        // Check if any dropped ItemEntities fell directly into the top hopper funnel opening (Y = 2.2..3.6 above base)
         Direction facing = state.getValue(IndustrialGrinderControllerBlock.FACING);
         BlockPos hopperCenter = getRelativePos(0, 2, 1, facing);
-        net.minecraft.world.phys.AABB hopperBox = new net.minecraft.world.phys.AABB(hopperCenter).inflate(1.25, 0.85, 1.25);
+        double cx = hopperCenter.getX() + 0.5;
+        double cz = hopperCenter.getZ() + 0.5;
+        double minY = hopperCenter.getY() + 0.20; // 2.20 above base (strictly inside the upper funnel bowl)
+        double maxY = hopperCenter.getY() + 1.60; // 3.60 above base (just above the hopper top rim)
+        net.minecraft.world.phys.AABB hopperBox = new net.minecraft.world.phys.AABB(
+                cx - 0.40, minY, cz - 0.40,
+                cx + 0.40, maxY, cz + 0.40
+        );
         List<net.minecraft.world.entity.item.ItemEntity> droppedItems = level.getEntitiesOfClass(
                 net.minecraft.world.entity.item.ItemEntity.class, hopperBox,
                 ie -> ie.isAlive() && !ie.getItem().isEmpty() && !getGrindResult(ie.getItem()).isEmpty());
@@ -312,20 +324,18 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         // Output Port is located at relative (1, 0, 0)
         BlockPos portPos = getRelativePos(1, 0, 0, facing);
 
-        // Candidate targets:
+        // Candidate targets around the output port and the right-hand discharge chute:
         // 1. Right side of the port (where the inclined discharge chute ends)
-        // 2. Front of the port
-        // 3. Below the port
-        // 4. Rear of the port
-        // 5. Front of the controller itself
-        // 6. Below the controller
+        // 2. Elevated right side (matching raised chute elevation)
+        // 3. Below the right chute end (e.g. floor hopper/conveyor catching falling output)
+        // 4. Front of the port
+        // 5. Below the port
         BlockPos[] targets = new BlockPos[]{
                 portPos.relative(facing.getClockWise()),
+                portPos.relative(facing.getClockWise()).above(),
+                portPos.relative(facing.getClockWise()).below(),
                 portPos.relative(facing.getOpposite()),
-                portPos.below(),
-                portPos.relative(facing),
-                this.worldPosition.relative(facing.getOpposite()),
-                this.worldPosition.below()
+                portPos.below()
         };
 
         for (int slot = 4; slot <= 7; slot++) {
@@ -333,7 +343,73 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             if (sourceStack.isEmpty()) continue;
 
             for (BlockPos targetPos : targets) {
+                if (isMultiblockPart(targetPos)) continue;
+
+                BlockState targetState = level.getBlockState(targetPos);
                 BlockEntity targetBE = level.getBlockEntity(targetPos);
+
+                boolean isConveyor = targetState.getBlock() instanceof ConveyorBeltBlock
+                        || targetState.getBlock() instanceof RightAngleConveyorBeltBlock
+                        || targetState.getBlock() instanceof SlopedConveyorBeltBlock
+                        || targetBE instanceof ConveyorBeltBlockEntity;
+
+                if (isConveyor) {
+                    // Export onto conveyor ONLY when that conveyor connects downstream to another conveyor, pipe, or container
+                    if (!isConveyorConnectedDownstream(level, targetPos, targetState)) {
+                        continue;
+                    }
+
+                    // Check that the conveyor block surface isn't already occupied by an item entity
+                    net.minecraft.world.phys.AABB beltBox = new net.minecraft.world.phys.AABB(
+                            targetPos.getX(), targetPos.getY() + 0.15, targetPos.getZ(),
+                            targetPos.getX() + 1.0, targetPos.getY() + 0.65, targetPos.getZ() + 1.0
+                    );
+                    List<net.minecraft.world.entity.item.ItemEntity> itemsOnBelt = level.getEntitiesOfClass(
+                            net.minecraft.world.entity.item.ItemEntity.class, beltBox);
+                    if (!itemsOnBelt.isEmpty()) {
+                        continue;
+                    }
+
+                    // Export a single item onto the conveyor belt so items flow smoothly along the line
+                    if (targetBE instanceof ConveyorBeltBlockEntity conveyorBE) {
+                        ItemStack single = sourceStack.copyWithCount(1);
+                        conveyorBE.setItem(0, single);
+                        sourceStack.shrink(1);
+                        if (sourceStack.isEmpty()) {
+                            this.items.set(slot, ItemStack.EMPTY);
+                        }
+                        setChanged();
+                        return;
+                    } else if (targetBE instanceof Container container) {
+                        ItemStack single = sourceStack.copyWithCount(1);
+                        ItemStack rem = AutoHarvesterBlockEntity.addItemToContainer(container, single);
+                        if (rem.isEmpty()) {
+                            sourceStack.shrink(1);
+                            if (sourceStack.isEmpty()) {
+                                this.items.set(slot, ItemStack.EMPTY);
+                            }
+                            setChanged();
+                            return;
+                        }
+                    }
+                    continue;
+                }
+
+                // Direct pipe insertion
+                if (targetBE instanceof IndustrialPipeBlockEntity pipeBE) {
+                    if (pipeBE.getPipeType() == IndustrialPipeType.ITEM) {
+                        ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(pipeBE, sourceStack.copy());
+                        if (remainder.getCount() != sourceStack.getCount()) {
+                            this.items.set(slot, remainder);
+                            setChanged();
+                            pipeBE.setChanged();
+                            return;
+                        }
+                    }
+                    continue;
+                }
+
+                // Standard non-conveyor container (Hopper, Chest, Barrel, Machine, etc.)
                 if (targetBE instanceof Container targetContainer) {
                     ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(targetContainer, sourceStack.copy());
                     if (remainder.getCount() != sourceStack.getCount()) {
@@ -361,6 +437,75 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                 }
             }
         }
+    }
+
+    private boolean isConveyorConnectedDownstream(ServerLevel level, BlockPos conveyorPos, BlockState conveyorState) {
+        Direction forward;
+        if (conveyorState.getBlock() instanceof ConveyorBeltBlock) {
+            forward = conveyorState.getValue(ConveyorBeltBlock.FACING);
+        } else if (conveyorState.getBlock() instanceof RightAngleConveyorBeltBlock) {
+            forward = RightAngleConveyorBeltBlock.getExitDirection(conveyorState);
+        } else if (conveyorState.getBlock() instanceof SlopedConveyorBeltBlock) {
+            forward = conveyorState.getValue(SlopedConveyorBeltBlock.FACING);
+        } else {
+            return false;
+        }
+
+        // Check the block the conveyor is feeding into
+        BlockPos nextPos = conveyorPos.relative(forward);
+        if (isAcceptableReceiver(level, nextPos, forward.getOpposite())) {
+            return true;
+        }
+        // If the conveyor line drops down or steps up
+        if (isAcceptableReceiver(level, nextPos.above(), Direction.DOWN)
+                || isAcceptableReceiver(level, nextPos.below(), Direction.UP)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAcceptableReceiver(ServerLevel level, BlockPos pos, Direction insertSide) {
+        if (isMultiblockPart(pos)) {
+            return false;
+        }
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) {
+            return false;
+        }
+        // 1. Another Conveyor Belt
+        if (state.getBlock() instanceof ConveyorBeltBlock
+                || state.getBlock() instanceof RightAngleConveyorBeltBlock
+                || state.getBlock() instanceof SlopedConveyorBeltBlock) {
+            return true;
+        }
+        // 2. An Item Pipe
+        if (state.getBlock() instanceof IndustrialPipeBlock pipeBlock && pipeBlock.getPipeType() == IndustrialPipeType.ITEM) {
+            return true;
+        }
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof IndustrialPipeBlockEntity pipeBE && pipeBE.getPipeType() == IndustrialPipeType.ITEM) {
+            return true;
+        }
+        // 3. A Container (Hopper, Chest, Barrel, Machine, etc. - excluding conveyor)
+        if (be instanceof Container && !(be instanceof ConveyorBeltBlockEntity)) {
+            return true;
+        }
+        // 4. Item capability
+        var handler = level.getCapability(Capabilities.Item.BLOCK, pos, insertSide);
+        return handler != null;
+    }
+
+    private boolean isMultiblockPart(BlockPos pos) {
+        BlockState state = getBlockState();
+        Direction facing = (state.getBlock() instanceof IndustrialGrinderControllerBlock && state.hasProperty(IndustrialGrinderControllerBlock.FACING))
+                ? state.getValue(IndustrialGrinderControllerBlock.FACING)
+                : Direction.NORTH;
+        for (BlueprintRequirement req : getRequirements()) {
+            if (getRelativePos(req.x(), req.y(), req.z(), facing).equals(pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static final TagKey<Item> ORES_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ores/tin"));

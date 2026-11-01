@@ -187,6 +187,9 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                         // Saplings plant on Dirt, Grass, Podzol, Coarse Dirt, Rooted Dirt, Mud, Mycelium, Moss, etc.
                         if (!isSoilForSapling(targetState)) continue;
 
+                        // Space out saplings: no sapling should be placed directly next to another sapling or tree trunk
+                        if (hasAdjacentSaplingOrTree(level, abovePos)) continue;
+
                         BlockState saplingState = getPlantableCrop(stack, level, abovePos);
                         if (saplingState == null) continue;
 
@@ -330,6 +333,28 @@ public class AutoPlanterBlockEntity extends BlockEntity implements MenuProvider,
                 || state.is(Blocks.CRIMSON_NYLIUM)
                 || state.is(Blocks.WARPED_NYLIUM)
                 || state.is(Blocks.SOUL_SOIL);
+    }
+
+    /**
+     * Checks if there is already a sapling or tree trunk immediately adjacent horizontally (Chebyshev distance <= 1).
+     * Prevents saplings from being planted directly next to another sapling or tree trunk, spacing them out naturally.
+     */
+    public static boolean hasAdjacentSaplingOrTree(Level level, BlockPos pos) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx == 0 && dz == 0) continue;
+                for (int dy = -1; dy <= 3; dy++) {
+                    BlockPos checkPos = pos.offset(dx, dy, dz);
+                    BlockState state = level.getBlockState(checkPos);
+                    if (state.getBlock() instanceof SaplingBlock
+                            || state.is(BlockTags.SAPLINGS)
+                            || state.is(BlockTags.LOGS)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean isSapling(ItemStack stack) {

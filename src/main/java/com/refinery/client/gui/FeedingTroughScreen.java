@@ -32,16 +32,16 @@ public class FeedingTroughScreen extends AbstractContainerScreen<FeedingTroughMe
 
         if (foodCount <= 0) {
             statusText = Component.literal("EMPTY").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xAA2222;
+            statusColor = 0xFFAA2222;
         } else if (animals > 0) {
-            statusText = Component.literal("ACTIVE").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD);
-            statusColor = 0x22AA22;
+            statusText = Component.literal("ACTIVE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
+            statusColor = 0xFF15803D;
         } else {
-            statusText = Component.literal("STANDBY").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
-            statusColor = 0xCCCC22;
+            statusText = Component.literal("STANDBY").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+            statusColor = 0xFFB45309;
         }
 
-        graphics.text(this.font, statusText, 115, 6, statusColor, false);
+        graphics.text(this.font, statusText, 120, 6, statusColor, false);
     }
 
     @Override
@@ -78,9 +78,9 @@ public class FeedingTroughScreen extends AbstractContainerScreen<FeedingTroughMe
         graphics.text(this.font, Component.literal("HAY: " + hayText).withStyle(ChatFormatting.GOLD), xo + 131, yo + 21, 0xFFD4AF37, false);
 
         String animalText = animals + " HD";
-        graphics.text(this.font, Component.literal("HERD: " + animalText).withStyle(ChatFormatting.AQUA), xo + 124, yo + 32, 0x55FFFF, false);
+        graphics.text(this.font, Component.literal("HERD: " + animalText).withStyle(ChatFormatting.AQUA), xo + 124, yo + 32, 0xFF55FFFF, false);
 
         String rangeText = "4.5m RNG";
-        graphics.text(this.font, Component.literal(rangeText).withStyle(ChatFormatting.GRAY), xo + 124, yo + 42, 0x888888, false);
+        graphics.text(this.font, Component.literal(rangeText).withStyle(ChatFormatting.GRAY), xo + 124, yo + 42, 0xFF888888, false);
     }
 }

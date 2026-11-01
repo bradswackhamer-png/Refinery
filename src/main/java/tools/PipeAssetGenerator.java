@@ -70,6 +70,36 @@ public class PipeAssetGenerator {
         generateMetalPipeTexture("cast_iron_pipe.png", new Color(85, 90, 95), new Color(50, 52, 56), new Color(135, 140, 145), false, false);
         generateMetalPipeTexture("void_pipe.png", new Color(35, 30, 50), new Color(15, 12, 25), new Color(160, 60, 230), true, false);
         generateMetalPipeTexture("quartz_pipe.png", new Color(240, 235, 230), new Color(195, 185, 180), new Color(255, 255, 255), false, false);
+        generateWindowTexture();
+    }
+
+    private static void generateWindowTexture() throws Exception {
+        int width = 32;
+        int height = 32;
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        Color darkBorder = new Color(35, 38, 44, 255);
+        Color lightBorder = new Color(85, 92, 102, 255);
+        Color glassBase = new Color(210, 240, 255, 35);
+        Color glare = new Color(255, 255, 255, 120);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (x == 0 || x == width - 1) {
+                    img.setRGB(x, y, darkBorder.getRGB());
+                } else if (x == 1 || x == width - 2) {
+                    img.setRGB(x, y, lightBorder.getRGB());
+                } else {
+                    if ((x + y >= 11 && x + y <= 13) || (x + y >= 37 && x + y <= 39)) {
+                        img.setRGB(x, y, glare.getRGB());
+                    } else {
+                        img.setRGB(x, y, glassBase.getRGB());
+                    }
+                }
+            }
+        }
+
+        ImageIO.write(img, "PNG", new File(ASSETS + "textures/block/pipe/pipe_window.png"));
     }
 
     private static void generateMetalPipeTexture(String filename, Color baseColor, Color darkShade, Color highlight, boolean isVoid, boolean isWood) throws Exception {
@@ -123,32 +153,6 @@ public class PipeAssetGenerator {
                 }
 
                 img.setRGB(x, y, new Color(cr, cg, cb, 255).getRGB());
-            }
-        }
-
-        // 2. Machined Flange Region (Top-Left 32x32: UV [0.0..0.25, 0.0..0.25])
-        for (int y = 0; y < 32; y++) {
-            for (int x = 0; x < 32; x++) {
-                double dist = Math.hypot(x - 16, y - 16);
-                if (dist <= 15) {
-                    int ring = (int) (dist * 2) % 2 == 0 ? 15 : -15;
-                    int fr = Math.min(255, Math.max(0, baseColor.getRed() + ring));
-                    int fg = Math.min(255, Math.max(0, baseColor.getGreen() + ring));
-                    int fb = Math.min(255, Math.max(0, baseColor.getBlue() + ring));
-
-                    for (int bIdx = 0; bIdx < 6; bIdx++) {
-                        double bAngle = bIdx * (Math.PI / 3.0);
-                        double bx = 16 + 10.5 * Math.cos(bAngle);
-                        double by = 16 + 10.5 * Math.sin(bAngle);
-                        if (Math.hypot(x - bx, y - by) <= 2.2) {
-                            fr = Math.min(255, highlight.getRed() + 30);
-                            fg = Math.min(255, highlight.getGreen() + 30);
-                            fb = Math.min(255, highlight.getBlue() + 30);
-                        }
-                    }
-
-                    img.setRGB(x, y, new Color(fr, fg, fb, 255).getRGB());
-                }
             }
         }
 

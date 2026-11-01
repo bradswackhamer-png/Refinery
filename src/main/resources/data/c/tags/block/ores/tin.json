@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "refinery:tin_ore",
+    "refinery:deepslate_tin_ore"
+  ]
+}

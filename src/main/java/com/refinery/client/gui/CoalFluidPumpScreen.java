@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.refinery.block.entity.AbstractFluidPumpBlockEntity;
 import com.refinery.menu.CoalFluidPumpMenu;
 import net.minecraft.ChatFormatting;
@@ -31,7 +32,7 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
         super.extractLabels(graphics, mouseX, mouseY);
 
         // Header Title
-        graphics.text(this.font, Component.literal("COAL FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 10, 6, 0x374151, false);
+        graphics.text(this.font, Component.literal("COAL FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 10, 6, 0xFF374151, false);
 
         // Central Status Display (x: 24..142, y: 17..33)
         AbstractFluidPumpBlockEntity.PumpStatus status = this.menu.getPumpStatus();
@@ -48,10 +49,10 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
             case REDSTONE_OFF -> Component.literal("[PAUSED - RS]").withStyle(ChatFormatting.DARK_RED);
         };
         int statusW = this.font.width(statusText);
-        graphics.text(this.font, statusText, 83 - statusW / 2, 21, 0xFFFFFF, false);
+        graphics.text(this.font, statusText, 83 - statusW / 2, 21, 0xFFFFFFFF, false);
 
         // Fuel burn rate text below flame
-        graphics.text(this.font, Component.literal("1 Coal = 3s").withStyle(ChatFormatting.GRAY), 38, 62, 0x6B7280, false);
+        graphics.text(this.font, Component.literal("1 Coal = 3s").withStyle(ChatFormatting.GRAY), 38, 62, 0xFF6B7280, false);
 
         // Infinite Water Mode Button Label (x: 84, y: 41, w: 58, h: 18)
         boolean inf = this.menu.isInfiniteWater();
@@ -59,7 +60,7 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
                 ? Component.literal("INFINITE").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
                 : Component.literal("DRAIN").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
         int infW = this.font.width(infLabel);
-        graphics.text(this.font, infLabel, 113 - infW / 2, 46, 0xFFFFFF, false);
+        graphics.text(this.font, infLabel, 113 - infW / 2, 46, 0xFFFFFFFF, false);
 
         // Redstone Mode Button Label (x: 10, y: 41, w: 24, h: 18)
         String rsStr = switch (this.menu.getRedstoneMode()) {
@@ -68,7 +69,7 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
             case REQUIRE_LOW -> "LOW";
         };
         int rsW = this.font.width(rsStr);
-        graphics.text(this.font, Component.literal(rsStr).withStyle(ChatFormatting.RED), 22 - rsW / 2, 46, 0xFFFFFF, false);
+        graphics.text(this.font, Component.literal(rsStr).withStyle(ChatFormatting.RED), 22 - rsW / 2, 46, 0xFFFFFFFF, false);
     }
 
     @Override
@@ -146,13 +147,14 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
         double mouseY = event.y();
         int button = event.button();
 
-        if (button == 0) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT || button == 0) {
             int xo = this.leftPos;
             int yo = this.topPos;
 
             // Infinite Water / Drain Mode Button (xo + 84..142, yo + 41..59)
             if (mouseX >= xo + 84 && mouseX <= xo + 142 && mouseY >= yo + 41 && mouseY <= yo + 59) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 0);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
@@ -162,6 +164,7 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
             // Redstone Mode Button (xo + 10..34, yo + 41..59)
             if (mouseX >= xo + 10 && mouseX <= xo + 34 && mouseY >= yo + 41 && mouseY <= yo + 59) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 1);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 1);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }

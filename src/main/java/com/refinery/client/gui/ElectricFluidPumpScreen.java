@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.refinery.block.entity.AbstractFluidPumpBlockEntity;
 import com.refinery.menu.ElectricFluidPumpMenu;
 import net.minecraft.ChatFormatting;
@@ -31,7 +32,7 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
         super.extractLabels(graphics, mouseX, mouseY);
 
         // Header Title
-        graphics.text(this.font, Component.literal("ELECTRIC FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), 10, 6, 0x2563EB, false);
+        graphics.text(this.font, Component.literal("ELECTRIC FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), 10, 6, 0xFF2563EB, false);
 
         // Central Status Display (x: 20..142, y: 17..33)
         AbstractFluidPumpBlockEntity.PumpStatus status = this.menu.getPumpStatus();
@@ -48,12 +49,12 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
             case REDSTONE_OFF -> Component.literal("[PAUSED - RS]").withStyle(ChatFormatting.DARK_RED);
         };
         int statusW = this.font.width(statusText);
-        graphics.text(this.font, statusText, 81 - statusW / 2, 21, 0xFFFFFF, false);
+        graphics.text(this.font, statusText, 81 - statusW / 2, 21, 0xFFFFFFFF, false);
 
         // Digital Readout Text
         int energy = this.menu.getEnergy();
         String eStr = energy >= 1000 ? (energy / 1000) + "k / 20k FE" : energy + " / 20,000 FE";
-        graphics.text(this.font, Component.literal(eStr).withStyle(ChatFormatting.GREEN), 46, 40, 0x22C55E, false);
+        graphics.text(this.font, Component.literal(eStr).withStyle(ChatFormatting.GREEN), 46, 40, 0xFF22C55E, false);
 
         // Mode Button Label inside digital panel (x: 44, y: 53, w: 50, h: 15)
         boolean inf = this.menu.isInfiniteWater();
@@ -61,7 +62,7 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
                 ? Component.literal("INFINITE").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
                 : Component.literal("DRAIN").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
         int infW = this.font.width(infLabel);
-        graphics.text(this.font, infLabel, 69 - infW / 2, 57, 0xFFFFFF, false);
+        graphics.text(this.font, infLabel, 69 - infW / 2, 57, 0xFFFFFFFF, false);
 
         // Redstone Mode Button Label (x: 96, y: 53, w: 44, h: 15)
         String rsStr = switch (this.menu.getRedstoneMode()) {
@@ -70,7 +71,7 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
             case REQUIRE_LOW -> "RS: LOW";
         };
         int rsW = this.font.width(rsStr);
-        graphics.text(this.font, Component.literal(rsStr).withStyle(ChatFormatting.RED), 118 - rsW / 2, 57, 0xFFFFFF, false);
+        graphics.text(this.font, Component.literal(rsStr).withStyle(ChatFormatting.RED), 118 - rsW / 2, 57, 0xFFFFFFFF, false);
     }
 
     @Override
@@ -158,13 +159,14 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
         double mouseY = event.y();
         int button = event.button();
 
-        if (button == 0) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT || button == 0) {
             int xo = this.leftPos;
             int yo = this.topPos;
 
             // Mode Button (xo + 44..94, yo + 53..68)
             if (mouseX >= xo + 44 && mouseX <= xo + 94 && mouseY >= yo + 53 && mouseY <= yo + 68) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 0);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
@@ -174,6 +176,7 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
             // Redstone Button (xo + 96..140, yo + 53..68)
             if (mouseX >= xo + 96 && mouseX <= xo + 140 && mouseY >= yo + 53 && mouseY <= yo + 68) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, 1);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 1);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }

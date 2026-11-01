@@ -18,7 +18,7 @@ public enum GateAction {
     GateAction(String label, String description, int displayColor) {
         this.label = label;
         this.description = description;
-        this.displayColor = displayColor;
+        this.displayColor = 0xFF000000 | displayColor;
     }
 
     public String getLabel() {

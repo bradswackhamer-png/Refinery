@@ -124,23 +124,23 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
             return;
         }
 
-        // 5. Tank capacity check
+        // 5. Pump Cooldown Tick
+        if (this.pumpCooldown > 0) {
+            this.pumpCooldown--;
+            return;
+        }
+
+        // 6. Tank capacity check
         if (this.fluidAmount + 1000 > TANK_CAPACITY) {
             this.status = PumpStatus.TANK_FULL;
             updateActiveState(false);
             return;
         }
 
-        // 6. Power Availability Check
+        // 7. Power Availability Check
         if (!hasPowerToPump()) {
             this.status = getNoPowerStatus();
             updateActiveState(false);
-            return;
-        }
-
-        // 7. Pump Cooldown Tick
-        if (this.pumpCooldown > 0) {
-            this.pumpCooldown--;
             return;
         }
 
@@ -457,27 +457,15 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
 
         @Override
         public boolean isValid(int index, FluidResource resource) {
-            if (index != 0 || resource.isEmpty()) return false;
-            return currentFluid == Fluids.EMPTY || resource.getFluid() == currentFluid;
+            // Pump output reservoir is strictly discharge/extract-only.
+            // Reject fluid insertion from external pipes and tanks to prevent back-draining and fluid contamination.
+            return false;
         }
 
         @Override
         public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
-            if (index != 0 || amount <= 0 || resource.isEmpty()) return 0;
-            if (currentFluid != Fluids.EMPTY && resource.getFluid() != currentFluid) return 0;
-
-            int space = TANK_CAPACITY - fluidAmount;
-            int toInsert = Math.min(space, amount);
-            if (toInsert <= 0) return 0;
-
-            updateSnapshots(transaction);
-            if (currentFluid == Fluids.EMPTY) {
-                currentFluid = resource.getFluid();
-                lastPumpedFluid = resource.getFluid();
-            }
-            fluidAmount += toInsert;
-            setChanged();
-            return toInsert;
+            // Strictly extract-only: never allow external pipes to pump fluid backwards into the pump.
+            return 0;
         }
 
         @Override

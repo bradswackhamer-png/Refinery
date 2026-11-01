@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
@@ -36,6 +37,8 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.Nullable;
 
@@ -150,7 +153,12 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     }
 
     public IndustrialPipeBlockEntity(BlockPos pos, BlockState state) {
-        this(pos, state, IndustrialPipeType.FLUID, IndustrialPipeMaterial.STEEL);
+        this(
+                pos,
+                state,
+                state.getBlock() instanceof com.refinery.block.pipe.IndustrialPipeBlock ipb ? ipb.getPipeType() : IndustrialPipeType.FLUID,
+                state.getBlock() instanceof com.refinery.block.pipe.IndustrialPipeBlock ipb ? ipb.getMaterial() : IndustrialPipeMaterial.STEEL
+        );
     }
 
     public IndustrialPipeBlockEntity(BlockPos pos, BlockState state, IndustrialPipeType pipeType, IndustrialPipeMaterial material) {
@@ -197,11 +205,19 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     }
 
     public IndustrialPipeType getPipeType() {
-        return pipeType;
+        if (pipeType != null) return pipeType;
+        if (getBlockState().getBlock() instanceof com.refinery.block.pipe.IndustrialPipeBlock ipb) {
+            return ipb.getPipeType();
+        }
+        return IndustrialPipeType.FLUID;
     }
 
     public IndustrialPipeMaterial getMaterial() {
-        return material;
+        if (material != null) return material;
+        if (getBlockState().getBlock() instanceof com.refinery.block.pipe.IndustrialPipeBlock ipb) {
+            return ipb.getMaterial();
+        }
+        return IndustrialPipeMaterial.STEEL;
     }
 
     public PipeConnectionType getConnection(Direction dir) {
@@ -238,14 +254,53 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         }
         // Also check if neighbor block has a blank gate on its opposing face pointing towards this pipe
         BlockPos targetPos = worldPosition.relative(dir);
-        List<com.refinery.entity.PipeGateEntity> gatesNeighbor = level.getEntitiesOfClass(
-                com.refinery.entity.PipeGateEntity.class, new net.minecraft.world.phys.AABB(targetPos));
-        for (com.refinery.entity.PipeGateEntity g : gatesNeighbor) {
-            if (g.getAttachedFace() == dir.getOpposite() && g.getTier() == com.refinery.gate.GateTier.BLANK) {
-                return true;
+        if (level.isLoaded(targetPos)) {
+            List<com.refinery.entity.PipeGateEntity> gatesNeighbor = level.getEntitiesOfClass(
+                    com.refinery.entity.PipeGateEntity.class, new net.minecraft.world.phys.AABB(targetPos));
+            for (com.refinery.entity.PipeGateEntity g : gatesNeighbor) {
+                if (g.getAttachedFace() == dir.getOpposite() && g.getTier() == com.refinery.gate.GateTier.BLANK) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+
+    public static boolean isItemMachine(Level level, BlockPos pos, Direction side) {
+        if (level == null || pos == null || !level.isLoaded(pos)) return false;
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) return false;
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof IndustrialPipeBlockEntity) return false;
+
+        if (level.getCapability(Capabilities.Item.BLOCK, pos, side) != null) return true;
+        if (level.getCapability(Capabilities.Item.BLOCK, pos, null) != null) return true;
+        if (be instanceof Container) return true;
+
+        return state.getBlock() instanceof com.refinery.block.GrinderPortBlock ||
+               state.getBlock() instanceof com.refinery.block.RefineryPortBlock ||
+               state.getBlock() instanceof com.refinery.block.FoundryPortBlock ||
+               state.getBlock() instanceof com.refinery.block.BoilerPortBlock ||
+               state.getBlock() instanceof com.refinery.block.ConveyorBeltBlock ||
+               state.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock ||
+               state.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock;
+    }
+
+    public static boolean isFluidMachine(Level level, BlockPos pos, Direction side) {
+        if (level == null || pos == null || !level.isLoaded(pos)) return false;
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) return false;
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof IndustrialPipeBlockEntity) return false;
+
+        if (level.getCapability(Capabilities.Fluid.BLOCK, pos, side) != null) return true;
+        if (level.getCapability(Capabilities.Fluid.BLOCK, pos, null) != null) return true;
+
+        return state.getBlock() instanceof com.refinery.block.StorageTankCasingBlock ||
+               state.getBlock() instanceof com.refinery.block.StorageTankDrainValveBlock ||
+               state.getBlock() instanceof com.refinery.block.StorageTankFillValveBlock ||
+               state.getBlock() instanceof com.refinery.block.BoilerPortBlock ||
+               state.getBlock() instanceof com.refinery.block.RefineryPortBlock;
     }
 
     public void updateConnections() {
@@ -262,6 +317,17 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             }
 
             BlockPos targetPos = worldPosition.relative(dir);
+            if (!level.isLoaded(targetPos)) {
+                // If neighbor chunk is not loaded yet across restart/chunk-load, preserve existing connection!
+                continue;
+            }
+
+            BlockState targetState = level.getBlockState(targetPos);
+            // If the neighbor block is expected to have a block entity but it hasn't instantiated yet during chunk load, preserve existing connection!
+            if (targetState.hasBlockEntity() && level.getBlockEntity(targetPos) == null) {
+                continue;
+            }
+
             BlockEntity targetBe = level.getBlockEntity(targetPos);
             Direction opposite = dir.getOpposite();
 
@@ -275,19 +341,12 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                 if (typesCompatible) {
                     detected = PipeConnectionType.PIPE;
                 }
-            } else if (targetBe != null) {
-                // Check if target machine has fluid or item capability
-                if (this.pipeType.handlesFluid()) {
-                    ResourceHandler<FluidResource> fh = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, opposite);
-                    if (fh != null) {
-                        detected = PipeConnectionType.MACHINE;
-                    }
+            } else {
+                if (this.pipeType.handlesFluid() && isFluidMachine(level, targetPos, opposite)) {
+                    detected = PipeConnectionType.MACHINE;
                 }
-                if (detected == PipeConnectionType.NONE && this.pipeType.handlesItems()) {
-                    ResourceHandler<ItemResource> ih = level.getCapability(Capabilities.Item.BLOCK, targetPos, opposite);
-                    if (ih != null) {
-                        detected = PipeConnectionType.MACHINE;
-                    }
+                if (detected == PipeConnectionType.NONE && this.pipeType.handlesItems() && isItemMachine(level, targetPos, opposite)) {
+                    detected = PipeConnectionType.MACHINE;
                 }
             }
 
@@ -308,8 +367,8 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     public static void tick(Level level, BlockPos pos, BlockState state, IndustrialPipeBlockEntity be) {
         if (level.isClientSide()) return;
 
-        // Periodic connection refresh every 20 ticks
-        if (level.getGameTime() % 20L == (pos.asLong() & 19L)) {
+        // Periodic connection refresh every 20 ticks (evenly distributed across all 20 game ticks)
+        if (level.getGameTime() % 20L == Math.floorMod(pos.asLong(), 20L)) {
             be.updateConnections();
         }
 
@@ -341,6 +400,9 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                     Direction dir = entry.getKey();
                     BlockPos targetPos = pos.relative(dir);
                     ResourceHandler<FluidResource> targetHandler = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, dir.getOpposite());
+                    if (targetHandler == null) {
+                        targetHandler = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, null);
+                    }
                     if (targetHandler != null) {
                         for (int i = 0; i < targetHandler.size(); i++) {
                             FluidResource res = targetHandler.getResource(i);
@@ -373,6 +435,9 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
 
                 if (connections.get(out) == PipeConnectionType.MACHINE) {
                     ResourceHandler<FluidResource> targetHandler = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, out.getOpposite());
+                    if (targetHandler == null) {
+                        targetHandler = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, null);
+                    }
                     if (targetHandler != null) {
                         try (Transaction tx = Transaction.openRoot()) {
                             int filled = targetHandler.insert(fluidRes, toTransfer, tx);
@@ -421,6 +486,9 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                     Direction dir = entry.getKey();
                     BlockPos targetPos = pos.relative(dir);
                     ResourceHandler<FluidResource> targetHandler = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, dir.getOpposite());
+                    if (targetHandler == null) {
+                        targetHandler = level.getCapability(Capabilities.Fluid.BLOCK, targetPos, null);
+                    }
                     if (targetHandler != null) {
                         try (Transaction tx = Transaction.openRoot()) {
                             int filled = targetHandler.insert(fluidRes, toTransfer, tx);
@@ -494,8 +562,18 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                         dispatched = true;
                     }
                 } else {
-                    // Try inserting into machine inventory via NeoForge Item capability
+                    // Try inserting into machine inventory via NeoForge Item capability (with side, null, and Container fallbacks)
                     ResourceHandler<ItemResource> destHandler = level.getCapability(Capabilities.Item.BLOCK, nextPos, targetDir.getOpposite());
+                    if (destHandler == null) {
+                        destHandler = level.getCapability(Capabilities.Item.BLOCK, nextPos, null);
+                    }
+                    if (destHandler == null && nextBe instanceof Container container && !(nextBe instanceof IndustrialPipeBlockEntity)) {
+                        if (container instanceof WorldlyContainer worldly) {
+                            destHandler = new WorldlyContainerWrapper(worldly, targetDir.getOpposite());
+                        } else {
+                            destHandler = VanillaContainerWrapper.of(container);
+                        }
+                    }
                     if (destHandler != null) {
                         ItemResource res = ItemResource.of(item.stack);
                         int count = item.stack.getCount();
@@ -533,6 +611,19 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                     Direction dir = entry.getKey();
                     BlockPos targetPos = pos.relative(dir);
                     ResourceHandler<ItemResource> sourceInv = level.getCapability(Capabilities.Item.BLOCK, targetPos, dir.getOpposite());
+                    if (sourceInv == null) {
+                        sourceInv = level.getCapability(Capabilities.Item.BLOCK, targetPos, null);
+                    }
+                    if (sourceInv == null) {
+                        BlockEntity tBe = level.getBlockEntity(targetPos);
+                        if (tBe instanceof Container container && !(tBe instanceof IndustrialPipeBlockEntity)) {
+                            if (container instanceof WorldlyContainer worldly) {
+                                sourceInv = new WorldlyContainerWrapper(worldly, dir.getOpposite());
+                            } else {
+                                sourceInv = VanillaContainerWrapper.of(container);
+                            }
+                        }
+                    }
                     if (sourceInv != null) {
                         for (int s = 0; s < sourceInv.size(); s++) {
                             ItemResource res = sourceInv.getResource(s);
@@ -656,6 +747,9 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             if (targetBe instanceof IndustrialPipeBlockEntity) continue;
 
             ResourceHandler<ItemResource> handler = level.getCapability(Capabilities.Item.BLOCK, targetPos, dir.getOpposite());
+            if (handler == null) {
+                handler = level.getCapability(Capabilities.Item.BLOCK, targetPos, null);
+            }
             if (handler != null) {
                 try (Transaction tx = Transaction.openRoot()) {
                     int accepted = handler.insert(ItemResource.of(stack), stack.getCount(), tx);
@@ -769,6 +863,8 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+        output.putString("PipeType", getPipeType().name());
+        output.putString("Material", getMaterial().name());
         output.putInt("FluidAmount", fluidTank.getAmount());
         output.putInt("RoundRobinIndex", roundRobinIndex);
         output.putInt("MergeOutput", mergeOutput.get3DDataValue());

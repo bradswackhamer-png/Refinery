@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.redstone.Orientation;
 import org.jspecify.annotations.Nullable;
 
 public class StorageTankDrainValveBlock extends Block implements EntityBlock {
@@ -105,6 +106,16 @@ public class StorageTankDrainValveBlock extends Block implements EntityBlock {
             be.disassemble();
         }
         return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation orientation, boolean isMoving) {
+        super.neighborChanged(state, level, pos, neighborBlock, orientation, isMoving);
+        if (!level.isClientSide() && state.getValue(ASSEMBLED)) {
+            if (level.getBlockEntity(pos) instanceof StorageTankBlockEntity be) {
+                be.refreshExportTargets();
+            }
+        }
     }
 
     @Nullable

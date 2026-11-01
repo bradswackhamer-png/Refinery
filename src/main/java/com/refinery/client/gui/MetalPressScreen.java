@@ -35,21 +35,21 @@ public class MetalPressScreen extends AbstractContainerScreen<MetalPressMenu> {
 
         if (!assembled) {
             statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0x882222;
+            statusColor = 0xFF882222;
         } else if (energy < 20) {
             statusText = Component.literal("NO POWER").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xEF4444;
+            statusColor = 0xFFEF4444;
         } else if (pressing) {
             statusText = Component.literal("STAMPING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xEA580C;
+            statusColor = 0xFFEA580C;
         } else {
             statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0x228822;
+            statusColor = 0xFF228822;
         }
 
         graphics.text(this.font, statusText, 102, 6, statusColor, false);
-        graphics.text(this.font, Component.literal("INGOTS").withStyle(ChatFormatting.DARK_GRAY), 44, 22, 0x444444, false);
-        graphics.text(this.font, Component.literal("PLATES").withStyle(ChatFormatting.DARK_GRAY), 116, 22, 0x444444, false);
+        graphics.text(this.font, Component.literal("INGOTS").withStyle(ChatFormatting.DARK_GRAY), 44, 22, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("PLATES").withStyle(ChatFormatting.DARK_GRAY), 116, 22, 0xFF444444, false);
     }
 
     @Override

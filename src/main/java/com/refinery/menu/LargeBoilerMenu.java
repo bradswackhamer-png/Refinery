@@ -83,7 +83,7 @@ public class LargeBoilerMenu extends AbstractContainerMenu {
     }
 
     public boolean isBurning() {
-        return getBurnTime() > 0;
+        return getBurnTime() > 0 && hasRedstone();
     }
 
     @Override

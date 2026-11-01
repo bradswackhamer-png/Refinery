@@ -40,19 +40,25 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StorageTankBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
+    public record ExportTarget(BlockPos pos, Direction sideTowardsTank) {}
+
     private boolean assembled = false;
     private StorageTankSize tankSize = StorageTankSize.SIZE_3X3X3;
     private StorageTankSize targetBlueprintSize = StorageTankSize.SIZE_3X3X3;
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
+    private int exportScanCooldown = 0;
+    private final List<ExportTarget> cachedExportTargets = new ArrayList<>();
 
     private final GenericFluidTank fluidTank = new GenericFluidTank(
             this::getCapacity,
@@ -60,6 +66,61 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
             true,
             this::onTankChanged
     );
+
+    private final ResourceHandler<FluidResource> exportOnlyHandler = new ResourceHandler<>() {
+        @Override
+        public int size() {
+            return fluidTank.size();
+        }
+
+        @Override
+        public FluidResource getResource(int index) {
+            return fluidTank.getResource(index);
+        }
+
+        @Override
+        public long getAmountAsLong(int index) {
+            return fluidTank.getAmountAsLong(index);
+        }
+
+        @Override
+        public int getAmountAsInt(int index) {
+            return fluidTank.getAmountAsInt(index);
+        }
+
+        @Override
+        public long getCapacityAsLong(int index, FluidResource resource) {
+            return fluidTank.getCapacityAsLong(index, resource);
+        }
+
+        @Override
+        public int getCapacityAsInt(int index, FluidResource resource) {
+            return fluidTank.getCapacityAsInt(index, resource);
+        }
+
+        @Override
+        public boolean isValid(int index, FluidResource resource) {
+            return false;
+        }
+
+        @Override
+        public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return 0; // Strict extract-only to prevent back-drain loops with connected pipes
+        }
+
+        @Override
+        public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return fluidTank.extract(index, resource, amount, transaction);
+        }
+    };
+
+    public ResourceHandler<FluidResource> getExportOnlyHandler() {
+        return this.exportOnlyHandler;
+    }
+
+    public void refreshExportTargets() {
+        this.exportScanCooldown = 0;
+    }
 
     // 2 item slots: 0 = Input Container, 1 = Output Container
     private final NonNullList<ItemStack> items = NonNullList.withSize(2, ItemStack.EMPTY);
@@ -162,12 +223,18 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
 
         if (!this.assembled) return;
 
-        // 3. Process Bucket / Container slots
+        // 3. Periodic export target scan (every 1 second)
+        if (--this.exportScanCooldown <= 0) {
+            this.exportScanCooldown = 20;
+            scanExportTargets(serverLevel);
+        }
+
+        // 4. Process Bucket / Container slots
         processContainerSlots();
 
-        // 4. Auto-Push into adjacent pipes & handlers (no extract pipe needed!)
+        // 5. Auto-Push into adjacent pipes & handlers (no extract pipe needed!)
         if (this.fluidTank.getAmount() > 0) {
-            pushFluidToNeighbors(serverLevel, pos);
+            pushFluidToNeighbors(serverLevel);
         }
     }
 
@@ -258,29 +325,82 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
         return ItemStack.EMPTY;
     }
 
+    private void scanExportTargets(ServerLevel level) {
+        this.cachedExportTargets.clear();
+        if (!this.assembled) return;
+
+        int r = this.tankSize.getRadius();
+        int h = this.tankSize.getHeight();
+        BlockPos base = this.worldPosition;
+
+        // 1. Underneath the tank floor (y = -1)
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                BlockPos target = base.offset(dx, -1, dz);
+                checkAndAddTarget(level, target, Direction.UP);
+            }
+        }
+
+        // 2. Around the 4 vertical perimeter walls (y in 0..h-1)
+        for (int y = 0; y < h; y++) {
+            // North face (z = -r - 1)
+            for (int dx = -r; dx <= r; dx++) {
+                BlockPos target = base.offset(dx, y, -r - 1);
+                checkAndAddTarget(level, target, Direction.SOUTH);
+            }
+            // South face (z = +r + 1)
+            for (int dx = -r; dx <= r; dx++) {
+                BlockPos target = base.offset(dx, y, r + 1);
+                checkAndAddTarget(level, target, Direction.NORTH);
+            }
+            // West face (x = -r - 1)
+            for (int dz = -r; dz <= r; dz++) {
+                BlockPos target = base.offset(-r - 1, y, dz);
+                checkAndAddTarget(level, target, Direction.EAST);
+            }
+            // East face (x = +r + 1)
+            for (int dz = -r; dz <= r; dz++) {
+                BlockPos target = base.offset(r + 1, y, dz);
+                checkAndAddTarget(level, target, Direction.WEST);
+            }
+        }
+    }
+
+    private void checkAndAddTarget(ServerLevel level, BlockPos target, Direction sideTowardsTank) {
+        var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, sideTowardsTank);
+        if (handler == null) {
+            handler = level.getCapability(Capabilities.Fluid.BLOCK, target, null);
+        }
+        if (handler != null) {
+            this.cachedExportTargets.add(new ExportTarget(target, sideTowardsTank));
+        }
+    }
+
     /**
      * Auto-pushes fluid into adjacent fluid handlers or regular liquid pipes!
-     * When attaching a regular fluid pipe beneath or adjacent to the drain valve,
+     * When attaching a regular fluid pipe beneath the drain valve or against any casing of the tank,
      * fluid flows directly into the pipe without requiring an extract pipe.
      */
-    protected void pushFluidToNeighbors(ServerLevel level, BlockPos pos) {
+    protected void pushFluidToNeighbors(ServerLevel level) {
         Fluid stored = this.fluidTank.getStoredFluid();
         if (stored == Fluids.EMPTY || this.fluidTank.getAmount() <= 0) return;
+        if (this.cachedExportTargets.isEmpty()) return;
 
         FluidResource resource = FluidResource.of(stored);
+        int toPush = Math.min(this.fluidTank.getAmount(), 1000); // Up to 1000 mB/t
+        int remainingPush = toPush;
 
-        // Prioritize pushing downward into pipes underneath the tank floor, then horizontal sides
-        Direction[] dirs = {Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-
-        for (Direction dir : dirs) {
-            BlockPos target = pos.relative(dir);
-            var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, dir.getOpposite());
+        for (int idx = 0; idx < this.cachedExportTargets.size(); idx++) {
+            ExportTarget target = this.cachedExportTargets.get(idx);
+            var handler = level.getCapability(Capabilities.Fluid.BLOCK, target.pos(), target.sideTowardsTank());
+            if (handler == null) {
+                handler = level.getCapability(Capabilities.Fluid.BLOCK, target.pos(), null);
+            }
             if (handler != null) {
-                int toPush = Math.min(this.fluidTank.getAmount(), 1000); // Up to 1000 mB/t
                 int inserted = 0;
                 try (Transaction tx = Transaction.openRoot()) {
                     for (int i = 0; i < handler.size(); i++) {
-                        int space = toPush - inserted;
+                        int space = remainingPush - inserted;
                         if (space <= 0) break;
                         int ins = handler.insert(i, resource, space, tx);
                         inserted += ins;
@@ -288,7 +408,8 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
                     if (inserted > 0) {
                         tx.commit();
                         this.fluidTank.setAmount(this.fluidTank.getAmount() - inserted);
-                        if (this.fluidTank.getAmount() <= 0) break;
+                        remainingPush -= inserted;
+                        if (remainingPush <= 0 || this.fluidTank.getAmount() <= 0) break;
                     }
                 }
             }
@@ -319,6 +440,7 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
             if (valid) {
                 newState = newState.setValue(StorageTankDrainValveBlock.BLUEPRINT, false);
                 linkFillValve();
+                this.exportScanCooldown = 0;
                 if (this.level instanceof ServerLevel serverLevel) {
                     serverLevel.playSound(null, this.worldPosition, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.9f, 1.1f);
                     serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
@@ -335,6 +457,7 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
     public void disassemble() {
         if (this.assembled) {
             this.assembled = false;
+            this.cachedExportTargets.clear();
             updateMemberBlockStates(false);
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState state = getBlockState();

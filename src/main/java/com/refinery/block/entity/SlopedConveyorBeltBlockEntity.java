@@ -44,10 +44,10 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
         double stepX = facing.getStepX() * beltSpeed;
         double stepZ = facing.getStepZ() * beltSpeed;
 
-        // Query items within the block volume (Y = 0.0 .. 1.8 to capture items moving along slope)
+        // Query items within the block volume (expanded bounds capture items smoothly entering and exiting slope)
         AABB beltBounds = new AABB(
-                pos.getX() - 0.1, pos.getY() - 0.1, pos.getZ() - 0.1,
-                pos.getX() + 1.1, pos.getY() + 1.6, pos.getZ() + 1.1
+                pos.getX() - 0.20, pos.getY() - 0.15, pos.getZ() - 0.20,
+                pos.getX() + 1.20, pos.getY() + 1.80, pos.getZ() + 1.20
         );
 
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, beltBounds);
@@ -60,14 +60,14 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
             // Calculate progress t in [0..1] along facing direction
             double relX = itemEntity.getX() - pos.getX();
             double relZ = itemEntity.getZ() - pos.getZ();
-            double t = switch (facing) {
+            double rawT = switch (facing) {
                 case NORTH -> 1.0 - relZ;
                 case SOUTH -> relZ;
                 case WEST  -> 1.0 - relX;
                 case EAST  -> relX;
                 default    -> 0.5;
             };
-            t = Math.max(0.0, Math.min(1.0, t));
+            double t = Math.max(0.0, Math.min(1.0, rawT));
 
             // Surface height:
             // UP: from y + 0.2875 at t=0 to y + 1.2875 at t=1
@@ -76,8 +76,11 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
                     ? pos.getY() + 0.2875 + t * 1.0
                     : pos.getY() + 1.2875 - t * 1.0;
 
+            // Direct vertical alignment onto the inclined belt surface
             double diffY = targetY - itemEntity.getY();
-            double velY = Math.max(-0.15, Math.min(0.20, diffY * 0.45));
+            if (Math.abs(diffY) > 0.02) {
+                itemEntity.setPos(itemEntity.getX(), targetY, itemEntity.getZ());
+            }
 
             // Centering along perpendicular axis
             double centerVelX = 0.0;
@@ -90,7 +93,9 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
                 centerVelZ = (targetZ - itemEntity.getZ()) * 0.15;
             }
 
-            itemEntity.setDeltaMovement(stepX + centerVelX, velY, stepZ + centerVelZ);
+            double verticalSpeed = (slope == SlopedConveyorBeltBlock.SlopeDirection.UP) ? beltSpeed : -beltSpeed;
+            itemEntity.setDeltaMovement(stepX + centerVelX, verticalSpeed, stepZ + centerVelZ);
+            itemEntity.setOnGround(true);
 
             if (!level.isClientSide()) {
                 checkInventoryInsertion(level, pos, facing, slope, itemEntity, t);
@@ -110,13 +115,18 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
 
         // If target is another conveyor, let it roll smoothly
         BlockState targetState = level.getBlockState(targetPos);
-        if (targetState.getBlock() instanceof ConveyorBeltBlock || targetState.getBlock() instanceof SlopedConveyorBeltBlock) {
+        if (targetState.getBlock() instanceof ConveyorBeltBlock
+                || targetState.getBlock() instanceof SlopedConveyorBeltBlock
+                || targetState.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock) {
             return;
         }
 
         // Also check direct forward block
         BlockPos directForward = pos.relative(facing);
-        if (level.getBlockState(directForward).getBlock() instanceof ConveyorBeltBlock || level.getBlockState(directForward).getBlock() instanceof SlopedConveyorBeltBlock) {
+        BlockState directForwardState = level.getBlockState(directForward);
+        if (directForwardState.getBlock() instanceof ConveyorBeltBlock
+                || directForwardState.getBlock() instanceof SlopedConveyorBeltBlock
+                || directForwardState.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock) {
             return;
         }
 

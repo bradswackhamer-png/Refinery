@@ -417,6 +417,44 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
 
         Direction facing = getAttachedFace();
 
+        // Auto-correct if gate is attached to a pipe end-cap or active arm instead of a radial cylinder side
+        BlockEntity hostBe = level().getBlockEntity(pipePos);
+        if (hostBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipeBe && getTier() != GateTier.BLANK) {
+            boolean connUp = pipeBe.getConnection(Direction.UP).isConnected();
+            boolean connDown = pipeBe.getConnection(Direction.DOWN).isConnected();
+            boolean connNorth = pipeBe.getConnection(Direction.NORTH).isConnected();
+            boolean connSouth = pipeBe.getConnection(Direction.SOUTH).isConnected();
+            boolean connWest = pipeBe.getConnection(Direction.WEST).isConnected();
+            boolean connEast = pipeBe.getConnection(Direction.EAST).isConnected();
+
+            boolean verticalRun = connUp || connDown;
+            boolean zRun = connNorth || connSouth;
+            boolean xRun = connWest || connEast;
+            int activeAxes = (verticalRun ? 1 : 0) + (zRun ? 1 : 0) + (xRun ? 1 : 0);
+            Direction.Axis singleAxis = (activeAxes == 0) ? Direction.Axis.Z
+                    : (activeAxes == 1 ? (verticalRun ? Direction.Axis.Y : (zRun ? Direction.Axis.Z : Direction.Axis.X)) : null);
+
+            if (pipeBe.getConnection(facing).isConnected() || (singleAxis != null && facing.getAxis() == singleAxis)) {
+                List<PipeGateEntity> siblings = level().getEntitiesOfClass(PipeGateEntity.class, new AABB(pipePos));
+                for (Direction candidate : Direction.values()) {
+                    if (pipeBe.getConnection(candidate).isConnected()) continue;
+                    if (singleAxis != null && candidate.getAxis() == singleAxis) continue;
+                    boolean taken = false;
+                    for (PipeGateEntity sib : siblings) {
+                        if (sib != this && sib.getAttachedFace() == candidate) {
+                            taken = true;
+                            break;
+                        }
+                    }
+                    if (!taken) {
+                        snapToPipe(pipePos, candidate);
+                        facing = candidate;
+                        break;
+                    }
+                }
+            }
+        }
+
         // Periodically evaluate conditions (every 4 ticks)
         this.evalTimer++;
         if (this.evalTimer >= 4) {

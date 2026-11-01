@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.24.jar`
+`refinery-1.8.40.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.24 (NeoForge 26.3)`
+`Industrial Refinery 1.8.40 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,195 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.40
+
+### What's New in v1.8.40:
+- **Industrial Diesel Generator (1x2x2 Compact Power Plant)**:
+  - Added the **Industrial Diesel Generator** (`refinery:diesel_generator`): a heavy-duty containerized sound-attenuated diesel power plant producing FE/RF from refined Diesel.
+  - **Compact 2-Block Footprint (Non-Multiblock)**: Placed as a single block item that automatically forms a 2-block wide footprint ($1\times 2\times 2$ max boundary) with Left (Master) and Right (Slave) sections. Breaking either cleanly drops 1 generator item and drops internal inventory contents.
+  - **3D Monolithic Model & POM Shading**: Modeled after heavy commercial generator skids (Triton / CAT style): heavy black C-channel steel skid with forklift tine pockets and yellow tie-down tags, off-white powder-coated acoustic weather canopy (`#E4E2DA`) with beveled drip-edge roof, digital operator control panel with glowing cyan LCD telemetry readout and red mushroom E-Stop button, bold black TRITON power logo, Blue Tech ECO Products badge, Tier 4 Final ribbon, access doors with black hinges, handles, and louvers, rear high-voltage connection box with 480V danger flash decal, and top exhaust muffler stack with dynamic animated rain-cap flapper.
+  - **Power Generation & Fluid Telemetry**: Generates **256 FE/t** of continuous electrical energy. Internal 8,000 mB diesel tank and 500,000 FE buffer. Consumes 1 mB diesel every 4 ticks (1,000 FE/mB; 1 bucket provides 200s / 4,000 ticks of full power).
+  - **Auto-Push Energy Output**: Automatically scans all adjacent faces across both blocks to push up to **1,024 FE/t** into connected cables, machines, or energy grids.
+  - **Smart Idling**: Shuts off fuel consumption when the internal capacitor is full, preventing fuel waste.
+  - **Configurable Redstone Modes**: Always On, Active High (redstone signal required), or Active Low (emergency backup generator mode).
+  - **Interactive Telemetry GUI**: Telemetry display with animated diesel level, energy buffer bar, digital status readout, and a one-click redstone control toggle button.
+
+---
+
+# Industrial Refinery v1.8.39
+
+### What's New in v1.8.39:
+- **Tin Ore, Deepslate Tin Ore & Raw Tin Generation**:
+  - Re-introduced subterranean **Tin Ore** and **Deepslate Tin Ore** naturally generating across all Overworld biomes.
+  - Generates with copper rarity and distribution: 16 veins per chunk, triangle distribution between $Y = -16$ and $Y = 112$ (peak at $Y = 48$), vein size 10.
+  - Added retroactive chunk generation (`TinRetrogenHandler`): automatically populates newly loaded chunks in pre-existing worlds with tin veins without requiring a new world.
+  - Added **Raw Tin** drop item with Fortune and Silk Touch support, plus **Block of Raw Tin** (9x storage).
+  - Added **Block of Tin** and **Block of Bronze** for full storage block compression/decompression.
+  - Full Minecraft 26.3 item definition architecture (`assets/refinery/items/<id>.json`), blockstates, models, textures, and common tag registrations (`#c:ores/tin`, `#c:raw_materials/tin`, `#c:storage_blocks/*`).
+- **Bronze 1:1 Forging Ratio**:
+  - Updated shapeless alloy crafting recipe: **1 Copper Ingot + 1 Tin Ingot $\rightarrow$ 2 Bronze Ingots** (and **1 Copper Dust + 1 Tin Dust $\rightarrow$ 2 Bronze Dust**).
+  - Compatible with common tag ingots and dusts (`#c:ingots/copper`, `#c:ingots/tin`, `#c:dusts/copper`, `#c:dusts/tin`).
+- **Metallurgy & Processing Integration**:
+  - **Electric Arc Melter**: Melts Raw Tin, Tin Ingot, Tin Ore, Deepslate Tin Ore, and Bronze Ingot into Molten Tin and Molten Bronze.
+  - **Casting Press**: Casts Molten Tin into Tin Ingots and Molten Bronze into Bronze Ingots.
+  - **Metal Press**: Forges Tin Ingot $\rightarrow$ Tin Plate and Bronze Ingot $\rightarrow$ Bronze Plate.
+  - **Industrial Grinder**: Crushes Tin Ore, Deepslate Tin Ore, and Raw Tin into 2x Tin Dust.
+  - Smelting and blasting recipes for Raw Tin, Tin Ore, and Deepslate Tin Ore into Tin Ingots.
+
+---
+
+# Industrial Refinery v1.8.38
+
+### What's New in v1.8.38:
+- **Pipe State & 3D Elbow Connection Retention on Server Restart**:
+  - Fixed a critical deserialization bug in `IndustrialPipeBlockEntity`: the `BlockEntityType` factory constructor `IndustrialPipeBlockEntity(BlockPos pos, BlockState state)` previously hardcoded `IndustrialPipeType.FLUID` and `IndustrialPipeMaterial.STEEL`.
+  - When chunks reloaded from disk on server restart or transmitted over the network to the client, all item pipes (such as Copper, Iron, Steel, Wood, Gold, Diamond, Emerald) were mistakenly instantiated as fluid pipes.
+  - When connection checks subsequently ran, `pipeType.handlesItems()` evaluated to `false`, causing pipes to sever their connections to item machines (conveyor belts, hoppers, chests, multiblock ports) and visually revert from 3D corner elbows to straight, dead-end capped runs.
+  - Updated the 2-argument constructor and getters to dynamically resolve `pipeType` and `material` directly from `state.getBlock()`, ensuring pipes retain their exact type, material, fluid capacity, and item behavior across chunk loads and server restarts.
+  - Guarded against block entity initialization races during world startup: if a neighbor block possesses a block entity (`targetState.hasBlockEntity()`) that has not finished instantiating (`level.getBlockEntity(targetPos) == null`), existing saved connections are safely preserved.
+  - Added explicit `PipeType` and `Material` NBT tags in `saveAdditional()` for robust save-game persistence.
+
+---
+
+# Industrial Refinery v1.8.37
+
+### What's New in v1.8.37:
+- **Pipe Texture Cleanup & Markings Removal**:
+  - Removed circular flange and bolt emblem markings that were previously baked into the top-left region of the pipe texture generator (`PipeAssetGenerator.java`).
+  - Regenerated all 12 pipe textures (`steel`, `iron`, `copper`, `wood`, `gold`, `diamond`, `emerald`, `brass`, `cast_iron`, `void`, `quartz`) to have clean, seamless, uninterrupted cylindrical metal shading.
+- **True 1/8-Diameter Clear Sight-Glass Inspection Strips**:
+  - Engineered dedicated longitudinal apertures on all 4 cardinal faces of pipe cylinders of width exactly $\frac{1}{8}$ of the pipe diameter ($0.050$ blocks wide).
+  - Metal walls now terminate cleanly at the strip borders, allowing an unobstructed line of sight straight into the hollow pipe interior without opaque depth buffer occlusion.
+  - Across the apertures, translucent sight-glass quads with metallic bevel edge frames (`pipe_window.png`) render flush with the pipe surface with zero z-fighting and no protruding ridges.
+  - Live traveling items and colored fluid levels are now 100% visible moving and flowing through the pipe from all viewing angles.
+
+---
+
+# Industrial Refinery v1.8.36
+
+### What's New in v1.8.36:
+- **Pipe Connection Persistence Across Server Restarts**:
+  - Fixed an issue where item pipes lost their connections to machines (chests, barrels, hoppers, furnaces, multiblock ports, and machines) upon restarting the server or reloading chunks.
+  - Guarded `updateConnections()` against chunk loading races: if an adjacent block's chunk is not yet loaded (`!level.isLoaded(targetPos)`), the existing connection loaded from NBT is preserved rather than prematurely wiped to `NONE`.
+  - Added multi-layered machine and container capability resolution (`isItemMachine` / `isFluidMachine`): pipes check directional side capabilities (`opposite`), unsided capabilities (`null`), `Container` / `WorldlyContainer` instances, and known multiblock member/port blocks. Multiblock machine ports undergoing structure assembly or delayed controller linkage no longer cause connected pipes to disconnect.
+  - Added robust fallback wrappers (`VanillaContainerWrapper` and `WorldlyContainerWrapper`) during item dispatch insertion and active machine extraction in `tickItems()`, as well as `null`-side capability query in `getGoldInsertionDirection()`, guaranteeing seamless item transfer to all vanilla and modded containers.
+- **Pipe Placement & Removal Neighbor Connection Snapping**:
+  - Fixed an issue where breaking a pipe left adjacent pipes in a stale connection state, preventing newly placed adjacent pipes from connecting and forcing players to replace the whole pipe line.
+  - Implemented `affectNeighborsAfterRemoval` on `IndustrialPipeBlock` to immediately notify and update connections on all adjacent pipes when a pipe is broken or deleted.
+  - Implemented `setPlacedBy` and scheduled placement ticks (`level.scheduleTick(pos, this, 1)`) on `IndustrialPipeBlock` so newly placed pipes immediately update themselves and trigger connection updates on all neighboring pipes and machines.
+  - Corrected the periodic pipe refresh schedule from `pos.asLong() & 19L` to `Math.floorMod(pos.asLong(), 20L)`, ensuring pipe connection checks are evenly and reliably evaluated across all 20 game ticks per second.
+
+---
+
+# Industrial Refinery v1.8.35
+
+### What's New in v1.8.35:
+- **Multiblock Storage Tank Auto-Export & Pipe Connectivity**:
+  - Fixed an issue where multiblock liquid storage tanks failed to auto-export fluids to connected pipes even though fluid reception via the top fill valve functioned properly.
+  - Resolved an internal back-drain loop on the drain valve (`STORAGE_TANK_DRAIN_VALVE_BE`): replaced the bidirectional handler with an extract-only handler (`getExportOnlyHandler()`) that rejects fluid insertion (`isValid = false`, `insert = 0`). Connected pipes receiving pushed fluid can no longer immediately pump the fluid backward into the tank, allowing fluid to freely flow downstream.
+  - Registered `Capabilities.Fluid.BLOCK` on all multiblock tank casing blocks (`STORAGE_TANK_CASING`), delegating fluid extraction to the assembled tank controller.
+  - Updated `IndustrialPipeBlockEntity` connection detection to recognize block-level capabilities on blocks without block entities (such as `StorageTankCasingBlock`), allowing fluid pipes to cleanly connect with visible 3D coupling arms to any casing face around the tank.
+  - Expanded `StorageTankBlockEntity.pushFluidToNeighbors()` from checking solely beneath the bottom center drain valve to scanning all exterior adjacent block positions around the entire tank floor and perimeter walls, caching valid fluid handlers and pushing up to 1,000 mB/t to any connected pipe network.
+  - Added instantaneous connection refresh on `StorageTankCasingBlock` and `StorageTankDrainValveBlock` neighbor changes so newly placed pipes immediately receive exported fluid without delay.
+
+---
+
+# Industrial Refinery v1.8.34
+
+### What's New in v1.8.34:
+- **Boiler Redstone Shutdown & Meltdown Prevention**:
+  - Fixed a critical safety bug where solid fuel boilers (`SmallBoilerControllerBlockEntity`, `LargeBoilerControllerBlockEntity`) failed to shut down when their redstone signal was turned off, leading to unchecked overheating and catastrophic explosions when water was depleted.
+  - Active boiling and steam generation now strictly require an active redstone signal in addition to burning fuel. When redstone power is removed, active boiling ceases immediately, halting water consumption and steam production.
+  - Boilers without redstone power or fuel automatically enter idle cooldown: firebox flames extinguish, active blockstates disable, and any accumulated overheat ticks steadily dissipate.
+  - Diesel boilers (`SmallDieselBoilerControllerBlockEntity`, `LargeDieselBoilerControllerBlockEntity`) feature accelerated cooldown dissipation and complete firebox flame deactivation when unpowered.
+  - Enhanced multiblock redstone connectivity (`hasRedstone()`): all boilers now check for redstone power across the controller block as well as all multiblock structure blocks and ports (water input, fuel input, steam output), enabling full remote control from anywhere on the structure.
+  - Synchronized boiler GUI status, hearth flame viewports, and redstone indicator lamps with real-time machine power state.
+
+---
+
+# Industrial Refinery v1.8.33
+
+### What's New in v1.8.33:
+- **Continuous 3D Surface-Mounted Pipe Wires**:
+  - Replaced the floating 2D wire item icons with continuous 3D surface-mounted wire conduits in `PipeWireEntityRenderer`.
+  - When pipe wires (Red, Blue, Green, Yellow) are attached to adjacent pipes in a network, the wires now dynamically trace along the outer cylinder of the pipes and connect seamlessly across pipe block boundaries without gaps.
+  - Dedicated 4-Quadrant Conduit Geometry: Each of the 4 wire colors occupies a dedicated diagonal quadrant along the pipe's outer cylinder, allowing all 4 wire lines (Red, Blue, Green, Yellow) to run parallel along the same pipe simultaneously without colliding with each other or occluding gate faces and sight glass strips.
+  - 3D Wire Hub Collars & Corner Routing: Smoothly connects multi-way branch intersections, right-angle pipe corners, and attached gate terminal bases.
+  - Signal Illumination: Active wire signals emit vibrant full-bright glowing neon light (`0x00F000F0`).
+
+# Industrial Refinery v1.8.32
+
+### What's New in v1.8.32:
+- **Sloped Conveyor Belt Item Ascent & Collision Resolution**:
+  - Fixed an issue where items traveling on conveyor belts got permanently stuck at the bottom of sloped conveyors (`refinery:sloped_conveyor_belt`).
+  - Replaced the rigid $16\times 16\times 16$ solid cube collision shape in `SlopedConveyorBeltBlock` with directional stepped collision geometry for players/mobs and `Shapes.empty()` for `ItemEntity`, allowing items to freely enter and glide up the slope without hitting vertical block collision walls.
+  - Locked item vertical positioning directly to the inclined surface height (`targetY = yEntry + t * 1.0`), preventing gravity from pulling items downward beneath the conveyor.
+  - Implemented 45-degree upward velocity matching the belt speed so client-side interpolation renders smooth 60fps item transit.
+  - Updated `ConveyorBeltBlockEntity` and `RightAngleConveyorBeltBlockEntity` boundary checks to recognize `SlopedConveyorBeltBlock` (both directly adjacent and stepped below) so items are handed off smoothly into slopes instead of attempting container insertion.
+
+# Industrial Refinery v1.8.31
+
+### What's New in v1.8.31:
+- **Industrial Grinder Hopper Bounding Box Containment**:
+  - Tightly bounded the top feed hopper collection box (`hopperBox`) in `IndustrialGrinderControllerBlockEntity` to strictly cover the open funnel mouth ($Y \in [2.20, 3.60]$ above base, horizontal radius $0.40$ blocks centered at $(0, 2, 1)$).
+  - Eliminated the oversized bounding volume inflation that previously allowed the input hopper to reach downward into $Y=1..0$ and rightward into $X=1$, which sucked items right back off the output hopper, output chute, and discharge conveyor.
+  - Cleaned up export targets to remove redundant controller block positions, ensuring auto-export exclusively feeds from the output port and right-hand discharge chute.
+- **Output Conveyor Downstream Connection Validation**:
+  - The Industrial Grinder now verifies downstream connectivity before discharging products onto an adjacent conveyor belt (`ConveyorBeltBlock`, `SlopedConveyorBeltBlock`, `RightAngleConveyorBeltBlock`).
+  - Output items will only export onto an adjacent conveyor if that conveyor is actively connected to another conveyor, an item pipe (`IndustrialPipeBlock` / `IndustrialPipeBlockEntity`), or a receiving machine/container. If a conveyor line terminates in open air without a recipient, items remain safely stored inside the grinder's internal output slots.
+  - Added belt vacancy detection: the grinder emits 1 item at a time onto the receiving conveyor belt only when the receiving belt section is clear, preventing items from stacking up in excessive entity clusters.
+
+# Industrial Refinery v1.8.30
+
+### What's New in v1.8.30:
+- **Fluid Pump Back-Draining & Pipe Leak Resolution**:
+  - The pumped fluid output reservoir across all pump variants (`Electric`, `Diesel`, `Coal`) is now strictly extract-only (`insert = 0`). Pipes can pull fluid out, but can never push fluid backward into the pump.
+  - Eliminated the continuous push-and-drain loop with fluid pipes that previously caused the Electric Fluid Pump to burn 400 FE every second even when the pipe network was full.
+  - Decremented `pumpCooldown` cleanly every tick regardless of buffer capacity, ensuring the pump idles in `[TANK FULL]` with zero energy consumption when the output network is backed up.
+  - Overrode `onEnergyChanged()` in `ElectricFluidPumpBlockEntity.energyStorage` so the internal buffer syncs immediately upon receiving energy from power cables, and increased `maxInsert` to 1,000 FE/t.
+  - Fixed a `ClassCastException` in `DieselFluidPumpBlockEntity.getFluidHandler` and added a dedicated `DieselFuelHandler` supporting pipe insertion of Diesel, Gasoline, and Ethanol fuels into the engine tank.
+
+# Industrial Refinery v1.8.29
+
+### What's New in v1.8.29:
+- **Automated Planter Sapling Spacing**:
+  - The Automated Planter now spaces out tree saplings so no sapling is placed directly adjacent (orthogonally or diagonally) to another sapling or tree trunk.
+  - Crops (wheat, potatoes, carrots, beetroots, melon/pumpkin stems) continue dense planting across farmland.
+- **Pipe Gate Placement Snapping on Occupied Faces**:
+  - Clicking on a pipe face that is already occupied by a gate automatically snaps to the closest unoccupied radial side facing the player.
+
+# Industrial Refinery v1.8.28
+
+### What's New in v1.8.28:
+- **Pipe Sight-Glass Inspection Strips & Flow Visualization**:
+  - Integrated longitudinal sight-glass inspection strips along pipe lengths.
+  - Live traveling items and fluid levels are clearly visible flowing through the pipes in real-time.
+
+# Industrial Refinery v1.8.27
+
+### What's New in v1.8.27:
+- **Pipe Gate 3D Saddle Orientation & Smart Radial Face Snapping**:
+  - Fixed `PipeGateEntityRenderer` rotations for `WEST` (`270°`), `EAST` (`90°`), `UP` (`270°`), and `DOWN` (`90°`) so the front gate face (`+Z`) always points outward and the concave saddle (`-Z`) always wraps inward around the pipe on all 6 faces.
+  - Unified local-X / local-Y pipe axis mapping so gates on vertical pipes, horizontal pipes, and T-junctions always curve perpendicular to the cylinder axis.
+  - Added smart radial face snapping (`PipeGateItem.resolveBestPipeFace`) and live tick auto-correction so clicking a pipe's flat end-cap or connected arm snaps the gate onto the nearest open radial side of the pipe cylinder.
+
+# Industrial Refinery v1.8.26
+
+### What's New in v1.8.26:
+- **Diamond Pipe 3D Color-Coded Connection Bands & Whitelist GUI Legend**:
+  - Added 3D color-coded collar bands around the ends of every connected arm on Diamond Pipes (`DOWN` = Green, `UP` = Yellow, `NORTH` = Blue, `SOUTH` = Red, `WEST` = Purple, `EAST` = White) that correspond directly with the 6-row whitelist sorting GUI.
+  - Upgraded the Diamond Pipe whitelist GUI (`DiamondPipeScreen`) with bold color-coded row bands, slot row tinting, side direction tabs (`DOWN`, `UP`, `NORTH`, `SOUTH`, `WEST`, `EAST`), and hover tooltips.
+
+# Industrial Refinery v1.8.25
+
+### What's New in v1.8.25:
+- **Minecraft 26.3 GUI Mouse Button Fix (`InputConstants.MOUSE_BUTTON_LEFT = 1`)**:
+  - Fixed unresponsive GUI buttons across the Auto-Harvester, Auto-Planter, Fluid Pumps (Coal, Diesel, Electric), Storage Tank, and Pipe Logic Gates.
+  - Updated `mouseClicked` handlers to check Minecraft 26.3's 1-indexed mouse button constants (`MOUSE_BUTTON_LEFT = 1`, `MOUSE_BUTTON_RIGHT = 3`).
+- **GUI Status Text Alpha Visibility & Texture Cleanup**:
+  - Added opaque alpha (`0xFF000000`) to all 24-bit RGB text colors across all machine screens and Gate trigger/action labels so status text renders visibly in Minecraft 26.3.
+  - Cleaned stray background artifact behind the radius `[+]` button in `auto_harvester.png` and `auto_planter.png`.
+
 # Industrial Refinery v1.8.24
 
 ### What's New in v1.8.24:

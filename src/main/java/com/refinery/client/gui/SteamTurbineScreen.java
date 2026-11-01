@@ -34,19 +34,19 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
 
         if (!assembled) {
             statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0x882222;
+            statusColor = 0xFF882222;
         } else if (active) {
             statusText = Component.literal("SPINNING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xEA580C;
+            statusColor = 0xFFEA580C;
         } else {
             statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0x228822;
+            statusColor = 0xFF228822;
         }
 
         graphics.text(this.font, statusText, 110, 6, statusColor, false);
-        graphics.text(this.font, Component.literal("STEAM").withStyle(ChatFormatting.DARK_GRAY), 22, 10, 0x444444, false);
-        graphics.text(this.font, Component.literal("WATER").withStyle(ChatFormatting.DARK_GRAY), 66, 10, 0x444444, false);
-        graphics.text(this.font, Component.literal("POWER").withStyle(ChatFormatting.DARK_GRAY), 120, 10, 0x444444, false);
+        graphics.text(this.font, Component.literal("STEAM").withStyle(ChatFormatting.DARK_GRAY), 22, 10, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("WATER").withStyle(ChatFormatting.DARK_GRAY), 66, 10, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("POWER").withStyle(ChatFormatting.DARK_GRAY), 120, 10, 0xFF444444, false);
     }
 
     @Override

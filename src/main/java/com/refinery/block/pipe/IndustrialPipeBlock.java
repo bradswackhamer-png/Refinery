@@ -4,6 +4,8 @@ import com.refinery.RefineryMod;
 import com.refinery.block.entity.IndustrialPipeBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -108,16 +110,44 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         super.onPlace(state, level, pos, oldState, isMoving);
-        if (!level.isClientSide()) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof IndustrialPipeBlockEntity pipeBe) {
-                pipeBe.updateConnections();
+        if (!level.isClientSide() && !state.is(oldState.getBlock())) {
+            level.scheduleTick(pos, this, 1);
+        }
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        super.tick(state, level, pos, random);
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof IndustrialPipeBlockEntity pipeBe) {
+            pipeBe.updateConnections();
+            for (Direction dir : Direction.values()) {
+                BlockEntity nBe = level.getBlockEntity(pos.relative(dir));
+                if (nBe instanceof IndustrialPipeBlockEntity neighborPipe) {
+                    neighborPipe.updateConnections();
+                }
             }
         }
     }
 
     @Override
+    public void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
+        super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockEntity nBe = level.getBlockEntity(neighborPos);
+            if (nBe instanceof IndustrialPipeBlockEntity neighborPipe) {
+                neighborPipe.updateConnections();
+            }
+        }
+        level.updateNeighborsAt(pos, this);
+    }
+
+    @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.getItem() instanceof com.refinery.item.PipeGateItem || stack.getItem() instanceof com.refinery.item.PipeWireItem) {
+            return InteractionResult.PASS;
+        }
         if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
             if (!level.isClientSide()) {
                 BlockEntity be = level.getBlockEntity(pos);
@@ -185,11 +215,22 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        if (this.material == IndustrialPipeMaterial.QUARTZ && placer != null && !level.isClientSide()) {
+        if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof IndustrialPipeBlockEntity pipeBe) {
-                pipeBe.setMergeOutput(placer.getDirection());
+                if (this.material == IndustrialPipeMaterial.QUARTZ && placer != null) {
+                    pipeBe.setMergeOutput(placer.getDirection());
+                }
+                pipeBe.updateConnections();
+                for (Direction dir : Direction.values()) {
+                    BlockPos neighborPos = pos.relative(dir);
+                    BlockEntity nBe = level.getBlockEntity(neighborPos);
+                    if (nBe instanceof IndustrialPipeBlockEntity neighborPipe) {
+                        neighborPipe.updateConnections();
+                    }
+                }
             }
+            level.updateNeighborsAt(pos, this);
         }
     }
 

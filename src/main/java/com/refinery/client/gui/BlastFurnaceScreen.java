@@ -27,9 +27,9 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         super.extractLabels(graphics, mouseX, mouseY);
 
         // Section Headers
-        graphics.text(this.font, Component.literal("IRON").withStyle(ChatFormatting.DARK_GRAY), 20, 11, 0x444444, false);
-        graphics.text(this.font, Component.literal("FUEL").withStyle(ChatFormatting.DARK_GRAY), 64, 11, 0x444444, false);
-        graphics.text(this.font, Component.literal("STEEL").withStyle(ChatFormatting.DARK_GRAY), 128, 11, 0x444444, false);
+        graphics.text(this.font, Component.literal("IRON").withStyle(ChatFormatting.DARK_GRAY), 20, 11, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("FUEL").withStyle(ChatFormatting.DARK_GRAY), 64, 11, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("STEEL").withStyle(ChatFormatting.DARK_GRAY), 128, 11, 0xFF444444, false);
 
         // Multiblock Status Header
         boolean assembled = this.menu.isAssembled();
@@ -40,13 +40,13 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
 
         if (!assembled) {
             statusText = Component.literal("INCOMPLETE").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0x882222;
+            statusColor = 0xFF882222;
         } else if (smelting) {
             statusText = Component.literal("FORGING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xEA580C;
+            statusColor = 0xFFEA580C;
         } else {
             statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0x228822;
+            statusColor = 0xFF228822;
         }
 
         graphics.text(this.font, statusText, 106, 6, statusColor, false);

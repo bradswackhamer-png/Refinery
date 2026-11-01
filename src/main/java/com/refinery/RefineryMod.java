@@ -23,6 +23,9 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.IEventBus;
@@ -58,6 +61,11 @@ public class RefineryMod {
     public static final java.util.function.Supplier<AttachmentType<Boolean>> OIL_CHUNK_BURNT = ATTACHMENT_TYPES.register(
             "oil_chunk_burnt",
             () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL.fieldOf("burnt")).build()
+    );
+
+    public static final java.util.function.Supplier<AttachmentType<Boolean>> TIN_CHUNK_RETROGEN = ATTACHMENT_TYPES.register(
+            "tin_chunk_retrogen",
+            () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL.fieldOf("retrogen")).build()
     );
 
     public static final DeferredHolder<EntityType<?>, EntityType<PipeGateEntity>> PIPE_GATE_ENTITY =
@@ -306,6 +314,27 @@ public class RefineryMod {
             OilSandBlock::new);
     public static final DeferredItem<BlockItem> OIL_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_sand", OIL_SAND);
 
+    // === Tin & Bronze Ores & Blocks ===
+    public static final DeferredBlock<Block> TIN_ORE = BLOCKS.registerBlock("tin_ore",
+            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_ORE)));
+    public static final DeferredItem<BlockItem> TIN_ORE_ITEM = ITEMS.registerSimpleBlockItem("tin_ore", TIN_ORE);
+
+    public static final DeferredBlock<Block> DEEPSLATE_TIN_ORE = BLOCKS.registerBlock("deepslate_tin_ore",
+            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_COPPER_ORE)));
+    public static final DeferredItem<BlockItem> DEEPSLATE_TIN_ORE_ITEM = ITEMS.registerSimpleBlockItem("deepslate_tin_ore", DEEPSLATE_TIN_ORE);
+
+    public static final DeferredBlock<Block> RAW_TIN_BLOCK = BLOCKS.registerBlock("raw_tin_block",
+            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.RAW_COPPER_BLOCK)));
+    public static final DeferredItem<BlockItem> RAW_TIN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("raw_tin_block", RAW_TIN_BLOCK);
+
+    public static final DeferredBlock<Block> TIN_BLOCK = BLOCKS.registerBlock("tin_block",
+            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+    public static final DeferredItem<BlockItem> TIN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("tin_block", TIN_BLOCK);
+
+    public static final DeferredBlock<Block> BRONZE_BLOCK = BLOCKS.registerBlock("bronze_block",
+            p -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+    public static final DeferredItem<BlockItem> BRONZE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("bronze_block", BRONZE_BLOCK);
+
     public static final DeferredBlock<FermenterBlock> FERMENTER = BLOCKS.registerBlock("fermenter",
             FermenterBlock::new);
     public static final DeferredItem<BlockItem> FERMENTER_ITEM = ITEMS.registerSimpleBlockItem("fermenter", FERMENTER);
@@ -326,6 +355,11 @@ public class RefineryMod {
     public static final DeferredBlock<ElectricFluidPumpBlock> ELECTRIC_FLUID_PUMP = BLOCKS.registerBlock("electric_fluid_pump",
             ElectricFluidPumpBlock::new);
     public static final DeferredItem<BlockItem> ELECTRIC_FLUID_PUMP_ITEM = ITEMS.registerSimpleBlockItem("electric_fluid_pump", ELECTRIC_FLUID_PUMP);
+
+    // === Industrial Diesel Generator (1x2x2) ===
+    public static final DeferredBlock<DieselGeneratorBlock> DIESEL_GENERATOR = BLOCKS.registerBlock("diesel_generator",
+            DieselGeneratorBlock::new);
+    public static final DeferredItem<BlockItem> DIESEL_GENERATOR_ITEM = ITEMS.registerSimpleBlockItem("diesel_generator", DIESEL_GENERATOR);
 
     // === Industrial Fluid Discharge Block ===
     public static final DeferredBlock<FluidDischargeBlock> FLUID_DISCHARGE = BLOCKS.registerBlock("fluid_discharge",
@@ -563,6 +597,8 @@ public class RefineryMod {
             RefineryWrenchItem::new, Item.Properties::new);
 
     // === New Modded Materials ===
+    public static final DeferredItem<MaterialItem> RAW_TIN = ITEMS.registerItem("raw_tin",
+            p -> new MaterialItem(p, "tooltip.refinery.raw_tin.desc"), Item.Properties::new);
     public static final DeferredItem<MaterialItem> TIN_DUST = ITEMS.registerItem("tin_dust",
             p -> new MaterialItem(p, "tooltip.refinery.tin_dust.desc"), Item.Properties::new);
     public static final DeferredItem<MaterialItem> TIN_INGOT = ITEMS.registerItem("tin_ingot",
@@ -701,6 +737,10 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("electric_fluid_pump",
                     () -> new BlockEntityType<>(ElectricFluidPumpBlockEntity::new, ELECTRIC_FLUID_PUMP.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DieselGeneratorBlockEntity>> DIESEL_GENERATOR_BE =
+            BLOCK_ENTITY_TYPES.register("diesel_generator",
+                    () -> new BlockEntityType<>(DieselGeneratorBlockEntity::new, DIESEL_GENERATOR.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidDischargeBlockEntity>> FLUID_DISCHARGE_BE =
             BLOCK_ENTITY_TYPES.register("fluid_discharge",
                     () -> new BlockEntityType<>(FluidDischargeBlockEntity::new, FLUID_DISCHARGE.get()));
@@ -833,6 +873,9 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.DiamondPipeMenu>> DIAMOND_PIPE_MENU =
             MENUS.register("diamond_pipe", () -> new MenuType<>(com.refinery.menu.DiamondPipeMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<DieselGeneratorMenu>> DIESEL_GENERATOR_MENU =
+            MENUS.register("diesel_generator", () -> new MenuType<>(DieselGeneratorMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
             () -> CreativeModeTab.builder()
@@ -896,6 +939,7 @@ public class RefineryMod {
                         output.accept(COAL_FLUID_PUMP_ITEM.get());
                         output.accept(DIESEL_FLUID_PUMP_ITEM.get());
                         output.accept(ELECTRIC_FLUID_PUMP_ITEM.get());
+                        output.accept(DIESEL_GENERATOR_ITEM.get());
                         output.accept(FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_DISCHARGE_ITEM.get());
                         output.accept(CONVEYOR_BELT_ITEM.get());
@@ -912,6 +956,12 @@ public class RefineryMod {
                         output.accept(STORAGE_TANK_DRAIN_VALVE_ITEM.get());
                         output.accept(STORAGE_TANK_FILL_VALVE_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
+                        output.accept(TIN_ORE_ITEM.get());
+                        output.accept(DEEPSLATE_TIN_ORE_ITEM.get());
+                        output.accept(RAW_TIN_BLOCK_ITEM.get());
+                        output.accept(TIN_BLOCK_ITEM.get());
+                        output.accept(BRONZE_BLOCK_ITEM.get());
+                        output.accept(RAW_TIN.get());
                         output.accept(BLANK_GATE_ITEM.get());
                         output.accept(BASIC_GATE_ITEM.get());
                         output.accept(IRON_GATE_ITEM.get());
@@ -1000,6 +1050,7 @@ public class RefineryMod {
 
         // Register game event bus listeners (Retrogen & Commands)
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.worldgen.OilRetrogenHandler::onChunkLoad);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.worldgen.TinRetrogenHandler::onChunkLoad);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.refinery.command.RefineryCommands::registerCommands);
 
         LOGGER.info("Industrial Refinery Mod initialized for Minecraft 26.3 NeoForge 26.3.0.48!");
@@ -1405,7 +1456,15 @@ public class RefineryMod {
 
         // Capabilities on Multiblock Liquid Storage Tank
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STORAGE_TANK_DRAIN_VALVE_BE.get(),
-                (be, side) -> be.getFluidTank());
+                (be, side) -> be.isAssembled() ? be.getExportOnlyHandler() : null);
+
+        event.registerBlock(Capabilities.Fluid.BLOCK,
+                (level, pos, state, be, side) -> {
+                    if (!state.getValue(StorageTankCasingBlock.ASSEMBLED)) return null;
+                    StorageTankBlockEntity controller = StorageTankCasingBlock.findNearbyController(level, pos);
+                    return controller != null && controller.isAssembled() ? controller.getExportOnlyHandler() : null;
+                },
+                STORAGE_TANK_CASING.get());
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STORAGE_TANK_FILL_VALVE_BE.get(),
                 (be, side) -> be.getFluidHandler());
@@ -1419,5 +1478,32 @@ public class RefineryMod {
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, INDUSTRIAL_PIPE_BE.get(),
                 (be, side) -> be.getPipeType().handlesItems() ? VanillaContainerWrapper.of(be) : null);
+
+        // Capabilities on Industrial Diesel Generator (Energy, Fluid, Item Container)
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, DIESEL_GENERATOR_BE.get(),
+                (be, side) -> be.getMaster().getEnergyStorage());
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, DIESEL_GENERATOR_BE.get(),
+                (be, side) -> be.getMaster().getFluidHandler());
+        event.registerBlockEntity(Capabilities.Item.BLOCK, DIESEL_GENERATOR_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be.getMaster()));
+
+        event.registerBlock(Capabilities.Energy.BLOCK,
+                (level, pos, state, be, side) -> {
+                    DieselGeneratorBlockEntity master = DieselGeneratorBlock.getMaster(level, pos, state);
+                    return master != null ? master.getEnergyStorage() : null;
+                },
+                DIESEL_GENERATOR.get());
+        event.registerBlock(Capabilities.Fluid.BLOCK,
+                (level, pos, state, be, side) -> {
+                    DieselGeneratorBlockEntity master = DieselGeneratorBlock.getMaster(level, pos, state);
+                    return master != null ? master.getFluidHandler() : null;
+                },
+                DIESEL_GENERATOR.get());
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> {
+                    DieselGeneratorBlockEntity master = DieselGeneratorBlock.getMaster(level, pos, state);
+                    return master != null ? VanillaContainerWrapper.of(master) : null;
+                },
+                DIESEL_GENERATOR.get());
     }
 }

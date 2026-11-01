@@ -60,6 +60,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.FEEDING_TROUGH_MENU.get(), FeedingTroughScreen::new);
         event.register((MenuType) RefineryMod.STORAGE_TANK_MENU.get(), StorageTankScreen::new);
         event.register((MenuType) RefineryMod.DIAMOND_PIPE_MENU.get(), DiamondPipeScreen::new);
+        event.register((MenuType) RefineryMod.DIESEL_GENERATOR_MENU.get(), DieselGeneratorScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -87,6 +88,7 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.FEEDING_TROUGH_BE.get(), FeedingTroughRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.STORAGE_TANK_DRAIN_VALVE_BE.get(), StorageTankRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_PIPE_BE.get(), IndustrialPipeRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.DIESEL_GENERATOR_BE.get(), DieselGeneratorRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_GATE_ENTITY.get(), PipeGateEntityRenderer::new);
         event.registerEntityRenderer(RefineryMod.PIPE_WIRE_ENTITY.get(), PipeWireEntityRenderer::new);
     }

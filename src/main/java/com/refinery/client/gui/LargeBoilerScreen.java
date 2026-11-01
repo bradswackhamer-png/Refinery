@@ -36,20 +36,20 @@ public class LargeBoilerScreen extends AbstractContainerScreen<LargeBoilerMenu> 
 
         if (!assembled) {
             statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0x882222;
+            statusColor = 0xFF882222;
         } else if (overheat > 0) {
             statusText = Component.literal("OVERHEATING!").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xEF4444;
+            statusColor = 0xFFEF4444;
         } else if (burning) {
             statusText = Component.literal("BURNING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xEA580C;
+            statusColor = 0xFFEA580C;
         } else {
             statusText = Component.literal("IDLE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0x228822;
+            statusColor = 0xFF228822;
         }
 
         graphics.text(this.font, statusText, 102, 6, statusColor, false);
-        graphics.text(this.font, Component.literal("HEAVY FUEL").withStyle(ChatFormatting.DARK_GRAY), 62, 15, 0x444444, false);
+        graphics.text(this.font, Component.literal("HEAVY FUEL").withStyle(ChatFormatting.DARK_GRAY), 62, 15, 0xFF444444, false);
     }
 
     @Override

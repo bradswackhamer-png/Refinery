@@ -196,9 +196,28 @@ public class SmallDieselBoilerControllerBlockEntity extends BlockEntity implemen
         return stack.is(RefineryFluids.DIESEL_BUCKET.get()) || stack.is(Items.WATER_BUCKET);
     }
 
+    private final List<BlockPos> structurePositions = new ArrayList<>();
+
     public boolean hasRedstone() {
         if (this.level == null) return false;
-        return this.level.hasNeighborSignal(this.worldPosition);
+        if (this.level.hasNeighborSignal(this.worldPosition) || this.level.getBestNeighborSignal(this.worldPosition) > 0) {
+            return true;
+        }
+        if (this.assembled) {
+            if (this.structurePositions.isEmpty()) {
+                Direction facing = getBlockState().getValue(SmallDieselBoilerControllerBlock.FACING);
+                for (BlueprintRequirement req : getRequirements()) {
+                    this.structurePositions.add(getRelativePos(req.x(), req.y(), req.z(), facing));
+                }
+            }
+            for (int i = 0; i < this.structurePositions.size(); i++) {
+                BlockPos targetPos = this.structurePositions.get(i);
+                if (this.level.hasNeighborSignal(targetPos) || this.level.getBestNeighborSignal(targetPos) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public NonNullList<ItemStack> getDrops() {
@@ -214,7 +233,11 @@ public class SmallDieselBoilerControllerBlockEntity extends BlockEntity implemen
 
     public void disassemble() {
         this.assembled = false;
+        this.structurePositions.clear();
         updateMemberBlockStates(false);
+        if (this.level instanceof ServerLevel sl) {
+            updateFireboxState(sl, false);
+        }
         if (this.level != null && !this.level.isClientSide()) {
             BlockState state = getBlockState();
             if (state.getBlock() instanceof SmallDieselBoilerControllerBlock) {
@@ -307,10 +330,13 @@ public class SmallDieselBoilerControllerBlockEntity extends BlockEntity implemen
             this.isBurning = false;
             this.cycleProgress = 0;
             if (this.overheatTicks > 0) {
-                this.overheatTicks--;
+                this.overheatTicks = Math.max(0, this.overheatTicks - 2);
                 setChanged();
             }
         }
+
+        // Update Firebox LIT blockstate in the center
+        updateFireboxState(serverLevel, this.isBurning);
 
         // Auto-transfer steam to adjacent pipes/handlers without requiring extraction pipes
         if (this.steamAmount > 0) {
@@ -326,6 +352,15 @@ public class SmallDieselBoilerControllerBlockEntity extends BlockEntity implemen
                 level.setBlock(pos, latest.setValue(SmallDieselBoilerControllerBlock.ACTIVE, this.isBurning), 3);
             }
             syncToClient();
+        }
+    }
+
+    private void updateFireboxState(ServerLevel level, boolean lit) {
+        Direction facing = getBlockState().getValue(SmallDieselBoilerControllerBlock.FACING);
+        BlockPos fireboxPos = getRelativePos(0, 0, 1, facing);
+        BlockState fireboxState = level.getBlockState(fireboxPos);
+        if (fireboxState.getBlock() instanceof BoilerFireboxBlock && fireboxState.getValue(BoilerFireboxBlock.LIT) != lit) {
+            level.setBlock(fireboxPos, fireboxState.setValue(BoilerFireboxBlock.LIT, lit), 3);
         }
     }
 

@@ -3,6 +3,7 @@ package com.refinery.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.refinery.block.entity.IndustrialPipeBlockEntity;
+import com.refinery.client.gui.StorageTankScreen;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -108,7 +110,27 @@ public class IndustrialPipeRenderer implements BlockEntityRenderer<IndustrialPip
         );
         poseStack.popPose();
 
-        // 2. Render live traveling items through the pipe axis
+        // 2. Render live fluid flow inside sight-glass core if fluid is present
+        if (state.pipeType.handlesFluid() && state.storedFluid != Fluids.EMPTY && state.fluidFillRatio > 0.01f) {
+            int flColor = StorageTankScreen.getFluidColor(state.storedFluid);
+            poseStack.pushPose();
+            submitNodeCollector.submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.entitySolid(IndustrialPipeModel.TEXTURE_STEEL),
+                    (pose, consumer) -> this.model.renderFluidCore(
+                            pose.pose(),
+                            consumer,
+                            state.connections,
+                            flColor,
+                            state.fluidFillRatio,
+                            state.lightCoords,
+                            OverlayTexture.NO_OVERLAY
+                    )
+            );
+            poseStack.popPose();
+        }
+
+        // 3. Render live traveling items through the pipe axis (visible through sight-glass windows)
         if (!state.travelingItems.isEmpty()) {
             for (IndustrialPipeRenderState.RenderTravelingItem item : state.travelingItems) {
                 poseStack.pushPose();
@@ -144,5 +166,20 @@ public class IndustrialPipeRenderer implements BlockEntityRenderer<IndustrialPip
                 poseStack.popPose();
             }
         }
+
+        // 4. Submit translucent sight-glass inspection strips along pipe lengths
+        poseStack.pushPose();
+        submitNodeCollector.submitCustomGeometry(
+                poseStack,
+                RenderTypes.entityTranslucent(IndustrialPipeModel.TEXTURE_WINDOW),
+                (pose, consumer) -> this.model.renderSightGlassWindows(
+                        pose.pose(),
+                        consumer,
+                        state.connections,
+                        state.lightCoords,
+                        OverlayTexture.NO_OVERLAY
+                )
+        );
+        poseStack.popPose();
     }
 }
