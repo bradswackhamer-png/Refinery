@@ -320,12 +320,19 @@ public class LargeDieselBoilerControllerBlockEntity extends BlockEntity implemen
                 this.isBurning = true;
                 this.overheatTicks++;
 
+                // Very loud raid siren alarm countdown
+                playOverheatAlarm(serverLevel, pos);
+
                 if (this.overheatTicks % 20 == 0) {
                     serverLevel.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 1.2f, 0.5f);
                 }
+                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                        pos.getX() + 0.5, pos.getY() + 2.5, pos.getZ() + 0.5,
+                        4, 0.4, 0.4, 0.4, 0.08);
 
                 if (this.overheatTicks >= MAX_OVERHEAT_TICKS) {
                     // Massive 5x5 Catastrophic Explosion!
+                    serverLevel.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3.0f, 0.5f);
                     serverLevel.explode(null, pos.getX() + 0.5, pos.getY() + 2.5, pos.getZ() + 2.5, 12.0f, Level.ExplosionInteraction.BLOCK);
                     disassemble();
                     return;
@@ -358,6 +365,29 @@ public class LargeDieselBoilerControllerBlockEntity extends BlockEntity implemen
                 level.setBlock(pos, latest.setValue(LargeDieselBoilerControllerBlock.ACTIVE, this.isBurning), 3);
             }
             syncToClient();
+        }
+    }
+
+    private void playOverheatAlarm(ServerLevel level, BlockPos pos) {
+        // Very loud raid siren alarm during the 60-second countdown to meltdown explosion
+        int interval;
+        float pitch;
+        if (this.overheatTicks >= 900) {
+            // Critical final 15 seconds: high-pitch, rapid siren blast every 2 seconds
+            interval = 40;
+            pitch = 1.2f;
+        } else if (this.overheatTicks >= 600) {
+            // Urgent 30s-45s: siren blast every 3 seconds
+            interval = 60;
+            pitch = 1.0f;
+        } else {
+            // Initial 0s-30s warning: deep ominous siren blast every 4 seconds
+            interval = 80;
+            pitch = 0.85f;
+        }
+
+        if (this.overheatTicks == 1 || this.overheatTicks % interval == 0) {
+            level.playSound(null, pos, SoundEvents.RAID_HORN.value(), SoundSource.BLOCKS, 20.0f, pitch);
         }
     }
 

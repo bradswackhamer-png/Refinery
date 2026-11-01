@@ -4,6 +4,19 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.48] - 2026-11-01
+
+### Added
+- **Boiler Meltdown Raid Siren Alarm Countdown**:
+  - Implemented a very loud industrial raid siren alarm (`minecraft:event.raid.horn`) across all Steam Boilers and Diesel Boilers (Small and Large) during the 60-second dry-running overheat countdown prior to catastrophic explosion.
+  - Broadcasts at high volume (16.0fâ€“20.0f, audible up to 250â€“320+ blocks away) so players anywhere in their factory or base receive an immediate emergency audible warning when a boiler runs out of water while actively burning fuel.
+  - Escalating urgency cadence:
+    - **Initial 0sâ€“30s**: Deep ominous horn blast every 4 seconds (pitch 0.85).
+    - **Urgent 30sâ€“45s**: Faster horn blast every 3 seconds (pitch 1.0).
+    - **Critical Final 15s**: Rapid, high-pitched shrieking siren blast every 2 seconds (pitch 1.2) accompanied by thick black smoke and hissing steam until water is replenished, redstone is disengaged, or catastrophic explosion occurs.
+
+---
+
 ## [1.8.47] - 2026-11-01
 
 ### Fixed

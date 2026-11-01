@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.48 (Boiler Meltdown Raid Siren Alarm Countdown)](#version-1848-boiler-meltdown-raid-siren-alarm-countdown)
    - [Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)](#version-1847-boiler-infinite-water-draw--phantom-fluid-voiding-fix)
    - [Version 1.8.46 (Storage Tank Valve Isolation & Side Connection Prevention)](#version-1846-storage-tank-valve-isolation--side-connection-prevention)
    - [Version 1.8.45 (Pipe Fluid Capacity Reduction 250â€“500 mB & High-Speed Flow)](#version-1845-pipe-fluid-capacity-reduction-250500-mb--high-speed-flow)
@@ -1670,6 +1671,17 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.48 (Boiler Meltdown Raid Siren Alarm Countdown)
+- **Acoustic Evacuation Raid Siren Alarm**:
+  - Added a very loud industrial raid siren alarm (`minecraft:event.raid.horn`) across all Small and Large Steam Boilers and Diesel Boilers during dry-running overheat countdowns (60s / 1,200 ticks).
+  - High acoustic range (16.0fâ€“20.0f volume, audible up to 250â€“320+ blocks away) so factory operators receive unmistakable auditory warning when a boiler runs out of water while burning fuel.
+  - Urgency escalation:
+    - **0sâ€“30s**: Deep warning horn every 4 seconds (pitch 0.85).
+    - **30sâ€“45s**: Urgent horn blast every 3 seconds (pitch 1.0).
+    - **Final 15s**: Rapid, shrieking alarm blast every 2 seconds (pitch 1.2) accompanied by billowing black smoke and hissing until water is restored, redstone signal is removed, or the boiler detonates.
 
 ---
 

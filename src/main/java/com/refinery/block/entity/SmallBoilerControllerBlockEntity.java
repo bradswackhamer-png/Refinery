@@ -321,6 +321,9 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
                 // DRY RUNNING WITH NO WATER: DANGER OF MELTDOWN EXPLOSION!
                 this.overheatTicks++;
 
+                // Very loud raid siren alarm countdown
+                playOverheatAlarm(serverLevel, pos);
+
                 // Warning hissing sounds & black smoke
                 if (this.overheatTicks % 20 == 0) {
                     serverLevel.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 1.6f);
@@ -362,6 +365,29 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
             if (latest.getBlock() instanceof SmallBoilerControllerBlock) {
                 level.setBlock(pos, latest.setValue(SmallBoilerControllerBlock.ACTIVE, isActive), 3);
             }
+        }
+    }
+
+    private void playOverheatAlarm(ServerLevel level, BlockPos pos) {
+        // Very loud raid siren alarm during the 60-second countdown to meltdown explosion
+        int interval;
+        float pitch;
+        if (this.overheatTicks >= 900) {
+            // Critical final 15 seconds: high-pitch, rapid siren blast every 2 seconds
+            interval = 40;
+            pitch = 1.2f;
+        } else if (this.overheatTicks >= 600) {
+            // Urgent 30s-45s: siren blast every 3 seconds
+            interval = 60;
+            pitch = 1.0f;
+        } else {
+            // Initial 0s-30s warning: deep ominous siren blast every 4 seconds
+            interval = 80;
+            pitch = 0.85f;
+        }
+
+        if (this.overheatTicks == 1 || this.overheatTicks % interval == 0) {
+            level.playSound(null, pos, SoundEvents.RAID_HORN.value(), SoundSource.BLOCKS, 16.0f, pitch);
         }
     }
 

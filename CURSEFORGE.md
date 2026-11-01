@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.47.jar`
+`refinery-1.8.48.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.47 (NeoForge 26.3)`
+`Industrial Refinery 1.8.48 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,19 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.48
+
+### What's New in v1.8.48:
+- **Boiler Meltdown Raid Siren Alarm Countdown**:
+  - Added a very loud industrial raid siren alarm (`minecraft:event.raid.horn`) across all Steam Boilers and Diesel Boilers (Small and Large) during dry-running overheat countdowns (60s / 1,200 ticks).
+  - High acoustic range (16.0fâ€“20.0f volume, audible up to 250â€“320+ blocks away) for plant-wide emergency warning.
+  - Urgency escalation:
+    - **0sâ€“30s**: Deep warning horn every 4 seconds (pitch 0.85).
+    - **30sâ€“45s**: Urgent horn blast every 3 seconds (pitch 1.0).
+    - **Final 15s**: Rapid, shrieking alarm blast every 2 seconds (pitch 1.2) accompanied by billowing black smoke and hissing until water is restored, redstone is disengaged, or detonation occurs.
+
+---
+
 # Industrial Refinery v1.8.47
 
 ### What's New in v1.8.47:
