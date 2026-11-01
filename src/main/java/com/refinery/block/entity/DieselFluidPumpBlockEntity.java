@@ -82,6 +82,21 @@ public class DieselFluidPumpBlockEntity extends AbstractFluidPumpBlockEntity imp
     }
 
     @Override
+    public int getPushRate() {
+        return 1000; // 2x amount of water per tick (was 500 mB/t)
+    }
+
+    @Override
+    public int getPumpCycleTicks() {
+        return 10; // 2x faster cycle (was 20 ticks)
+    }
+
+    @Override
+    public int getPumpAmount() {
+        return 2000; // 2x pump amount per cycle (was 1000 mB)
+    }
+
+    @Override
     public ContainerData getDataAccess() {
         return this.dataAccess;
     }

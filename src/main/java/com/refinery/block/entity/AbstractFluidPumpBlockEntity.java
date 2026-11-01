@@ -85,6 +85,22 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
     public abstract void tickFuel();
     public abstract ContainerData getDataAccess();
 
+    public int getPushRate() {
+        return 500;
+    }
+
+    public int getPumpCycleTicks() {
+        return PUMP_CYCLE_TICKS;
+    }
+
+    public int getPumpAmount() {
+        return 1000;
+    }
+
+    public boolean isCreativePump() {
+        return false;
+    }
+
     public void tick(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide()) return;
         ServerLevel serverLevel = (ServerLevel) level;
@@ -112,6 +128,15 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
 
         // 4. Target Intake Check
         if (this.targetPos == null) {
+            if (isCreativePump()) {
+                if (this.currentFluid == Fluids.EMPTY) {
+                    this.currentFluid = Fluids.WATER;
+                }
+                this.fluidAmount = TANK_CAPACITY;
+                this.status = PumpStatus.PUMPING;
+                updateActiveState(true);
+                return;
+            }
             this.status = PumpStatus.NO_TARGET;
             updateActiveState(false);
             return;
@@ -148,7 +173,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
         boolean pumped = executePump(serverLevel);
         if (pumped) {
             this.status = PumpStatus.PUMPING;
-            this.pumpCooldown = PUMP_CYCLE_TICKS;
+            this.pumpCooldown = getPumpCycleTicks();
             updateActiveState(true);
             setChanged();
         } else {
@@ -198,7 +223,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
             consumePower();
             this.currentFluid = Fluids.WATER;
             this.lastPumpedFluid = Fluids.WATER;
-            this.fluidAmount = Math.min(TANK_CAPACITY, this.fluidAmount + 1000);
+            this.fluidAmount = Math.min(TANK_CAPACITY, this.fluidAmount + getPumpAmount());
             level.playSound(null, this.worldPosition, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.6f, 1.1f);
             return true;
         }
@@ -220,7 +245,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
         consumePower();
         this.currentFluid = fluidToPump;
         this.lastPumpedFluid = fluidToPump;
-        this.fluidAmount = Math.min(TANK_CAPACITY, this.fluidAmount + 1000);
+        this.fluidAmount = Math.min(TANK_CAPACITY, this.fluidAmount + getPumpAmount());
         level.playSound(null, this.worldPosition, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.6f, 1.1f);
         return true;
     }
@@ -312,7 +337,7 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
             BlockPos target = pos.relative(dir);
             var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, dir.getOpposite());
             if (handler != null) {
-                int toPush = Math.min(this.fluidAmount, 500);
+                int toPush = Math.min(this.fluidAmount, getPushRate());
                 FluidResource res = FluidResource.of(this.currentFluid);
                 try (Transaction tx = Transaction.openRoot()) {
                     int inserted = 0;
@@ -323,10 +348,12 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
                     }
                     if (inserted > 0) {
                         tx.commit();
-                        this.fluidAmount -= inserted;
-                        if (this.fluidAmount <= 0) {
-                            this.fluidAmount = 0;
-                            this.currentFluid = Fluids.EMPTY;
+                        if (!isCreativePump()) {
+                            this.fluidAmount -= inserted;
+                            if (this.fluidAmount <= 0) {
+                                this.fluidAmount = 0;
+                                this.currentFluid = Fluids.EMPTY;
+                            }
                         }
                         setChanged();
                     }
@@ -477,12 +504,14 @@ public abstract class AbstractFluidPumpBlockEntity extends BlockEntity implement
             if (toExtract <= 0) return 0;
 
             updateSnapshots(transaction);
-            fluidAmount -= toExtract;
-            if (fluidAmount <= 0) {
-                fluidAmount = 0;
-                currentFluid = Fluids.EMPTY;
+            if (!isCreativePump()) {
+                fluidAmount -= toExtract;
+                if (fluidAmount <= 0) {
+                    fluidAmount = 0;
+                    currentFluid = Fluids.EMPTY;
+                }
+                setChanged();
             }
-            setChanged();
             return toExtract;
         }
 

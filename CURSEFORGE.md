@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.48.jar`
+`refinery-1.8.49.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.48 (NeoForge 26.3)`
+`Industrial Refinery 1.8.49 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,21 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.49
+
+### What's New in v1.8.49:
+- **Creative Fluid Pump (`refinery:fluid_pump`)**:
+  - Transformed the industrial pump into a dedicated **Creative Fluid Pump**.
+  - Requires zero fuel, zero electricity, and no intake target; immediately supplies infinite water (or any linked fluid) and auto-pushes up to 2,000 mB/t directly into connected pipes, tanks, and machines.
+  - Fluid extraction never drains the internal buffer.
+  - Removed survival recipe (`recipe/fluid_pump.json`) so it is obtainable exclusively via Creative Mode or commands.
+  - Features a custom Vibrant Magenta frame styling (`0xFFD946EF`) and dedicated creative management GUI.
+- **Doubled Pumping Throughput on Diesel & Electric (RF) Pumps**:
+  - Doubled the output push rate of both Diesel Fluid Pumps and Electric (RF) Fluid Pumps from 500 mB/t to **1,000 mB/t**.
+  - Doubled cycle pumping speed and volume: cycle duration reduced from 20 ticks to **10 ticks** (2x speed) and pumped amount increased from 1,000 mB to **2,000 mB** per cycle.
+
+---
+
 # Industrial Refinery v1.8.48
 
 ### What's New in v1.8.48:

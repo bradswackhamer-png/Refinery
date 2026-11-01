@@ -1431,8 +1431,6 @@ public class RefineryMod {
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, DIESEL_FLUID_PUMP_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
-        event.registerBlockEntity(Capabilities.Item.BLOCK, FLUID_PUMP_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, CONVEYOR_BELT_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, SLOPED_CONVEYOR_BELT_BE.get(),

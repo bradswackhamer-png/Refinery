@@ -4,6 +4,24 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.49] - 2026-11-01
+
+### Added
+- **Creative Fluid Pump (`refinery:fluid_pump`)**:
+  - Transformed the industrial pump into a dedicated **Creative Fluid Pump**.
+  - Requires zero fuel, zero electricity, and no intake target to operate.
+  - Automatically generates unlimited fluid (defaults to infinite water upon placement) and auto-pushes up to 2,000 mB/t directly into connected pipes, tanks, and machines.
+  - Extracting fluid from the creative pump never depletes its internal buffer.
+  - Removed crafting recipe (`recipe/fluid_pump.json`) so it is obtainable exclusively via Creative Mode or commands.
+  - Features a custom Vibrant Magenta frame styling (`0xFFD946EF`) and dedicated creative management GUI.
+
+### Changed
+- **Doubled Pumping Throughput on Diesel & Electric (RF) Pumps**:
+  - Doubled the output push rate of both Diesel Fluid Pumps and Electric (RF) Fluid Pumps from 500 mB/t to **1,000 mB/t** into connected pipes and tanks.
+  - Doubled pumping speed and volume: cycle duration reduced from 20 ticks to **10 ticks** (2x speed) and pumped amount increased from 1,000 mB to **2,000 mB** per cycle.
+
+---
+
 ## [1.8.48] - 2026-11-01
 
 ### Added
