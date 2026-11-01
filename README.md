@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.24 (Complete In-Game Localization & Translation Key Fix)](#version-1824-complete-in-game-localization--translation-key-fix)
    - [Version 1.8.23 (Quartz Merge Pipe Suite & Selectable Output Routing)](#version-1823-quartz-merge-pipe-suite--selectable-output-routing)
    - [Version 1.8.22 (Void Pipe Shaped Crafting Parity & Gate Curvature Fix)](#version-1822-void-pipe-shaped-crafting-parity--gate-curvature-fix)
    - [Version 1.8.21 (Pipe Gate Orientation, Extended Dead-Ends, & Conveyor Occlusion Fix)](#version-1821-pipe-gate-orientation-extended-dead-ends--conveyor-occlusion-fix)
@@ -1638,6 +1639,24 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.24 (Complete In-Game Localization & Translation Key Fix)
+- **Complete In-Game Localization & Translation Key Resolution (n_us.json)**:
+  - Fixed an issue where multiple items, blocks, and tooltips displayed raw registry/variable keys (such as item.refinery.coal_dust and 	ooltip.refinery.coal_dust.desc) in GUI containers and player inventories.
+  - Added full user-facing item names and informative tooltip descriptions for all materials and metallurgy items:
+    - **Dusts**: Coal Dust, Iron Dust, Gold Dust, Copper Dust, Tin Dust, Bronze Dust.
+    - **Ingots & Plates**: Steel Ingot & Plate, Tin Ingot & Plate, Bronze Ingot & Plate, Iron Plate, Copper Plate, Gold Plate.
+    - **Hydrocarbons & Upgrades**: Refined Bitumen, Autarchic Chipset, and Red/Blue/Green/Yellow Pipe Wires.
+  - Added comprehensive localization for all advanced multiblock machinery and structures:
+    - **Industrial Blast Furnace Suite**: Controller, Casing, Foundry Heat-Resistant Glass, Foundry Input & Output Ports.
+    - **Steam Turbine Generator Suite**: Controller, Casing, Rotor Shaft, Steam Input, Water Output, and Energy Output Ports.
+    - **Electric Arc Melter Suite**: Controller, Casing, Heating Chamber, Input & Output Ports.
+    - **Continuous Casting Suite**: Controller, Casing, Mold Basin, Safety Chamber, Refractory Casting Channel, Input & Output Ports.
+    - **Multi-Smelter & Fermenter**: Multi-Smelter Controller, Casing, Chamber, Ports, and Industrial Fermenter.
+  - Added localized names for all fluid types, fluid blocks, and buckets (Crude Oil, Steam, Molten Iron/Gold/Copper/Tin/Bronze/Glass, Ethanol) and GUI container titles.
+  - Cleaned up duplicate client network sync methods in AutoHarvesterBlockEntity.
 
 ---
 
