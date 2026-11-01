@@ -16,6 +16,12 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Features a custom Vibrant Magenta frame styling (`0xFFD946EF`) and dedicated creative management GUI.
 
 ### Changed
+- **Fluid Discharge Fill Range Expanded to 200 Blocks (`refinery:fluid_discharge`)**:
+  - Increased contiguous fill search radius from 48 blocks to **200 blocks** ($401 \times 401$ horizontal bounding area).
+  - Expanded search budget from 2,048 to **131,072 nodes** to effortlessly fill massive lakes, reservoirs, and canals.
+  - Implemented high-efficiency frontier neighbor caching (`lastFillPos`) enabling $O(1)$ source block placement at the lake's perimeter without re-traversing already filled blocks every tick.
+  - Guarded search traversal with `level.isLoaded()` to safely prevent lagging server ticks by loading distant unloaded chunks.
+  - Increased internal buffer capacity from 4,000 mB to **16,000 mB** and enabled rapid multi-block placement (up to 4 source blocks / 4,000 mB per tick) for high-speed filling from creative or industrial pump feeds.
 - **Doubled Pumping Throughput on Diesel & Electric (RF) Pumps**:
   - Doubled the output push rate of both Diesel Fluid Pumps and Electric (RF) Fluid Pumps from 500 mB/t to **1,000 mB/t** into connected pipes and tanks.
   - Doubled pumping speed and volume: cycle duration reduced from 20 ticks to **10 ticks** (2x speed) and pumped amount increased from 1,000 mB to **2,000 mB** per cycle.

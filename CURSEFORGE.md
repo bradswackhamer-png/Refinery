@@ -224,6 +224,12 @@ When uploading your `.jar` file to CurseForge, use these values:
   - Fluid extraction never drains the internal buffer.
   - Removed survival recipe (`recipe/fluid_pump.json`) so it is obtainable exclusively via Creative Mode or commands.
   - Features a custom Vibrant Magenta frame styling (`0xFFD946EF`) and dedicated creative management GUI.
+- **Fluid Discharge Valve 200-Block Fill Range (`refinery:fluid_discharge`)**:
+  - Expanded contiguous horizontal fill radius from 48 blocks to **200 blocks** ($401 \times 401$ horizontal bounding area).
+  - Raised BFS node exploration ceiling to **131,072 nodes** to traverse vast water bodies.
+  - Added $O(1)$ frontier neighbor caching (`lastFillPos`) allowing the valve to place source blocks rapidly without re-scanning previously placed water.
+  - Multi-placement support: places up to 4 source blocks (4,000 mB) per tick when supplied by high-throughput pumps with an enlarged 16,000 mB tank buffer.
+  - Guarded against chunk thrashing via `level.isLoaded()`.
 - **Doubled Pumping Throughput on Diesel & Electric (RF) Pumps**:
   - Doubled the output push rate of both Diesel Fluid Pumps and Electric (RF) Fluid Pumps from 500 mB/t to **1,000 mB/t**.
   - Doubled cycle pumping speed and volume: cycle duration reduced from 20 ticks to **10 ticks** (2x speed) and pumped amount increased from 1,000 mB to **2,000 mB** per cycle.

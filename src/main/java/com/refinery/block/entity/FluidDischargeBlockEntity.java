@@ -31,14 +31,15 @@ import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 public class FluidDischargeBlockEntity extends BlockEntity {
-    public static final int TANK_CAPACITY = 4000;
-    public static final int MAX_SEARCH_RADIUS = 48;
-    public static final int MAX_BFS_NODES = 2048;
+    public static final int TANK_CAPACITY = 16000;
+    public static final int MAX_SEARCH_RADIUS = 200;
+    public static final int MAX_BFS_NODES = 131072;
 
     private DischargeMode mode = DischargeMode.VOID;
     private boolean redstonePaused = false;
     private int activeTimer = 0;
     private int tickCounter = 0;
+    private @Nullable BlockPos lastFillPos = null;
 
     private Fluid currentFluid = Fluids.EMPTY;
     private int fluidAmount = 0;
@@ -58,6 +59,7 @@ public class FluidDischargeBlockEntity extends BlockEntity {
 
     public void setMode(DischargeMode mode) {
         this.mode = mode;
+        this.lastFillPos = null;
         if (mode == DischargeMode.VOID) {
             this.currentFluid = Fluids.EMPTY;
             this.fluidAmount = 0;
@@ -131,11 +133,6 @@ public class FluidDischargeBlockEntity extends BlockEntity {
     }
 
     private void handleFillMode() {
-        // Attempt fill every 4 ticks (~5 source blocks per second)
-        if (this.tickCounter % 4 != 0) {
-            return;
-        }
-
         if (this.fluidAmount < 1000 || this.currentFluid == Fluids.EMPTY) {
             return;
         }
@@ -145,19 +142,47 @@ public class FluidDischargeBlockEntity extends BlockEntity {
             return;
         }
 
-        // Search for nearest contiguous unfilled air/replaceable position on the same Y level
-        BlockPos targetPos = findNextContiguousFillPosition(level, worldPosition, this.currentFluid);
-        if (targetPos != null) {
-            // Place fluid source block
+        int fillsThisTick = 0;
+        int maxFills = Math.min(this.fluidAmount / 1000, 4);
+
+        while (fillsThisTick < maxFills && this.fluidAmount >= 1000) {
+            BlockPos targetPos = null;
+
+            // Fast path: Check immediate horizontal neighbors of the last filled position
+            if (this.lastFillPos != null && withinDistance(worldPosition, this.lastFillPos, MAX_SEARCH_RADIUS)) {
+                for (Direction dir : Direction.Plane.HORIZONTAL) {
+                    BlockPos candidate = this.lastFillPos.relative(dir);
+                    if (withinDistance(worldPosition, candidate, MAX_SEARCH_RADIUS) && level.isLoaded(candidate) && canBeFilledWithFluid(level, candidate, this.currentFluid)) {
+                        targetPos = candidate;
+                        break;
+                    }
+                }
+            }
+
+            // Fallback: Contiguous BFS search from discharge valve outward
+            if (targetPos == null) {
+                targetPos = findNextContiguousFillPosition(level, worldPosition, this.currentFluid);
+            }
+
+            if (targetPos == null) {
+                break;
+            }
+
             level.setBlock(targetPos, sourceBlockState, Block.UPDATE_ALL);
             this.fluidAmount -= 1000;
+            this.lastFillPos = targetPos;
+            fillsThisTick++;
+        }
+
+        if (fillsThisTick > 0) {
             if (this.fluidAmount <= 0) {
                 this.fluidAmount = 0;
                 this.currentFluid = Fluids.EMPTY;
             }
             this.activeTimer = 10;
-
-            level.playSound(null, targetPos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.7f, 1.0f);
+            if (this.tickCounter % 4 == 0) {
+                level.playSound(null, this.lastFillPos != null ? this.lastFillPos : worldPosition, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.7f, 1.0f);
+            }
             setChanged();
         }
     }
@@ -178,8 +203,9 @@ public class FluidDischargeBlockEntity extends BlockEntity {
         // Start search from direct horizontal neighbors of the discharge block
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             BlockPos neighbor = startPos.relative(dir);
-            visited.add(neighbor);
-            queue.add(neighbor);
+            if (level.isLoaded(neighbor) && visited.add(neighbor)) {
+                queue.add(neighbor);
+            }
         }
 
         int nodesExamined = 0;
@@ -198,7 +224,7 @@ public class FluidDischargeBlockEntity extends BlockEntity {
             if (isContiguousFluid(level, current, fluid)) {
                 for (Direction dir : Direction.Plane.HORIZONTAL) {
                     BlockPos next = current.relative(dir);
-                    if (withinDistance(startPos, next, MAX_SEARCH_RADIUS) && visited.add(next)) {
+                    if (withinDistance(startPos, next, MAX_SEARCH_RADIUS) && level.isLoaded(next) && visited.add(next)) {
                         queue.add(next);
                     }
                 }

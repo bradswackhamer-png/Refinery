@@ -53,7 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
-   - [Version 1.8.49 (Creative Fluid Pump & 2x Throughput for Diesel and Electric Pumps)](#version-1849-creative-fluid-pump--2x-throughput-for-diesel-and-electric-pumps)
+   - [Version 1.8.49 (Creative Fluid Pump, 2x Pump Output, & 200-Block Fluid Discharge Range)](#version-1849-creative-fluid-pump-2x-pump-output--200-block-fluid-discharge-range)
    - [Version 1.8.48 (Boiler Meltdown Raid Siren Alarm Countdown)](#version-1848-boiler-meltdown-raid-siren-alarm-countdown)
    - [Version 1.8.47 (Boiler Infinite Water Draw & Phantom Fluid Voiding Fix)](#version-1847-boiler-infinite-water-draw--phantom-fluid-voiding-fix)
    - [Version 1.8.46 (Storage Tank Valve Isolation & Side Connection Prevention)](#version-1846-storage-tank-valve-isolation--side-connection-prevention)
@@ -1675,13 +1675,19 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ---
 
-### Version 1.8.49 (Creative Fluid Pump & 2x Throughput for Diesel and Electric Pumps)
+### Version 1.8.49 (Creative Fluid Pump, 2x Pump Output, & 200-Block Fluid Discharge Range)
 - **Creative Fluid Pump (`refinery:fluid_pump`)**:
   - Transformed the industrial pump into a standalone **Creative Fluid Pump** for sandbox testing and infinite fluid supply.
   - Requires zero fuel, zero electricity, and no intake target; automatically fills with infinite water upon placement and auto-pushes up to 2,000 mB/t directly into connected pipes, tanks, and machines.
   - Fluid extraction never drains the internal buffer.
   - Removed survival recipe so it is exclusively obtainable through Creative Mode or `/give`.
   - Rendered with a custom Vibrant Magenta frame styling (`0xFFD946EF`) and dedicated creative GUI.
+- **Fluid Discharge Valve 200-Block Fill Range (`refinery:fluid_discharge`)**:
+  - Expanded contiguous horizontal fill radius from 48 blocks to **200 blocks** ($401 \times 401$ horizontal bounding area).
+  - Raised BFS node exploration ceiling to **131,072 nodes** to traverse vast water bodies.
+  - Added $O(1)$ frontier neighbor caching (`lastFillPos`) allowing the valve to place source blocks rapidly without re-scanning previously placed water.
+  - Multi-placement support: places up to 4 source blocks (4,000 mB) per tick when supplied by high-throughput pumps with an enlarged 16,000 mB tank buffer.
+  - Guarded against chunk thrashing via `level.isLoaded()`.
 - **Doubled Pumping Throughput on Diesel & Electric (RF) Pumps**:
   - Doubled the output push rate of both Diesel Fluid Pumps and Electric Fluid Pumps from 500 mB/t to **1,000 mB/t**.
   - Halved cycle duration from 20 ticks to **10 ticks** (2x speed) and doubled pumped amount from 1,000 mB to **2,000 mB** per cycle.
