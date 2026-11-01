@@ -72,29 +72,29 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
             int slotY = top + 26 + row * 23;
 
             // Slot bounding container
-            graphics.fill(RenderPipelines.GUI, slotX, slotY, slotX + 102, slotY + 21, 0xFF21252B);
+            graphics.fill(RenderPipelines.GUI, slotX, slotY, slotX + 104, slotY + 21, 0xFF21252B);
 
             // LED
             boolean active = menu.isConditionMet(i);
             int ledCol = active ? 0xFF00FF66 : 0xFF335533;
-            graphics.fill(RenderPipelines.GUI, slotX + 2, slotY + 7, slotX + 8, slotY + 13, ledCol);
+            graphics.fill(RenderPipelines.GUI, slotX + 2, slotY + 7, slotX + 7, slotY + 13, ledCol);
 
             // Trigger box
             GateTrigger trigger = menu.getTrigger(i);
-            graphics.fill(RenderPipelines.GUI, slotX + 11, slotY + 2, slotX + 53, slotY + 19, 0xFF282C34);
+            graphics.fill(RenderPipelines.GUI, slotX + 9, slotY + 2, slotX + 57, slotY + 19, 0xFF282C34);
 
-            String trigText = font.plainSubstrByWidth(trigger.getLabel(), 38);
-            graphics.text(this.font, Component.literal(trigText), slotX + 13, slotY + 6, trigger.getDisplayColor(), false);
+            String trigText = font.plainSubstrByWidth(trigger.getShortLabel(), 44);
+            graphics.text(this.font, Component.literal(trigText), slotX + 11, slotY + 6, trigger.getDisplayColor(), false);
 
             // Arrow
-            graphics.text(this.font, Component.literal(">"), slotX + 55, slotY + 6, 0xFF888888, false);
+            graphics.text(this.font, Component.literal(">"), slotX + 59, slotY + 6, 0xFF888888, false);
 
             // Action box
             GateAction action = menu.getAction(i);
-            graphics.fill(RenderPipelines.GUI, slotX + 62, slotY + 2, slotX + 100, slotY + 19, 0xFF282C34);
+            graphics.fill(RenderPipelines.GUI, slotX + 66, slotY + 2, slotX + 102, slotY + 19, 0xFF282C34);
 
-            String actText = font.plainSubstrByWidth(action.getLabel(), 34);
-            graphics.text(this.font, Component.literal(actText), slotX + 64, slotY + 6, action.getDisplayColor(), false);
+            String actText = font.plainSubstrByWidth(action.getShortLabel(), 33);
+            graphics.text(this.font, Component.literal(actText), slotX + 68, slotY + 6, action.getDisplayColor(), false);
         }
 
         // Inventory background boxes
@@ -125,6 +125,8 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
             return super.mouseClicked(event, isDouble);
         }
 
+        boolean isShift = event.hasShiftDown();
+
         for (int i = 0; i < slots; i++) {
             int col = (twoColumns && i >= 4) ? 1 : 0;
             int row = twoColumns ? (i % 4) : i;
@@ -132,21 +134,26 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
             int slotX = left + 8 + col * 106;
             int slotY = top + 26 + row * 23;
 
-            // Trigger box clicked (left: slotX + 11 to + 53, top: slotY + 2 to + 19)
-            if (mouseX >= slotX + 11 && mouseX <= slotX + 53 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
-                int buttonId = i * 4 + (rightClick ? 1 : 0);
-                if (this.minecraft != null && this.minecraft.gameMode != null) {
+            // Trigger box clicked (slotX + 9 to + 57)
+            if (mouseX >= slotX + 9 && mouseX <= slotX + 57 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
+                int buttonId;
+                if (isShift) {
+                    buttonId = 100 + i * 4 + (rightClick ? 1 : 0);
+                } else {
+                    buttonId = i * 4 + (rightClick ? 1 : 0);
+                }
+                if (this.minecraft != null && this.minecraft.gameMode != null && this.minecraft.player != null) {
                     this.menu.clickMenuButton(this.minecraft.player, buttonId);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
-                    this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+                    this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, isShift ? 1.2f : 1.0f));
                 }
                 return true;
             }
 
-            // Action box clicked (left: slotX + 62 to + 100, top: slotY + 2 to + 19)
-            if (mouseX >= slotX + 62 && mouseX <= slotX + 100 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
+            // Action box clicked (slotX + 66 to + 102)
+            if (mouseX >= slotX + 66 && mouseX <= slotX + 102 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
                 int buttonId = i * 4 + (rightClick ? 3 : 2);
-                if (this.minecraft != null && this.minecraft.gameMode != null) {
+                if (this.minecraft != null && this.minecraft.gameMode != null && this.minecraft.player != null) {
                     this.menu.clickMenuButton(this.minecraft.player, buttonId);
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
@@ -156,6 +163,46 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
         }
 
         return super.mouseClicked(event, isDouble);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        int left = this.leftPos;
+        int top = this.topPos;
+        int slots = menu.getTier().getSlots();
+        boolean twoColumns = slots > 4;
+
+        for (int i = 0; i < slots; i++) {
+            int col = (twoColumns && i >= 4) ? 1 : 0;
+            int row = twoColumns ? (i % 4) : i;
+
+            int slotX = left + 8 + col * 106;
+            int slotY = top + 26 + row * 23;
+
+            // Trigger box scroll
+            if (mouseX >= slotX + 9 && mouseX <= slotX + 57 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
+                int buttonId = i * 4 + (scrollY > 0 ? 0 : 1);
+                if (this.minecraft != null && this.minecraft.gameMode != null && this.minecraft.player != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, buttonId);
+                    this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
+                    this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.1f));
+                }
+                return true;
+            }
+
+            // Action box scroll
+            if (mouseX >= slotX + 66 && mouseX <= slotX + 102 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
+                int buttonId = i * 4 + (scrollY > 0 ? 2 : 3);
+                if (this.minecraft != null && this.minecraft.gameMode != null && this.minecraft.player != null) {
+                    this.menu.clickMenuButton(this.minecraft.player, buttonId);
+                    this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
+                    this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.1f));
+                }
+                return true;
+            }
+        }
+
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -175,29 +222,32 @@ public class GateScreen extends AbstractContainerScreen<GateMenu> {
             int slotY = top + 26 + row * 23;
 
             // Trigger tooltip
-            if (mouseX >= slotX + 11 && mouseX <= slotX + 53 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
+            if (mouseX >= slotX + 9 && mouseX <= slotX + 57 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
                 GateTrigger trig = menu.getTrigger(i);
                 graphics.setComponentTooltipForNextFrame(this.font, List.of(
                         Component.literal("§eTrigger: §f" + trig.getLabel()),
                         Component.literal("§7" + trig.getDescription()),
-                        Component.literal("§8[Left-click: Next | Right-click: Prev]")
+                        Component.literal("§8[Left/Right Click: Next/Prev]"),
+                        Component.literal("§8[Mouse Scroll: Rapid Select]"),
+                        Component.literal("§8[Shift + Click: Jump Category]")
                 ), mouseX, mouseY);
                 return;
             }
 
             // Action tooltip
-            if (mouseX >= slotX + 62 && mouseX <= slotX + 100 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
+            if (mouseX >= slotX + 66 && mouseX <= slotX + 102 && mouseY >= slotY + 2 && mouseY <= slotY + 19) {
                 GateAction act = menu.getAction(i);
                 graphics.setComponentTooltipForNextFrame(this.font, List.of(
                         Component.literal("§bAction: §f" + act.getLabel()),
                         Component.literal("§7" + act.getDescription()),
-                        Component.literal("§8[Left-click: Next | Right-click: Prev]")
+                        Component.literal("§8[Left/Right Click: Next/Prev]"),
+                        Component.literal("§8[Mouse Scroll: Rapid Select]")
                 ), mouseX, mouseY);
                 return;
             }
 
             // LED tooltip
-            if (mouseX >= slotX + 2 && mouseX <= slotX + 8 && mouseY >= slotY + 7 && mouseY <= slotY + 13) {
+            if (mouseX >= slotX + 2 && mouseX <= slotX + 7 && mouseY >= slotY + 7 && mouseY <= slotY + 13) {
                 boolean active = menu.isConditionMet(i);
                 graphics.setComponentTooltipForNextFrame(this.font, List.of(
                         Component.literal(active ? "§aStatus: ACTIVE" : "§7Status: INACTIVE")

@@ -1705,7 +1705,8 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 ---
 ### Version 1.8.44 (Diamond Sorting Pipe Filter Retention Across Restarts)
 - **Diamond Sorting Pipe Filter Retention Fix**:
-  - Resolved filter loss across restarts in Diamond Sorting Pipes (efinery:diamond_item_pipe).
+  - Resolved filter loss across restarts in Diamond Sorting Pipes (
+efinery:diamond_item_pipe).
   - Fixed an internal container list truncation issue during loadAdditional where clearContent() reduced the NonNullList size to 0, rejecting all restored filter items.
   - Direction filters (6 directions $\times$ 9 slots) now save and restore faithfully under dedicated NBT list records with live network sync and safety drops on block break.
 

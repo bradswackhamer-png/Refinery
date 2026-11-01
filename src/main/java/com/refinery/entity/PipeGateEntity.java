@@ -259,6 +259,12 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     }
 
     @Override
+    public void cycleTriggerCategory(int slot, boolean forward) {
+        if (slot < 0 || slot >= getTier().getSlots()) return;
+        triggers[slot] = forward ? triggers[slot].nextCategory(getTier()) : triggers[slot].previousCategory(getTier());
+    }
+
+    @Override
     public void cycleAction(int slot, boolean forward) {
         if (slot < 0 || slot >= getTier().getSlots()) return;
         actions[slot] = forward ? actions[slot].next(getTier(), isAutarchic()) : actions[slot].previous(getTier(), isAutarchic());
@@ -627,117 +633,23 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                                      @Nullable ResourceHandler<ItemResource> itemHandler,
                                      @Nullable ResourceHandler<FluidResource> fluidHandler,
                                      @Nullable BlockPos containerPos) {
+        if (trigger == GateTrigger.NONE) return false;
+
+        // Process Tank triggers with fill percentage
+        if (trigger.isTankTrigger()) {
+            double percent = GateTrigger.getFluidFillPercentage(fluidHandler);
+            return trigger.evaluateTank(percent);
+        }
+
+        // Process Inventory triggers with fill percentage
+        if (trigger.isInventoryTrigger()) {
+            double percent = GateTrigger.getItemFillPercentage(container, itemHandler);
+            return trigger.evaluateInventory(percent);
+        }
+
         return switch (trigger) {
-            case NONE -> false;
             case REDSTONE_ON -> level.hasNeighborSignal(pipePos);
             case REDSTONE_OFF -> !level.hasNeighborSignal(pipePos);
-            case INV_EMPTY -> {
-                if (container != null) {
-                    boolean empty = true;
-                    for (int s = 0; s < container.getContainerSize(); s++) {
-                        if (!container.getItem(s).isEmpty()) { empty = false; break; }
-                    }
-                    yield empty;
-                }
-                if (itemHandler != null) {
-                    boolean empty = true;
-                    for (int s = 0; s < itemHandler.size(); s++) {
-                        if (itemHandler.getAmountAsLong(s) > 0) { empty = false; break; }
-                    }
-                    yield empty;
-                }
-                yield false;
-            }
-            case INV_HAS_ITEMS -> {
-                if (container != null) {
-                    for (int s = 0; s < container.getContainerSize(); s++) {
-                        if (!container.getItem(s).isEmpty()) yield true;
-                    }
-                    yield false;
-                }
-                if (itemHandler != null) {
-                    for (int s = 0; s < itemHandler.size(); s++) {
-                        if (itemHandler.getAmountAsLong(s) > 0) yield true;
-                    }
-                    yield false;
-                }
-                yield false;
-            }
-            case INV_SPACE -> {
-                if (container != null) {
-                    for (int s = 0; s < container.getContainerSize(); s++) {
-                        ItemStack st = container.getItem(s);
-                        if (st.isEmpty() || st.getCount() < st.getMaxStackSize()) yield true;
-                    }
-                    yield false;
-                }
-                if (itemHandler != null) {
-                    for (int s = 0; s < itemHandler.size(); s++) {
-                        long amt = itemHandler.getAmountAsLong(s);
-                        long cap = itemHandler.getCapacityAsLong(s, itemHandler.getResource(s));
-                        if (amt < cap) yield true;
-                    }
-                    yield false;
-                }
-                yield false;
-            }
-            case INV_FULL -> {
-                if (container != null) {
-                    for (int s = 0; s < container.getContainerSize(); s++) {
-                        ItemStack st = container.getItem(s);
-                        if (st.isEmpty() || st.getCount() < st.getMaxStackSize()) yield false;
-                    }
-                    yield true;
-                }
-                if (itemHandler != null) {
-                    for (int s = 0; s < itemHandler.size(); s++) {
-                        long amt = itemHandler.getAmountAsLong(s);
-                        long cap = itemHandler.getCapacityAsLong(s, itemHandler.getResource(s));
-                        if (amt < cap) yield false;
-                    }
-                    yield true;
-                }
-                yield false;
-            }
-            case TANK_EMPTY -> {
-                if (fluidHandler == null) yield false;
-                long total = 0;
-                for (int t = 0; t < fluidHandler.size(); t++) {
-                    total += fluidHandler.getAmountAsLong(t);
-                }
-                yield total == 0;
-            }
-            case TANK_HAS_FLUID -> {
-                if (fluidHandler == null) yield false;
-                for (int t = 0; t < fluidHandler.size(); t++) {
-                    if (fluidHandler.getAmountAsLong(t) > 0) yield true;
-                }
-                yield false;
-            }
-            case TANK_SPACE -> {
-                if (fluidHandler == null) yield false;
-                for (int t = 0; t < fluidHandler.size(); t++) {
-                    long amt = fluidHandler.getAmountAsLong(t);
-                    if (amt == 0) yield true; // An empty tank always has space!
-                    long cap = fluidHandler.getCapacityAsLong(t, fluidHandler.getResource(t));
-                    if (cap <= 0) cap = fluidHandler.getCapacityAsLong(t, net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER));
-                    if (cap > 0 && amt < cap) yield true;
-                }
-                yield false;
-            }
-            case TANK_FULL -> {
-                if (fluidHandler == null) yield false;
-                boolean hasAnyTank = false;
-                for (int t = 0; t < fluidHandler.size(); t++) {
-                    hasAnyTank = true;
-                    long amt = fluidHandler.getAmountAsLong(t);
-                    if (amt == 0) yield false; // An empty tank is never full!
-                    long cap = fluidHandler.getCapacityAsLong(t, fluidHandler.getResource(t));
-                    if (cap <= 0) cap = fluidHandler.getCapacityAsLong(t, net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER));
-                    if (cap > 0 && amt < cap) yield false;
-                }
-                yield hasAnyTank;
-            }
             case PIPE_EMPTY -> {
                 if (isPipe && pipeBe != null) {
                     if (LogisticsPipeCompat.hasTravelingItems(pipeBe)) yield false;
@@ -801,6 +713,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             case WIRE_GREEN_OFF -> !wireStates[2];
             case WIRE_YELLOW_ON -> wireStates[3];
             case WIRE_YELLOW_OFF -> !wireStates[3];
+            default -> false;
         };
     }
 

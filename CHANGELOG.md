@@ -39,7 +39,8 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ### Fixed
 - **Diamond Sorting Pipe Filter Retention Across Server Restarts**:
-  - Fixed an issue where items placed into the 54 direction filter slots of the Diamond Sorting Pipe (efinery:diamond_item_pipe) disappeared after server restart or chunk reload.
+  - Fixed an issue where items placed into the 54 direction filter slots of the Diamond Sorting Pipe (
+efinery:diamond_item_pipe) disappeared after server restart or chunk reload.
   - In loadAdditional, calling clearContent() on SimpleContainer truncated its internal NonNullList to size 0, causing ContainerHelper.loadAllItems to discard every filter slot due to isValidInContainer size checks.
   - Added dedicated DiamondFilters NBT list serialization via ItemStackWithSlot.CODEC with backward-compatible fallback, pre-sizing to 54 slots on load without truncating the container.
   - Added preRemoveSideEffects to drop filter contents when the Diamond Pipe is dismantled, and real-time block update broadcasting on setChanged().
@@ -70,7 +71,8 @@ eoforge/biome_modifier/add_tin_ore.json).
 
 ### Fixed
 - **Minecraft Bootstrap Block Registration Crash (Block id not set)**:
-  - In NeoForge 26.3.0.48+, blocks strictly require a ResourceKey assigned via Properties.setId(...) provided by NeoForge's egisterBlock(name, func) callback parameter p.
+  - In NeoForge 26.3.0.48+, blocks strictly require a ResourceKey assigned via Properties.setId(...) provided by NeoForge's 
+egisterBlock(name, func) callback parameter p.
   - Updated TIN_ORE, DEEPSLATE_TIN_ORE, RAW_TIN_BLOCK, TIN_BLOCK, and BRONZE_BLOCK to chain onto p directly rather than creating detached copies with ofFullCopy(...).
 
 ---

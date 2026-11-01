@@ -1,24 +1,26 @@
 package com.refinery.gate;
 
 public enum GateAction {
-    NONE("None", "No action executed", 0x888888),
-    REDSTONE_SIGNAL("Emit Redstone", "Emits constant redstone signal (power 15)", 0xFF2222),
-    REDSTONE_PULSE("Redstone Pulse", "Emits periodic redstone pulses (1 sec)", 0xFF6666),
-    PULSAR_PULL_ITEM("Autarchic Pulse (Item)", "Pulls 1 item from container into pipe", 0x22EEFF),
-    PULSAR_PUMP_FLUID("Autarchic Pulse (Fluid)", "Pumps fluid from tank into pipe", 0x00BBDD),
-    EMIT_WIRE_RED("Emit Red Wire", "Broadcasts Red Wire signal along pipe network", 0xFF2222),
-    EMIT_WIRE_BLUE("Emit Blue Wire", "Broadcasts Blue Wire signal along pipe network", 0x2266FF),
-    EMIT_WIRE_GREEN("Emit Green Wire", "Broadcasts Green Wire signal along pipe network", 0x22DD22),
-    EMIT_WIRE_YELLOW("Emit Yellow Wire", "Broadcasts Yellow Wire signal along pipe network", 0xFFFF22);
+    NONE("None", "No action executed", 0x888888, "None"),
+    REDSTONE_SIGNAL("Emit Redstone", "Emits constant redstone signal (power 15)", 0xFF2222, "Redstone"),
+    REDSTONE_PULSE("Redstone Pulse", "Emits periodic redstone pulses (1 sec)", 0xFF6666, "Pulse"),
+    PULSAR_PULL_ITEM("Autarchic Pulse (Item)", "Pulls 1 item from container into pipe", 0x22EEFF, "Pull Item"),
+    PULSAR_PUMP_FLUID("Autarchic Pulse (Fluid)", "Pumps fluid from tank into pipe", 0x00BBDD, "Pump Fluid"),
+    EMIT_WIRE_RED("Emit Red Wire", "Broadcasts Red Wire signal along pipe network", 0xFF2222, "Red Wire"),
+    EMIT_WIRE_BLUE("Emit Blue Wire", "Broadcasts Blue Wire signal along pipe network", 0x2266FF, "Blue Wire"),
+    EMIT_WIRE_GREEN("Emit Green Wire", "Broadcasts Green Wire signal along pipe network", 0x22DD22, "Grn Wire"),
+    EMIT_WIRE_YELLOW("Emit Yellow Wire", "Broadcasts Yellow Wire signal along pipe network", 0xFFFF22, "Yel Wire");
 
     private final String label;
     private final String description;
     private final int displayColor;
+    private final String shortLabel;
 
-    GateAction(String label, String description, int displayColor) {
+    GateAction(String label, String description, int displayColor, String shortLabel) {
         this.label = label;
         this.description = description;
         this.displayColor = 0xFF000000 | displayColor;
+        this.shortLabel = shortLabel;
     }
 
     public String getLabel() {
@@ -31,6 +33,10 @@ public enum GateAction {
 
     public int getDisplayColor() {
         return displayColor;
+    }
+
+    public String getShortLabel() {
+        return shortLabel;
     }
 
     public boolean isPulsar() {
