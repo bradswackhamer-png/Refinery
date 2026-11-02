@@ -4,6 +4,18 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.52] - 2026-11-01
+
+### Fixed
+- **Pipe Wires Stuck in Active ON State**:
+  - Implemented a time-to-live lease/pulse hold mechanism on `PipeWireEntity` (`pulseSignal(color, ticks)`) and `PipeGateEntity` (`pulseWire(color, ticks)`) so wire signals automatically count down and expire when emitting gates cease broadcasting.
+  - Resolved one-way latch where `setSignalActive(color, true)` and gate `wireStates[color.ordinal()] = true` were never reset to `false` when conditions stopped being met.
+  - Replaced improper lever-toggle behavior in `PipeGateEntity.interact` when right-clicking gates with pipe wire items; right-clicking now properly attaches the wire color to the pipe host instead of manually latching the signal bit.
+  - Constrained wire signal BFS network propagation along connected pipes to only traverse adjacent pipe blocks that actually have that wire color installed (`PipeWireEntity.hasWire(color)`).
+  - Synchronized gate screen GUI wire status indicators and `WIRE_COLOR_ON` / `WIRE_COLOR_OFF` condition triggers dynamically each tick to live wire signal states.
+
+---
+
 ## [1.8.51] - 2026-11-01
 
 ### Fixed

@@ -91,6 +91,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     private final GateAction[] actions = new GateAction[MAX_SLOTS];
     private final boolean[] conditionsMet = new boolean[MAX_SLOTS];
     private final boolean[] wireStates = new boolean[4]; // RED, BLUE, GREEN, YELLOW
+    private final int[] wireHoldTicks = new int[4];
 
     private int pulsarTimer = 0;
     private int evalTimer = 0;
@@ -270,12 +271,18 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         actions[slot] = forward ? actions[slot].next(getTier(), isAutarchic()) : actions[slot].previous(getTier(), isAutarchic());
     }
 
+    public void pulseWire(PipeWireColor color, int ticks) {
+        int idx = color.ordinal();
+        this.wireHoldTicks[idx] = Math.max(this.wireHoldTicks[idx], ticks);
+        this.wireStates[idx] = true;
+    }
+
     public boolean isWireActive(PipeWireColor color) {
         if (wireStates[color.ordinal()]) return true;
         if (level() != null) {
             List<PipeWireEntity> wires = level().getEntitiesOfClass(PipeWireEntity.class, new AABB(getPipePos()));
             for (PipeWireEntity w : wires) {
-                if (w.isSignalActive(color)) return true;
+                if (w.hasWire(color) && w.isSignalActive(color)) return true;
             }
         }
         return false;
@@ -319,8 +326,23 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         if (wireColor != null) {
             if (getTier().supportsWire(wireColor)) {
                 if (!level().isClientSide()) {
-                    wireStates[wireColor.ordinal()] = !wireStates[wireColor.ordinal()];
-                    level().playSound(null, blockPosition(), SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.6f, 1.2f);
+                    BlockPos hostPos = getPipePos();
+                    List<PipeWireEntity> existingWires = level().getEntitiesOfClass(PipeWireEntity.class, new AABB(hostPos));
+                    PipeWireEntity wireEntity = existingWires.isEmpty() ? null : existingWires.get(0);
+                    if (wireEntity == null) {
+                        wireEntity = new PipeWireEntity(RefineryMod.PIPE_WIRE_ENTITY.get(), level(), hostPos);
+                        wireEntity.setWirePresent(wireColor, true);
+                        level().addFreshEntity(wireEntity);
+                        level().playSound(null, hostPos, SoundEvents.TRIPWIRE_ATTACH, SoundSource.BLOCKS, 1.0f, 1.2f);
+                        if (!player.getAbilities().instabuild) held.shrink(1);
+                        return InteractionResult.SUCCESS;
+                    } else if (!wireEntity.hasWire(wireColor)) {
+                        wireEntity.setWirePresent(wireColor, true);
+                        level().playSound(null, hostPos, SoundEvents.TRIPWIRE_ATTACH, SoundSource.BLOCKS, 1.0f, 1.2f);
+                        if (!player.getAbilities().instabuild) held.shrink(1);
+                        return InteractionResult.SUCCESS;
+                    }
+
                 }
                 return InteractionResult.SUCCESS;
             }
@@ -458,6 +480,25 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                         break;
                     }
                 }
+            }
+        }
+
+        // Decrement wire hold timers and sync wire states
+        for (int i = 0; i < 4; i++) {
+            if (this.wireHoldTicks[i] > 0) {
+                this.wireHoldTicks[i]--;
+                this.wireStates[i] = true;
+            } else {
+                PipeWireColor c = PipeWireColor.values()[i];
+                boolean active = false;
+                List<PipeWireEntity> wires = level().getEntitiesOfClass(PipeWireEntity.class, new AABB(pipePos));
+                for (PipeWireEntity w : wires) {
+                    if (w.hasWire(c) && w.isSignalActive(c)) {
+                        active = true;
+                        break;
+                    }
+                }
+                this.wireStates[i] = active;
             }
         }
 
@@ -705,14 +746,14 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                 }
                 yield false;
             }
-            case WIRE_RED_ON -> wireStates[0];
-            case WIRE_RED_OFF -> !wireStates[0];
-            case WIRE_BLUE_ON -> wireStates[1];
-            case WIRE_BLUE_OFF -> !wireStates[1];
-            case WIRE_GREEN_ON -> wireStates[2];
-            case WIRE_GREEN_OFF -> !wireStates[2];
-            case WIRE_YELLOW_ON -> wireStates[3];
-            case WIRE_YELLOW_OFF -> !wireStates[3];
+            case WIRE_RED_ON -> isWireActive(PipeWireColor.RED);
+            case WIRE_RED_OFF -> !isWireActive(PipeWireColor.RED);
+            case WIRE_BLUE_ON -> isWireActive(PipeWireColor.BLUE);
+            case WIRE_BLUE_OFF -> !isWireActive(PipeWireColor.BLUE);
+            case WIRE_GREEN_ON -> isWireActive(PipeWireColor.GREEN);
+            case WIRE_GREEN_OFF -> !isWireActive(PipeWireColor.GREEN);
+            case WIRE_YELLOW_ON -> isWireActive(PipeWireColor.YELLOW);
+            case WIRE_YELLOW_OFF -> !isWireActive(PipeWireColor.YELLOW);
             default -> false;
         };
     }
@@ -835,11 +876,13 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         while (!queue.isEmpty()) {
             BlockPos current = queue.poll();
 
-            // Set wire signal active on any PipeWireEntity at current
+            // Pulse wire signal on any PipeWireEntity at current
+            boolean currentHasWire = false;
             List<PipeWireEntity> wires = level.getEntitiesOfClass(PipeWireEntity.class, new AABB(current));
             for (PipeWireEntity w : wires) {
                 if (w.hasWire(color)) {
-                    w.setSignalActive(color, true);
+                    currentHasWire = true;
+                    w.pulseSignal(color, 6);
                 }
             }
 
@@ -847,19 +890,42 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             List<PipeGateEntity> gates = level.getEntitiesOfClass(PipeGateEntity.class, new AABB(current));
             for (PipeGateEntity g : gates) {
                 if (g.getTier().supportsWire(color)) {
-                    g.wireStates[color.ordinal()] = true;
+                    g.pulseWire(color, 6);
+                }
+            }
+
+            // Pulse wire signal on any block-based PipeGateBlockEntity attached to current
+            for (Direction dir : Direction.values()) {
+                BlockPos gatePos = current.relative(dir);
+                BlockEntity be = level.getBlockEntity(gatePos);
+                if (be instanceof com.refinery.block.entity.PipeGateBlockEntity bg) {
+                    if (bg.getTier().supportsWire(color)) {
+                        bg.pulseWire(color, 6);
+                    }
                 }
             }
 
             if (visited.size() >= maxDistance) continue;
+            if (!current.equals(startPos) && !currentHasWire) continue;
 
             for (Direction d : Direction.values()) {
                 BlockPos nPos = current.relative(d);
                 if (!visited.contains(nPos)) {
                     BlockState nState = level.getBlockState(nPos);
                     if (com.refinery.item.PipeWireItem.isPipeOrHost(level, nPos, nState)) {
-                        visited.add(nPos);
-                        queue.add(nPos);
+                        List<PipeWireEntity> nWires = level.getEntitiesOfClass(PipeWireEntity.class, new AABB(nPos));
+                        boolean neighborHasWire = false;
+                        for (PipeWireEntity nw : nWires) {
+                            if (nw.hasWire(color)) {
+                                neighborHasWire = true;
+                                break;
+                            }
+                        }
+                        if (neighborHasWire) {
+                            visited.add(nPos);
+                            queue.add(nPos);
+                        }
+
                     }
                 }
             }

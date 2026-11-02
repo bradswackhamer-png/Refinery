@@ -50,6 +50,7 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
     private final GateAction[] actions = new GateAction[MAX_SLOTS];
     private final boolean[] conditionsMet = new boolean[MAX_SLOTS];
     private final boolean[] wireStates = new boolean[4]; // RED, BLUE, GREEN, YELLOW
+    private final int[] wireHoldTicks = new int[4];
 
     private int pulsarTimer = 0;
     private int evalTimer = 0;
@@ -180,6 +181,12 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
         setChanged();
     }
 
+    public void pulseWire(PipeWireColor color, int ticks) {
+        int idx = color.ordinal();
+        this.wireHoldTicks[idx] = Math.max(this.wireHoldTicks[idx], ticks);
+        this.wireStates[idx] = true;
+    }
+
     public void copyFrom(PipeGateBlockEntity other) {
         this.tier = other.tier;
         this.autarchic = other.autarchic;
@@ -194,6 +201,16 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
     public static void serverTick(Level level, BlockPos pos, BlockState state, PipeGateBlockEntity gate) {
         Direction facing = state.getValue(PipeGateBlock.FACING);
         BlockPos attachedPos = pos.relative(facing);
+
+        // Decrement wire hold timers
+        for (int i = 0; i < 4; i++) {
+            if (gate.wireHoldTicks[i] > 0) {
+                gate.wireHoldTicks[i]--;
+                gate.wireStates[i] = true;
+            } else {
+                gate.wireStates[i] = false;
+            }
+        }
 
         // Periodically evaluate conditions (every 4 ticks)
         gate.evalTimer++;
@@ -525,43 +542,10 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
     }
 
     private void broadcastWires(Level level, BlockPos startPipePos, Set<PipeWireColor> colors) {
-        // BFS along continuous pipe blocks up to 24 blocks
-        Queue<BlockPos> queue = new ArrayDeque<>();
-        Set<BlockPos> visited = new HashSet<>();
-
-        queue.add(startPipePos);
-        visited.add(startPipePos);
-
-        while (!queue.isEmpty() && visited.size() < 24) {
-            BlockPos current = queue.poll();
-
-            // Check if any gates are attached to this pipe
-            for (Direction dir : Direction.values()) {
-                BlockPos gatePos = current.relative(dir);
-                BlockEntity be = level.getBlockEntity(gatePos);
-                if (be instanceof PipeGateBlockEntity otherGate && otherGate != this) {
-                    BlockState gState = level.getBlockState(gatePos);
-                    if (gState.getBlock() instanceof PipeGateBlock && gState.getValue(PipeGateBlock.FACING) == dir.getOpposite()) {
-                        for (PipeWireColor c : colors) {
-                            otherGate.wireStates[c.ordinal()] = true;
-                        }
-                    }
-                }
-            }
-
-            // Continue pipe traversal
-            for (Direction dir : Direction.values()) {
-                BlockPos next = current.relative(dir);
-                if (!visited.contains(next)) {
-                    BlockEntity nextBe = level.getBlockEntity(next);
-                    if (LogisticsPipeCompat.isLogisticsPipe(nextBe) ||
-                        level.getBlockState(next).getBlock().getDescriptionId().contains("pipe")) {
-                        visited.add(next);
-                        queue.add(next);
-                    }
-                }
-            }
+        for (PipeWireColor c : colors) {
+            com.refinery.entity.PipeGateEntity.propagateWireSignal(level, startPipePos, c, 32);
         }
+
     }
 
     @Override

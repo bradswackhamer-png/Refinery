@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.52 (Pipe Wire Signal Expiration & Active State Stuck Fix)](#version-1852-pipe-wire-signal-expiration--active-state-stuck-fix)
    - [Version 1.8.51 (Sloped-to-Flat Conveyor Transition Seam & Item Sticking Fix)](#version-1851-sloped-to-flat-conveyor-transition-seam--item-sticking-fix)
    - [Version 1.8.50 (Sloped & Corner Conveyor Belt Controls Unified)](#version-1850-sloped--corner-conveyor-belt-controls-unified)
    - [Version 1.8.49 (Creative Fluid Pump, 2x Pump Output, & 200-Block Fluid Discharge Range)](#version-1849-creative-fluid-pump-2x-pump-output--200-block-fluid-discharge-range)
@@ -1674,6 +1675,16 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.52 (Pipe Wire Signal Expiration & Active State Stuck Fix)
+- **Pipe Wire Active State Stuck Fix**:
+  - Implemented dynamic pulse lease timers (`signalHoldTicks` and `wireHoldTicks`) across `PipeWireEntity` and `PipeGateEntity`. Wire signals automatically expire within 6 ticks ($0.3$s) when triggering conditions are lost.
+  - Eliminated permanent one-way latching where `DATA_SIGNALS` and `wireStates` remained active indefinitely after gate actions stopped emitting.
+  - Replaced accidental lever-toggle behavior in `PipeGateEntity.interact` when right-clicking gates with pipe wire items; now safely attaches the wire color to the pipe host without latching logic bits.
+  - Constrained BFS wire propagation to only traverse adjacent pipe blocks that actually have that wire color installed (`PipeWireEntity.hasWire(color)`).
+  - Dynamically synchronized gate screen GUI wire status indicators and `WIRE_COLOR_ON` / `WIRE_COLOR_OFF` condition triggers to live wire states each tick.
 
 ---
 

@@ -28,6 +28,7 @@ public class PipeWireEntity extends Entity {
     private static final EntityDataAccessor<Integer> DATA_SIGNALS = SynchedEntityData.defineId(PipeWireEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<BlockPos> DATA_PIPE_POS = SynchedEntityData.defineId(PipeWireEntity.class, EntityDataSerializers.BLOCK_POS);
 
+    private final int[] signalHoldTicks = new int[4];
     private int tickCount = 0;
 
     public PipeWireEntity(EntityType<?> entityType, Level level) {
@@ -86,12 +87,23 @@ public class PipeWireEntity extends Entity {
             mask |= (1 << color.ordinal());
         } else {
             mask &= ~(1 << color.ordinal());
+            this.signalHoldTicks[color.ordinal()] = 0;
         }
         this.entityData.set(DATA_SIGNALS, mask);
     }
 
+    public void pulseSignal(PipeWireColor color, int ticks) {
+        int idx = color.ordinal();
+        this.signalHoldTicks[idx] = Math.max(this.signalHoldTicks[idx], ticks);
+        int mask = this.entityData.get(DATA_SIGNALS);
+        if ((mask & (1 << idx)) == 0) {
+            this.entityData.set(DATA_SIGNALS, mask | (1 << idx));
+        }
+    }
+
     public void clearSignals() {
         this.entityData.set(DATA_SIGNALS, 0);
+        java.util.Arrays.fill(this.signalHoldTicks, 0);
     }
 
     @Override
@@ -145,17 +157,31 @@ public class PipeWireEntity extends Entity {
         super.tick();
         this.tickCount++;
 
-        if (!level().isClientSide() && this.tickCount % 20 == 0) {
-            BlockPos pipePos = getPipePos();
-            BlockState state = level().getBlockState(pipePos);
-            if (!PipeWireItem.isPipeOrHost(level(), pipePos, state)) {
-                dropAllWires();
-                discard();
-                return;
+        if (!level().isClientSide()) {
+            for (int i = 0; i < 4; i++) {
+                if (this.signalHoldTicks[i] > 0) {
+                    this.signalHoldTicks[i]--;
+                    if (this.signalHoldTicks[i] <= 0) {
+                        int mask = this.entityData.get(DATA_SIGNALS);
+                        if ((mask & (1 << i)) != 0) {
+                            this.entityData.set(DATA_SIGNALS, mask & ~(1 << i));
+                        }
+                    }
+                }
             }
-            // If all wires were removed, discard entity
-            if (this.entityData.get(DATA_WIRES) == 0) {
-                discard();
+
+            if (this.tickCount % 20 == 0) {
+                BlockPos pipePos = getPipePos();
+                BlockState state = level().getBlockState(pipePos);
+                if (!PipeWireItem.isPipeOrHost(level(), pipePos, state)) {
+                    dropAllWires();
+                    discard();
+                    return;
+                }
+                // If all wires were removed, discard entity
+                if (this.entityData.get(DATA_WIRES) == 0) {
+                    discard();
+                }
             }
         }
     }

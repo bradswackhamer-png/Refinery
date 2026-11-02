@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.51.jar`
+`refinery-1.8.52.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.51 (NeoForge 26.3)`
+`Industrial Refinery 1.8.52 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,16 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.52
+
+### What's New in v1.8.52:
+- **Pipe Wire Active State Stuck Fix**:
+  - Implemented dynamic pulse lease timers (`signalHoldTicks` and `wireHoldTicks`) across `PipeWireEntity` and `PipeGateEntity`. Wire signals automatically expire within 6 ticks ($0.3$s) when triggering conditions are lost.
+  - Eliminated permanent one-way latching where `DATA_SIGNALS` and `wireStates` remained active indefinitely after gate actions stopped emitting.
+  - Replaced accidental lever-toggle behavior in `PipeGateEntity.interact` when right-clicking gates with pipe wire items; now safely attaches the wire color to the pipe host without latching logic bits.
+  - Constrained BFS wire propagation to only traverse adjacent pipe blocks that actually have that wire color installed (`PipeWireEntity.hasWire(color)`).
+  - Dynamically synchronized gate screen GUI wire status indicators and `WIRE_COLOR_ON` / `WIRE_COLOR_OFF` condition triggers to live wire states each tick.
+
 # Industrial Refinery v1.8.51
 
 ### What's New in v1.8.51:
