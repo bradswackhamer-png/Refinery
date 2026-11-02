@@ -67,7 +67,7 @@ public class DieselGeneratorBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Direction facing = context.getHorizontalDirection();
+        Direction facing = context.getHorizontalDirection().getOpposite();
         BlockPos pos = context.getClickedPos();
         Level level = context.getLevel();
 
@@ -144,9 +144,11 @@ public class DieselGeneratorBlock extends Block implements EntityBlock {
             BlockState partnerState = level.getBlockState(partnerPos);
 
             if (partnerState.is(this) && partnerState.getValue(PART) != part) {
-                if (player.isCreative() && part == GeneratorPart.RIGHT) {
+                if (player.isCreative()) {
                     level.setBlock(partnerPos, Blocks.AIR.defaultBlockState(), 35);
                     level.levelEvent(player, 2001, partnerPos, Block.getId(partnerState));
+                } else if (part == GeneratorPart.RIGHT) {
+                    level.destroyBlock(partnerPos, true, player);
                 }
             }
 

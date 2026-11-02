@@ -3,7 +3,6 @@ package com.refinery.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.refinery.RefineryMod;
-import com.refinery.entity.PipeGateEntity;
 import com.refinery.entity.PipeWireEntity;
 import com.refinery.gate.PipeWireColor;
 import com.refinery.item.PipeWireItem;
@@ -17,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
@@ -59,69 +59,147 @@ public class PipeWireEntityRenderer extends EntityRenderer<PipeWireEntity, PipeW
         state.signalGreen = entity.isSignalActive(PipeWireColor.GREEN);
         state.signalYellow = entity.isSignalActive(PipeWireColor.YELLOW);
 
-        Level level = entity.level();
-        BlockPos pipePos = entity.getPipePos();
-
         for (int c = 0; c < 4; c++) {
             for (int d = 0; d < 6; d++) {
                 state.connections[c][d] = false;
             }
         }
 
+        Level level = entity.level();
+        BlockPos pipePos = entity.getPipePos();
         if (level == null || pipePos == null) {
             return;
         }
 
-        // 1. Attached gates on this pipe: wires branch directly to the gate's terminal face
-        List<PipeGateEntity> gates = level.getEntitiesOfClass(PipeGateEntity.class, new AABB(pipePos));
-        for (PipeGateEntity gate : gates) {
-            Direction gd = gate.getDirection();
-            if (gd != null) {
-                for (PipeWireColor color : PipeWireColor.values()) {
-                    if (gate.getTier().supportsWire(color) && entity.hasWire(color)) {
-                        state.connections[color.ordinal()][gd.ordinal()] = true;
-                    }
-                }
+        // 1. Query physical pipe connections at this block
+        boolean[] pipeHasArm = new boolean[6];
+        BlockEntity be = level.getBlockEntity(pipePos);
+        if (be instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipeBe) {
+            for (Direction d : Direction.values()) {
+                pipeHasArm[d.ordinal()] = pipeBe.getConnection(d).isConnected();
+            }
+        } else {
+            for (Direction d : Direction.values()) {
+                BlockPos nPos = pipePos.relative(d);
+                pipeHasArm[d.ordinal()] = PipeWireItem.isPipeOrHost(level, nPos, level.getBlockState(nPos));
             }
         }
 
-        // 2. Neighbor pipes: connect continuous wires between adjacent pipes that share this wire color
-        for (Direction d : Direction.values()) {
-            BlockPos neighborPos = pipePos.relative(d);
-            BlockState neighborState = level.getBlockState(neighborPos);
-            if (PipeWireItem.isPipeOrHost(level, neighborPos, neighborState)) {
-                List<PipeWireEntity> neighborWires = level.getEntitiesOfClass(PipeWireEntity.class, new AABB(neighborPos));
-                if (!neighborWires.isEmpty()) {
-                    PipeWireEntity nw = neighborWires.get(0);
-                    for (PipeWireColor color : PipeWireColor.values()) {
-                        if (entity.hasWire(color) && nw.hasWire(color)) {
-                            state.connections[color.ordinal()][d.ordinal()] = true;
+        // Determine default pipe axis from physical arms
+        boolean yRun = pipeHasArm[Direction.UP.ordinal()] || pipeHasArm[Direction.DOWN.ordinal()];
+        boolean zRun = pipeHasArm[Direction.NORTH.ordinal()] || pipeHasArm[Direction.SOUTH.ordinal()];
+        boolean xRun = pipeHasArm[Direction.WEST.ordinal()] || pipeHasArm[Direction.EAST.ordinal()];
+
+        Direction.Axis pipeAxis = Direction.Axis.Y;
+        if (yRun && !zRun && !xRun) pipeAxis = Direction.Axis.Y;
+        else if (zRun && !yRun && !xRun) pipeAxis = Direction.Axis.Z;
+        else if (xRun && !yRun && !zRun) pipeAxis = Direction.Axis.X;
+        else if (yRun) pipeAxis = Direction.Axis.Y;
+        else if (zRun) pipeAxis = Direction.Axis.Z;
+        else if (xRun) pipeAxis = Direction.Axis.X;
+
+        // 2. Compute directional connections and quadrant offsets for each wire color
+        for (PipeWireColor color : PipeWireColor.values()) {
+            if (!entity.hasWire(color)) continue;
+            int cIdx = color.ordinal();
+
+            int wireCount = 0;
+            Direction firstWireDir = null;
+
+            // Connect to neighboring pipes that share this wire color
+            for (Direction d : Direction.values()) {
+                BlockPos neighborPos = pipePos.relative(d);
+                BlockState neighborState = level.getBlockState(neighborPos);
+                if (PipeWireItem.isPipeOrHost(level, neighborPos, neighborState)) {
+                    List<PipeWireEntity> neighborWires = level.getEntitiesOfClass(PipeWireEntity.class, new AABB(neighborPos));
+                    if (!neighborWires.isEmpty() && neighborWires.get(0).hasWire(color)) {
+                        state.connections[cIdx][d.ordinal()] = true;
+                        wireCount++;
+                        if (firstWireDir == null) firstWireDir = d;
+                    }
+                }
+            }
+
+            // End wire or isolated wire: follow the physical pipe's direction across this block
+            if (wireCount == 0) {
+                // Isolated wire: follow the pipe's existing arms
+                boolean added = false;
+                for (Direction d : Direction.values()) {
+                    if (pipeHasArm[d.ordinal()]) {
+                        state.connections[cIdx][d.ordinal()] = true;
+                        added = true;
+                    }
+                }
+                if (!added) {
+                    // Default to vertical pipe run if no neighbor connections yet
+                    state.connections[cIdx][Direction.UP.ordinal()] = true;
+                    state.connections[cIdx][Direction.DOWN.ordinal()] = true;
+                }
+            } else if (wireCount == 1 && firstWireDir != null) {
+                // End wire: continue along the pipe's direction across this block!
+                Direction opp = firstWireDir.getOpposite();
+                if (pipeHasArm[opp.ordinal()]) {
+                    // Straight continuation along the pipe axis
+                    state.connections[cIdx][opp.ordinal()] = true;
+                } else {
+                    // Follow any other pipe arm (elbow / corner)
+                    for (Direction d : Direction.values()) {
+                        if (d != firstWireDir && pipeHasArm[d.ordinal()]) {
+                            state.connections[cIdx][d.ordinal()] = true;
+                            break;
                         }
                     }
                 }
             }
-        }
 
-        // 3. Fallback: if a placed wire has no neighbor wire or gate yet, run along the physical pipe's arms
-        for (PipeWireColor color : PipeWireColor.values()) {
-            if (!entity.hasWire(color)) continue;
-            int cIdx = color.ordinal();
-            boolean hasAny = false;
-            for (int d = 0; d < 6; d++) {
-                if (state.connections[cIdx][d]) {
-                    hasAny = true;
-                    break;
+            // Determine wire axis based on its actual connections
+            boolean wY = state.connections[cIdx][Direction.UP.ordinal()] || state.connections[cIdx][Direction.DOWN.ordinal()];
+            boolean wZ = state.connections[cIdx][Direction.NORTH.ordinal()] || state.connections[cIdx][Direction.SOUTH.ordinal()];
+            boolean wX = state.connections[cIdx][Direction.WEST.ordinal()] || state.connections[cIdx][Direction.EAST.ordinal()];
+
+            Direction.Axis wireAxis = pipeAxis;
+            if (wY && !wZ && !wX) wireAxis = Direction.Axis.Y;
+            else if (wZ && !wY && !wX) wireAxis = Direction.Axis.Z;
+            else if (wX && !wY && !wZ) wireAxis = Direction.Axis.X;
+            else if (wY) wireAxis = Direction.Axis.Y;
+            else if (wZ) wireAxis = Direction.Axis.Z;
+            else if (wX) wireAxis = Direction.Axis.X;
+
+            // Set [cx, cy, cz] quadrant offsets for this color based on wireAxis
+            float cx = 0.0f, cy = 0.0f, cz = 0.0f;
+            switch (wireAxis) {
+                case Y -> {
+                    // Vertical pipe cylinder: cross section is X-Z
+                    switch (color) {
+                        case RED -> { cx = -D; cy = 0.0f; cz = -D; }
+                        case BLUE -> { cx = D; cy = 0.0f; cz = -D; }
+                        case GREEN -> { cx = -D; cy = 0.0f; cz = D; }
+                        case YELLOW -> { cx = D; cy = 0.0f; cz = D; }
+                    }
                 }
-            }
-            if (!hasAny) {
-                for (Direction d : Direction.values()) {
-                    BlockPos neighborPos = pipePos.relative(d);
-                    BlockState neighborState = level.getBlockState(neighborPos);
-                    if (PipeWireItem.isPipeOrHost(level, neighborPos, neighborState)) {
-                        state.connections[cIdx][d.ordinal()] = true;
+                case Z -> {
+                    // North-South pipe cylinder: cross section is X-Y
+                    switch (color) {
+                        case RED -> { cx = -D; cy = D; cz = 0.0f; }
+                        case BLUE -> { cx = D; cy = D; cz = 0.0f; }
+                        case GREEN -> { cx = -D; cy = -D; cz = 0.0f; }
+                        case YELLOW -> { cx = D; cy = -D; cz = 0.0f; }
+                    }
+                }
+                case X -> {
+                    // East-West pipe cylinder: cross section is Y-Z
+                    switch (color) {
+                        case RED -> { cx = 0.0f; cy = D; cz = -D; }
+                        case BLUE -> { cx = 0.0f; cy = D; cz = D; }
+                        case GREEN -> { cx = 0.0f; cy = -D; cz = -D; }
+                        case YELLOW -> { cx = 0.0f; cy = -D; cz = D; }
                     }
                 }
             }
+
+            state.offsets[cIdx][0] = cx;
+            state.offsets[cIdx][1] = cy;
+            state.offsets[cIdx][2] = cz;
         }
     }
 
@@ -133,40 +211,44 @@ public class PipeWireEntityRenderer extends EntityRenderer<PipeWireEntity, PipeW
                 (pose, consumer) -> {
                     Matrix4f m = pose.pose();
 
-                    // Render Red Wire (Top-Left Quadrant)
+                    // Render Red Wire
                     if (state.hasRed) {
                         float r = state.signalRed ? 1.0f : 0.85f;
                         float g = state.signalRed ? 0.28f : 0.12f;
                         float b = state.signalRed ? 0.28f : 0.12f;
                         int light = state.signalRed ? FULL_BRIGHT : state.lightCoords;
-                        renderWireRun(m, consumer, -D, D, -D, state.connections[PipeWireColor.RED.ordinal()], r, g, b, light);
+                        float[] off = state.offsets[PipeWireColor.RED.ordinal()];
+                        renderWireRun(m, consumer, off[0], off[1], off[2], state.connections[PipeWireColor.RED.ordinal()], r, g, b, light);
                     }
 
-                    // Render Blue Wire (Top-Right Quadrant)
+                    // Render Blue Wire
                     if (state.hasBlue) {
                         float r = state.signalBlue ? 0.28f : 0.15f;
                         float g = state.signalBlue ? 0.72f : 0.38f;
                         float b = state.signalBlue ? 1.0f : 0.88f;
                         int light = state.signalBlue ? FULL_BRIGHT : state.lightCoords;
-                        renderWireRun(m, consumer, D, D, -D, state.connections[PipeWireColor.BLUE.ordinal()], r, g, b, light);
+                        float[] off = state.offsets[PipeWireColor.BLUE.ordinal()];
+                        renderWireRun(m, consumer, off[0], off[1], off[2], state.connections[PipeWireColor.BLUE.ordinal()], r, g, b, light);
                     }
 
-                    // Render Green Wire (Bottom-Left Quadrant)
+                    // Render Green Wire
                     if (state.hasGreen) {
                         float r = state.signalGreen ? 0.28f : 0.10f;
                         float g = state.signalGreen ? 1.0f : 0.68f;
                         float b = state.signalGreen ? 0.40f : 0.20f;
                         int light = state.signalGreen ? FULL_BRIGHT : state.lightCoords;
-                        renderWireRun(m, consumer, -D, -D, -D, state.connections[PipeWireColor.GREEN.ordinal()], r, g, b, light);
+                        float[] off = state.offsets[PipeWireColor.GREEN.ordinal()];
+                        renderWireRun(m, consumer, off[0], off[1], off[2], state.connections[PipeWireColor.GREEN.ordinal()], r, g, b, light);
                     }
 
-                    // Render Yellow Wire (Bottom-Right Quadrant)
+                    // Render Yellow Wire
                     if (state.hasYellow) {
                         float r = state.signalYellow ? 1.0f : 0.90f;
                         float g = state.signalYellow ? 0.95f : 0.72f;
                         float b = state.signalYellow ? 0.28f : 0.10f;
                         int light = state.signalYellow ? FULL_BRIGHT : state.lightCoords;
-                        renderWireRun(m, consumer, D, -D, -D, state.connections[PipeWireColor.YELLOW.ordinal()], r, g, b, light);
+                        float[] off = state.offsets[PipeWireColor.YELLOW.ordinal()];
+                        renderWireRun(m, consumer, off[0], off[1], off[2], state.connections[PipeWireColor.YELLOW.ordinal()], r, g, b, light);
                     }
                 }
         );

@@ -94,11 +94,11 @@ public class DieselGeneratorRenderer implements BlockEntityRenderer<DieselGenera
             }
             case EAST -> {
                 poseStack.translate(1.0, 0.0, 0.0);
-                poseStack.rotateDegrees(Axis.YP, 90.0f);
+                poseStack.rotateDegrees(Axis.YP, 270.0f);
             }
             case WEST -> {
                 poseStack.translate(0.0, 0.0, 1.0);
-                poseStack.rotateDegrees(Axis.YP, 270.0f);
+                poseStack.rotateDegrees(Axis.YP, 90.0f);
             }
         }
 

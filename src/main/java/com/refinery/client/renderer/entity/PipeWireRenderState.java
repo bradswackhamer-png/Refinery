@@ -18,4 +18,7 @@ public class PipeWireRenderState extends EntityRenderState {
 
     // Directional connectivity for each of the 4 colors (6 directions: D, U, N, S, W, E)
     public final boolean[][] connections = new boolean[4][6];
+
+    // Radial center offsets [cx, cy, cz] for each of the 4 wire colors based on pipe axis
+    public final float[][] offsets = new float[4][3];
 }

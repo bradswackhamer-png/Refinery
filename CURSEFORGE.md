@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.52.jar`
+`refinery-1.8.54.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.52 (NeoForge 26.3)`
+`Industrial Refinery 1.8.54 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,23 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.54
+
+### What's New in v1.8.54:
+- **Diesel Generator Placement Alignment & Drop Duplication**:
+  - Corrected East and West rotation angles in `DieselGeneratorRenderer`: inverted `EAST` from $90.0^\circ$ to $270.0^\circ$ and `WEST` from $270.0^\circ$ to $90.0^\circ$, fixing a spatial offset where the 2-block monolithic generator model rendered shifted by 2 blocks into adjacent air instead of matching its physical blocks and selection outlines.
+  - Made the generator face towards the player upon placement using `context.getHorizontalDirection().getOpposite()`, matching standard Minecraft machine conventions.
+  - Added a `part: left` block state property condition to `loot_table/blocks/diesel_generator.json` to prevent duplicate generator item drops when breaking either block.
+  - Updated `DieselGeneratorBlock.playerWillDestroy`: in survival mode, breaking the `RIGHT` block now safely destroys the master `LEFT` block to drop the single generator item and inventory contents; in creative mode, breaking either half immediately removes its partner block cleanly without dropping items.
+
+# Industrial Refinery v1.8.53
+
+### What's New in v1.8.53:
+- **Pipe Wire End-Wire Direction & Spurious Gate Branches**:
+  - Eliminated bogus wire arm connection generation in `PipeWireEntityRenderer` that previously read `gate.getDirection()` (which returned `EAST`), causing 0.5-block long wire conduits to shoot out sideways into empty air at every gate.
+  - Corrected end-wire directional continuation: when a wire terminates on a pipe that continues straight or around a corner, the wire now automatically follows the physical pipe's direction across that block instead of making an abrupt 90°/45° turn into open space.
+  - Dynamically configured radial quadrant offsets (`[cx, cy, cz]`) across all 3 spatial axes ($Y$, $Z$, and $X$); on vertical pipes, wires now hug the pipe perimeter diagonally across the $X$-$Z$ plane rather than collapsing along an assumed $Z$-axis.
+
 # Industrial Refinery v1.8.52
 
 ### What's New in v1.8.52:
