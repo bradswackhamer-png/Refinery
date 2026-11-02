@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.51 (Sloped-to-Flat Conveyor Transition Seam & Item Sticking Fix)](#version-1851-sloped-to-flat-conveyor-transition-seam--item-sticking-fix)
    - [Version 1.8.50 (Sloped & Corner Conveyor Belt Controls Unified)](#version-1850-sloped--corner-conveyor-belt-controls-unified)
    - [Version 1.8.49 (Creative Fluid Pump, 2x Pump Output, & 200-Block Fluid Discharge Range)](#version-1849-creative-fluid-pump-2x-pump-output--200-block-fluid-discharge-range)
    - [Version 1.8.48 (Boiler Meltdown Raid Siren Alarm Countdown)](#version-1848-boiler-meltdown-raid-siren-alarm-countdown)
@@ -1673,6 +1674,16 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.51 (Sloped-to-Flat Conveyor Transition Seam & Item Sticking Fix)
+- **Sloped-to-Flat Conveyor Transition Seam Alignment**:
+  - Aligned the bottom surface elevation of the sloped conveyor belt to `0.3125` ($5.0$ pixels), matching the flat conveyor belt bed with zero vertical ledge.
+  - Set `ItemEntity` collision boxes on flat and corner conveyor belts to $4.0$px (`Block.box(0, 0, 0, 16, 4, 16)`), preventing items from colliding with the leading edge of flat conveyors when descending from slopes.
+  - Dynamically tapered downward vertical velocity to $0.0$ near the bottom terminal ($t \ge 0.85$ on down slopes) and applied a forward hand-off velocity boost ($1.3\times$).
+  - Guarded vertical `setPos` positioning strictly to $0.0 \le t \le 1.0$ to ensure the sloped conveyor cleanly hands off control as items enter adjacent blocks.
+  - Expanded horizontal item collection bounds on flat and right-angle conveyors by $\pm0.08$ blocks to seamlessly capture incoming items at block boundaries.
 
 ---
 

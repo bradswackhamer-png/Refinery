@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.50.jar`
+`refinery-1.8.51.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.50 (NeoForge 26.3)`
+`Industrial Refinery 1.8.51 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,16 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.8.51
+
+### What's New in v1.8.51:
+- **Sloped-to-Flat Conveyor Transition Seam & Item Sticking Fix**:
+  - Aligned the bottom surface elevation of the sloped conveyor belt to `0.3125` ($5.0$ pixels), matching the flat conveyor belt bed with zero vertical ledge.
+  - Set `ItemEntity` collision boxes on flat and corner conveyor belts to $4.0$px (`Block.box(0, 0, 0, 16, 4, 16)`), preventing items from colliding with the leading edge of flat conveyors when descending from slopes.
+  - Dynamically tapered downward vertical velocity to $0.0$ near the bottom terminal ($t \ge 0.85$ on down slopes) and applied a forward hand-off velocity boost ($1.3\times$).
+  - Guarded vertical `setPos` positioning strictly to $0.0 \le t \le 1.0$ to ensure the sloped conveyor cleanly hands off control as items enter adjacent blocks.
+  - Expanded horizontal item collection bounds on flat and right-angle conveyors by $\pm0.08$ blocks to seamlessly capture incoming items at block boundaries.
+
 # Industrial Refinery v1.8.50
 
 ### What's New in v1.8.50:

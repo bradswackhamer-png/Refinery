@@ -45,10 +45,10 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
         double dx = stepX * beltSpeed;
         double dz = stepZ * beltSpeed;
 
-        // Query items on the belt surface (y = 0.20 .. 0.55 above block base)
+        // Query items on the belt surface (slightly expanded bounds capture items smoothly across block transitions)
         AABB beltBounds = new AABB(
-                pos.getX(), pos.getY() + 0.20, pos.getZ(),
-                pos.getX() + 1.0, pos.getY() + 0.60, pos.getZ() + 1.0
+                pos.getX() - 0.08, pos.getY() + 0.15, pos.getZ() - 0.08,
+                pos.getX() + 1.08, pos.getY() + 0.65, pos.getZ() + 1.08
         );
 
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, beltBounds);

@@ -11,6 +11,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
@@ -47,6 +49,8 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
 
     // 5px low-profile industrial conveyor bounding box (matches reference extruded bed)
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
+    // 4px collision box for items so items entering from slopes/conveyors never catch on a 5px edge
+    protected static final VoxelShape ITEM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
 
     public ConveyorBeltBlock(Properties properties) {
         super(properties);
@@ -69,6 +73,9 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        if (context instanceof EntityCollisionContext ecc && ecc.getEntity() instanceof ItemEntity) {
+            return ITEM_SHAPE;
+        }
         return SHAPE;
     }
 

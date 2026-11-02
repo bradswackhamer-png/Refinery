@@ -4,6 +4,18 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.8.51] - 2026-11-01
+
+### Fixed
+- **Sloped-to-Flat Conveyor Transition Seam & Item Sticking**:
+  - Aligned the bottom surface height of the sloped conveyor belt to exactly `0.3125` ($5.0$ pixels), perfectly matching the flat conveyor belt's bed height.
+  - Resolved physical collision ledge where items traveling downhill would catch against the $5.0$px front edge of the flat conveyor by configuring flat and corner conveyor collision for `ItemEntity` to $4.0$px (`Block.box(0, 0, 0, 16, 4, 16)`).
+  - Tapered vertical velocity to $0.0$ near the bottom terminal ($t \ge 0.85$ on down slopes) and applied a forward hand-off momentum boost ($1.3\times$) so items seamlessly glide horizontally onto flat belts without driving into the floor.
+  - Restricted direct vertical position snapping (`setPos`) to $0.0 \le t \le 1.0$ so the sloped belt never overrides item positions once they cross into the adjacent conveyor.
+  - Expanded item query bounds across flat and corner conveyor block entities (`±0.08` blocks horizontally) to ensure instantaneous capture at conveyor seams.
+
+---
+
 ## [1.8.50] - 2026-11-01
 
 ### Changed

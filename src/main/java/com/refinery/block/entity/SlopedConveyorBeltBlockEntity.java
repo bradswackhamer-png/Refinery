@@ -70,16 +70,18 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
             double t = Math.max(0.0, Math.min(1.0, rawT));
 
             // Surface height:
-            // UP: from y + 0.2875 at t=0 to y + 1.2875 at t=1
-            // DOWN: from y + 1.2875 at t=0 to y + 0.2875 at t=1
+            // UP: from y + 0.3125 at t=0 to y + 1.3125 at t=1
+            // DOWN: from y + 1.3125 at t=0 to y + 0.3125 at t=1
             double targetY = slope == SlopedConveyorBeltBlock.SlopeDirection.UP
-                    ? pos.getY() + 0.2875 + t * 1.0
-                    : pos.getY() + 1.2875 - t * 1.0;
+                    ? pos.getY() + 0.3125 + t * 1.0
+                    : pos.getY() + 1.3125 - t * 1.0;
 
-            // Direct vertical alignment onto the inclined belt surface
-            double diffY = targetY - itemEntity.getY();
-            if (Math.abs(diffY) > 0.02) {
-                itemEntity.setPos(itemEntity.getX(), targetY, itemEntity.getZ());
+            // Direct vertical alignment onto the inclined belt surface (only while actively traversing the slope)
+            if (rawT >= 0.0 && rawT <= 1.0) {
+                double diffY = targetY - itemEntity.getY();
+                if (Math.abs(diffY) > 0.02) {
+                    itemEntity.setPos(itemEntity.getX(), targetY, itemEntity.getZ());
+                }
             }
 
             // Centering along perpendicular axis
@@ -93,8 +95,20 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
                 centerVelZ = (targetZ - itemEntity.getZ()) * 0.15;
             }
 
-            double verticalSpeed = (slope == SlopedConveyorBeltBlock.SlopeDirection.UP) ? beltSpeed : -beltSpeed;
-            itemEntity.setDeltaMovement(stepX + centerVelX, verticalSpeed, stepZ + centerVelZ);
+            // Level off vertical velocity near terminals so items glide horizontally onto flat conveyors
+            double verticalSpeed;
+            if (slope == SlopedConveyorBeltBlock.SlopeDirection.UP) {
+                verticalSpeed = (rawT >= 0.92) ? 0.0 : beltSpeed;
+            } else {
+                verticalSpeed = (rawT >= 0.85) ? 0.0 : -beltSpeed;
+            }
+
+            // Provide forward momentum boost near terminal exit to smoothly transition into adjacent flat conveyor
+            double forwardSpeed = (rawT >= 0.88) ? beltSpeed * 1.3 : beltSpeed;
+            double curStepX = facing.getStepX() * forwardSpeed;
+            double curStepZ = facing.getStepZ() * forwardSpeed;
+
+            itemEntity.setDeltaMovement(curStepX + centerVelX, verticalSpeed, curStepZ + centerVelZ);
             itemEntity.setOnGround(true);
 
             if (!level.isClientSide()) {
