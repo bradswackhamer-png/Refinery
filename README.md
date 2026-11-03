@@ -1,4 +1,4 @@
-# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
+﻿# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
 *A comprehensive guide to heavy industry, fractional distillation, steam power, metallurgy, and automation for Minecraft 26.3 NeoForge.*
 
 ---
@@ -53,6 +53,14 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.8.62 (Arc Melter & Casting Press Speeds, Viscous Lava Channel Flow, Grinder Auto-Export)](#version-1862-arc-melter--casting-press-speeds-viscous-lava-channel-flow-grinder-auto-export)
+   - [Version 1.8.61 (Sloped-to-Flat Conveyor Crest Transition & Item Sticking Resolution)](#version-1861-sloped-to-flat-conveyor-crest-transition--item-sticking-resolution)
+   - [Version 1.8.60 (Arc Melter 2x Output Doubling, Dark Steel Blast Furnace & Metal Press GUI, Clean Screen Headers)](#version-1860-arc-melter-2x-output-doubling-dark-steel-blast-furnace--metal-press-gui-clean-screen-headers)
+   - [Version 1.8.59 (Arc Furnace, Casting Press, & Channel Flow Rates Adjusted)](#version-1859-arc-furnace-casting-press--channel-flow-rates-adjusted)
+   - [Version 1.8.58 (Casting Press Input Port Molten Acceptance, Pipe Wire Termination, & Generator Drops)](#version-1858-casting-press-input-port-molten-acceptance-pipe-wire-termination--generator-drops)
+   - [Version 1.8.57 (Unlimited Channel Flow Length, Animated Molten Metal, & Arc/Casting GUI Alignment)](#version-1857-unlimited-channel-flow-length-animated-molten-metal--arccasting-gui-alignment)
+   - [Version 1.8.56 (Electric Arc Melter & Continuous Casting Press Blueprint Holograms)](#version-1856-electric-arc-melter--continuous-casting-press-blueprint-holograms)
+   - [Version 1.8.55 (Buffer Pipe 1-Slot Chest Pipe)](#version-1855-buffer-pipe-1-slot-chest-pipe)
    - [Version 1.8.54 (Diesel Generator Placement Alignment & Drop Duplication Fix)](#version-1854-diesel-generator-placement-alignment--drop-duplication-fix)
    - [Version 1.8.53 (Pipe Wire End-Wire Direction & Spurious Gate Branches Fix)](#version-1853-pipe-wire-end-wire-direction--spurious-gate-branches-fix)
    - [Version 1.8.52 (Pipe Wire Signal Expiration & Active State Stuck Fix)](#version-1852-pipe-wire-signal-expiration--active-state-stuck-fix)
@@ -1677,6 +1685,120 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.8.62 (Arc Melter & Casting Press Speeds, Viscous Lava Channel Flow, Grinder Auto-Export)
+- **Arc Melter Processing Speed**:
+  - Doubled batch process time from 60 ticks (3.0s) to 120 ticks (6.0s).
+  - Reduced automatic fluid output rate to 25 mB every 4 ticks, simulating a steady pouring stream.
+- **Continuous Casting Press Processing Speed**:
+  - Tripled cycle process time from 80 ticks (4.0s) to 240 ticks (12.0s) per press stroke (+200% duration).
+  - Synchronized hydraulic die ram descent/ascent to 120 ticks each, with quench effects and ingot solidification at tick 120.
+- **Viscous Lava-Like Casting Channel Flow**:
+  - Molten metal accumulates in empty channels for 25 ticks (1.25s) before cascading downstream, mimicking thick molten lava.
+  - Slowed downstream fluid transfer rate to 25 mB every 4 ticks.
+  - Active upstream channels maintain a 150 mB visual pool so pouring channels stay continuously filled and glowing.
+  - Reduced visual molten fluid surface scrolling velocity in the renderer by nearly 7x (0.0018).
+- **Industrial Grinder Conveyor Auto-Export**:
+  - Automatically exports finished crushed items onto any attached conveyor belt (flat, sloped, or right-angle) one at a time.
+  - Removed downstream receiver restriction that prevented single or un-terminated conveyor attachments.
+  - Safely buffers finished items internally in output slots 4..7 when no conveyor, pipe, or container is connected.
+
+---
+### Version 1.8.61 (Sloped-to-Flat Conveyor Crest Transition & Item Sticking Resolution)
+- **Sloped-to-Flat Conveyor Crest Alignment**:
+  - Re-profiled the sloped conveyor incline curve so it reaches the full crest height of the level conveyor ($pos.getY() + 1.3125$) by $t = 0.85$, allowing items to glide horizontally across the top terminal rather than slamming into the vertical face of the flat conveyor.
+  - Extended active item position and height alignment across the hand-off seam ($0.0 \le rawT \le 1.15$), maintaining smooth continuity while transitioning into the next block.
+- **Directional Recessed Entry Collision**:
+  - Implemented directional recessed entry collision shapes (`ITEM_ENTRY_SHAPES`) on flat and right-angle conveyors (`ConveyorBeltBlock` & `RightAngleConveyorBeltBlock`), leaving a 3px clearance at the incoming face to completely eliminate physical collision walls for incoming items.
+  - Expanded horizontal item collection bounds on level conveyors ($\pm0.15$ blocks) and lowered detection floor to $pos.getY() + 0.05$ with automatic upward alignment onto the belt surface ($0.3125$).
+  - Eliminated downward gravity drag during level conveyor transit, setting vertical velocity to $0.0$ so items glide seamlessly across all block boundaries.
+
+---
+
+### Version 1.8.60 (Arc Melter 2x Output Doubling, Dark Steel Blast Furnace & Metal Press GUI, Clean Screen Headers)
+- **2x Output Doubling via Arc Melter & Casting Press**:
+  - Raw ores, ore blocks, and dusts smelted in the Electric Arc Melter yield 1,000 mB of molten metal.
+  - The Hydraulic Casting Press now stamps 1,000 mB of molten fluid into **2 ingots** (Iron, Gold, Copper, Tin, Bronze) or **2 Glass blocks**, doubling the reward for processing through the foundry chain.
+  - Ingot recycling is balanced: inserting ingots into the Arc Melter yields 500 mB per ingot (1,000 mB for 2 ingots), preventing infinite duplication loops.
+- **Blast Furnace & Metal Press Dark Industrial GUIs**:
+  - Replaced legacy vanilla light-gray GUI textures for both the Industrial Blast Furnace and Hydraulic Metal Press with heavy riveted dark steel panels (`#2E3339`), recessed dark slot wells (`#1D2126`), and beveled industrial bezels matching the rest of the machinery suite.
+  - Realignment of `inventoryLabelY` to 74 for consistent spacing above player inventory slots.
+- **Screen Title Alignment & Overlapping Status Text Elimination**:
+  - Eliminated text collisions where "ONLINE", "OFFLINE", "UNFORMED", and pump subheaders were rendered at $(x \approx 98..120, y=6)$ directly colliding with machine titles (e.g., "Industrial Rock Crusher", "Hydraulic Casting Press", "Industrial Blast Furnace").
+  - Removed header text collisions across all mod container screens (`IndustrialGrinderScreen`, `ArcMelterScreen`, `CastingPressScreen`, `BlastFurnaceScreen`, `MetalPressScreen`, `FermenterScreen`, `RefineryScreen`, `SmallBoilerScreen`, `LargeBoilerScreen`, `LargeDieselBoilerScreen`, `SmallDieselBoilerScreen`, `MultiSmelterScreen`, `SteamTurbineScreen`, `StorageTankScreen`, `FeedingTroughScreen`, and pump screens), leaving title rows completely uncorrupted.
+
+---
+
+### Version 1.8.59 (Arc Furnace, Casting Press, & Channel Flow Rates Adjusted)
+- **Arc Melter Processing Speed**:
+  - Increased `PROCESS_TIME` from 40 ticks (2.0s) to 60 ticks (3.0s) per smelting cycle (+50% process duration).
+- **Casting Press Processing Speed**:
+  - Increased `PROCESS_TIME` from 40 ticks (2.0s) to 80 ticks (4.0s) per press stroke (+100% process duration / 50% speed).
+  - Adjusted hydraulic stamping die ram stroke in `CastingPressControllerRenderer` to span 40 ticks descent and 40 ticks ascent, with ingot solidification at tick 40.
+- **Molten Channel Fluid Flow & Animation Speed**:
+  - Decreased casting channel fluid transfer rate from 250 mB/t to 80 mB/t in `CastingChannelBlockEntity` and `ArcMelterControllerBlockEntity`.
+  - Reduced visual molten fluid surface scrolling rate from 0.035 to 0.012 in `CastingChannelRenderer`, providing realistic viscous molten fluid movement.
+
+---
+
+### Version 1.8.58 (Casting Press Input Port Molten Acceptance, Pipe Wire Termination, & Generator Drops)
+- **Continuous Casting Press Input Port Molten Fluid Acceptance**:
+  - Upgraded `SingleFluidHandler` with dynamic fluid setters and predicate filtering, resolving empty-tank rejection so Casting Input Ports accept molten fluids into empty internal tanks.
+  - Linked `CASTING_PORT_BE` and `CASTING_PRESS_CONTROLLER_BE` fluid capabilities to dynamic setters and casting recipe filters (`getCastingProduct`), enabling molten metal transfer from casting channels, fluid pipes, and direct bucket interactions.
+  - Added instant multiblock assembly synchronization (`syncAssembly()`) upon capability querying, ensuring connected channels and pipes immediately flow upon structure completion.
+  - Added direct right-click bucket dumping on `CastingPortBlock` to fill 1,000 mB of molten fluid into the input port and return an empty bucket.
+- **Pipe Wire End Wire Termination & Routing Correction**:
+  - Eliminated erroneous arm propagation in `PipeWireEntityRenderer` when a wire terminates on an end pipe (`wireCount <= 1`).
+  - End wires now terminate cleanly at the pipe's center node without sprouting ghost perpendicular or 45°/90° arms into thin air or adjacent blocks.
+- **Diesel Generator Placement Alignment & Drops**:
+  - Confirmed 2-block monolithic model bounds and coordinate transformations across all four cardinal directions (NORTH, SOUTH, EAST, WEST), guaranteeing the enclosure aligns flush with placed world blocks.
+  - Confirmed break behavior ensuring breaking either half of the 2x1 generator reliably drops exactly 1 item.
+
+---
+
+### Version 1.8.57 (Unlimited Channel Flow Length, Animated Molten Metal, & Arc/Casting GUI Alignment)
+- **Unlimited Casting Channel Flow Length**:
+  - Eliminated the 3-channel flow limitation by implementing flow direction tracking (`lastInputSide` and `lastInputTick`). Channels now prioritize forward discharge away from the source neighbor and gravity discharge downwards, preventing fluid from bouncing back and forth between adjacent blocks.
+  - Channels now inform receiving neighbor channels of the flow direction upon transfer, enabling continuous cascading molten fluid flow across arbitrarily long flumes with no length restrictions.
+  - Increased channel transfer rate from 100 mB/t to 250 mB/t to match the Arc Melter output spout without pooling or backflow.
+- **Animated Visible Molten Metal Fluid in Casting Channels**:
+  - Replaced wireframe outline rendering in `CastingChannelRenderer` with real, solid, emissive 3D molten fluid geometry using `submitCustomGeometry` and `RenderTypes.entityTranslucent`.
+  - Added real-time flowing fluid surface animation with texture scrolling across all molten fluids (Iron, Gold, Copper, Tin, Bronze, and Glass) at full bright light (15728880).
+  - Added animated downward vertical pour stream geometry when channels connect downwards into molds, basins, or lower channel runs.
+  - Implemented `getUpdateTag()` in `CastingChannelBlockEntity` to ensure client chunk loading properly synchronizes fluid type and volume.
+- **Arc Melter & Continuous Casting Press GUI Re-alignment**:
+  - Realigned all 4 input slots in `ArcMelterMenu` to `(38, 26), (56, 26), (38, 44), (56, 44)`, perfectly matching the texture slot boxes of `industrial_grinder.png`.
+  - Realigned the molten metal bath gauge in `ArcMelterScreen` to the 36x36 area at `(116..152, 26..62)` with accurate level fill, fluid surface highlight, and tooltips.
+  - Replaced the mismatched `metal_press.png` layout in `CastingPressScreen` with `industrial_grinder.png`, positioning the molten metal inflow basin at `(38..74, 26..62)` and the 4 stamped product output slots at `(116, 26), (134, 26), (116, 44), (134, 44)`.
+  - Centered all progress bars, energy gauges, and section headers (`ORES / DUSTS`, `MOLTEN BATH`, `MOLTEN INFLOW`, `CAST PRODUCTS`).
+
+---
+
+### Version 1.8.56 (Electric Arc Melter & Continuous Casting Press Blueprint Holograms)
+- **Electric Arc Melter & Continuous Casting Press Blueprint Holograms**:
+  - Added sneak-right-click (Shift + Right-Click) support to both `ArcMelterControllerBlock` and `CastingPressControllerBlock` to project real-time 3D in-world holographic build guides, matching all other multiblock machines in the mod.
+  - Added empty-hand right-click projection when unassembled so players without a wrench can preview multiblock construction requirements and receive structure diagnostics in chat.
+  - Registered `ArcMelterControllerBlock` and `CastingPressControllerBlock` (along with `MultiSmelterControllerBlock`, `SmallDieselBoilerControllerBlock`, and `LargeDieselBoilerControllerBlock`) directly in `RefineryWrenchItem.useOn` so right-clicking with a wrench cleanly triggers holographic blueprint projection instead of block rotation.
+  - Implemented `shouldRenderOffScreen()` and expanded `getRenderBoundingBox()` in `ArcMelterControllerRenderer`, `CastingPressControllerRenderer`, `MultiSmelterControllerRenderer`, and `BlastFurnaceControllerRenderer` to eliminate frustum culling when players look away from the controller block to examine the hologram structure.
+  - Added `getUpdateTag()` implementation to ensure client block entities properly sync state tags upon chunk loading.
+
+---
+
+### Version 1.8.55 (Buffer Pipe 1-Slot Chest Pipe)
+- **Buffer Pipe (1-Slot Chest Pipe)**:
+  - Added the **Buffer Pipe** (`refinery:buffer_pipe`): an industrial pipe that acts like a chest with 1 inventory slot (holding 1 full stack of items).
+  - High-fidelity 3D cylindrical pipe model featuring sight glass inspection windows; buffered items visibly hover and rotate inside the pipe center in the world.
+  - Dedicated container GUI with a single centered slot, shift-click quick move, and full player inventory access.
+  - Full interoperability with NeoForge `Capabilities.Item.BLOCK` and vanilla `WorldlyContainer` / `Container`:
+    - Transport item pipes seamlessly route items into the buffer.
+    - Extractor pipes, wooden pipes, and Autarchic Pulsar gates pull items from the buffer.
+    - Hoppers and automation insert into or extract from the buffer from any face.
+  - Full Redstone Comparator support: produces analog output signal ($0$ to $15$) proportional to item stack fullness.
+  - Wrench support to manually configure or disconnect individual side connections.
+  - Drops buffered contents when broken in survival.
+  - Shapeless crafting recipes from an Item Pipe (Steel or Iron) + a Chest.
 
 ---
 

@@ -244,6 +244,41 @@ public class RefineryWrenchItem extends Item {
             }
             return InteractionResult.SUCCESS;
         }
+        if (state.getBlock() instanceof ArcMelterControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof ArcMelterControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof CastingPressControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CastingPressControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof MultiSmelterControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MultiSmelterControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof SmallDieselBoilerControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof SmallDieselBoilerControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getBlock() instanceof LargeDieselBoilerControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof LargeDieselBoilerControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
 
         if (state.getBlock() instanceof FluidDischargeBlock) {
             if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FluidDischargeBlockEntity be) {

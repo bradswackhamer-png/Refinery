@@ -276,7 +276,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) return false;
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof IndustrialPipeBlockEntity) return false;
+        if (be instanceof IndustrialPipeBlockEntity || be instanceof BufferPipeBlockEntity) return false;
 
         if (level.getCapability(Capabilities.Item.BLOCK, pos, side) != null) return true;
         if (level.getCapability(Capabilities.Item.BLOCK, pos, null) != null) return true;
@@ -296,7 +296,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) return false;
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof IndustrialPipeBlockEntity) return false;
+        if (be instanceof IndustrialPipeBlockEntity || be instanceof BufferPipeBlockEntity) return false;
 
         if (level.getCapability(Capabilities.Fluid.BLOCK, pos, side) != null) return true;
         if (level.getCapability(Capabilities.Fluid.BLOCK, pos, null) != null) return true;
@@ -348,6 +348,12 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                                           (this.pipeType.handlesItems() && otherPipe.getPipeType().handlesItems()) ||
                                           this.pipeType == IndustrialPipeType.VOID || otherPipe.getPipeType() == IndustrialPipeType.VOID;
                 if (typesCompatible) {
+                    detected = PipeConnectionType.PIPE;
+                }
+            } else if (targetBe instanceof BufferPipeBlockEntity) {
+                if (isExtractor()) {
+                    detected = PipeConnectionType.MACHINE;
+                } else if (this.pipeType.handlesItems() || this.pipeType == IndustrialPipeType.VOID) {
                     detected = PipeConnectionType.PIPE;
                 }
             } else {

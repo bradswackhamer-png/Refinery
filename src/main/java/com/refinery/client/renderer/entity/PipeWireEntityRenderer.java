@@ -120,37 +120,8 @@ public class PipeWireEntityRenderer extends EntityRenderer<PipeWireEntity, PipeW
                 }
             }
 
-            // End wire or isolated wire: follow the physical pipe's direction across this block
-            if (wireCount == 0) {
-                // Isolated wire: follow the pipe's existing arms
-                boolean added = false;
-                for (Direction d : Direction.values()) {
-                    if (pipeHasArm[d.ordinal()]) {
-                        state.connections[cIdx][d.ordinal()] = true;
-                        added = true;
-                    }
-                }
-                if (!added) {
-                    // Default to vertical pipe run if no neighbor connections yet
-                    state.connections[cIdx][Direction.UP.ordinal()] = true;
-                    state.connections[cIdx][Direction.DOWN.ordinal()] = true;
-                }
-            } else if (wireCount == 1 && firstWireDir != null) {
-                // End wire: continue along the pipe's direction across this block!
-                Direction opp = firstWireDir.getOpposite();
-                if (pipeHasArm[opp.ordinal()]) {
-                    // Straight continuation along the pipe axis
-                    state.connections[cIdx][opp.ordinal()] = true;
-                } else {
-                    // Follow any other pipe arm (elbow / corner)
-                    for (Direction d : Direction.values()) {
-                        if (d != firstWireDir && pipeHasArm[d.ordinal()]) {
-                            state.connections[cIdx][d.ordinal()] = true;
-                            break;
-                        }
-                    }
-                }
-            }
+            // Wires only extend across block boundaries to neighbor pipes that actually have this wire color.
+            // When a wire ends at this pipe (wireCount <= 1), it terminates at the center node without sprouting phantom arms.
 
             // Determine wire axis based on its actual connections
             boolean wY = state.connections[cIdx][Direction.UP.ordinal()] || state.connections[cIdx][Direction.DOWN.ordinal()];

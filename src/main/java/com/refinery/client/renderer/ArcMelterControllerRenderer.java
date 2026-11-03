@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
@@ -29,6 +30,16 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
     @Override
     public ArcMelterControllerRenderState createRenderState() {
         return new ArcMelterControllerRenderState();
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(ArcMelterControllerBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).inflate(4.0);
     }
 
     @Override
@@ -72,7 +83,7 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
         Direction back = state.facing.getOpposite();
 
         // 1. Hologram Blueprint Rendering
-        if (state.isBlueprintActive && !state.missingComponents.isEmpty()) {
+        if (state.isBlueprintActive && !state.isAssembled && !state.missingComponents.isEmpty()) {
             for (var comp : state.missingComponents) {
                 int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
                 int dy = comp.relY();

@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
@@ -36,6 +37,16 @@ public class MultiSmelterControllerRenderer implements BlockEntityRenderer<Multi
     @Override
     public MultiSmelterControllerRenderState createRenderState() {
         return new MultiSmelterControllerRenderState();
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(MultiSmelterControllerBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).inflate(4.0);
     }
 
     @Override

@@ -47,6 +47,9 @@ public class MelterPortBlockEntity extends BlockEntity implements WorldlyContain
     public ArcMelterControllerBlockEntity getController() {
         if (this.level != null && this.controllerPos != null && this.level.isLoaded(this.controllerPos)) {
             if (this.level.getBlockEntity(this.controllerPos) instanceof ArcMelterControllerBlockEntity controllerBE) {
+                if (!controllerBE.isAssembled()) {
+                    controllerBE.syncAssembly();
+                }
                 if (controllerBE.isAssembled()) {
                     return controllerBE;
                 }
@@ -54,10 +57,15 @@ public class MelterPortBlockEntity extends BlockEntity implements WorldlyContain
         }
         if (this.level != null) {
             for (BlockPos p : BlockPos.betweenClosed(this.worldPosition.offset(-3, -3, -3), this.worldPosition.offset(3, 3, 3))) {
-                if (this.level.getBlockEntity(p) instanceof ArcMelterControllerBlockEntity c && c.isAssembled()) {
-                    this.controllerPos = p.immutable();
-                    setChanged();
-                    return c;
+                if (this.level.getBlockEntity(p) instanceof ArcMelterControllerBlockEntity c) {
+                    if (!c.isAssembled()) {
+                        c.syncAssembly();
+                    }
+                    if (c.isAssembled()) {
+                        this.controllerPos = p.immutable();
+                        setChanged();
+                        return c;
+                    }
                 }
             }
         }

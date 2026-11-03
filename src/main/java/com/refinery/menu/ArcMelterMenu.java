@@ -31,26 +31,26 @@ public class ArcMelterMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
 
-        // 4 Input Slots in a 2x2 grid (x: 44, 62; y: 26, 44)
-        this.addSlot(new Slot(container, 0, 44, 26) {
+        // 4 Input Slots in a 2x2 grid (x: 38, 56; y: 26, 44) aligned with industrial_grinder.png
+        this.addSlot(new Slot(container, 0, 38, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ArcMelterControllerBlockEntity.getMeltingResult(stack) != Fluids.EMPTY;
             }
         });
-        this.addSlot(new Slot(container, 1, 62, 26) {
+        this.addSlot(new Slot(container, 1, 56, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ArcMelterControllerBlockEntity.getMeltingResult(stack) != Fluids.EMPTY;
             }
         });
-        this.addSlot(new Slot(container, 2, 44, 44) {
+        this.addSlot(new Slot(container, 2, 38, 44) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ArcMelterControllerBlockEntity.getMeltingResult(stack) != Fluids.EMPTY;
             }
         });
-        this.addSlot(new Slot(container, 3, 62, 44) {
+        this.addSlot(new Slot(container, 3, 56, 44) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ArcMelterControllerBlockEntity.getMeltingResult(stack) != Fluids.EMPTY;

@@ -670,4 +670,14 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         return new MultiSmelterMenu(containerId, playerInventory, this, this.dataAccess);
     }
+
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
 }

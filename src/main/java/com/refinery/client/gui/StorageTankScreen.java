@@ -33,17 +33,6 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
 
-        // Header Title
-        graphics.text(this.font, Component.literal("STORAGE TANK").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 8, 6, 0xFF374151, false);
-
-        boolean assembled = this.menu.isAssembled();
-        if (assembled) {
-            String sizeName = this.menu.getTankSize().getDisplayName();
-            graphics.text(this.font, Component.literal("[" + sizeName + "]").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD), 95, 6, 0xFF15803D, false);
-        } else {
-            graphics.text(this.font, Component.literal("[UNFORMED]").withStyle(ChatFormatting.RED, ChatFormatting.BOLD), 105, 6, 0xFFDC2626, false);
-        }
-
         // Fluid Information on the right side of the gauge (x: 74)
         Fluid fluid = this.menu.getStoredFluid();
         int amount = this.menu.getFluidAmount();

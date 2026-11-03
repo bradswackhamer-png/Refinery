@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
@@ -29,6 +30,16 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
     @Override
     public CastingPressControllerRenderState createRenderState() {
         return new CastingPressControllerRenderState();
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(CastingPressControllerBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).inflate(4.0);
     }
 
     @Override
@@ -72,7 +83,7 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
         Direction back = state.facing.getOpposite();
 
         // 1. Hologram Blueprint Rendering
-        if (state.isBlueprintActive && !state.missingComponents.isEmpty()) {
+        if (state.isBlueprintActive && !state.isAssembled && !state.missingComponents.isEmpty()) {
             for (var comp : state.missingComponents) {
                 int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
                 int dy = comp.relY();
@@ -127,11 +138,11 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
             float lowestY = 0.08f;
 
             if (state.progress > 0) {
-                if (state.progress <= 20) {
-                    float t = Math.min(1.0f, (state.progress + state.partialTicks) / 20.0f);
+                if (state.progress <= 120) {
+                    float t = Math.min(1.0f, (state.progress + state.partialTicks) / 120.0f);
                     ramY = restingY - (t * t) * (restingY - lowestY);
                 } else {
-                    float t = Math.min(1.0f, (state.progress - 20 + state.partialTicks) / 20.0f);
+                    float t = Math.min(1.0f, (state.progress - 120 + state.partialTicks) / 120.0f);
                     ramY = lowestY + t * (restingY - lowestY);
                 }
             } else {
@@ -165,8 +176,8 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
             // C. Lower Mold Bed Molten Ingot Pool
             if (state.moltenAmount > 0 || state.progress > 0) {
                 int poolColor = getFluidGlowColor(state);
-                // When quenched at tick 20+, transitions to solidified metallic color
-                if (state.progress >= 20) {
+                // When quenched at tick 120+, transitions to solidified metallic color
+                if (state.progress >= 120) {
                     poolColor = 0xFF94A3B8;
                 }
 

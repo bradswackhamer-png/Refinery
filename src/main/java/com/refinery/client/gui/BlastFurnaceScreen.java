@@ -19,7 +19,7 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
 
     public BlastFurnaceScreen(BlastFurnaceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);
-        this.inventoryLabelY = 64;
+        this.inventoryLabelY = 74;
     }
 
     @Override
@@ -30,26 +30,6 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         graphics.text(this.font, Component.literal("IRON").withStyle(ChatFormatting.DARK_GRAY), 20, 11, 0xFF444444, false);
         graphics.text(this.font, Component.literal("FUEL").withStyle(ChatFormatting.DARK_GRAY), 64, 11, 0xFF444444, false);
         graphics.text(this.font, Component.literal("STEEL").withStyle(ChatFormatting.DARK_GRAY), 128, 11, 0xFF444444, false);
-
-        // Multiblock Status Header
-        boolean assembled = this.menu.isAssembled();
-        boolean smelting = this.menu.isSmelting();
-
-        Component statusText;
-        int statusColor;
-
-        if (!assembled) {
-            statusText = Component.literal("INCOMPLETE").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFF882222;
-        } else if (smelting) {
-            statusText = Component.literal("FORGING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFEA580C;
-        } else {
-            statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 106, 6, statusColor, false);
     }
 
     @Override
@@ -74,10 +54,6 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         if (this.menu.isSmelting()) {
             graphics.fill(RenderPipelines.GUI, xo + 107, yo + 44, xo + 107 + 10, yo + 44 + 10, 0xFFEA580C);
         }
-
-        // Multiblock Status Light (x: 94, y: 6, w: 6, h: 6)
-        int statusColor = this.menu.isAssembled() ? 0xFF22C55E : 0xFFEF4444;
-        graphics.fill(RenderPipelines.GUI, xo + 94, yo + 6, xo + 100, yo + 12, statusColor);
     }
 
     @Override

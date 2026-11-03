@@ -29,6 +29,16 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
     }
 
     @Override
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(BlastFurnaceControllerBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).inflate(4.0);
+    }
+
+    @Override
     public void extractRenderState(BlastFurnaceControllerBlockEntity be, BlastFurnaceControllerRenderState state, float partialTicks, Vec3 cameraPosition, net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState.extractBase(be, state, breakProgress);
 

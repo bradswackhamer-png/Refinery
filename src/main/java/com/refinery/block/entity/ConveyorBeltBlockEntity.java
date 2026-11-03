@@ -45,10 +45,10 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
         double dx = stepX * beltSpeed;
         double dz = stepZ * beltSpeed;
 
-        // Query items on the belt surface (slightly expanded bounds capture items smoothly across block transitions)
+        // Query items on the belt surface (expanded bounds seamlessly capture items arriving from slopes or adjacent belts)
         AABB beltBounds = new AABB(
-                pos.getX() - 0.08, pos.getY() + 0.15, pos.getZ() - 0.08,
-                pos.getX() + 1.08, pos.getY() + 0.65, pos.getZ() + 1.08
+                pos.getX() - 0.15, pos.getY() + 0.05, pos.getZ() - 0.15,
+                pos.getX() + 1.15, pos.getY() + 0.65, pos.getZ() + 1.15
         );
 
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, beltBounds);
@@ -60,6 +60,16 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
             }
 
             Vec3 currentVel = itemEntity.getDeltaMovement();
+
+            // Smoothly lift and lock item onto the belt surface if arriving from an incline/slope
+            double beltSurfaceY = pos.getY() + 0.3125;
+            if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() + 0.05) {
+                double diff = beltSurfaceY - itemEntity.getY();
+                if (diff > 0.01) {
+                    itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
+                }
+            }
+            itemEntity.setOnGround(true);
 
             // Centering towards middle of the conveyor
             double centerVelX = 0.0;
@@ -73,10 +83,10 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
                 centerVelZ = (targetZ - itemEntity.getZ()) * 0.15;
             }
 
-            // Smoothly propel item forward along belt and center it
+            // Smoothly propel item forward along belt and center it (zero vertical gravity drag)
             itemEntity.setDeltaMovement(
                     (dx != 0 ? dx : currentVel.x * 0.5) + centerVelX,
-                    Math.max(-0.04, Math.min(0.0, currentVel.y)),
+                    0.0,
                     (dz != 0 ? dz : currentVel.z * 0.5) + centerVelZ
             );
 

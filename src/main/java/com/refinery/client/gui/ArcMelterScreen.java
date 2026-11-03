@@ -25,31 +25,8 @@ public class ArcMelterScreen extends AbstractContainerScreen<ArcMelterMenu> {
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        boolean assembled = this.menu.isAssembled();
-        boolean melting = this.menu.isMelting();
-        int energy = this.menu.getEnergy();
-
-        Component statusText;
-        int statusColor;
-
-        if (!assembled) {
-            statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFF882222;
-        } else if (energy < 40) {
-            statusText = Component.literal("NO POWER").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xFFEF4444;
-        } else if (melting) {
-            statusText = Component.literal("MELTING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFEA580C;
-        } else {
-            statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 102, 6, statusColor, false);
-        graphics.text(this.font, Component.literal("DUSTS").withStyle(ChatFormatting.DARK_GRAY), 44, 14, 0xFF444444, false);
-        graphics.text(this.font, Component.literal("MOLTEN BATH").withStyle(ChatFormatting.DARK_GRAY), 108, 14, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("ORES / DUSTS").withStyle(ChatFormatting.DARK_GRAY), 26, 14, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("MOLTEN BATH").withStyle(ChatFormatting.DARK_GRAY), 106, 14, 0xFF444444, false);
     }
 
     @Override
@@ -60,30 +37,33 @@ public class ArcMelterScreen extends AbstractContainerScreen<ArcMelterMenu> {
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo, yo, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
 
-        // Energy Bar (x: 12, y: 18, width: 12, height: 50)
+        // 1. Energy Storage Bar (x: 14..28, y: 18..68, width: 14, height: 50)
         int energy = this.menu.getEnergy();
         int maxEnergy = 50000;
         int energyH = Math.min(50, (int) ((long) energy * 50 / maxEnergy));
         if (energyH > 0) {
-            graphics.fill(RenderPipelines.GUI, xo + 12, yo + 18 + (50 - energyH), xo + 24, yo + 68, 0xFFDC2626);
+            graphics.fill(RenderPipelines.GUI, xo + 14, yo + 18 + (50 - energyH), xo + 28, yo + 68, 0xFFDC2626);
+            graphics.fill(RenderPipelines.GUI, xo + 14, yo + 18 + (50 - energyH), xo + 28, yo + 18 + (50 - energyH) + 2, 0xFFEF4444);
         }
 
-        // Progress Arrow (x: 84, y: 35, width: 22, height: 16)
+        // 2. Melting Arc Progress Bar (x: 78..110, y: 34..50, width: 32, height: 16)
         if (this.menu.isMelting()) {
             int progress = this.menu.getProgress();
             int maxProgress = this.menu.getMaxProgress();
-            int arrowW = maxProgress > 0 ? (progress * 22 / maxProgress) : 0;
-            if (arrowW > 0) {
-                graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo + 84, yo + 35, 176.0f, 14.0f, arrowW, 16, 256, 256);
+            int fillW = maxProgress > 0 ? Math.min(32, (int) (((float) progress / maxProgress) * 32)) : 0;
+            if (fillW > 0) {
+                graphics.fill(RenderPipelines.GUI, xo + 78, yo + 34, xo + 78 + fillW, yo + 50, 0xFFEA580C);
+                graphics.fill(RenderPipelines.GUI, xo + 78, yo + 34, xo + 78 + fillW, yo + 36, 0xFFFBBF24);
             }
         }
 
-        // Molten Fluid Level Gauge (x: 120, y: 26, width: 34, height: 34)
+        // 3. Molten Fluid Level Gauge (x: 116..152, y: 26..62, width: 36, height: 36)
         int amount = this.menu.getMoltenAmount();
         int capacity = this.menu.getTankCapacity();
         if (amount > 0 && capacity > 0) {
-            int fluidH = Math.min(34, (int) ((long) amount * 34 / capacity));
-            graphics.fill(RenderPipelines.GUI, xo + 120, yo + 26 + (34 - fluidH), xo + 154, yo + 60, 0xFFEA580C);
+            int fluidH = Math.min(36, (int) ((long) amount * 36 / capacity));
+            graphics.fill(RenderPipelines.GUI, xo + 116, yo + 26 + (36 - fluidH), xo + 152, yo + 62, 0xFFEA580C);
+            graphics.fill(RenderPipelines.GUI, xo + 116, yo + 26 + (36 - fluidH), xo + 152, yo + 26 + (36 - fluidH) + 2, 0xFFFBBF24);
         }
     }
 
@@ -97,18 +77,30 @@ public class ArcMelterScreen extends AbstractContainerScreen<ArcMelterMenu> {
         int amount = this.menu.getMoltenAmount();
         int capacity = this.menu.getTankCapacity();
 
-        // Hover Tooltips
-        if (mouseX >= xo + 12 && mouseX <= xo + 24 && mouseY >= yo + 18 && mouseY <= yo + 68) {
+        // 1. Energy Tooltip (x: 14..28, y: 18..68)
+        if (mouseX >= xo + 14 && mouseX <= xo + 28 && mouseY >= yo + 18 && mouseY <= yo + 68) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("§cEnergy Storage:"),
                     Component.literal("§7" + String.format("%,d", energy) + " / 50,000 FE")
             ), mouseX, mouseY);
         }
 
-        if (mouseX >= xo + 120 && mouseX <= xo + 154 && mouseY >= yo + 26 && mouseY <= yo + 60) {
+        // 2. Molten Bath Tooltip (x: 116..152, y: 26..62)
+        if (mouseX >= xo + 116 && mouseX <= xo + 152 && mouseY >= yo + 26 && mouseY <= yo + 62) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
-                    Component.literal("§6Molten Fluid Tank:"),
+                    Component.literal("§6Molten Metal Bath:"),
                     Component.literal("§e" + String.format("%,d", amount) + " / " + String.format("%,d", capacity) + " mB")
+            ), mouseX, mouseY);
+        }
+
+        // 3. Progress Tooltip (x: 78..110, y: 34..50)
+        if (mouseX >= xo + 78 && mouseX <= xo + 110 && mouseY >= yo + 34 && mouseY <= yo + 50) {
+            int progress = this.menu.getProgress();
+            int maxProgress = this.menu.getMaxProgress();
+            int pct = maxProgress > 0 ? (progress * 100 / maxProgress) : 0;
+            graphics.setComponentTooltipForNextFrame(this.font, List.of(
+                    Component.literal("§6Electric Arc Smelting:"),
+                    Component.literal("§e" + pct + "% complete")
             ), mouseX, mouseY);
         }
     }

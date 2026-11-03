@@ -25,25 +25,6 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        boolean assembled = this.menu.isAssembled();
-        boolean active = this.menu.isActive();
-
-        Component statusText;
-        int statusColor;
-
-        if (!assembled) {
-            statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFF882222;
-        } else if (active) {
-            statusText = Component.literal("SPINNING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFEA580C;
-        } else {
-            statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 110, 6, statusColor, false);
         graphics.text(this.font, Component.literal("STEAM").withStyle(ChatFormatting.DARK_GRAY), 22, 10, 0xFF444444, false);
         graphics.text(this.font, Component.literal("WATER").withStyle(ChatFormatting.DARK_GRAY), 66, 10, 0xFF444444, false);
         graphics.text(this.font, Component.literal("POWER").withStyle(ChatFormatting.DARK_GRAY), 120, 10, 0xFF444444, false);

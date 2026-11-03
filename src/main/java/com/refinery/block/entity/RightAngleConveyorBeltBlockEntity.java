@@ -40,10 +40,10 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
 
         double beltSpeed = 0.05;
 
-        // Query items on the belt surface (slightly expanded bounds capture items smoothly across block transitions)
+        // Query items on the belt surface (expanded bounds seamlessly capture items arriving from slopes or adjacent belts)
         AABB beltBounds = new AABB(
-                pos.getX() - 0.08, pos.getY() + 0.15, pos.getZ() - 0.08,
-                pos.getX() + 1.08, pos.getY() + 0.65, pos.getZ() + 1.08
+                pos.getX() - 0.15, pos.getY() + 0.05, pos.getZ() - 0.15,
+                pos.getX() + 1.15, pos.getY() + 0.65, pos.getZ() + 1.15
         );
 
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, beltBounds);
@@ -55,6 +55,16 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
             if (!level.isClientSide() && itemEntity.getAge() > 4000) {
                 itemEntity.setUnlimitedLifetime();
             }
+
+            // Smoothly lift and lock item onto the belt surface if arriving from an incline/slope
+            double beltSurfaceY = pos.getY() + 0.3125;
+            if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() + 0.05) {
+                double diff = beltSurfaceY - itemEntity.getY();
+                if (diff > 0.01) {
+                    itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
+                }
+            }
+            itemEntity.setOnGround(true);
 
             // Determine if the item has reached the turn center
             boolean pastCenter = switch (facing) {
@@ -90,7 +100,7 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
 
             itemEntity.setDeltaMovement(
                     moveX,
-                    Math.max(-0.04, Math.min(0.0, itemEntity.getDeltaMovement().y)),
+                    0.0,
                     moveZ
             );
 

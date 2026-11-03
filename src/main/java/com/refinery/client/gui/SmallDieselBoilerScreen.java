@@ -25,30 +25,6 @@ public class SmallDieselBoilerScreen extends AbstractContainerScreen<SmallDiesel
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        boolean assembled = this.menu.isAssembled();
-        boolean burning = this.menu.isBurning();
-        int overheat = this.menu.getOverheatTicks();
-
-        Component statusText;
-        int statusColor;
-
-        if (!assembled) {
-            statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFF882222;
-        } else if (overheat > 0) {
-            statusText = Component.literal("OVERHEATING!").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xFFEF4444;
-        } else if (burning) {
-            statusText = Component.literal("FIRING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFEA580C;
-        } else {
-            statusText = Component.literal("IDLE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 106, 6, statusColor, false);
-        graphics.text(this.font, Component.literal("DIESEL").withStyle(ChatFormatting.GOLD), 14, 6, 0xFFD97706, false);
     }
 
     @Override

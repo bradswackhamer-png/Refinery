@@ -36,6 +36,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public class RightAngleConveyorBeltBlock extends Block implements EntityBlock {
 
     public enum TurnDirection implements StringRepresentable {
@@ -61,6 +64,20 @@ public class RightAngleConveyorBeltBlock extends Block implements EntityBlock {
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
     protected static final VoxelShape ITEM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
 
+    // Directional item collision shapes with 3px recessed entry edge:
+    private static final Map<Direction, VoxelShape> ITEM_ENTRY_SHAPES = new EnumMap<>(Direction.class);
+
+    static {
+        // NORTH: incoming from SOUTH, recessed entry at z: 13..16
+        ITEM_ENTRY_SHAPES.put(Direction.NORTH, Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 13.0));
+        // SOUTH: incoming from NORTH, recessed entry at z: 0..3
+        ITEM_ENTRY_SHAPES.put(Direction.SOUTH, Block.box(0.0, 0.0, 3.0, 16.0, 4.0, 16.0));
+        // WEST: incoming from EAST, recessed entry at x: 13..16
+        ITEM_ENTRY_SHAPES.put(Direction.WEST, Block.box(0.0, 0.0, 0.0, 13.0, 4.0, 16.0));
+        // EAST: incoming from WEST, recessed entry at x: 0..3
+        ITEM_ENTRY_SHAPES.put(Direction.EAST, Block.box(3.0, 0.0, 0.0, 16.0, 4.0, 16.0));
+    }
+
     public RightAngleConveyorBeltBlock(Properties properties) {
         super(properties);
         registerDefaultState(this.stateDefinition.any()
@@ -82,7 +99,8 @@ public class RightAngleConveyorBeltBlock extends Block implements EntityBlock {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (context instanceof EntityCollisionContext ecc && ecc.getEntity() instanceof ItemEntity) {
-            return ITEM_SHAPE;
+            Direction facing = state.getValue(FACING);
+            return ITEM_ENTRY_SHAPES.getOrDefault(facing, ITEM_SHAPE);
         }
         return SHAPE;
     }

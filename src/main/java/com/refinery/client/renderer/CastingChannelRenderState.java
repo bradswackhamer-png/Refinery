@@ -12,4 +12,7 @@ public class CastingChannelRenderState extends BlockEntityRenderState {
     public boolean east = false;
     public boolean west = false;
     public boolean down = false;
+    public long gameTime = 0;
+    public float partialTicks = 0;
+    public int lightCoords = 15728880;
 }

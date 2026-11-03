@@ -31,9 +31,6 @@ public class ElectricFluidPumpScreen extends AbstractContainerScreen<ElectricFlu
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
 
-        // Header Title
-        graphics.text(this.font, Component.literal("ELECTRIC FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), 10, 6, 0xFF2563EB, false);
-
         // Central Status Display (x: 20..142, y: 17..33)
         AbstractFluidPumpBlockEntity.PumpStatus status = this.menu.getPumpStatus();
         Component statusText = switch (status) {

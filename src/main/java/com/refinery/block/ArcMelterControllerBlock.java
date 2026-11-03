@@ -71,10 +71,12 @@ public class ArcMelterControllerBlock extends Block implements EntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide()) {
             if (level.getBlockEntity(pos) instanceof ArcMelterControllerBlockEntity controllerBE) {
-                if (controllerBE.isAssembled()) {
+                if (player.isShiftKeyDown()) {
+                    controllerBE.toggleBlueprintProjection(player);
+                } else if (controllerBE.isAssembled()) {
                     player.openMenu(controllerBE, pos);
                 } else {
-                    controllerBE.checkStructure(true, player);
+                    controllerBE.toggleBlueprintProjection(player);
                 }
             }
         }

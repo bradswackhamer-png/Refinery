@@ -31,9 +31,6 @@ public class CoalFluidPumpScreen extends AbstractContainerScreen<CoalFluidPumpMe
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
 
-        // Header Title
-        graphics.text(this.font, Component.literal("COAL FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY), 10, 6, 0xFF374151, false);
-
         // Central Status Display (x: 24..142, y: 17..33)
         AbstractFluidPumpBlockEntity.PumpStatus status = this.menu.getPumpStatus();
         Component statusText = switch (status) {

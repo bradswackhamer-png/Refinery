@@ -25,13 +25,6 @@ public class RefineryScreen extends AbstractContainerScreen<RefineryMenu> {
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        // Status Header
-        boolean assembled = this.menu.isAssembled();
-        Component statusText = assembled
-                ? Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD)
-                : Component.literal("INCOMPLETE").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-        graphics.text(this.font, statusText, 100, 6, assembled ? 0xFF228822 : 0xFF882222, false);
     }
 
     @Override

@@ -586,6 +586,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
     public static boolean hasInventory(Level level, BlockPos pos, Direction side) {
         if (level == null || pos == null) return false;
         BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof com.refinery.block.entity.BufferPipeBlockEntity) return true;
         if (isPipeBlock(level, pos, be)) return false;
 
         if (be instanceof Container) return true;

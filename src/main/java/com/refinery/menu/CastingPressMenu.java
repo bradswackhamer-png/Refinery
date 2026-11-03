@@ -30,26 +30,26 @@ public class CastingPressMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
 
-        // 4 Output slots (x: 108, 126; y: 26, 44)
-        this.addSlot(new Slot(container, 0, 108, 26) {
+        // 4 Output slots in 2x2 grid (x: 116, 134; y: 26, 44) aligned with industrial_grinder.png
+        this.addSlot(new Slot(container, 0, 116, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 1, 126, 26) {
+        this.addSlot(new Slot(container, 1, 134, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 2, 108, 44) {
+        this.addSlot(new Slot(container, 2, 116, 44) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 3, 126, 44) {
+        this.addSlot(new Slot(container, 3, 134, 44) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;

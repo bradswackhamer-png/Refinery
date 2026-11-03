@@ -25,34 +25,6 @@ public class MultiSmelterScreen extends AbstractContainerScreen<MultiSmelterMenu
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        boolean assembled = this.menu.isAssembled();
-        int energy = this.menu.getEnergy();
-        int burnTime = this.menu.getBurnTime();
-        int mask = this.menu.getActiveSlotsMask();
-        int activeCount = Integer.bitCount(mask);
-
-        Component statusText;
-        int statusColor;
-
-        if (!assembled) {
-            statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFF882222;
-        } else if (activeCount > 0) {
-            statusText = Component.literal("SMELTING (" + activeCount + ")").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFEA580C;
-        } else if (burnTime > 0) {
-            statusText = Component.literal("HEATED").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
-            statusColor = 0xFFD97706;
-        } else if (energy < 30 && burnTime <= 0) {
-            statusText = Component.literal("IDLE").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.BOLD);
-            statusColor = 0xFF666666;
-        } else {
-            statusText = Component.literal("READY").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 98, 6, statusColor, false);
         graphics.text(this.font, Component.literal("IN").withStyle(ChatFormatting.DARK_GRAY), 26, 9, 0xFF444444, false);
         graphics.text(this.font, Component.literal("OUT").withStyle(ChatFormatting.DARK_GRAY), 100, 9, 0xFF444444, false);
     }

@@ -55,7 +55,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public static final int TANK_CAPACITY = 8000;
     public static final int ENERGY_CAPACITY = 50000;
     public static final int ENERGY_PER_TICK = 40;
-    public static final int PROCESS_TIME = 40; // 2 seconds per batch
+    public static final int PROCESS_TIME = 120; // 6 seconds per batch (slowed down another 100%)
 
     private boolean assembled = false;
     private int energy = 0;
@@ -172,18 +172,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         }
 
         if (serverLevel.getGameTime() % 20 == 0) {
-            boolean matches = checkStructure(false, null);
-            if (matches != this.assembled) {
-                this.assembled = matches;
-                if (this.assembled) {
-                    linkPorts();
-                }
-                BlockState current = getBlockState();
-                if (current.hasProperty(ArcMelterControllerBlock.ASSEMBLED)) {
-                    level.setBlock(pos, current.setValue(ArcMelterControllerBlock.ASSEMBLED, this.assembled), 3);
-                }
-                setChanged();
-            }
+            syncAssembly();
         }
 
         if (!this.assembled) {
@@ -212,8 +201,9 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
             ItemStack input = this.items.get(inputSlot);
             Fluid resultFluid = getMeltingResult(input);
             if (resultFluid != Fluids.EMPTY) {
+                int fluidProduced = isIngot(input) ? 500 : 1000;
                 boolean canFit = (this.moltenFluid == Fluids.EMPTY || this.moltenFluid == resultFluid)
-                        && (this.moltenAmount + 1000 <= TANK_CAPACITY);
+                        && (this.moltenAmount + fluidProduced <= TANK_CAPACITY);
                 int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
                 if (canFit && this.energy >= requiredEnergy) {
                     isActive = true;
@@ -239,7 +229,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                         this.progress = 0;
                         input.shrink(1);
                         this.moltenFluid = resultFluid;
-                        this.moltenAmount += 1000;
+                        this.moltenAmount += fluidProduced;
 
                         Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
                         BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
@@ -270,6 +260,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
 
     private void pushFluidOut() {
         if (this.level == null) return;
+        if (this.level.getGameTime() % 4 != 0) return;
         Direction facing = getBlockState().getValue(ArcMelterControllerBlock.FACING);
 
         // Find output port
@@ -281,7 +272,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                         BlockPos neighborPos = targetPos.relative(dir);
                         var neighborHandler = this.level.getCapability(Capabilities.Fluid.BLOCK, neighborPos, dir.getOpposite());
                         if (neighborHandler != null) {
-                            int toPush = Math.min(250, this.moltenAmount);
+                            int toPush = Math.min(25, this.moltenAmount);
                             FluidResource res = FluidResource.of(this.moltenFluid);
                             try (Transaction tx = Transaction.openRoot()) {
                                 int inserted = 0;
@@ -350,6 +341,17 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         }
 
         return Fluids.EMPTY;
+    }
+
+    public static boolean isIngot(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        if (stack.is(Items.IRON_INGOT) || stack.is(Items.GOLD_INGOT) || stack.is(Items.COPPER_INGOT)
+                || stack.is(RefineryMod.TIN_INGOT.get()) || stack.is(RefineryMod.BRONZE_INGOT.get())
+                || stack.is(Blocks.GLASS.asItem())) {
+            return true;
+        }
+        String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        return path.endsWith("_ingot") || path.equals("glass");
     }
 
     public void toggleBlueprintProjection(@Nullable Player player) {
@@ -512,6 +514,22 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         return inPorts >= 1 && outPorts >= 1 && chambers >= 1;
     }
 
+    public void syncAssembly() {
+        if (this.level == null || this.level.isClientSide()) return;
+        boolean matches = checkStructure(false, null);
+        if (matches != this.assembled) {
+            this.assembled = matches;
+            if (this.assembled) {
+                linkPorts();
+            }
+            BlockState current = getBlockState();
+            if (current.hasProperty(ArcMelterControllerBlock.ASSEMBLED)) {
+                level.setBlock(getBlockPos(), current.setValue(ArcMelterControllerBlock.ASSEMBLED, this.assembled), 3);
+            }
+            setChanged();
+        }
+    }
+
     private void linkPorts() {
         if (this.level == null) return;
         Direction facing = getBlockState().getValue(ArcMelterControllerBlock.FACING);
@@ -562,6 +580,11 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         }
 
         ContainerHelper.loadAllItems(input, this.items);
+    }
+
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override

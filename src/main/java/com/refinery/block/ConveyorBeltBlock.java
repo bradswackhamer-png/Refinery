@@ -40,6 +40,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public class ConveyorBeltBlock extends Block implements EntityBlock {
 
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -49,8 +52,23 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
 
     // 5px low-profile industrial conveyor bounding box (matches reference extruded bed)
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
-    // 4px collision box for items so items entering from slopes/conveyors never catch on a 5px edge
+    // 4px collision box for items
     protected static final VoxelShape ITEM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
+
+    // Directional item collision shapes with 3px recessed entry edge:
+    // Items entering from sloped or flat conveyors behind never collide with a vertical wall ledge
+    private static final Map<Direction, VoxelShape> ITEM_ENTRY_SHAPES = new EnumMap<>(Direction.class);
+
+    static {
+        // NORTH: moves towards -Z (z: 0..13). South entry (z: 13..16) is open/recessed
+        ITEM_ENTRY_SHAPES.put(Direction.NORTH, Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 13.0));
+        // SOUTH: moves towards +Z (z: 3..16). North entry (z: 0..3) is open/recessed
+        ITEM_ENTRY_SHAPES.put(Direction.SOUTH, Block.box(0.0, 0.0, 3.0, 16.0, 4.0, 16.0));
+        // WEST: moves towards -X (x: 0..13). East entry (x: 13..16) is open/recessed
+        ITEM_ENTRY_SHAPES.put(Direction.WEST, Block.box(0.0, 0.0, 0.0, 13.0, 4.0, 16.0));
+        // EAST: moves towards +X (x: 3..16). West entry (x: 0..3) is open/recessed
+        ITEM_ENTRY_SHAPES.put(Direction.EAST, Block.box(3.0, 0.0, 0.0, 16.0, 4.0, 16.0));
+    }
 
     public ConveyorBeltBlock(Properties properties) {
         super(properties);
@@ -74,7 +92,8 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (context instanceof EntityCollisionContext ecc && ecc.getEntity() instanceof ItemEntity) {
-            return ITEM_SHAPE;
+            Direction facing = state.getValue(FACING);
+            return ITEM_ENTRY_SHAPES.getOrDefault(facing, ITEM_SHAPE);
         }
         return SHAPE;
     }

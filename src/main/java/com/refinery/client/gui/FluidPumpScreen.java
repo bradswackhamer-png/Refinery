@@ -30,9 +30,6 @@ public class FluidPumpScreen extends AbstractContainerScreen<FluidPumpMenu> {
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
 
-        // Header Title
-        graphics.text(this.font, Component.literal("CREATIVE FLUID PUMP").withStyle(ChatFormatting.BOLD), 10, 6, 0xFFD946EF, false);
-
         // Central Status Display (x: 24..142, y: 17..33)
         AbstractFluidPumpBlockEntity.PumpStatus status = this.menu.getPumpStatus();
         Component statusText = switch (status) {

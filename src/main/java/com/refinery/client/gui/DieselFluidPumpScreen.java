@@ -31,9 +31,6 @@ public class DieselFluidPumpScreen extends AbstractContainerScreen<DieselFluidPu
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
 
-        // Header Title
-        graphics.text(this.font, Component.literal("DIESEL FLUID PUMP").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD), 10, 6, 0xFFD97706, false);
-
         // Central Status Display (x: 20..142, y: 17..33)
         AbstractFluidPumpBlockEntity.PumpStatus status = this.menu.getPumpStatus();
         Component statusText = switch (status) {

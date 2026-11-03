@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "refinery:steel_item_pipe",
+    "minecraft:chest"
+  ],
+  "result": {
+    "id": "refinery:buffer_pipe",
+    "count": 1
+  }
+}

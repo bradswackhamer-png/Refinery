@@ -25,29 +25,6 @@ public class IndustrialGrinderScreen extends AbstractContainerScreen<IndustrialG
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        boolean assembled = this.menu.isAssembled();
-        boolean grinding = this.menu.isGrinding();
-        int energy = this.menu.getEnergy();
-
-        Component statusText;
-        int statusColor;
-
-        if (!assembled) {
-            statusText = Component.literal("UNFORMED").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFF882222;
-        } else if (energy < 30) {
-            statusText = Component.literal("NO POWER").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xFFEF4444;
-        } else if (grinding) {
-            statusText = Component.literal("GRINDING").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFEA580C;
-        } else {
-            statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 102, 6, statusColor, false);
         graphics.text(this.font, Component.literal("INPUT").withStyle(ChatFormatting.DARK_GRAY), 38, 14, 0xFF444444, false);
         graphics.text(this.font, Component.literal("OUTPUT").withStyle(ChatFormatting.DARK_GRAY), 116, 14, 0xFF444444, false);
     }

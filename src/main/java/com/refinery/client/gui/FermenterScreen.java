@@ -25,30 +25,6 @@ public class FermenterScreen extends AbstractContainerScreen<FermenterMenu> {
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        boolean fermenting = this.menu.isFermenting();
-        int energy = this.menu.getEnergy();
-        int ethanol = this.menu.getEthanolAmount();
-        int capacity = this.menu.getTankCapacity();
-
-        Component statusText;
-        int statusColor;
-
-        if (energy < 15) {
-            statusText = Component.literal("NO POWER").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-            statusColor = 0xFFEF4444;
-        } else if (ethanol >= capacity) {
-            statusText = Component.literal("TANK FULL").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFF59E0B;
-        } else if (fermenting) {
-            statusText = Component.literal("FERMENTING").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF22C55E;
-        } else {
-            statusText = Component.literal("ONLINE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF228822;
-        }
-
-        graphics.text(this.font, statusText, 96, 6, statusColor, false);
         graphics.text(this.font, Component.literal("CROPS").withStyle(ChatFormatting.DARK_GRAY), 42, 22, 0xFF555555, false);
         graphics.text(this.font, Component.literal("SEEDS").withStyle(ChatFormatting.DARK_GRAY), 78, 44, 0xFF555555, false);
     }

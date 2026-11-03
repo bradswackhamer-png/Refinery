@@ -23,25 +23,6 @@ public class FeedingTroughScreen extends AbstractContainerScreen<FeedingTroughMe
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        int foodCount = this.menu.getFoodCount();
-        int animals = this.menu.getAnimalsInRange();
-
-        Component statusText;
-        int statusColor;
-
-        if (foodCount <= 0) {
-            statusText = Component.literal("EMPTY").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
-            statusColor = 0xFFAA2222;
-        } else if (animals > 0) {
-            statusText = Component.literal("ACTIVE").withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.BOLD);
-            statusColor = 0xFF15803D;
-        } else {
-            statusText = Component.literal("STANDBY").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-            statusColor = 0xFFB45309;
-        }
-
-        graphics.text(this.font, statusText, 120, 6, statusColor, false);
     }
 
     @Override

@@ -332,5 +332,9 @@
   "container.refinery.diesel_generator": "Industrial Diesel Generator",
   "tooltip.refinery.diesel_generator.desc_1": "§7Heavy containerized sound-attenuated diesel power plant (1x2x2).",
   "tooltip.refinery.diesel_generator.desc_2": "§6Generates 256 FE/t from Diesel with smart idling and auto-push.",
-  "tooltip.refinery.diesel_generator.desc_3": "§eConfigurable Redstone control: Always On, Active High, or Active Low backup."
+  "tooltip.refinery.diesel_generator.desc_3": "§eConfigurable Redstone control: Always On, Active High, or Active Low backup.",
+  "block.refinery.buffer_pipe": "Buffer Pipe",
+  "item.refinery.buffer_pipe": "Buffer Pipe",
+  "container.refinery.buffer_pipe": "Buffer Pipe",
+  "tooltip.refinery.buffer_pipe.desc": "§7Single-slot item buffer that looks and connects like a piece of pipe."
 }

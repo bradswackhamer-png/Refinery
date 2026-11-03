@@ -16,6 +16,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.flag.FeatureFlags;
@@ -546,6 +547,11 @@ public class RefineryMod {
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM_EXTRACTOR, com.refinery.block.pipe.IndustrialPipeMaterial.STEEL));
     public static final DeferredItem<BlockItem> ITEM_EXTRACTOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("item_extractor_pipe", ITEM_EXTRACTOR_PIPE);
 
+    // Buffer Pipe (1-Slot Item Storage Pipe)
+    public static final DeferredBlock<com.refinery.block.pipe.BufferPipeBlock> BUFFER_PIPE = BLOCKS.registerBlock("buffer_pipe",
+            com.refinery.block.pipe.BufferPipeBlock::new);
+    public static final DeferredItem<BlockItem> BUFFER_PIPE_ITEM = ITEMS.registerSimpleBlockItem("buffer_pipe", BUFFER_PIPE);
+
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> VOID_PIPE = BLOCKS.registerBlock("void_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.VOID, com.refinery.block.pipe.IndustrialPipeMaterial.VOID));
     public static final DeferredItem<BlockItem> VOID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("void_pipe", VOID_PIPE);
@@ -804,6 +810,10 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("storage_tank_fill_valve",
                     () -> new BlockEntityType<>(StorageTankFillValveBlockEntity::new, STORAGE_TANK_FILL_VALVE.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.refinery.block.entity.BufferPipeBlockEntity>> BUFFER_PIPE_BE =
+            BLOCK_ENTITY_TYPES.register("buffer_pipe",
+                    () -> new BlockEntityType<>(com.refinery.block.entity.BufferPipeBlockEntity::new, BUFFER_PIPE.get()));
+
     // === Menu ===
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -876,6 +886,9 @@ public class RefineryMod {
 
     public static final DeferredHolder<MenuType<?>, MenuType<DieselGeneratorMenu>> DIESEL_GENERATOR_MENU =
             MENUS.register("diesel_generator", () -> new MenuType<>(DieselGeneratorMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.BufferPipeMenu>> BUFFER_PIPE_MENU =
+            MENUS.register("buffer_pipe", () -> new MenuType<>(com.refinery.menu.BufferPipeMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
@@ -990,6 +1003,7 @@ public class RefineryMod {
                         output.accept(BRASS_ITEM_PIPE_ITEM.get());
                         output.accept(FLUID_EXTRACTOR_PIPE_ITEM.get());
                         output.accept(ITEM_EXTRACTOR_PIPE_ITEM.get());
+                        output.accept(BUFFER_PIPE_ITEM.get());
                         output.accept(VOID_PIPE_ITEM.get());
                         output.accept(MERGE_PIPE_ITEM.get());
                         output.accept(MERGE_FLUID_PIPE_ITEM.get());
@@ -1362,7 +1376,7 @@ public class RefineryMod {
 
         // Capabilities on Casting Channel
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_CHANNEL_BE.get(),
-                (be, side) -> be.fluidHandler);
+                (be, side) -> be.getFluidHandler(side));
 
         // Capabilities on Continuous Casting Press
         event.registerBlockEntity(Capabilities.Energy.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
@@ -1376,10 +1390,12 @@ public class RefineryMod {
                     if (!be.isAssembled()) return null;
                     return new SingleFluidHandler(
                             be::getMoltenFluid,
+                            be::setMoltenFluid,
                             be::getMoltenAmount,
                             be::setMoltenAmount,
                             CastingPressControllerBlockEntity.TANK_CAPACITY,
-                            true, false, be::setChanged);
+                            true, false, be::setChanged,
+                            f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty());
                 });
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, CASTING_PORT_BE.get(),
@@ -1395,10 +1411,12 @@ public class RefineryMod {
                     if (controller == null || be.getPortType() != CastingPortBlock.PortType.INPUT) return null;
                     return new SingleFluidHandler(
                             controller::getMoltenFluid,
+                            controller::setMoltenFluid,
                             controller::getMoltenAmount,
                             controller::setMoltenAmount,
                             CastingPressControllerBlockEntity.TANK_CAPACITY,
-                            true, false, controller::setChanged);
+                            true, false, controller::setChanged,
+                            f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty());
                 });
 
         // Capabilities on Industrial Fermenter (Energy, Fluid Ethanol, Items)
@@ -1477,6 +1495,13 @@ public class RefineryMod {
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, INDUSTRIAL_PIPE_BE.get(),
                 (be, side) -> be.getPipeType().handlesItems() ? VanillaContainerWrapper.of(be) : null);
+
+        // Capabilities on Buffer Pipe (1-Slot Item Container)
+        event.registerBlockEntity(Capabilities.Item.BLOCK, BUFFER_PIPE_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> be instanceof Container c ? VanillaContainerWrapper.of(c) : null,
+                BUFFER_PIPE.get());
 
         // Capabilities on Industrial Diesel Generator (Energy, Fluid, Item Container)
         event.registerBlockEntity(Capabilities.Energy.BLOCK, DIESEL_GENERATOR_BE.get(),

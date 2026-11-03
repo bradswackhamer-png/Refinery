@@ -46,7 +46,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     public static final int TANK_CAPACITY = 4000;
     public static final int ENERGY_CAPACITY = 50000;
     public static final int ENERGY_PER_TICK = 40;
-    public static final int PROCESS_TIME = 40; // 2 seconds per press stroke
+    public static final int PROCESS_TIME = 240; // 12 seconds per press stroke (turned down by 200%)
 
     private boolean assembled = false;
     private int energy = 0;
@@ -162,18 +162,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         }
 
         if (serverLevel.getGameTime() % 20 == 0) {
-            boolean matches = checkStructure(false, null);
-            if (matches != this.assembled) {
-                this.assembled = matches;
-                if (this.assembled) {
-                    linkPorts();
-                }
-                BlockState current = getBlockState();
-                if (current.hasProperty(CastingPressControllerBlock.ASSEMBLED)) {
-                    level.setBlock(pos, current.setValue(CastingPressControllerBlock.ASSEMBLED, this.assembled), 3);
-                }
-                setChanged();
-            }
+            syncAssembly();
         }
 
         if (!this.assembled) {
@@ -193,7 +182,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
 
         // Check if we have at least 1000 mB of molten fluid and room in output
         ItemStack resultStack = getCastingProduct(this.moltenFluid);
-        boolean canCast = (this.progress > 20) || (!resultStack.isEmpty() && this.moltenAmount >= 1000 && canFitOutput(resultStack));
+        boolean canCast = (this.progress > 120) || (!resultStack.isEmpty() && this.moltenAmount >= 1000 && canFitOutput(resultStack));
 
         if (canCast) {
             int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
@@ -206,8 +195,8 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
                 Direction facing = state.getValue(CastingPressControllerBlock.FACING);
                 BlockPos basinPos = getRelativePos(0, 0, 1, facing);
 
-                // Stamping impact at tick 20 (bottom of hydraulic stroke)
-                if (this.progress == 20) {
+                // Stamping impact at tick 120 (bottom of hydraulic stroke)
+                if (this.progress == 120) {
                     this.moltenAmount -= 1000;
                     if (this.moltenAmount <= 0) {
                         this.moltenFluid = Fluids.EMPTY;
@@ -234,7 +223,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
                 setChanged();
             }
         } else {
-            if (this.progress > 0 && this.progress <= 20) {
+            if (this.progress > 0 && this.progress <= 120) {
                 this.progress = 0;
                 setChanged();
             }
@@ -249,12 +238,12 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     }
 
     public static ItemStack getCastingProduct(Fluid fluid) {
-        if (fluid == RefineryFluids.MOLTEN_IRON_SOURCE.get()) return new ItemStack(Items.IRON_INGOT);
-        if (fluid == RefineryFluids.MOLTEN_GOLD_SOURCE.get()) return new ItemStack(Items.GOLD_INGOT);
-        if (fluid == RefineryFluids.MOLTEN_COPPER_SOURCE.get()) return new ItemStack(Items.COPPER_INGOT);
-        if (fluid == RefineryFluids.MOLTEN_TIN_SOURCE.get()) return new ItemStack(RefineryMod.TIN_INGOT.get());
-        if (fluid == RefineryFluids.MOLTEN_BRONZE_SOURCE.get()) return new ItemStack(RefineryMod.BRONZE_INGOT.get());
-        if (fluid == RefineryFluids.MOLTEN_GLASS_SOURCE.get()) return new ItemStack(Blocks.GLASS);
+        if (fluid == RefineryFluids.MOLTEN_IRON_SOURCE.get()) return new ItemStack(Items.IRON_INGOT, 2);
+        if (fluid == RefineryFluids.MOLTEN_GOLD_SOURCE.get()) return new ItemStack(Items.GOLD_INGOT, 2);
+        if (fluid == RefineryFluids.MOLTEN_COPPER_SOURCE.get()) return new ItemStack(Items.COPPER_INGOT, 2);
+        if (fluid == RefineryFluids.MOLTEN_TIN_SOURCE.get()) return new ItemStack(RefineryMod.TIN_INGOT.get(), 2);
+        if (fluid == RefineryFluids.MOLTEN_BRONZE_SOURCE.get()) return new ItemStack(RefineryMod.BRONZE_INGOT.get(), 2);
+        if (fluid == RefineryFluids.MOLTEN_GLASS_SOURCE.get()) return new ItemStack(Blocks.GLASS, 2);
         return ItemStack.EMPTY;
     }
 
@@ -447,6 +436,22 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         return inPorts >= 1 && outPorts >= 1 && basins >= 1;
     }
 
+    public void syncAssembly() {
+        if (this.level == null || this.level.isClientSide()) return;
+        boolean matches = checkStructure(false, null);
+        if (matches != this.assembled) {
+            this.assembled = matches;
+            if (this.assembled) {
+                linkPorts();
+            }
+            BlockState current = getBlockState();
+            if (current.hasProperty(CastingPressControllerBlock.ASSEMBLED)) {
+                level.setBlock(getBlockPos(), current.setValue(CastingPressControllerBlock.ASSEMBLED, this.assembled), 3);
+            }
+            setChanged();
+        }
+    }
+
     private void linkPorts() {
         if (this.level == null) return;
         Direction facing = getBlockState().getValue(CastingPressControllerBlock.FACING);
@@ -495,6 +500,11 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
             this.moltenFluid = Fluids.EMPTY;
         }
         ContainerHelper.loadAllItems(input, this.items);
+    }
+
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override

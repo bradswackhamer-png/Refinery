@@ -63,6 +63,9 @@ public class MultiSmelterControllerBlock extends Block implements EntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
+        if (player.isShiftKeyDown()) {
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
+        }
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
     }
 
@@ -70,7 +73,9 @@ public class MultiSmelterControllerBlock extends Block implements EntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide()) {
             if (level.getBlockEntity(pos) instanceof MultiSmelterControllerBlockEntity controllerBE) {
-                if (controllerBE.isAssembled()) {
+                if (player.isShiftKeyDown()) {
+                    controllerBE.toggleBlueprintProjection(player);
+                } else if (controllerBE.isAssembled()) {
                     player.openMenu(controllerBE, pos);
                 } else {
                     controllerBE.toggleBlueprintProjection(player);
