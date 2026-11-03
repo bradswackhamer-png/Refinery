@@ -133,20 +133,7 @@ public class MultiSmelterControllerRenderer implements BlockEntityRenderer<Multi
 
                 double distSq = (dx * dx) + (dy * dy) + (dz * dz);
                 if (distSq < 100.0) {
-                    poseStack.pushPose();
-                    poseStack.translate(0.5, 0.5, 0.5);
-
-                    submitNodeCollector.submitNameTag(
-                            poseStack,
-                            Vec3.ZERO,
-                            0,
-                            formattedName,
-                            false,
-                            15728880,
-                            camera
-                    );
-
-                    poseStack.popPose();
+                    BlueprintColors.renderBlueprintLabel(poseStack, submitNodeCollector, camera, formattedName);
                 }
 
                 poseStack.popPose();

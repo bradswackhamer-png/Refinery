@@ -4,6 +4,24 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.9.0] - 2026-11-03
+
+### Changed
+- **Multiblock Hologram Part Label Size Reduced by 60%**:
+  - Implemented centralized blueprint label rendering via `BlueprintColors.renderBlueprintLabel` across all 13 multiblock machine renderers (`ArcMelter`, `BlastFurnace`, `CastingPress`, `IndustrialGrinder`, `LargeBoiler`, `LargeDieselBoiler`, `MetalPress`, `MultiSmelter`, `Refinery`, `SmallBoiler`, `SmallDieselBoiler`, `SteamTurbine`, and `StorageTank`).
+  - Scaled floating 3D billboard text down to 40% of its previous size (`scale = 0.40f`, a 60% reduction), significantly improving legibility and preventing text clutter.
+  - Positioned labels directly above each block's top center with zero-offset anchoring (`(0.5, 1.0, 0.5)` with `(0, -0.5, 0)` nametag baseline), preventing nametags from overlapping and obscuring neighboring blocks in dense multiblock structures.
+
+---
+## [1.8.63] - 2026-11-02
+
+### Changed
+- **Petroleum Refinery Diesel Output Port Relocation**:
+  - Relocated the Diesel Output Port from Layer 1 (`(0, 1, 2)`) to Layer 0 (`(0, 0, 2)`), placing it on the bottom ground tier of the multiblock structure.
+  - Placed a Reinforced Casing at Layer 1 (`(0, 1, 2)`), separating the Diesel Port from the Gas Output Port at Layer 2 (`(0, 2, 2)`) so liquid output connections do not crowd together on the back face.
+  - Updated holographic blueprint projection guidelines to reflect the new port layout.
+
+---
 ## [1.8.62] - 2026-11-02
 
 ### Changed

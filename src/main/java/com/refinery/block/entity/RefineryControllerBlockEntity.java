@@ -492,7 +492,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         list.add(new BlueprintRequirement( 0, 0, 1, RefineryMod.COMBUSTION_CHAMBER.get(), "Combustion Chamber", 0xFFEA580C));
         list.add(new BlueprintRequirement( 1, 0, 1, RefineryMod.BYPRODUCT_PORT.get(), "Byproduct Port", 0xFF475569));
         list.add(new BlueprintRequirement(-1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 2, RefineryMod.DIESEL_PORT.get(), "Diesel Port", 0xFFEAB308));
         list.add(new BlueprintRequirement( 1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
 
         // Layer 1
@@ -503,7 +503,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         list.add(new BlueprintRequirement( 0, 1, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
         list.add(new BlueprintRequirement( 1, 1, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
         list.add(new BlueprintRequirement(-1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 2, RefineryMod.DIESEL_PORT.get(), "Diesel Port", 0xFFEAB308));
+        list.add(new BlueprintRequirement( 0, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
 
         // Layer 2

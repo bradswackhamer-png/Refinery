@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.8.62.jar`
+`refinery-1.9.0.jar`
 
 ### Display Name
-`Industrial Refinery 1.8.62 (NeoForge 26.3)`
+`Industrial Refinery 1.9.0 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,20 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.9.0
+
+### What's New in v1.9.0:
+- **Multiblock Hologram Part Label Size Reduced by 60%**:
+  - Centralized holographic 3D billboard label rendering via `BlueprintColors.renderBlueprintLabel` across all 13 multiblock machine renderers.
+  - Floating nametags are now 60% smaller (scaled to 40% of their previous oversized dimensions), dramatically reducing visual clutter and preventing label overlap on dense multiblock matrices.
+  - Precisely anchored to the top face of each projected outline box for crisp, clean readability.
+# Industrial Refinery v1.8.63
+
+### What's New in v1.8.63:
+- **Petroleum Refinery Diesel Output Port Relocation**:
+  - Moved the Diesel Output Port from Layer 1 (middle tier) down to Layer 0 (ground tier) at the rear of the multiblock (`(0, 0, 2)`).
+  - Placed Reinforced Casing at Layer 1 (`(0, 1, 2)`) between the Diesel Port and the Gas Output Port at Layer 2 (`(0, 2, 2)`), preventing output pipes from overlapping and crowding the rear face.
+  - Holographic blueprint projection now guides construction to the new ground-level port location.
 # Industrial Refinery v1.8.62
 
 ### What's New in v1.8.62:

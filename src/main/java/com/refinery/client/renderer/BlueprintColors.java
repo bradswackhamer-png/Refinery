@@ -1,10 +1,40 @@
 package com.refinery.client.renderer;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.phys.Vec3;
 
 public class BlueprintColors {
+
+    public static final Vec3 NAMETAG_OFFSET = new Vec3(0.0, -0.5, 0.0);
+    public static final float TEXT_SCALE = 0.40f; // 60% reduction in size (significantly smaller, >50% reduction)
+
+    public static void renderBlueprintLabel(
+            PoseStack poseStack,
+            SubmitNodeCollector submitNodeCollector,
+            CameraRenderState camera,
+            Component formattedName
+    ) {
+        poseStack.pushPose();
+        poseStack.translate(0.5, 1.0, 0.5);
+        poseStack.scale(TEXT_SCALE, TEXT_SCALE, TEXT_SCALE);
+
+        submitNodeCollector.submitNameTag(
+                poseStack,
+                NAMETAG_OFFSET,
+                0,
+                formattedName,
+                false,
+                15728880,
+                camera
+        );
+
+        poseStack.popPose();
+    }
 
     public static int getTextColor(String name, int fallbackColor) {
         if (name == null) return 0xFFFFFF;

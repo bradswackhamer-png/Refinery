@@ -53,6 +53,8 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.9.0 (Hologram Blueprint Label Size Reduced by 60%)](#version-190-hologram-blueprint-label-size-reduced-by-60)
+   - [Version 1.8.63 (Petroleum Refinery Diesel Output Port Relocation)](#version-1863-petroleum-refinery-diesel-output-port-relocation)
    - [Version 1.8.62 (Arc Melter & Casting Press Speeds, Viscous Lava Channel Flow, Grinder Auto-Export)](#version-1862-arc-melter--casting-press-speeds-viscous-lava-channel-flow-grinder-auto-export)
    - [Version 1.8.61 (Sloped-to-Flat Conveyor Crest Transition & Item Sticking Resolution)](#version-1861-sloped-to-flat-conveyor-crest-transition--item-sticking-resolution)
    - [Version 1.8.60 (Arc Melter 2x Output Doubling, Dark Steel Blast Furnace & Metal Press GUI, Clean Screen Headers)](#version-1860-arc-melter-2x-output-doubling-dark-steel-blast-furnace--metal-press-gui-clean-screen-headers)
@@ -1688,6 +1690,20 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ---
 
+### Version 1.9.0 (Hologram Blueprint Label Size Reduced by 60%)
+- **Hologram Blueprint Label Text Size Significantly Reduced**:
+  - Implemented centralized blueprint label rendering via `BlueprintColors.renderBlueprintLabel` across all 13 multiblock machine renderers.
+  - Reduced text size by 60% (scaled to 40% of original dimensions), eliminating label overlap across adjacent blocks and making multiblock construction holograms vastly cleaner and easier to read.
+  - Re-anchored billboard labels to the top center of each block frame with zero-offset baseline correction.
+
+---
+### Version 1.8.63 (Petroleum Refinery Diesel Output Port Relocation)
+- **Diesel Output Port Relocated to Ground Layer**:
+  - Relocated the Diesel Output Port from Layer 1 (`(0, 1, 2)`) to Layer 0 (`(0, 0, 2)`), moving it down to the ground tier directly beneath the Gas Output Port.
+  - Placed a Reinforced Casing at Layer 1 (`(0, 1, 2)`) so the Diesel Port and Gas Port (Layer 2 `(0, 2, 2)`) are separated by a solid casing block rather than sitting adjacent, preventing fluid pipe congestion on the rear face.
+  - Blueprint holographic projections now reflect the new ground-level port location.
+
+---
 ### Version 1.8.62 (Arc Melter & Casting Press Speeds, Viscous Lava Channel Flow, Grinder Auto-Export)
 - **Arc Melter Processing Speed**:
   - Doubled batch process time from 60 ticks (3.0s) to 120 ticks (6.0s).
