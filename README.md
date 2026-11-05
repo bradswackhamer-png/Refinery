@@ -53,6 +53,9 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.10.14 (Slender 3D 8-Bit Pipes, Dedicated Facades Tab, Dynamic Block Textures)](#version-11014-slender-3d-8-bit-pipes-dedicated-facades-tab-dynamic-block-textures)
+   - [Version 1.10.12 (Pipe Facade Network Codec Fix & Tin Ore Silk Touch Loot Table Fix)](#version-11012-pipe-facade-network-codec-fix--tin-ore-silk-touch-loot-table-fix)
+   - [Version 1.10.11 (3D 8-Bit Pixel Art Pipe Item Icons & Fluid Markings)](#version-11011-3d-8-bit-pixel-art-pipe-item-icons--fluid-markings)
    - [Version 1.10.10 (BuildCraft-Style Pipe Facades & Structure Pipe)](#version-11010-buildcraft-style-pipe-facades--structure-pipe)
    - [Version 1.10.9 (Cross-Mod Conveyor Belt Transition & Ole Saw Mill Fix)](#version-1109-cross-mod-conveyor-belt-transition--ole-saw-mill-fix)
    - [Version 1.10.7 (LabPBR 1.3 & POM for Corrugated Steel Panels)](#version-1107-labpbr-13--pom-for-corrugated-steel-panels)
@@ -1705,6 +1708,36 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.10.14 (Slender 3D 8-Bit Pipes, Dedicated Facades Tab, Dynamic Block Textures)
+- **Dedicated Pipe Facades Creative Tab (`itemGroup.refinery.facades`)**:
+  - Moved all dynamic Pipe Facades out of the main Industrial Refinery creative tab into their own dedicated creative tab (`refinery_facades_tab`), preventing clutter in the main mod item tab.
+- **Dynamic Real-Block Texture Rendering for Pipe Facade Item Models (`PipeFacadeSpecialRenderer`)**:
+  - Registered a Minecraft 26.3 `SpecialModelRenderer` for `pipe_facade` and `pipe_facade_hole` items via `RegisterSpecialModelRendererEvent`.
+  - Automatically samples the target block's native `TextureAtlasSprite` from `TextureAtlas.LOCATION_BLOCKS` at runtime, rendering every facade item in creative menus, player inventories, and hand models with its true block texture (Stone, Oak, Corrugated Steel, Bronze, etc.) and 3D plate thickness rather than a generic flat gray sprite.
+- **Slender Horizontal Rectangular 3D 8-Bit Pipe Icons**:
+  - Re-proportioned all 23 pipe item icons to slender horizontal rectangles (16px collar height, 12px shaft height, 30px width; 2.5:1 aspect ratio), matching the slender profile of classic Mario pipes.
+  - Retains all crisp 8-bit details: flanged collars, top specular highlight stripes, dark notch grooves, deep body mid-tones, 1x1 checkerboard dithering, bottom bounce highlights, and centered 5x7 fluid droplet indicators for liquid pipes.
+
+---
+
+### Version 1.10.12 (Pipe Facade Network Codec Fix & Tin Ore Silk Touch Loot Table Fix)
+- **Pipe Facade CustomRecipe Network Packet Encoding (`neoforge:recipe_content`)**:
+  - Fixed a disconnect crash (`EncoderException: Failed encoding custom payload neoforge:recipe_content: IllegalStateException: Can't encode 'com.refinery.recipe.PipeFacadeRecipe@...', expected '...'`) when joining a world by registering `PipeFacadeRecipe.INSTANCE` and `PipeFacadeSwapRecipe.INSTANCE` singletons with `equals` and `hashCode` implementations for `MapCodec.unit(...)` and `StreamCodec.unit(...)`.
+- **Tin Ore & Deepslate Tin Ore Loot Table Validation**:
+  - Updated `tin_ore.json` and `deepslate_tin_ore.json` loot tables to use the Minecraft 26.3 `"condition": "minecraft:tool/can_silk_touch"` syntax instead of `#minecraft:enchantments/silk_touch`, resolving `ReloadableServerRegistries` validation warnings and restoring Silk Touch drops.
+
+---
+
+### Version 1.10.11 (3D 8-Bit Pixel Art Pipe Item Icons & Fluid Markings)
+- **Authentic 3D 8-Bit Pixel Art Pipe Item Icons**:
+  - Replaced legacy blurred vector/anti-aliased pipe icons with crisp 32x32 3D 8-bit retro arcade pixel art pipe icons inspired by classic Mario pipes.
+  - Features flanged collar rims on both ends with vertical rim highlights, specular top highlight stripes, grooved notch separators, deep cylindrical body shading, 1x1 checkerboard dither shading at the base, and bottom bounce specular reflection.
+  - Tailored distinct material palettes across all 23 pipe types: Wood, Copper, Iron, Steel, Gold, Diamond, Emerald (reference green pipe), Brass, Cast Iron, Void, Quartz/Merge, Buffer, and Structure.
+  - Added a distinct 8-bit fluid droplet emblem marking in the center of all liquid transport pipes (`wood_fluid_pipe`, `copper_fluid_pipe`, `iron_fluid_pipe`, `steel_fluid_pipe`, `gold_fluid_pipe`, `diamond_fluid_pipe`, `cast_iron_fluid_pipe`, `fluid_extractor_pipe`, and `merge_fluid_pipe`) for immediate visual distinction between item and liquid conduits in inventory screens.
+  - Added dedicated status badges for utility pipes: golden extraction chevrons for extractor pipes, storage latches for buffer pipes, and swirling singularity vortexes for void pipes.
 
 ---
 

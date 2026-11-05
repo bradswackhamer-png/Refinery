@@ -1,6 +1,9 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "refinery:item/pipe_facade_hole"
+    "type": "minecraft:special",
+    "base": "refinery:item/pipe_facade_hole",
+    "model": {
+      "type": "refinery:pipe_facade"
+    }
   }
 }

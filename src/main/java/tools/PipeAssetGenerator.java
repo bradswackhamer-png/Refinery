@@ -35,10 +35,12 @@ public class PipeAssetGenerator {
             "brass_item_pipe",
             "fluid_extractor_pipe",
             "item_extractor_pipe",
+            "buffer_pipe",
             "void_pipe",
             "merge_pipe",
             "merge_item_pipe",
-            "merge_fluid_pipe"
+            "merge_fluid_pipe",
+            "structure_pipe"
     };
 
     public static void main(String[] args) throws Exception {
@@ -160,88 +162,258 @@ public class PipeAssetGenerator {
         ImageIO.write(img, "PNG", new File(ASSETS + "textures/block/pipe/" + filename));
     }
 
+    public static class PipePalette {
+        public final int outline;
+        public final int darkBody;
+        public final int highlight;
+        public final int notch;
+        public final int bounce;
+
+        public PipePalette(int outline, int darkBody, int highlight, int notch, int bounce) {
+            this.outline = outline;
+            this.darkBody = darkBody;
+            this.highlight = highlight;
+            this.notch = notch;
+            this.bounce = bounce;
+        }
+    }
+
+    private static PipePalette getPipePalette(String id) {
+        if (id.contains("wood")) return new PipePalette(0xFF2A1808, 0xFF824B1E, 0xFFE5AA68, 0xFF502C0E, 0xFFDCA05E);
+        if (id.contains("copper")) return new PipePalette(0xFF3D1505, 0xFFB8592B, 0xFFFFA87A, 0xFF7D3414, 0xFFFFA87A);
+        if (id.contains("iron") && !id.contains("cast")) return new PipePalette(0xFF25272B, 0xFF969DA6, 0xFFF5F8FC, 0xFF5E646E, 0xFFFFFFFF);
+        if (id.contains("steel")) return new PipePalette(0xFF151D28, 0xFF6F829A, 0xFFDCEAF8, 0xFF455468, 0xFFDCEAF8);
+        if (id.contains("gold")) return new PipePalette(0xFF3E2400, 0xFFDA9F00, 0xFFFFF24A, 0xFF8F6300, 0xFFFFF24A);
+        if (id.contains("diamond")) return new PipePalette(0xFF053232, 0xFF20C5B7, 0xFFA8FFF6, 0xFF11756D, 0xFFA8FFF6);
+        if (id.contains("emerald")) return new PipePalette(0xFF004800, 0xFF00AB00, 0xFFB8F818, 0xFF007800, 0xFFB8F818);
+        if (id.contains("brass")) return new PipePalette(0xFF382602, 0xFFC7981E, 0xFFFFEB75, 0xFF7D5C0C, 0xFFFFEB75);
+        if (id.contains("cast_iron")) return new PipePalette(0xFF0E0F12, 0xFF4E5158, 0xFFA0A5AE, 0xFF2D2F35, 0xFFA0A5AE);
+        if (id.contains("void")) return new PipePalette(0xFF080210, 0xFF3E1958, 0xFFD45FFF, 0xFF220B33, 0xFFEA94FF);
+        if (id.contains("quartz") || id.contains("merge")) return new PipePalette(0xFF3B3530, 0xFFC2BAAF, 0xFFFFFFFF, 0xFF7D756C, 0xFFFFFFFF);
+        if (id.contains("structure")) return new PipePalette(0xFF222222, 0xFF5E5E5E, 0xFFB4B4B4, 0xFF3C3C3C, 0xFFB4B4B4);
+        return new PipePalette(0xFF151D28, 0xFF6F829A, 0xFFDCEAF8, 0xFF455468, 0xFFDCEAF8);
+    }
+
     public static void generateItemTextures() throws Exception {
         for (String id : ALL_PIPE_IDS) {
-            BufferedImage itemImg = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = itemImg.createGraphics();
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            PipePalette pal = getPipePalette(id);
+            boolean isFluid = id.contains("fluid");
+            boolean isExtractor = id.contains("extractor");
+            String special = "none";
+            if (id.equals("buffer_pipe")) special = "buffer";
+            else if (id.equals("void_pipe")) special = "void";
+            else if (id.contains("merge")) special = "merge";
 
-            Color base = getColorForId(id, false);
-            Color hi = getColorForId(id, true);
-
-            // Pipe Body Cylinder (Diagonal across item square)
-            Stroke pipeStroke = new BasicStroke(7.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            g.setStroke(pipeStroke);
-            g.setColor(base.darker());
-            g.drawLine(5, 27, 27, 5);
-
-            g.setStroke(new BasicStroke(5.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(base);
-            g.drawLine(5, 27, 27, 5);
-
-            // Specular reflection streak
-            g.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(hi);
-            g.drawLine(7, 23, 23, 7);
-
-            // Flanged Collars at endpoints
-            g.setColor(base.darker().darker());
-            g.fillOval(2, 23, 8, 8);
-            g.fillOval(22, 3, 8, 8);
-
-            g.setColor(hi);
-            g.drawOval(2, 23, 8, 8);
-            g.drawOval(22, 3, 8, 8);
-
-            // Waterproof Seal / Fluid Indicator ring for fluid pipes
-            if (id.contains("fluid")) {
-                g.setColor(new Color(40, 160, 240, 200));
-                g.setStroke(new BasicStroke(2.0f));
-                g.drawOval(13, 13, 6, 6);
-            }
-
-            // Extractors badge
-            if (id.contains("extractor")) {
-                g.setColor(new Color(255, 215, 0));
-                g.fillPolygon(new int[]{13, 19, 16}, new int[]{19, 19, 13}, 3);
-            }
-
-            // Merge Pipe badge
-            if (id.contains("merge")) {
-                g.setColor(new Color(255, 200, 30));
-                g.fillPolygon(new int[]{12, 19, 15}, new int[]{15, 12, 19}, 3);
-            }
-
-            g.dispose();
+            BufferedImage itemImg = createPipeIcon(pal, isFluid, isExtractor, special);
             ImageIO.write(itemImg, "PNG", new File(ASSETS + "textures/item/" + id + ".png"));
         }
     }
 
-    private static Color getColorForId(String id, boolean highlight) {
-        if (id.contains("wood")) {
-            return highlight ? new Color(195, 145, 90) : new Color(145, 95, 50);
-        } else if (id.contains("copper")) {
-            return highlight ? new Color(255, 180, 140) : new Color(210, 125, 80);
-        } else if (id.contains("iron") && !id.contains("cast")) {
-            return highlight ? new Color(250, 250, 255) : new Color(215, 215, 220);
-        } else if (id.contains("steel")) {
-            return highlight ? new Color(230, 240, 250) : new Color(185, 195, 205);
-        } else if (id.contains("gold")) {
-            return highlight ? new Color(255, 235, 120) : new Color(245, 195, 35);
-        } else if (id.contains("diamond")) {
-            return highlight ? new Color(180, 255, 245) : new Color(55, 235, 205);
-        } else if (id.contains("emerald")) {
-            return highlight ? new Color(140, 255, 180) : new Color(25, 220, 100);
-        } else if (id.contains("brass")) {
-            return highlight ? new Color(255, 230, 130) : new Color(225, 185, 65);
-        } else if (id.contains("cast_iron")) {
-            return highlight ? new Color(130, 135, 140) : new Color(75, 80, 85);
-        } else if (id.contains("void")) {
-            return highlight ? new Color(180, 80, 255) : new Color(40, 30, 60);
-        } else if (id.contains("quartz") || id.contains("merge")) {
-            return highlight ? new Color(255, 255, 255) : new Color(235, 230, 225);
+    public static BufferedImage createPipeIcon(PipePalette pal, boolean isFluid, boolean isExtractor, String special) {
+        BufferedImage img = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+
+        int leftX1 = 1, leftX2 = 5;
+        int rightX1 = 26, rightX2 = 30;
+        int shaftX1 = 6, shaftX2 = 25;
+
+        // Slender horizontal rectangle proportions:
+        // Collar height = 16 (Y=8 to 23), Shaft height = 12 (Y=10 to 21)
+        int collarY1 = 8, collarY2 = 23;
+        int shaftY1 = 10, shaftY2 = 21;
+
+        // 1. Draw Shaft (Y=10 to 21)
+        for (int y = shaftY1; y <= shaftY2; y++) {
+            for (int x = shaftX1; x <= shaftX2; x++) {
+                int col;
+                if (y == shaftY1 || y == shaftY2) {
+                    col = pal.outline;
+                } else if (y == 11) {
+                    col = pal.highlight; // top highlight stripe
+                } else if (y == 12) {
+                    col = pal.notch; // dark notch
+                } else if (y == 13 || y == 14) {
+                    col = pal.highlight; // main highlight
+                } else if (y == 15 || y == 16) {
+                    col = pal.darkBody; // main body shadow
+                } else if (y == 17 || y == 18) {
+                    // Dither band: checkerboard alternating darkBody and highlight
+                    col = ((x + y) % 2 == 0) ? pal.highlight : pal.darkBody;
+                } else if (y == 19 || y == 20) {
+                    col = pal.bounce; // bottom bounce light
+                } else {
+                    col = pal.darkBody;
+                }
+                img.setRGB(x, y, col);
+            }
         }
-        return highlight ? new Color(230, 240, 250) : new Color(185, 195, 205);
+
+        // 2. Draw Left Collar
+        drawCollar(img, leftX1, leftX2, collarY1, collarY2, pal, true);
+
+        // 3. Draw Right Collar
+        drawCollar(img, rightX1, rightX2, collarY1, collarY2, pal, false);
+
+        // 4. Markings
+        if (isFluid) {
+            drawFluidDroplet(img, 15, 15);
+        }
+
+        if (isExtractor) {
+            drawExtractorBadge(img, 15, 15, isFluid);
+        }
+
+        if ("buffer".equals(special)) {
+            drawBufferBadge(img, 15, 15);
+        } else if ("void".equals(special)) {
+            drawVoidVortex(img, 15, 15);
+        } else if ("merge".equals(special)) {
+            drawMergeBadge(img, 15, 15, isFluid);
+        }
+
+        return img;
+    }
+
+    private static void drawCollar(BufferedImage img, int x1, int x2, int y1, int y2, PipePalette pal, boolean isLeft) {
+        for (int y = y1; y <= y2; y++) {
+            for (int x = x1; x <= x2; x++) {
+                int col;
+                if (x == x1 || x == x2 || y == y1 || y == y2) {
+                    col = pal.outline;
+                } else {
+                    int relY = y - y1;
+                    if (relY <= 2) col = pal.highlight;
+                    else if (relY == 3) col = pal.notch;
+                    else if (relY <= 6) col = pal.highlight;
+                    else if (relY <= 9) col = pal.darkBody;
+                    else if (relY <= 11) col = ((x + y) % 2 == 0) ? pal.highlight : pal.darkBody;
+                    else col = pal.bounce;
+
+                    // Vertical highlight stripe near outer rim
+                    if (isLeft && x == x1 + 1 && relY >= 1 && relY <= 13) {
+                        if (relY != 3) col = pal.highlight;
+                    } else if (!isLeft && x == x2 - 1 && relY >= 1 && relY <= 13) {
+                        if (relY != 3) col = pal.highlight;
+                    }
+                }
+                img.setRGB(x, y, col);
+            }
+        }
+    }
+
+    private static void drawFluidDroplet(BufferedImage img, int cx, int cy) {
+        int[][] droplet = {
+                {0, 0, 1, 0, 0},
+                {0, 1, 2, 1, 0},
+                {1, 3, 2, 2, 1},
+                {1, 3, 2, 4, 1},
+                {1, 2, 4, 4, 1},
+                {0, 1, 4, 1, 0},
+                {0, 0, 1, 0, 0}
+        };
+
+        int colOutline = 0xFF05162B;
+        int colWater   = 0xFF1E90FF;
+        int colWhite   = 0xFFE0F7FF;
+        int colShadow  = 0xFF0C4D94;
+
+        int startX = cx - 2;
+        int startY = cy - 3;
+
+        for (int dy = 0; dy < droplet.length; dy++) {
+            for (int dx = 0; dx < droplet[dy].length; dx++) {
+                int code = droplet[dy][dx];
+                if (code == 1) img.setRGB(startX + dx, startY + dy, colOutline);
+                else if (code == 2) img.setRGB(startX + dx, startY + dy, colWater);
+                else if (code == 3) img.setRGB(startX + dx, startY + dy, colWhite);
+                else if (code == 4) img.setRGB(startX + dx, startY + dy, colShadow);
+            }
+        }
+    }
+
+    private static void drawExtractorBadge(BufferedImage img, int cx, int cy, boolean isFluid) {
+        int colGold = 0xFFFFD700;
+        int colOutline = 0xFF4A3500;
+        int colBright = 0xFFFFF59D;
+
+        if (isFluid) {
+            for (int y = cy - 2; y <= cy + 2; y++) {
+                img.setRGB(cx - 4, y, colGold);
+                img.setRGB(cx - 5, y, colOutline);
+                img.setRGB(cx + 4, y, colGold);
+                img.setRGB(cx + 5, y, colOutline);
+            }
+        } else {
+            int[][] chevron = {
+                    {0, 1, 2, 1, 0},
+                    {1, 2, 3, 2, 1},
+                    {2, 3, 3, 3, 2},
+                    {1, 2, 3, 2, 1},
+                    {0, 1, 2, 1, 0}
+            };
+            int sx = cx - 2;
+            int sy = cy - 2;
+            for (int dy = 0; dy < 5; dy++) {
+                for (int dx = 0; dx < 5; dx++) {
+                    int c = chevron[dy][dx];
+                    if (c == 1) img.setRGB(sx + dx, sy + dy, colOutline);
+                    else if (c == 2) img.setRGB(sx + dx, sy + dy, colGold);
+                    else if (c == 3) img.setRGB(sx + dx, sy + dy, colBright);
+                }
+            }
+        }
+    }
+
+    private static void drawBufferBadge(BufferedImage img, int cx, int cy) {
+        int colGold = 0xFFFFC72C;
+        int colDark = 0xFF4A3500;
+        int colWhite = 0xFFFFF8D0;
+        int sx = cx - 2;
+        int sy = cy - 2;
+        for (int dy = 0; dy < 5; dy++) {
+            for (int dx = 0; dx < 5; dx++) {
+                if (dx == 0 || dx == 4 || dy == 0 || dy == 4) img.setRGB(sx + dx, sy + dy, colDark);
+                else if (dx == 1 && dy == 1) img.setRGB(sx + dx, sy + dy, colWhite);
+                else img.setRGB(sx + dx, sy + dy, colGold);
+            }
+        }
+    }
+
+    private static void drawVoidVortex(BufferedImage img, int cx, int cy) {
+        int colVoid = 0xFF05000C;
+        int colRing = 0xFFDA70D6;
+        int colPurple = 0xFF8A2BE2;
+        img.setRGB(cx, cy, colVoid);
+        img.setRGB(cx - 1, cy, colVoid);
+        img.setRGB(cx + 1, cy, colVoid);
+        img.setRGB(cx, cy - 1, colVoid);
+        img.setRGB(cx, cy + 1, colVoid);
+        img.setRGB(cx - 2, cy, colRing);
+        img.setRGB(cx + 2, cy, colRing);
+        img.setRGB(cx, cy - 2, colRing);
+        img.setRGB(cx + 2, cy, colRing);
+        img.setRGB(cx - 1, cy - 1, colPurple);
+        img.setRGB(cx + 1, cy + 1, colPurple);
+    }
+
+    private static void drawMergeBadge(BufferedImage img, int cx, int cy, boolean isFluid) {
+        int colOrange = 0xFFFF9900;
+        int colDark = 0xFF502500;
+        if (isFluid) {
+            for (int y = cy - 2; y <= cy + 2; y++) {
+                img.setRGB(cx - 4, y, colOrange);
+                img.setRGB(cx - 5, y, colDark);
+            }
+        } else {
+            img.setRGB(cx, cy - 2, colDark);
+            img.setRGB(cx, cy - 1, colOrange);
+            img.setRGB(cx, cy, colOrange);
+            img.setRGB(cx, cy + 1, colOrange);
+            img.setRGB(cx, cy + 2, colDark);
+            img.setRGB(cx - 1, cy, colOrange);
+            img.setRGB(cx + 1, cy, colOrange);
+            img.setRGB(cx - 2, cy, colDark);
+            img.setRGB(cx + 2, cy, colDark);
+        }
     }
 
     public static void generateJsonFiles() throws Exception {

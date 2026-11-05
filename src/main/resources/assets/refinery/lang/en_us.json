@@ -1,5 +1,6 @@
 {
   "itemGroup.refinery": "Industrial Refinery",
+  "itemGroup.refinery.facades": "Industrial Refinery: Facades",
   "block.refinery.refinery_controller": "Refinery Controller",
   "item.refinery.refinery_controller": "Refinery Controller",
   "block.refinery.reinforced_casing": "Reinforced Refinery Casing",

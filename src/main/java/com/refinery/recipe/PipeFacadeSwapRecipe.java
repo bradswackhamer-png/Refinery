@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.Block;
  */
 public class PipeFacadeSwapRecipe extends CustomRecipe {
 
+    public static final PipeFacadeSwapRecipe INSTANCE = new PipeFacadeSwapRecipe();
+
     public PipeFacadeSwapRecipe() {
         super();
     }
@@ -58,5 +60,15 @@ public class PipeFacadeSwapRecipe extends CustomRecipe {
     @Override
     public RecipeSerializer<? extends CustomRecipe> getSerializer() {
         return RefineryMod.PIPE_FACADE_SWAP_SERIALIZER.get();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PipeFacadeSwapRecipe;
+    }
+
+    @Override
+    public int hashCode() {
+        return PipeFacadeSwapRecipe.class.hashCode();
     }
 }

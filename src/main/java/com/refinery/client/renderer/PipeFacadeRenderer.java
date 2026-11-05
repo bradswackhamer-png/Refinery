@@ -65,6 +65,43 @@ public final class PipeFacadeRenderer {
         poseStack.popPose();
     }
 
+    public static void renderFacadeItem(
+            Block block,
+            boolean hollow,
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            int light,
+            int overlay
+    ) {
+        poseStack.pushPose();
+        collector.submitCustomGeometry(
+                poseStack,
+                RenderTypes.entitySolid(TextureAtlas.LOCATION_BLOCKS),
+                (pose, consumer) -> {
+                    Matrix4f m = pose.pose();
+                    TextureAtlasSprite sDown  = getSpriteForFace(block, Direction.DOWN);
+                    TextureAtlasSprite sUp    = getSpriteForFace(block, Direction.UP);
+                    TextureAtlasSprite sNorth = getSpriteForFace(block, Direction.NORTH);
+                    TextureAtlasSprite sSouth = getSpriteForFace(block, Direction.SOUTH);
+                    TextureAtlasSprite sWest  = getSpriteForFace(block, Direction.WEST);
+                    TextureAtlasSprite sEast  = getSpriteForFace(block, Direction.EAST);
+
+                    float z0 = (1.0f - THICK) / 2.0f;
+                    float z1 = (1.0f + THICK) / 2.0f;
+
+                    if (!hollow) {
+                        renderTexturedBox(m, consumer, EPS, EPS, z0, 1.0f - EPS, 1.0f - EPS, z1, sDown, sUp, sNorth, sSouth, sWest, sEast, light, overlay);
+                    } else {
+                        renderTexturedBox(m, consumer, EPS, EPS, z0, 1.0f - EPS, HOLE_MIN, z1, sDown, sUp, sNorth, sSouth, sWest, sEast, light, overlay);
+                        renderTexturedBox(m, consumer, EPS, HOLE_MAX, z0, 1.0f - EPS, 1.0f - EPS, z1, sDown, sUp, sNorth, sSouth, sWest, sEast, light, overlay);
+                        renderTexturedBox(m, consumer, EPS, HOLE_MIN, z0, HOLE_MIN, HOLE_MAX, z1, sDown, sUp, sNorth, sSouth, sWest, sEast, light, overlay);
+                        renderTexturedBox(m, consumer, HOLE_MAX, HOLE_MIN, z0, 1.0f - EPS, HOLE_MAX, z1, sDown, sUp, sNorth, sSouth, sWest, sEast, light, overlay);
+                    }
+                }
+        );
+        poseStack.popPose();
+    }
+
     private static TextureAtlasSprite getSpriteForFace(Block block, Direction face) {
         BlockState state = block.defaultBlockState();
         var modelSet = Minecraft.getInstance().getModelManager().getBlockStateModelSet();

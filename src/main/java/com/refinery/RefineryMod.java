@@ -71,13 +71,13 @@ public class RefineryMod {
 
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.refinery.recipe.PipeFacadeRecipe>> PIPE_FACADE_RECIPE_SERIALIZER =
             RECIPE_SERIALIZERS.register("pipe_facade_crafting", () -> new net.minecraft.world.item.crafting.RecipeSerializer<>(
-                    com.mojang.serialization.MapCodec.unit(com.refinery.recipe.PipeFacadeRecipe::new),
-                    net.minecraft.network.codec.StreamCodec.unit(new com.refinery.recipe.PipeFacadeRecipe())));
+                    com.mojang.serialization.MapCodec.unit(com.refinery.recipe.PipeFacadeRecipe.INSTANCE),
+                    net.minecraft.network.codec.StreamCodec.unit(com.refinery.recipe.PipeFacadeRecipe.INSTANCE)));
 
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.refinery.recipe.PipeFacadeSwapRecipe>> PIPE_FACADE_SWAP_SERIALIZER =
             RECIPE_SERIALIZERS.register("pipe_facade_swap", () -> new net.minecraft.world.item.crafting.RecipeSerializer<>(
-                    com.mojang.serialization.MapCodec.unit(com.refinery.recipe.PipeFacadeSwapRecipe::new),
-                    net.minecraft.network.codec.StreamCodec.unit(new com.refinery.recipe.PipeFacadeSwapRecipe())));
+                    com.mojang.serialization.MapCodec.unit(com.refinery.recipe.PipeFacadeSwapRecipe.INSTANCE),
+                    net.minecraft.network.codec.StreamCodec.unit(com.refinery.recipe.PipeFacadeSwapRecipe.INSTANCE)));
 
     public static final java.util.function.Supplier<AttachmentType<Boolean>> OIL_CHUNK_BURNT = ATTACHMENT_TYPES.register(
             "oil_chunk_burnt",
@@ -1200,7 +1200,14 @@ public class RefineryMod {
                         output.accept(RefineryFluids.MOLTEN_BRONZE_BUCKET.get());
                         output.accept(RefineryFluids.MOLTEN_GLASS_BUCKET.get());
                         output.accept(RefineryFluids.ETHANOL_BUCKET.get());
-                        // Dynamically populate Pipe Facades for all eligible full-cube blocks
+                    })
+                    .build());
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FACADES_TAB = CREATIVE_MODE_TABS.register("refinery_facades_tab",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.refinery.facades"))
+                    .icon(() -> com.refinery.block.pipe.PipeFacadeHelper.createFacadeStack(PIPE_FACADE.get(), CORRUGATED_STEEL_PANEL.get(), 1))
+                    .displayItems((params, output) -> {
                         for (Block eligible : com.refinery.block.pipe.PipeFacadeHelper.getAllEligibleBlocks()) {
                             output.accept(com.refinery.block.pipe.PipeFacadeHelper.createFacadeStack(PIPE_FACADE.get(), eligible, 1));
                             output.accept(com.refinery.block.pipe.PipeFacadeHelper.createFacadeStack(PIPE_FACADE_HOLE.get(), eligible, 1));

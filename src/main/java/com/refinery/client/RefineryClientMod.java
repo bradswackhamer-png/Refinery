@@ -20,6 +20,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import org.joml.Vector4f;
@@ -38,6 +39,7 @@ public class RefineryClientMod {
         modEventBus.addListener(this::registerRenderers);
         modEventBus.addListener(this::registerClientExtensions);
         modEventBus.addListener(this::registerFluidModels);
+        modEventBus.addListener(this::registerSpecialModelRenderers);
     }
 
     private void registerMenuScreens(RegisterMenuScreensEvent event) {
@@ -147,5 +149,12 @@ public class RefineryClientMod {
                 null,
                 null
         ), still, flowing);
+    }
+
+    private void registerSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
+        event.register(
+                Identifier.fromNamespaceAndPath(RefineryMod.MODID, "pipe_facade"),
+                PipeFacadeSpecialRenderer.Unbaked.MAP_CODEC
+        );
     }
 }
