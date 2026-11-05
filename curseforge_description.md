@@ -198,7 +198,7 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.10.jar`
+`refinery-1.11.11.jar`
 
 ### Display Name
 `Industrial Refinery 1.11.4 (NeoForge 26.3)`
@@ -217,6 +217,17 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.11
+
+### What's New in v1.11.11:
+- **Seamless Sloped-to-Flat Conveyor Transition & Collision Wall Elimination (`ConveyorBeltBlock`, `SlopedConveyorBeltBlockEntity`)**:
+  - Resolved an issue where items reaching the top crest of a sloped conveyor belt would hit a vertical collision ledge, bounce into the air, or get permanently stuck at the transition to a horizontal flat conveyor.
+  - Replaced restrictive directional voxel shapes (`ITEM_ENTRY_SHAPES`) in `ConveyorBeltBlock` and `RightAngleConveyorBeltBlock` with `Shapes.empty()` for `ItemEntity`, eliminating the 5-pixel vertical block collision wall at conveyor seams while preserving full solid collision for players and mobs.
+  - Implemented clean conveyor hand-off logic in `SlopedConveyorBeltBlockEntity`: once an item physically crosses the boundary into the next conveyor (`rawT >= 1.0`), ownership is relinquished immediately to prevent competing velocity and position conflicts.
+  - Synchronized carrying surface heights across all conveyor types to `0.3125` (`5.0px`), leveled off vertical velocity by `rawT >= 0.82`, and added an exit momentum boost to ensure silky-smooth glide onto flat conveyors.
+
+---
+
 # Industrial Refinery v1.11.10
 
 ### What's New in v1.11.10:

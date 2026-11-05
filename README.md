@@ -54,6 +54,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.11 (Seamless Sloped-to-Flat Conveyor Transition & Collision Fix)](#version-11111-seamless-sloped-to-flat-conveyor-transition--collision-fix)
    - [Version 1.11.10 (Sloped Conveyor Belt Ground Support Legs & Foot Pads)](#version-11110-sloped-conveyor-belt-ground-support-legs--foot-pads)
    - [Version 1.11.9 (Refinery Tower South Takeoff Pipes Realignment, Arc Melter Hazard Stripe Removal)](#version-1119-refinery-tower-south-takeoff-pipes-realignment-arc-melter-hazard-stripe-removal)
    - [Version 1.11.8 (Refinery Output Fluid Auto-Push, Stage 1 South Takeoff Pipe, Anti-Flicker Fixes)](#version-1118-refinery-output-fluid-auto-push-stage-1-south-takeoff-pipe-anti-flicker-fixes)
@@ -1760,6 +1761,15 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.11 (Seamless Sloped-to-Flat Conveyor Transition & Collision Fix)
+- **Seamless Sloped-to-Flat Conveyor Transition & Collision Wall Elimination (`ConveyorBeltBlock`, `SlopedConveyorBeltBlockEntity`)**:
+  - Resolved an issue where items reaching the top crest of a sloped conveyor belt would hit a vertical collision ledge, bounce into the air, or get permanently stuck at the transition to a horizontal flat conveyor.
+  - Replaced restrictive directional voxel shapes (`ITEM_ENTRY_SHAPES`) in `ConveyorBeltBlock` and `RightAngleConveyorBeltBlock` with `Shapes.empty()` for `ItemEntity`, eliminating the 5-pixel vertical block collision wall at conveyor seams while preserving full solid collision for players and mobs.
+  - Implemented clean conveyor hand-off logic in `SlopedConveyorBeltBlockEntity`: once an item physically crosses the boundary into the next conveyor (`rawT >= 1.0`), ownership is relinquished immediately to prevent competing velocity and position conflicts.
+  - Synchronized carrying surface heights across all conveyor types to `0.3125` (`5.0px`), leveled off vertical velocity by `rawT >= 0.82`, and added an exit momentum boost to ensure silky-smooth glide onto flat conveyors.
 
 ---
 

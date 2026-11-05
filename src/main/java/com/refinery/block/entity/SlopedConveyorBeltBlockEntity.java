@@ -67,6 +67,18 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
                 case EAST  -> relX;
                 default    -> 0.5;
             };
+
+            // If item has physically crossed into the next conveyor block, hand off ownership
+            // completely so the two conveyor systems do not fight over the item's velocity and position.
+            BlockPos targetPos = slope == SlopedConveyorBeltBlock.SlopeDirection.UP
+                    ? pos.relative(facing).above()
+                    : pos.relative(facing).below();
+            boolean nextIsConveyor = ConveyorBeltBlock.isAnyConveyorBlock(level.getBlockState(targetPos))
+                    || ConveyorBeltBlock.isAnyConveyorBlock(level.getBlockState(pos.relative(facing)));
+            if (nextIsConveyor && rawT >= 1.0) {
+                continue;
+            }
+
             double t = Math.max(0.0, Math.min(1.0, rawT));
 
             // Surface height:
@@ -78,9 +90,9 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
                     : pos.getY() + 1.3125 - climbProgress * 1.0;
 
             // Direct vertical alignment onto the inclined belt surface (active across the entire slope and hand-off seam)
-            if (rawT >= 0.0 && rawT <= 1.15) {
+            if (rawT >= 0.0 && rawT <= 1.05) {
                 double diffY = targetY - itemEntity.getY();
-                if (Math.abs(diffY) > 0.02) {
+                if (Math.abs(diffY) > 0.01) {
                     itemEntity.setPos(itemEntity.getX(), targetY, itemEntity.getZ());
                 }
             }
@@ -99,13 +111,13 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
             // Level off vertical velocity near terminals so items glide horizontally onto flat conveyors
             double verticalSpeed;
             if (slope == SlopedConveyorBeltBlock.SlopeDirection.UP) {
-                verticalSpeed = (rawT >= 0.85) ? 0.0 : beltSpeed;
+                verticalSpeed = (rawT >= 0.82) ? 0.0 : beltSpeed;
             } else {
-                verticalSpeed = (rawT >= 0.85) ? 0.0 : -beltSpeed;
+                verticalSpeed = (rawT >= 0.82) ? 0.0 : -beltSpeed;
             }
 
             // Provide forward momentum boost near terminal exit to smoothly transition into adjacent flat conveyor
-            double forwardSpeed = (rawT >= 0.82) ? beltSpeed * 1.4 : beltSpeed;
+            double forwardSpeed = (rawT >= 0.80) ? beltSpeed * 1.5 : beltSpeed;
             double curStepX = facing.getStepX() * forwardSpeed;
             double curStepZ = facing.getStepZ() * forwardSpeed;
 

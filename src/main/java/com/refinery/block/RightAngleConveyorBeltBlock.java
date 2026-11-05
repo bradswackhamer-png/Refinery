@@ -98,9 +98,9 @@ public class RightAngleConveyorBeltBlock extends Block implements EntityBlock {
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        // Items must pass through smoothly without colliding with block walls or step ledges
         if (context instanceof EntityCollisionContext ecc && ecc.getEntity() instanceof ItemEntity) {
-            Direction facing = state.getValue(FACING);
-            return ITEM_ENTRY_SHAPES.getOrDefault(facing, ITEM_SHAPE);
+            return Shapes.empty();
         }
         return SHAPE;
     }

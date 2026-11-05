@@ -83,10 +83,15 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
             Vec3 currentVel = itemEntity.getDeltaMovement();
 
             // Smoothly lift and lock item onto the belt surface if arriving from an incline/slope
-            double beltSurfaceY = pos.getY() + 0.32;
-            if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() + 0.05) {
+            double beltSurfaceY = pos.getY() + 0.3125;
+            if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() - 0.15) {
                 double diff = beltSurfaceY - itemEntity.getY();
                 if (diff > 0.001) {
+                    itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
+                }
+            } else if (itemEntity.getY() > beltSurfaceY && itemEntity.getY() <= pos.getY() + 0.45) {
+                double diff = itemEntity.getY() - beltSurfaceY;
+                if (diff > 0.001 && diff < 0.15) {
                     itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
                 }
             }
