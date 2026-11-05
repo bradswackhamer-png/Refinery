@@ -3,6 +3,7 @@ package com.refinery.client.renderer;
 import com.refinery.block.pipe.IndustrialPipeMaterial;
 import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.block.pipe.PipeConnectionType;
+import com.refinery.block.pipe.PipeFacadeHelper;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.BlockPos;
@@ -24,6 +25,7 @@ public class IndustrialPipeRenderState extends BlockEntityRenderState {
     public IndustrialPipeMaterial material = IndustrialPipeMaterial.STEEL;
     public Direction mergeOutput = Direction.NORTH;
     public final Map<Direction, PipeConnectionType> connections = new EnumMap<>(Direction.class);
+    public final Map<Direction, PipeFacadeHelper.FacadeData> facades = new EnumMap<>(Direction.class);
 
     public Fluid storedFluid = Fluids.EMPTY;
     public float fluidFillRatio = 0.0f;

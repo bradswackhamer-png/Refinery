@@ -13,7 +13,8 @@ public enum IndustrialPipeMaterial implements StringRepresentable {
     BRASS("brass", 0xdcb43c, 1.5f, 350, 16, 350),
     CAST_IRON("cast_iron", 0x46484e, 0.8f, 250, 4, 150),
     VOID("void", 0x202026, 2.0f, 500, 64, 2000),
-    QUARTZ("quartz", 0xf0ede9, 1.75f, 400, 8, 800);
+    QUARTZ("quartz", 0xf0ede9, 1.75f, 400, 8, 800),
+    STRUCTURE("structure", 0x7a7a7a, 1.0f, 0, 0, 0);
 
     private final String name;
     private final int colorRgb;

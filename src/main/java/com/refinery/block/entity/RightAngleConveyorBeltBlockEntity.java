@@ -37,6 +37,10 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
                 ? state.getValue(RightAngleConveyorBeltBlock.FACING)
                 : Direction.NORTH;
         Direction exitDir = RightAngleConveyorBeltBlock.getExitDirection(state);
+        BlockPos exitPos = pos.relative(exitDir);
+        BlockState exitState = level.getBlockState(exitPos);
+        boolean exitIsConveyor = ConveyorBeltBlock.isAnyConveyorBlock(exitState) ||
+                                 ConveyorBeltBlock.isAnyConveyorBlock(level.getBlockState(exitPos.below()));
 
         double beltSpeed = 0.05;
 
@@ -52,20 +56,6 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
         double centerZ = pos.getZ() + 0.5;
 
         for (ItemEntity itemEntity : items) {
-            if (!level.isClientSide() && itemEntity.getAge() > 4000) {
-                itemEntity.setUnlimitedLifetime();
-            }
-
-            // Smoothly lift and lock item onto the belt surface if arriving from an incline/slope
-            double beltSurfaceY = pos.getY() + 0.3125;
-            if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() + 0.05) {
-                double diff = beltSurfaceY - itemEntity.getY();
-                if (diff > 0.01) {
-                    itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
-                }
-            }
-            itemEntity.setOnGround(true);
-
             // Determine if the item has reached the turn center
             boolean pastCenter = switch (facing) {
                 case NORTH -> itemEntity.getZ() <= centerZ;
@@ -74,6 +64,33 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
                 case EAST  -> itemEntity.getX() >= centerX;
                 default    -> false;
             };
+
+            // If exiting toward an adjacent conveyor, release control once across the boundary
+            if (pastCenter && exitIsConveyor) {
+                boolean crossedBoundary = switch (exitDir) {
+                    case NORTH -> itemEntity.getZ() <= pos.getZ();
+                    case SOUTH -> itemEntity.getZ() >= pos.getZ() + 1.0;
+                    case WEST  -> itemEntity.getX() <= pos.getX();
+                    case EAST  -> itemEntity.getX() >= pos.getX() + 1.0;
+                    default    -> false;
+                };
+                if (crossedBoundary) {
+                    continue;
+                }
+            }
+            if (!level.isClientSide() && itemEntity.getAge() > 4000) {
+                itemEntity.setUnlimitedLifetime();
+            }
+
+            // Smoothly lift and lock item onto the belt surface if arriving from an incline/slope
+            double beltSurfaceY = pos.getY() + 0.32;
+            if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() + 0.05) {
+                double diff = beltSurfaceY - itemEntity.getY();
+                if (diff > 0.001) {
+                    itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
+                }
+            }
+            itemEntity.setOnGround(true);
 
             double moveX;
             double moveZ;
@@ -89,8 +106,16 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
                 }
             } else {
                 // Phase 2: Outgoing travel along `exitDir`, centering along incoming axis
-                moveX = exitDir.getStepX() * beltSpeed;
-                moveZ = exitDir.getStepZ() * beltSpeed;
+                boolean nearExit = switch (exitDir) {
+                    case NORTH -> itemEntity.getZ() <= pos.getZ() + 0.18;
+                    case SOUTH -> itemEntity.getZ() >= pos.getZ() + 0.82;
+                    case WEST  -> itemEntity.getX() <= pos.getX() + 0.18;
+                    case EAST  -> itemEntity.getX() >= pos.getX() + 0.82;
+                    default -> false;
+                };
+                double exitSpeed = (nearExit && exitIsConveyor) ? beltSpeed * 1.3 : beltSpeed;
+                moveX = exitDir.getStepX() * exitSpeed;
+                moveZ = exitDir.getStepZ() * exitSpeed;
                 if (exitDir.getAxis() == Direction.Axis.Z) {
                     moveX += (centerX - itemEntity.getX()) * 0.15;
                 } else {
@@ -125,13 +150,11 @@ public class RightAngleConveyorBeltBlockEntity extends BlockEntity implements Co
 
         BlockPos exitPos = pos.relative(exitDir);
         BlockState exitState = level.getBlockState(exitPos);
-        if (exitState.getBlock() instanceof ConveyorBeltBlock
-                || exitState.getBlock() instanceof RightAngleConveyorBeltBlock
-                || exitState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock) {
+        if (ConveyorBeltBlock.isAnyConveyorBlock(exitState)) {
             return;
         }
         BlockState exitBelowState = level.getBlockState(exitPos.below());
-        if (exitBelowState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock) {
+        if (ConveyorBeltBlock.isAnyConveyorBlock(exitBelowState)) {
             return;
         }
 

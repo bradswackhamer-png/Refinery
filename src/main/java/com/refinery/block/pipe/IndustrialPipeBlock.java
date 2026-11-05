@@ -39,6 +39,7 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
     // VoxelShapes centered around [8, 8, 8] with radius 3.2 units (4.8 to 11.2)
     private static final VoxelShape CORE_SHAPE = Block.box(4.8, 4.8, 4.8, 11.2, 11.2, 11.2);
     private static final Map<Direction, VoxelShape> ARM_SHAPES = new EnumMap<>(Direction.class);
+    public static final Map<Direction, VoxelShape> FACADE_SHAPES = new EnumMap<>(Direction.class);
 
     static {
         ARM_SHAPES.put(Direction.DOWN,  Block.box(4.8, 0.0,  4.8, 11.2, 4.8,  11.2));
@@ -47,6 +48,13 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
         ARM_SHAPES.put(Direction.SOUTH, Block.box(4.8, 4.8,  11.2, 11.2, 11.2, 16.0));
         ARM_SHAPES.put(Direction.WEST,  Block.box(0.0, 4.8,  4.8, 4.8,  11.2, 11.2));
         ARM_SHAPES.put(Direction.EAST,  Block.box(11.2, 4.8, 4.8, 16.0, 11.2, 11.2));
+
+        FACADE_SHAPES.put(Direction.DOWN,  Block.box(0.0, 0.0,  0.0, 16.0, 2.0,  16.0));
+        FACADE_SHAPES.put(Direction.UP,    Block.box(0.0, 14.0, 0.0, 16.0, 16.0, 16.0));
+        FACADE_SHAPES.put(Direction.NORTH, Block.box(0.0, 0.0,  0.0, 16.0, 16.0, 2.0));
+        FACADE_SHAPES.put(Direction.SOUTH, Block.box(0.0, 0.0,  14.0, 16.0, 16.0, 16.0));
+        FACADE_SHAPES.put(Direction.WEST,  Block.box(0.0, 0.0,  0.0, 2.0,  16.0, 16.0));
+        FACADE_SHAPES.put(Direction.EAST,  Block.box(14.0, 0.0, 0.0, 16.0, 16.0, 16.0));
     }
 
     public IndustrialPipeBlock(Properties properties) {
@@ -89,6 +97,9 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
             for (Direction dir : Direction.values()) {
                 if (pipeBe.getConnection(dir).isConnected()) {
                     shape = Shapes.or(shape, ARM_SHAPES.get(dir));
+                }
+                if (pipeBe.getFacade(dir) != null) {
+                    shape = Shapes.or(shape, FACADE_SHAPES.get(dir));
                 }
             }
             return shape;
@@ -148,10 +159,51 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
         if (stack.getItem() instanceof com.refinery.item.PipeGateItem || stack.getItem() instanceof com.refinery.item.PipeWireItem) {
             return InteractionResult.PASS;
         }
+        if (stack.getItem() instanceof com.refinery.item.PipeFacadeItem facadeItem) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof IndustrialPipeBlockEntity pipeBe) {
+                Direction targetSide = PipeFacadeHelper.resolveTargetFace(pos, hitResult);
+                Block facadeBlock = PipeFacadeHelper.getFacadeBlock(stack);
+                PipeFacadeHelper.FacadeData newData = new PipeFacadeHelper.FacadeData(facadeBlock, facadeItem.isHollow());
+                PipeFacadeHelper.FacadeData existing = pipeBe.getFacade(targetSide);
+                if (existing != null && existing.block() == newData.block() && existing.hollow() == newData.hollow()) {
+                    return InteractionResult.PASS;
+                }
+                if (!level.isClientSide()) {
+                    if (existing != null) {
+                        ItemStack oldStack = existing.toItemStack(1);
+                        if (!player.getInventory().add(oldStack)) {
+                            net.minecraft.world.Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, oldStack);
+                        }
+                    }
+                    pipeBe.setFacade(targetSide, newData);
+                    SoundType soundType = facadeBlock.defaultBlockState().getSoundType(level, pos, player);
+                    level.playSound(null, pos, soundType.getPlaceSound(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
         if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
-            if (!level.isClientSide()) {
-                BlockEntity be = level.getBlockEntity(pos);
-                if (be instanceof IndustrialPipeBlockEntity pipeBe) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof IndustrialPipeBlockEntity pipeBe) {
+                Direction targetSide = PipeFacadeHelper.resolveTargetFace(pos, hitResult);
+                PipeFacadeHelper.FacadeData existingFacade = pipeBe.getFacade(targetSide);
+                if (existingFacade != null && player.isShiftKeyDown()) {
+                    if (!level.isClientSide()) {
+                        pipeBe.setFacade(targetSide, null);
+                        ItemStack drop = existingFacade.toItemStack(1);
+                        if (!player.getInventory().add(drop)) {
+                            net.minecraft.world.Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                        }
+                        SoundType soundType = existingFacade.block().defaultBlockState().getSoundType(level, pos, player);
+                        level.playSound(null, pos, soundType.getBreakSound(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    }
+                    return InteractionResult.SUCCESS;
+                }
+                if (!level.isClientSide()) {
                     Direction clickedSide = hitResult.getDirection();
                     if (this.material == IndustrialPipeMaterial.QUARTZ && !player.isShiftKeyDown()) {
                         pipeBe.cycleOrSetMergeOutput(clickedSide, player);
@@ -174,7 +226,7 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        if (this.material == IndustrialPipeMaterial.DIAMOND && !player.isShiftKeyDown()) {
+        if ((this.material == IndustrialPipeMaterial.DIAMOND || (this.material == IndustrialPipeMaterial.WOOD && this.pipeType.handlesItems())) && !player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof IndustrialPipeBlockEntity pipeBe) {
@@ -189,6 +241,25 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (player.isShiftKeyDown()) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof IndustrialPipeBlockEntity pipeBe) {
+                Direction targetSide = PipeFacadeHelper.resolveTargetFace(pos, hitResult);
+                PipeFacadeHelper.FacadeData existingFacade = pipeBe.getFacade(targetSide);
+                if (existingFacade != null) {
+                    if (!level.isClientSide()) {
+                        pipeBe.setFacade(targetSide, null);
+                        ItemStack drop = existingFacade.toItemStack(1);
+                        if (!player.getInventory().add(drop)) {
+                            net.minecraft.world.Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                        }
+                        SoundType soundType = existingFacade.block().defaultBlockState().getSoundType(level, pos, player);
+                        level.playSound(null, pos, soundType.getBreakSound(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    }
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        }
         if (this.material == IndustrialPipeMaterial.QUARTZ) {
             if (!level.isClientSide()) {
                 BlockEntity be = level.getBlockEntity(pos);
@@ -200,7 +271,7 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        if (this.material == IndustrialPipeMaterial.DIAMOND && !player.isShiftKeyDown()) {
+        if ((this.material == IndustrialPipeMaterial.DIAMOND || (this.material == IndustrialPipeMaterial.WOOD && this.pipeType.handlesItems())) && !player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof IndustrialPipeBlockEntity pipeBe) {

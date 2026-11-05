@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "refinery:red_corrugated_steel_panel"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "refinery:blocks/red_corrugated_steel_panel"
+}

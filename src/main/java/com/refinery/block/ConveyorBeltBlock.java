@@ -4,7 +4,9 @@ import com.refinery.RefineryMod;
 import com.refinery.block.entity.ConveyorBeltBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -52,22 +54,23 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
 
     // 5px low-profile industrial conveyor bounding box (matches reference extruded bed)
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
-    // 4px collision box for items
-    protected static final VoxelShape ITEM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
+    // 5px collision box for items, matching standard 5px conveyor surface height across mods (such as Ole Saw Mill)
+    protected static final VoxelShape ITEM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
 
-    // Directional item collision shapes with 3px recessed entry edge:
-    // Items entering from sloped or flat conveyors behind never collide with a vertical wall ledge
+    // Directional item collision shapes with 3px recessed entry edge at 5px height:
+    // Items entering from sloped or flat conveyors behind never collide with a vertical wall ledge,
+    // while the 5px height ensures flush level handoff to adjacent conveyors.
     private static final Map<Direction, VoxelShape> ITEM_ENTRY_SHAPES = new EnumMap<>(Direction.class);
 
     static {
         // NORTH: moves towards -Z (z: 0..13). South entry (z: 13..16) is open/recessed
-        ITEM_ENTRY_SHAPES.put(Direction.NORTH, Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 13.0));
+        ITEM_ENTRY_SHAPES.put(Direction.NORTH, Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 13.0));
         // SOUTH: moves towards +Z (z: 3..16). North entry (z: 0..3) is open/recessed
-        ITEM_ENTRY_SHAPES.put(Direction.SOUTH, Block.box(0.0, 0.0, 3.0, 16.0, 4.0, 16.0));
+        ITEM_ENTRY_SHAPES.put(Direction.SOUTH, Block.box(0.0, 0.0, 3.0, 16.0, 5.0, 16.0));
         // WEST: moves towards -X (x: 0..13). East entry (x: 13..16) is open/recessed
-        ITEM_ENTRY_SHAPES.put(Direction.WEST, Block.box(0.0, 0.0, 0.0, 13.0, 4.0, 16.0));
+        ITEM_ENTRY_SHAPES.put(Direction.WEST, Block.box(0.0, 0.0, 0.0, 13.0, 5.0, 16.0));
         // EAST: moves towards +X (x: 3..16). West entry (x: 0..3) is open/recessed
-        ITEM_ENTRY_SHAPES.put(Direction.EAST, Block.box(3.0, 0.0, 0.0, 16.0, 4.0, 16.0));
+        ITEM_ENTRY_SHAPES.put(Direction.EAST, Block.box(3.0, 0.0, 0.0, 16.0, 5.0, 16.0));
     }
 
     public ConveyorBeltBlock(Properties properties) {
@@ -211,6 +214,17 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         return state.setValue(CONNECTED_FRONT, front).setValue(CONNECTED_BACK, back);
     }
 
+    public static boolean isAnyConveyorBlock(@Nullable BlockState state) {
+        if (state == null || state.isAir()) return false;
+        if (state.getBlock() instanceof ConveyorBeltBlock
+                || state.getBlock() instanceof SlopedConveyorBeltBlock
+                || state.getBlock() instanceof RightAngleConveyorBeltBlock) {
+            return true;
+        }
+        Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        return id != null && id.getPath().contains("conveyor");
+    }
+
     private static boolean isBeltMatchingFront(LevelReader level, BlockPos pos, Direction facing) {
         if (level == null) return false;
         BlockPos frontPos = pos.relative(facing);
@@ -228,6 +242,15 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         BlockState neighborBelow = level.getBlockState(frontPos.below());
         if (neighborBelow.getBlock() instanceof SlopedConveyorBeltBlock && neighborBelow.getValue(SlopedConveyorBeltBlock.FACING) == facing
                 && neighborBelow.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.DOWN) {
+            return true;
+        }
+        if (isAnyConveyorBlock(neighbor)) {
+            if (neighbor.hasProperty(FACING)) {
+                return neighbor.getValue(FACING) == facing;
+            }
+            return true;
+        }
+        if (isAnyConveyorBlock(neighborBelow)) {
             return true;
         }
         return false;
@@ -250,6 +273,15 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         BlockState neighborBelow = level.getBlockState(backPos.below());
         if (neighborBelow.getBlock() instanceof SlopedConveyorBeltBlock && neighborBelow.getValue(SlopedConveyorBeltBlock.FACING) == facing
                 && neighborBelow.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.UP) {
+            return true;
+        }
+        if (isAnyConveyorBlock(neighbor)) {
+            if (neighbor.hasProperty(FACING)) {
+                return neighbor.getValue(FACING) == facing;
+            }
+            return true;
+        }
+        if (isAnyConveyorBlock(neighborBelow)) {
             return true;
         }
         return false;

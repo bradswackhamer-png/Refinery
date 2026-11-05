@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CGC"
+  ],
+  "key": {
+    "C": "minecraft:cobblestone",
+    "G": "minecraft:gravel"
+  },
+  "result": {
+    "id": "refinery:structure_pipe",
+    "count": 8
+  }
+}

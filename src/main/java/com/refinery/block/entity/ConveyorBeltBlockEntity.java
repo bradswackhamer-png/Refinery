@@ -45,6 +45,11 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
         double dx = stepX * beltSpeed;
         double dz = stepZ * beltSpeed;
 
+        BlockPos frontPos = pos.relative(facing);
+        BlockState frontState = level.getBlockState(frontPos);
+        boolean frontIsConveyor = ConveyorBeltBlock.isAnyConveyorBlock(frontState) ||
+                                  ConveyorBeltBlock.isAnyConveyorBlock(level.getBlockState(frontPos.below()));
+
         // Query items on the belt surface (expanded bounds seamlessly capture items arriving from slopes or adjacent belts)
         AABB beltBounds = new AABB(
                 pos.getX() - 0.15, pos.getY() + 0.05, pos.getZ() - 0.15,
@@ -54,6 +59,22 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, beltBounds);
 
         for (ItemEntity itemEntity : items) {
+            // If the front block is an adjacent conveyor belt (e.g. another mod's conveyor like Ole Saw Mill),
+            // once the item has physically crossed the boundary into that conveyor block, hand off ownership
+            // completely so the two conveyor systems do not fight over the item's velocity and position.
+            if (frontIsConveyor) {
+                boolean crossedBoundary = switch (facing) {
+                    case NORTH -> itemEntity.getZ() <= pos.getZ();
+                    case SOUTH -> itemEntity.getZ() >= pos.getZ() + 1.0;
+                    case WEST  -> itemEntity.getX() <= pos.getX();
+                    case EAST  -> itemEntity.getX() >= pos.getX() + 1.0;
+                    default    -> false;
+                };
+                if (crossedBoundary) {
+                    continue;
+                }
+            }
+
             // Keep traveling items from despawning during automated factory routing
             if (!level.isClientSide() && itemEntity.getAge() > 4000) {
                 itemEntity.setUnlimitedLifetime();
@@ -62,10 +83,10 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
             Vec3 currentVel = itemEntity.getDeltaMovement();
 
             // Smoothly lift and lock item onto the belt surface if arriving from an incline/slope
-            double beltSurfaceY = pos.getY() + 0.3125;
+            double beltSurfaceY = pos.getY() + 0.32;
             if (itemEntity.getY() < beltSurfaceY && itemEntity.getY() >= pos.getY() + 0.05) {
                 double diff = beltSurfaceY - itemEntity.getY();
-                if (diff > 0.01) {
+                if (diff > 0.001) {
                     itemEntity.setPos(itemEntity.getX(), beltSurfaceY, itemEntity.getZ());
                 }
             }
@@ -83,11 +104,26 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
                 centerVelZ = (targetZ - itemEntity.getZ()) * 0.15;
             }
 
+            boolean isNearFront = switch (facing) {
+                case NORTH -> itemEntity.getZ() <= pos.getZ() + 0.18;
+                case SOUTH -> itemEntity.getZ() >= pos.getZ() + 0.82;
+                case WEST  -> itemEntity.getX() <= pos.getX() + 0.18;
+                case EAST  -> itemEntity.getX() >= pos.getX() + 0.82;
+                default    -> false;
+            };
+
+            double forwardDx = dx;
+            double forwardDz = dz;
+            if (isNearFront && frontIsConveyor) {
+                forwardDx = stepX * (beltSpeed * 1.3);
+                forwardDz = stepZ * (beltSpeed * 1.3);
+            }
+
             // Smoothly propel item forward along belt and center it (zero vertical gravity drag)
             itemEntity.setDeltaMovement(
-                    (dx != 0 ? dx : currentVel.x * 0.5) + centerVelX,
+                    (forwardDx != 0 ? forwardDx : currentVel.x * 0.5) + centerVelX,
                     0.0,
-                    (dz != 0 ? dz : currentVel.z * 0.5) + centerVelZ
+                    (forwardDz != 0 ? forwardDz : currentVel.z * 0.5) + centerVelZ
             );
 
             // Server-side inventory injection when reaching the front terminal
@@ -114,13 +150,11 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
         BlockPos frontPos = pos.relative(facing);
         BlockState frontState = level.getBlockState(frontPos);
         // Do not insert into another conveyor belt (allow smooth physical handoff)
-        if (frontState.getBlock() instanceof ConveyorBeltBlock
-                || frontState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock
-                || frontState.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock) {
+        if (ConveyorBeltBlock.isAnyConveyorBlock(frontState)) {
             return;
         }
         BlockState frontBelowState = level.getBlockState(frontPos.below());
-        if (frontBelowState.getBlock() instanceof com.refinery.block.SlopedConveyorBeltBlock) {
+        if (ConveyorBeltBlock.isAnyConveyorBlock(frontBelowState)) {
             return;
         }
 

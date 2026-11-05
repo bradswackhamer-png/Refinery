@@ -30,11 +30,11 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
 
-        // 8 Input slots (4x2 grid on the left: X: 26, 44, 62, 80; Y: 20, 38)
+        // 8 Input slots (4x2 grid on the left plate: X: 27, 45, 63, 81; Y: 19, 39)
         // Row 1: slots 0..3
         for (int i = 0; i < 4; i++) {
             int slotIdx = i;
-            this.addSlot(new Slot(container, slotIdx, 26 + i * 18, 20) {
+            this.addSlot(new Slot(container, slotIdx, 27 + i * 18, 19) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return true;
@@ -44,7 +44,7 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
         // Row 2: slots 4..7
         for (int i = 0; i < 4; i++) {
             int slotIdx = 4 + i;
-            this.addSlot(new Slot(container, slotIdx, 26 + i * 18, 38) {
+            this.addSlot(new Slot(container, slotIdx, 27 + i * 18, 39) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return true;
@@ -52,11 +52,11 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
             });
         }
 
-        // 8 Output slots (4x2 grid on the right: X: 100, 118, 136, 154; Y: 20, 38)
+        // 8 Output slots (4x2 grid on the right plate: X: 101, 119, 137, 155; Y: 19, 39)
         // Row 1: slots 8..11
         for (int i = 0; i < 4; i++) {
             int slotIdx = 8 + i;
-            this.addSlot(new Slot(container, slotIdx, 100 + i * 18, 20) {
+            this.addSlot(new Slot(container, slotIdx, 101 + i * 18, 19) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return false;
@@ -66,7 +66,7 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
         // Row 2: slots 12..15
         for (int i = 0; i < 4; i++) {
             int slotIdx = 12 + i;
-            this.addSlot(new Slot(container, slotIdx, 100 + i * 18, 38) {
+            this.addSlot(new Slot(container, slotIdx, 101 + i * 18, 39) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return false;
@@ -74,8 +74,8 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
             });
         }
 
-        // 1 Fuel slot (slot 16, centered at bottom of smelter area: X: 89, Y: 60)
-        this.addSlot(new Slot(container, 16, 89, 60) {
+        // 1 Fuel slot (slot 16, centered in combustion console: X: 89, Y: 62)
+        this.addSlot(new Slot(container, 16, 89, 62) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return MultiSmelterControllerBlockEntity.getFuelBurnDuration(stack) > 0;

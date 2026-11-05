@@ -6,6 +6,7 @@ import com.refinery.block.StorageTankFillValveBlock;
 import com.refinery.block.pipe.IndustrialPipeMaterial;
 import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.block.pipe.PipeConnectionType;
+import com.refinery.block.pipe.PipeFacadeHelper;
 import com.refinery.fluid.GenericFluidTank;
 import com.refinery.menu.DiamondPipeMenu;
 import net.minecraft.core.BlockPos;
@@ -19,6 +20,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
@@ -58,6 +60,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
 
     private final Map<Direction, PipeConnectionType> connections = new EnumMap<>(Direction.class);
     private final Map<Direction, Boolean> manualDisconnections = new EnumMap<>(Direction.class);
+    private final Map<Direction, PipeFacadeHelper.FacadeData> facades = new EnumMap<>(Direction.class);
 
     // Fluid Tank
     private final GenericFluidTank fluidTank;
@@ -85,6 +88,15 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
 
     // Diamond Pipe Sorting Filters (6 directions x 9 slots = 54 slots)
     private final SimpleContainer diamondFilters = new SimpleContainer(54) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            IndustrialPipeBlockEntity.this.setChanged();
+        }
+    };
+
+    // Wood Extraction Pipe Item Filters (9 slots)
+    private final SimpleContainer woodFilters = new SimpleContainer(9) {
         @Override
         public void setChanged() {
             super.setChanged();
@@ -146,6 +158,25 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         return diamondFilters;
     }
 
+    public SimpleContainer getWoodFilters() {
+        return woodFilters;
+    }
+
+    public boolean matchesWoodFilter(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        boolean hasAnyFilter = false;
+        for (int i = 0; i < woodFilters.getContainerSize(); i++) {
+            ItemStack filter = woodFilters.getItem(i);
+            if (!filter.isEmpty()) {
+                hasAnyFilter = true;
+                if (ItemStack.isSameItemSameComponents(filter, stack)) {
+                    return true;
+                }
+            }
+        }
+        return !hasAnyFilter;
+    }
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(getBlockState().getBlock().getDescriptionId());
@@ -154,6 +185,9 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+        if (this.material == IndustrialPipeMaterial.WOOD) {
+            return new com.refinery.menu.WoodPipeMenu(containerId, playerInventory, this.woodFilters);
+        }
         return new DiamondPipeMenu(containerId, playerInventory, this.diamondFilters);
     }
 
@@ -239,6 +273,38 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
 
     public List<TravelingItem> getTravelingItems() {
         return travelingItems;
+    }
+
+    public Map<Direction, PipeFacadeHelper.FacadeData> getFacades() {
+        return facades;
+    }
+
+    @Nullable
+    public PipeFacadeHelper.FacadeData getFacade(Direction dir) {
+        return facades.get(dir);
+    }
+
+    public void setFacade(Direction dir, @Nullable PipeFacadeHelper.FacadeData data) {
+        if (data == null) {
+            facades.remove(dir);
+        } else {
+            facades.put(dir, data);
+        }
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public void dropAllFacades() {
+        if (level == null || level.isClientSide() || facades.isEmpty()) return;
+        for (PipeFacadeHelper.FacadeData data : facades.values()) {
+            if (data != null) {
+                Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, data.toItemStack(1));
+            }
+        }
+        facades.clear();
+        setChanged();
     }
 
     public void toggleSideConnection(Direction dir) {
@@ -346,14 +412,15 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                 // Pipe to Pipe connection
                 boolean typesCompatible = (this.pipeType.handlesFluid() && otherPipe.getPipeType().handlesFluid()) ||
                                           (this.pipeType.handlesItems() && otherPipe.getPipeType().handlesItems()) ||
-                                          this.pipeType == IndustrialPipeType.VOID || otherPipe.getPipeType() == IndustrialPipeType.VOID;
+                                          this.pipeType == IndustrialPipeType.VOID || otherPipe.getPipeType() == IndustrialPipeType.VOID ||
+                                          this.pipeType == IndustrialPipeType.STRUCTURE || otherPipe.getPipeType() == IndustrialPipeType.STRUCTURE;
                 if (typesCompatible) {
                     detected = PipeConnectionType.PIPE;
                 }
             } else if (targetBe instanceof BufferPipeBlockEntity) {
                 if (isExtractor()) {
                     detected = PipeConnectionType.MACHINE;
-                } else if (this.pipeType.handlesItems() || this.pipeType == IndustrialPipeType.VOID) {
+                } else if (this.pipeType.handlesItems() || this.pipeType == IndustrialPipeType.VOID || this.pipeType == IndustrialPipeType.STRUCTURE) {
                     detected = PipeConnectionType.PIPE;
                 }
             } else {
@@ -380,18 +447,36 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, IndustrialPipeBlockEntity be) {
-        if (level.isClientSide()) return;
+        if (level.isClientSide()) {
+            if (be.pipeType.handlesItems() && !be.travelingItems.isEmpty()) {
+                float speed = 0.08f * be.material.getSpeedMultiplier();
+                for (TravelingItem item : be.travelingItems) {
+                    item.progress = Math.min(1.0f, item.progress + speed);
+                }
+            }
+            return;
+        }
+
+        // Periodic sync to client while items are in transit (every 2 ticks)
+        if (be.pipeType.handlesItems() && !be.travelingItems.isEmpty()) {
+            if (level.getGameTime() % 2L == 0) {
+                level.sendBlockUpdated(pos, state, state, 3);
+            }
+        }
 
         // Periodic connection refresh every 20 ticks (evenly distributed across all 20 game ticks)
         if (level.getGameTime() % 20L == Math.floorMod(pos.asLong(), 20L)) {
             be.updateConnections();
         }
 
-        // 1. VOID PIPE BEHAVIOR
+        // 1. VOID & STRUCTURE PIPE BEHAVIOR
         if (be.pipeType == IndustrialPipeType.VOID) {
             be.fluidTank.dump();
             be.internalItem = ItemStack.EMPTY;
             be.travelingItems.clear();
+            return;
+        }
+        if (be.pipeType == IndustrialPipeType.STRUCTURE) {
             return;
         }
 
@@ -601,61 +686,76 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                                     dispatched = true;
                                 } else {
                                     item.stack.shrink(accepted);
-                                    // Reverse motion or wait
-                                    item.toDir = item.fromDir;
-                                    item.progress = 0.5f;
+                                    // Eject remainder that could not fit into destination inventory
+                                    ejectItem(level, pos, targetDir, item.stack.copy());
+                                    dispatched = true;
                                 }
                             }
                         }
                     }
                 }
 
-                if (dispatched) {
-                    travelingItems.remove(i);
-                    setChanged();
-                    if (!level.isClientSide()) {
-                        level.sendBlockUpdated(pos, getBlockState(), getBlockState(), 3);
-                    }
+                if (!dispatched) {
+                    // Dead end or rejected by full inventory: eject items onto the ground
+                    ejectItem(level, pos, targetDir, item.stack.copy());
+                }
+
+                travelingItems.remove(i);
+                setChanged();
+                if (!level.isClientSide()) {
+                    level.sendBlockUpdated(pos, getBlockState(), getBlockState(), 3);
                 }
             }
         }
 
         // 2. Active Extraction from machines
         if (isExtractor() && travelingItems.size() < 4) {
-            for (Map.Entry<Direction, PipeConnectionType> entry : connections.entrySet()) {
-                if (entry.getValue() == PipeConnectionType.MACHINE) {
-                    Direction dir = entry.getKey();
-                    BlockPos targetPos = pos.relative(dir);
-                    ResourceHandler<ItemResource> sourceInv = level.getCapability(Capabilities.Item.BLOCK, targetPos, dir.getOpposite());
-                    if (sourceInv == null) {
-                        sourceInv = level.getCapability(Capabilities.Item.BLOCK, targetPos, null);
-                    }
-                    if (sourceInv == null) {
-                        BlockEntity tBe = level.getBlockEntity(targetPos);
-                        if (tBe instanceof Container container && !(tBe instanceof IndustrialPipeBlockEntity)) {
-                            if (container instanceof WorldlyContainer worldly) {
-                                sourceInv = new WorldlyContainerWrapper(worldly, dir.getOpposite());
-                            } else {
-                                sourceInv = VanillaContainerWrapper.of(container);
+            // Wood item pipes only extract when triggered by an autarchic pulse gate
+            boolean shouldExtract = true;
+            if (this.material == IndustrialPipeMaterial.WOOD && this.pipeType.handlesItems()) {
+                shouldExtract = false;
+            }
+
+            if (shouldExtract) {
+                for (Map.Entry<Direction, PipeConnectionType> entry : connections.entrySet()) {
+                    if (entry.getValue() == PipeConnectionType.MACHINE) {
+                        Direction dir = entry.getKey();
+                        BlockPos targetPos = pos.relative(dir);
+                        ResourceHandler<ItemResource> sourceInv = level.getCapability(Capabilities.Item.BLOCK, targetPos, dir.getOpposite());
+                        if (sourceInv == null) {
+                            sourceInv = level.getCapability(Capabilities.Item.BLOCK, targetPos, null);
+                        }
+                        if (sourceInv == null) {
+                            BlockEntity tBe = level.getBlockEntity(targetPos);
+                            if (tBe instanceof Container container && !(tBe instanceof IndustrialPipeBlockEntity)) {
+                                if (container instanceof WorldlyContainer worldly) {
+                                    sourceInv = new WorldlyContainerWrapper(worldly, dir.getOpposite());
+                                } else {
+                                    sourceInv = VanillaContainerWrapper.of(container);
+                                }
                             }
                         }
-                    }
-                    if (sourceInv != null) {
-                        for (int s = 0; s < sourceInv.size(); s++) {
-                            ItemResource res = sourceInv.getResource(s);
-                            if (!res.isEmpty()) {
-                                try (Transaction tx = Transaction.openRoot()) {
-                                    int pulled = sourceInv.extract(s, res, 1, tx);
-                                    if (pulled > 0) {
-                                        tx.commit();
-                                        ItemStack extracted = res.toStack(pulled);
-                                        Direction exitDir = chooseNextItemDirection(this, dir, extracted);
-                                        travelingItems.add(new TravelingItem(extracted, dir, exitDir, 0.05f));
-                                        setChanged();
-                                        if (!level.isClientSide()) {
-                                            level.sendBlockUpdated(pos, getBlockState(), getBlockState(), 3);
+                        if (sourceInv != null) {
+                            for (int s = 0; s < sourceInv.size(); s++) {
+                                ItemResource res = sourceInv.getResource(s);
+                                if (!res.isEmpty()) {
+                                    ItemStack sample = res.toStack(1);
+                                    if (this.material == IndustrialPipeMaterial.WOOD && !matchesWoodFilter(sample)) {
+                                        continue;
+                                    }
+                                    try (Transaction tx = Transaction.openRoot()) {
+                                        int pulled = sourceInv.extract(s, res, 1, tx);
+                                        if (pulled > 0) {
+                                            tx.commit();
+                                            ItemStack extracted = res.toStack(pulled);
+                                            Direction exitDir = chooseNextItemDirection(this, dir, extracted);
+                                            travelingItems.add(new TravelingItem(extracted, dir, exitDir, 0.05f));
+                                            setChanged();
+                                            if (!level.isClientSide()) {
+                                                level.sendBlockUpdated(pos, getBlockState(), getBlockState(), 3);
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 }
                             }
@@ -704,6 +804,38 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             }
         }
         return fromSide.getOpposite();
+    }
+
+    private void ejectItem(Level level, BlockPos pos, Direction targetDir, ItemStack stack) {
+        if (level.isClientSide() || stack.isEmpty()) return;
+        BlockPos targetPos = pos.relative(targetDir);
+        double spawnX;
+        double spawnY;
+        double spawnZ;
+        var rand = level.getRandom();
+        double vx = targetDir.getStepX() * 0.18 + (rand.nextDouble() - 0.5) * 0.05;
+        double vy = targetDir.getStepY() * 0.18 + 0.06;
+        double vz = targetDir.getStepZ() * 0.18 + (rand.nextDouble() - 0.5) * 0.05;
+
+        BlockState targetState = level.getBlockState(targetPos);
+        if (targetState.isAir() || !targetState.isSolid()) {
+            spawnX = pos.getX() + 0.5 + targetDir.getStepX() * 0.6;
+            spawnY = pos.getY() + 0.5 + targetDir.getStepY() * 0.6;
+            spawnZ = pos.getZ() + 0.5 + targetDir.getStepZ() * 0.6;
+        } else {
+            spawnX = pos.getX() + 0.5;
+            spawnY = pos.getY() + 0.5;
+            spawnZ = pos.getZ() + 0.5;
+            vx = (rand.nextDouble() - 0.5) * 0.1;
+            vy = 0.2;
+            vz = (rand.nextDouble() - 0.5) * 0.1;
+        }
+
+        ItemEntity entity = new ItemEntity(level, spawnX, spawnY, spawnZ, stack);
+        entity.setDeltaMovement(vx, vy, vz);
+        entity.setDefaultPickUpDelay();
+        level.addFreshEntity(entity);
+        level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.25f, (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f);
     }
 
     public @Nullable Direction getDiamondFilteredDirection(Direction fromSide, ItemStack stack) {
@@ -885,8 +1017,13 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
-        if (level != null && !level.isClientSide() && getMaterial() == IndustrialPipeMaterial.DIAMOND) {
-            Containers.dropContents(level, pos, this.diamondFilters);
+        if (level != null && !level.isClientSide()) {
+            dropAllFacades();
+            if (getMaterial() == IndustrialPipeMaterial.DIAMOND) {
+                Containers.dropContents(level, pos, this.diamondFilters);
+            } else if (getMaterial() == IndustrialPipeMaterial.WOOD) {
+                Containers.dropContents(level, pos, this.woodFilters);
+            }
         }
     }
 
@@ -911,6 +1048,16 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                 }
             }
             ContainerHelper.saveAllItems(output, items);
+        } else if (getMaterial() == IndustrialPipeMaterial.WOOD) {
+            NonNullList<ItemStack> items = this.woodFilters.getItems();
+            var filterList = output.list("WoodFilters", ItemStackWithSlot.CODEC);
+            for (int i = 0; i < items.size(); i++) {
+                ItemStack stack = items.get(i);
+                if (!stack.isEmpty()) {
+                    filterList.add(new ItemStackWithSlot(i, stack));
+                }
+            }
+            ContainerHelper.saveAllItems(output, items);
         }
 
         Fluid fl = fluidTank.getStoredFluid();
@@ -921,9 +1068,35 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             }
         }
 
+        if (this.pipeType.handlesItems() && !travelingItems.isEmpty()) {
+            var listOut = output.childrenList("TravelingItems");
+            for (TravelingItem ti : travelingItems) {
+                if (ti.stack != null && !ti.stack.isEmpty()) {
+                    var itemOut = listOut.addChild();
+                    itemOut.store("Item", ItemStack.CODEC, ti.stack);
+                    itemOut.putInt("From", ti.fromDir != null ? ti.fromDir.get3DDataValue() : -1);
+                    itemOut.putInt("To", ti.toDir != null ? ti.toDir.get3DDataValue() : -1);
+                    itemOut.putFloat("Progress", ti.progress);
+                }
+            }
+        }
+
         for (Direction dir : Direction.values()) {
             output.putString("Conn_" + dir.getName(), connections.getOrDefault(dir, PipeConnectionType.NONE).name());
             output.putBoolean("Manual_" + dir.getName(), manualDisconnections.getOrDefault(dir, false));
+        }
+
+        if (!facades.isEmpty()) {
+            var facList = output.childrenList("Facades");
+            for (Map.Entry<Direction, PipeFacadeHelper.FacadeData> entry : facades.entrySet()) {
+                PipeFacadeHelper.FacadeData fd = entry.getValue();
+                if (fd != null && fd.block() != null) {
+                    var child = facList.addChild();
+                    child.putInt("Side", entry.getKey().get3DDataValue());
+                    child.putString("Block", fd.getBlockId().toString());
+                    child.putBoolean("Hollow", fd.hollow());
+                }
+            }
         }
     }
 
@@ -954,6 +1127,26 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             if (!loaded) {
                 ContainerHelper.loadAllItems(input, items);
             }
+        } else if (getMaterial() == IndustrialPipeMaterial.WOOD) {
+            NonNullList<ItemStack> items = this.woodFilters.getItems();
+            while (items.size() < 9) {
+                items.add(ItemStack.EMPTY);
+            }
+            for (int i = 0; i < items.size(); i++) {
+                items.set(i, ItemStack.EMPTY);
+            }
+
+            var filterList = input.listOrEmpty("WoodFilters", ItemStackWithSlot.CODEC);
+            boolean loaded = false;
+            for (ItemStackWithSlot entry : filterList) {
+                if (entry.isValidInContainer(items.size())) {
+                    items.set(entry.slot(), entry.stack());
+                    loaded = true;
+                }
+            }
+            if (!loaded) {
+                ContainerHelper.loadAllItems(input, items);
+            }
         }
 
         String flId = input.getStringOr("Fluid", "");
@@ -965,6 +1158,25 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             fluidTank.setStoredFluid(Fluids.EMPTY);
         }
 
+        this.travelingItems.clear();
+        for (ValueInput itemIn : input.childrenListOrEmpty("TravelingItems")) {
+            java.util.Optional<ItemStack> optStack = itemIn.read("Item", ItemStack.CODEC);
+            if (optStack.isPresent() && !optStack.get().isEmpty()) {
+                int fromVal = itemIn.getIntOr("From", -1);
+                int toVal = itemIn.getIntOr("To", -1);
+                Direction from = (fromVal >= 0 && fromVal < 6) ? Direction.from3DDataValue(fromVal) : null;
+                Direction to = (toVal >= 0 && toVal < 6) ? Direction.from3DDataValue(toVal) : null;
+                if (from == null && to != null) from = to.getOpposite();
+                if (to == null && from != null) to = from.getOpposite();
+                if (from == null) {
+                    from = Direction.NORTH;
+                    to = Direction.SOUTH;
+                }
+                float prog = itemIn.getFloatOr("Progress", 0.0f);
+                this.travelingItems.add(new TravelingItem(optStack.get(), from, to, prog));
+            }
+        }
+
         for (Direction dir : Direction.values()) {
             String cName = input.getStringOr("Conn_" + dir.getName(), PipeConnectionType.NONE.name());
             try {
@@ -973,6 +1185,22 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                 connections.put(dir, PipeConnectionType.NONE);
             }
             manualDisconnections.put(dir, input.getBooleanOr("Manual_" + dir.getName(), false));
+        }
+
+        this.facades.clear();
+        for (ValueInput facIn : input.childrenListOrEmpty("Facades")) {
+            int sideIdx = facIn.getIntOr("Side", -1);
+            String blockIdStr = facIn.getStringOr("Block", "");
+            boolean hollow = facIn.getBooleanOr("Hollow", false);
+            if (sideIdx >= 0 && sideIdx < 6 && !blockIdStr.isEmpty()) {
+                Identifier id = Identifier.tryParse(blockIdStr);
+                if (id != null) {
+                    net.minecraft.world.level.block.Block blk = BuiltInRegistries.BLOCK.getValue(id);
+                    if (blk != null && blk != net.minecraft.world.level.block.Blocks.AIR) {
+                        this.facades.put(Direction.from3DDataValue(sideIdx), new PipeFacadeHelper.FacadeData(blk, hollow));
+                    }
+                }
+            }
         }
     }
 

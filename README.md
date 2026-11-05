@@ -1,4 +1,4 @@
-﻿# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
+# Industrial Refinery â€” Complete Mod Wiki & Engineering Guide
 *A comprehensive guide to heavy industry, fractional distillation, steam power, metallurgy, and automation for Minecraft 26.3 NeoForge.*
 
 ---
@@ -53,6 +53,21 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.10.10 (BuildCraft-Style Pipe Facades & Structure Pipe)](#version-11010-buildcraft-style-pipe-facades--structure-pipe)
+   - [Version 1.10.9 (Cross-Mod Conveyor Belt Transition & Ole Saw Mill Fix)](#version-1109-cross-mod-conveyor-belt-transition--ole-saw-mill-fix)
+   - [Version 1.10.7 (LabPBR 1.3 & POM for Corrugated Steel Panels)](#version-1107-labpbr-13--pom-for-corrugated-steel-panels)
+   - [Version 1.10.5 (Steam Bucket Creative Restriction & Item Pipe Multi-Block Traversal)](#version-1105-steam-bucket-creative-restriction--item-pipe-multi-block-traversal)
+   - [Version 1.10.3 (Model & Blockstate Resolution, 26.3 Recipe Syntax Migration)](#version-1103-model--blockstate-resolution-263-recipe-syntax-migration)
+   - [Version 1.10.2 (Corrugated Steel Panels & 16 Dyed Color Variants)](#version-1102-corrugated-steel-panels--16-dyed-color-variants)
+   - [Version 1.10.1 (Bituminous Oil Sands & Shale, 3D Pipe End Caps, Item Ejection)](#version-1101-bituminous-oil-sands--shale-3d-pipe-end-caps-item-ejection)
+   - [Version 1.9.9 (Multi-Smelter, Metal Press, & Blast Furnace Conveyor Auto-Export)](#version-199-multi-smelter-metal-press--blast-furnace-conveyor-auto-export)
+   - [Version 1.9.8 (Multi-Smelter Dark Gunmetal GUI & Item Pipe In-Transit Visibility)](#version-198-multi-smelter-dark-gunmetal-gui--item-pipe-in-transit-visibility)
+   - [Version 1.9.7 (Guide Book Click Fix)](#version-197-guide-book-click-fix)
+   - [Version 1.9.6 (Informative Pipe Tooltips & Transfer Rates)](#version-196-informative-pipe-tooltips--transfer-rates)
+   - [Version 1.9.5 (In-Game Industrial Field Manual / Guide Book)](#version-195-in-game-industrial-field-manual--guide-book)
+   - [Version 1.9.4 (Wood Extraction Pipe Filter GUI & Pulse Gate Extraction)](#version-194-wood-extraction-pipe-filter-gui--pulse-gate-extraction)
+   - [Version 1.9.3 (Cross-Mod Conveyor Belt Handoff & Trapped Item Resolution)](#version-193-cross-mod-conveyor-belt-handoff--trapped-item-resolution)
+   - [Version 1.9.2 (Autarchic Pulse Item x5 / x10)](#version-192-autarchic-pulse-item-x5--x10)
    - [Version 1.9.0 (Hologram Blueprint Label Size Reduced by 60%)](#version-190-hologram-blueprint-label-size-reduced-by-60)
    - [Version 1.8.63 (Petroleum Refinery Diesel Output Port Relocation)](#version-1863-petroleum-refinery-diesel-output-port-relocation)
    - [Version 1.8.62 (Arc Melter & Casting Press Speeds, Viscous Lava Channel Flow, Grinder Auto-Export)](#version-1862-arc-melter--casting-press-speeds-viscous-lava-channel-flow-grinder-auto-export)
@@ -359,6 +374,8 @@ An early-to-midgame high-throughput industrial smelting array that unifies **8 i
   - **Smelter Output Port**: Automatically extracts completed items from the 8 output slots.
   - **Smelter Fuel/Energy Port**: Accepts solid fuel into the fuel slot and connects directly to external RF energy cables or power generators.
   - **Refinery Wrench Support**: Right-clicking the controller with a wrench projects a full 60-block 3D holographic blueprint with labeled block requirements.
+  - **Dark Gunmetal Industrial Interface**: Redesigned heavy steel UI matching the Grinder and Metal Press with energy gauges, combustion flame & RF induction activity meters, and dedicated cook progress tracks under each slot.
+  - **Auto-Export to Conveyors & Factory Logistics**: When a conveyor belt is placed in front of the controller, along the front face, or adjacent to the Output Port, finished products (charcoal, ingots, glass) are automatically ejected onto the conveyor with smooth single-item spacing.
 
 #### Layer-by-Layer Multi-Smelter Schematic
 Local coordinates relative to the controller facing North:
@@ -928,6 +945,7 @@ Gates can communicate across long distances without bulky redstone dust lines:
 - `Emit Redstone`: Constant redstone signal (power 15).
 - `Redstone Pulse`: Pulses redstone on and off every 1 second (ideal for clocks).
 - `Autarchic Pulse (Item)`: Extracts 1 item from adjacent container into pipe.
+- Autarchic Pulse (Item x5) / Autarchic Pulse (Item x10): Same, but extracts 5 or 10 items per pulse.
 - `Autarchic Pulse (Fluid)`: Pumps 250 mB from adjacent tank into fluid pipe.
 - `Emit Red / Blue / Green / Yellow Wire`: Broadcasts logic signal to other gates along connected pipes.
 
@@ -1687,6 +1705,176 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.10.10 (BuildCraft-Style Pipe Facades & Structure Pipe)
+- **BuildCraft-Style Pipe Facades (`refinery:pipe_facade` & `refinery:pipe_facade_hole`)**:
+  - Added **Solid Pipe Facades** (`refinery:pipe_facade`) and **Pass-Through (Hollow) Pipe Facades** (`refinery:pipe_facade_hole`) that conceal pipes behind 2/16-inch (`0.125` block) structural wall panels on any of the 6 faces (`DOWN`, `UP`, `NORTH`, `SOUTH`, `WEST`, `EAST`) of any Industrial Pipe or Buffer Pipe.
+  - **Live Registry Scanning & Dynamic Texture Wrapping (`PipeFacadeHelper` & `PipeFacadeRenderer`)**:
+    - Automatically scans `BuiltInRegistries.BLOCK` at runtime to support any full-cube, opaque block from Vanilla, Industrial Refinery (including all 17 Corrugated Steel Panels, metal/ore storage blocks, Oil Shale, and industrial casings), and third-party mods without pre-generating static asset files per block.
+    - Excludes non-solid or problematic blocks (glass, ice, leaves, grass blocks, slime/honey, TNT, redstone components, spawners, portals, liquids, falling blocks, and block entities).
+    - Samples the disguised block's native `TextureAtlasSprite`s on `TextureAtlas.LOCATION_BLOCKS`, preserving **LabPBR 1.3 metallic specular reflections (`_s`)** and **Parallax Occlusion Mapping (`_n`)** in Complementary Unbound and Iris shaders.
+  - **Crafting & Conversion Recipes (`PipeFacadeRecipe` & `PipeFacadeSwapRecipe`)**:
+    - **Solid Pipe Facade (x8)**: 1 eligible full block in the center surrounded by 8 Copper Item Pipes (`refinery:copper_item_pipe`).
+    - **Solid <-> Pass-Through Conversion**: Craft any Solid Pipe Facade 1-to-1 into a Pass-Through Facade (with a centered pipe opening) and back at any time.
+  - **In-World Placement & Removal**:
+    - Right-click any pipe with a facade to attach it to the clicked side; Shift + Right-Click with a **Refinery Wrench** or empty hand to pop the facade off.
+- **Structure Pipe (`refinery:structure_pipe`)**:
+  - Added an inexpensive structural pipe (`2 Cobblestone + 1 Gravel -> 8 Structure Pipes`) with a solid cobblestone-gray finish.
+  - Transfers neither items nor fluids, serving as a dedicated structural conduit for bridging **Pipe Wires** (`Red`, `Blue`, `Green`, `Yellow`), mounting **Pipe Logic Gates**, and anchoring **Pipe Facades**.
+
+---
+
+### Version 1.10.9 (Cross-Mod Conveyor Belt Transition & Ole Saw Mill Fix)
+- **Cross-Mod Conveyor Belt Transition & Item Sticking (Ole Saw Mill Compatibility)**:
+  - Fixed item collision box height in `ConveyorBeltBlock` and `RightAngleConveyorBeltBlock` from 4.0 px (`0.25`) to 5.0 px (`0.3125`), matching the standard 5-pixel surface height used by adjacent conveyor mods such as Ole Saw Mill (`olesawmill:sawmill_conveyor`). This eliminates the 1-pixel collision lip that previously stopped items from crossing the block seam.
+  - Implemented boundary handoff release in `ConveyorBeltBlockEntity` and `RightAngleConveyorBeltBlockEntity`: once an item physically crosses the forward boundary into a connected conveyor belt block, our conveyor immediately yields ownership, eliminating conflicting dual-conveyor velocity overrides and seam jitter.
+  - Added forward velocity boost (`1.3x`) when items approach the exit threshold of an attached conveyor belt, guaranteeing uninterrupted gliding across block boundaries.
+
+---
+
+### Version 1.10.7 (LabPBR 1.3 & POM for Corrugated Steel Panels)
+- **LabPBR 1.3 & POM (Parallax Occlusion Mapping) Support for Corrugated Steel Panels**:
+  - Added dedicated LabPBR 1.3 Normal Maps (`_n.png`) and Specular Maps (`_s.png`) for all 17 Corrugated Steel Panel variants (raw steel and 16 dyed colors) across both side panels and cross-section caps (102 textures total).
+  - **Parallax Occlusion Mapping (POM) Depth**: Encoded physical height profiles into the Alpha channel of `_n.png` (rib crests at 245, valleys at 36, stiffening micro-ribs at 90), rendering authentic 3D depth, sloped folds, and raymarched self-shadows in shaders like Complementary Unbound.
+  - **DirectX Normal Vectors & Ambient Occlusion**: Analytically derived tangent-space normal vectors with DirectX Y-down orientation and linear contact ambient occlusion baked into the Blue channel (`B = 140-250`) for deep contact shadows in panel crevices.
+  - **Metallic Specular Reflectance (LabPBR 1.3)**:
+    - Raw Corrugated Steel Panel configured with Hardcoded Iron/Steel ID (`G = 230`) for physically accurate metallic Fresnel reflectance.
+    - 16 Dyed Corrugated Steel Panels configured with Custom Metal mode (`G = 255`) for glossy, colored metallic specular highlights matching the panel's powder-coat color.
+    - Smoothness calibrated to a crisp satin industrial metal finish (`R = 186-214`, roughness 0.16–0.27).
+    - Porosity set to non-porous metal (`B = 0`), creating realistic rainwater slick reflections during rainfall.
+- **Enhanced Galvanized & Powder-Coat Diffuse Textures**:
+  - Implemented Voronoi crystallization zinc spangle lattices on the raw Corrugated Steel Panel diffuse map.
+  - Refined specular crest highlights, shadow contrast in trough valleys, and cold-rolling mill micro-streaks across all variants.
+
+---
+
+### Version 1.10.5 (Steam Bucket Creative Restriction & Item Pipe Multi-Block Traversal)
+- **Steam Bucket Creative-Only Restriction**:
+  - Survival players can no longer scoop up gaseous steam into open buckets. Right-clicking in-world steam with an empty bucket plays a vapor dissipation sound (`SoundEvents.FIRE_EXTINGUISH`) without filling the bucket.
+  - The Steam Bucket (`refinery:steam_bucket`) remains accessible in Creative mode for world building and testing, featuring an explanatory tooltip: *"Creative Only: Steam cannot be contained in an open bucket in Survival."*
+- **Continuous Item Pipe In-Transit Traversal**:
+  - Replaced legacy `ItemStackWithSlot` serialization with dedicated NBT `childrenList` storage for `"TravelingItems"`, fixing packet encoding failures where direction and progress bitmasks exceeded the Minecraft `UNSIGNED_BYTE` 255-slot limitation.
+  - Added immediate block entity update broadcasts (`sendBlockUpdated` with flag 3) when an item exits a pipe and enters an adjacent pipe block entity, ensuring uninterrupted visual traversal through every pipe piece across the entire transport network.
+  - Increased in-transit item synchronization frequency to every 2 ticks for responsive client-side progress tracking and sub-tick partial tick animation.
+  - Applied minimum ambient lighting (`0x00D000D0`) to traveling items inside transparent pipe casings, ensuring items remain distinctly visible even when passing through dark, enclosed, or unlit factory environments.
+
+---
+
+### Version 1.10.3 (Model & Blockstate Resolution, 26.3 Recipe Syntax Migration)
+- **Recipe Syntax Migration (Minecraft 26.3 / 1.21.4+)**:
+  - Migrated Corrugated Steel Panel recipes (shaped, shapeless re-dyeing, water-bucket washing, stonecutting) to Minecraft 26.3 string-based ingredient IDs (`"#c:corrugated_steel_panels"`, `"refinery:corrugated_steel_panel"`, etc.), resolving recipe registry deserialization warnings.
+- **Model & Blockstate Resolution**:
+  - Added missing item model for `oil_shale` (`assets/refinery/models/item/oil_shale.json`).
+  - Added missing blockstate and block model for `buffer_pipe` (`assets/refinery/blockstates/buffer_pipe.json`, `models/block/buffer_pipe.json`).
+  - Cleaned up `casting_input_port`, `casting_output_port`, `melter_input_port`, and `melter_output_port` blockstates by removing invalid `facing=up` and `facing=down` entries, aligning with `HorizontalDirectionalBlock`.
+
+---
+
+### Version 1.10.2 (Corrugated Steel Panels & 16 Dyed Color Variants)
+- **Corrugated Steel Panels (Industrial Cladding & Siding)**:
+  - Added the **Corrugated Steel Panel** (`refinery:corrugated_steel_panel`) along with **16 dyed color variants** (White, Orange, Magenta, Light Blue, Yellow, Lime, Pink, Gray, Light Gray, Cyan, Purple, Blue, Brown, Green, Red, Black).
+  - Designed with 64x64 high-resolution textures capturing authentic R-panel / standing seam industrial sheet metal: specular crests, directional drop shadows in the troughs, fine micro-ribbing stiffeners, and galvanized metallic stippling.
+  - **100% Seamless Wall & Roof Flow**: Every block features a 16-pixel rib pitch (4 major ribs per block) and continuous vertical flutes that align mathematically with zero edge borders or seam gaps across adjacent blocks in all dimensions.
+  - **Rotated Pillar Orientation (`axis=x|y|z`)**: Place vertically for factory/warehouse exterior siding, or horizontally for industrial metal roofing and architectural cladding. End cross sections accurately depict the wavy corrugated metal plate profile.
+  - **Crafting & Dyeing Integration**:
+    - Crafted in a 2x2 grid with 4 Iron Ingots -> 4 Corrugated Steel Panels.
+    - Stonecutter: 1 Iron Ingot -> 2 Corrugated Steel Panels.
+    - Dyeing: 8 Corrugated Steel Panels surrounding any dye -> 8 Dyed Panels.
+    - Shapeless 1-to-1 re-dyeing and water-bucket washing back to natural galvanized steel.
+
+---
+
+### Version 1.10.1 (Bituminous Oil Sands & Shale, 3D Pipe End Caps, Item Ejection)
+- **Bituminous Tar Sands & Animated Crude Oil Sync**:
+  - Synchronized Crude Oil still and flowing fluid textures with animated 32x1024 and 16x512 high-resolution textures and `.mcmeta` animation timings.
+  - Replaced standard Oil Sand with authentic bituminous tar sand texturing.
+  - Added **Oil Red Sand** (`refinery:oil_red_sand`) with badlands red sand bituminous texture and custom reddish dust particles (`0x8C381E`).
+  - Added **Oil Shale** (`refinery:oil_shale`) stone-tier bituminous ore block mineable with pickaxe.
+  - Fully integrated into world generation: Oil Red Sand generates in badlands and red sand surface deposits, while Oil Shale lines subterranean deepslate and cavern oil reservoirs.
+  - Both new blocks are fully supported in the Industrial Grinder and Petroleum Refinery distillation column for crude oil extraction.
+- **Heavy-Duty 3D Industrial Pipe End Caps**:
+  - Modeled 3D industrial pipe caps on all unconnected pipe termination ends and standalone pipes (`IndustrialPipeModel`).
+  - Features an outer sleeve collar wrapping the pipe end, a circular front cap plate, and a raised central hex nut / bolt head boss for a heavy industrial appearance.
+- **Pipe Item Ejection on Dead Ends & Full Containers**:
+  - When traveling items in an item pipe reach a dead end (unconnected pipe terminal) or an attached container whose inventory is full or rejects the item, the items are cleanly ejected out onto the ground with realistic velocity and sound (`IndustrialPipeBlockEntity`).
+  - Partial insertion leftovers are similarly ejected rather than looping or freezing inside the pipe network.
+
+---
+
+### Version 1.9.9 (Multi-Smelter, Metal Press, & Blast Furnace Conveyor Auto-Export)
+- **Multi-Smelter Conveyor & Logistics Auto-Export**:
+  - The Industrial Multi-Smelter (`MultiSmelterControllerBlockEntity`) now auto-exports finished smelted items (such as charcoal from wood/logs, refined ingots, glass) from Output Slots 8..15 directly onto any conveyor belt placed in front of the machine (in front of the Controller or along the front face) or adjacent to any Smelter Output Port.
+  - Automatically detects conveyor orientation to avoid feeding items into reversed conveyors heading back into the machine.
+  - Enforces smooth single-item spacing along the conveyor surface so items travel down the belt in an orderly line without clumping.
+  - Also auto-exports into adjacent item transport pipes, containers (chests, barrels, hoppers), and external item capabilities.
+- **Metal Press & Blast Furnace Auto-Export Parity**:
+  - Added auto-export support to the Industrial Metal Press (`MetalPressControllerBlockEntity`), automatically ejecting finished stamped items (plates, rods, gears) from slots 2..3 onto adjacent conveyors or containers at the bed discharge or in front.
+  - Upgraded Blast Furnace (`BlastFurnaceControllerBlockEntity`) auto-export with comprehensive conveyor detection, proper forward orientation handling, and single-item spacing.
+
+---
+
+### Version 1.9.8 (Multi-Smelter Dark Gunmetal GUI & Item Pipe In-Transit Visibility)
+- **Item Pipe In-Transit Visibility & 3D Glass Rendering**:
+  - Implemented 360-degree clear cylindrical glass pipe bodies with heavy industrial structural collar rings for all item transport pipes (Wood, Stone, Iron, Gold, Diamond, Netherite, Emerald, Quartz, Obsidian, Void, and Buffer).
+  - Traveling items are now fully visible moving through the pipes in real time.
+  - Added smooth client-side partial tick interpolation for fluid, continuous item motion.
+  - Added full NBT serialization/deserialization for traveling items in `IndustrialPipeBlockEntity` via `ItemStackWithSlot.CODEC`, keeping items preserved during chunk unloads and reloads.
+  - Synchronized pipe traveling items to client every 4 ticks during transit.
+- **Industrial Multi-Smelter GUI Overhaul & Dark Gunmetal Styling**:
+  - Restyled `textures/gui/multi_smelter.png` in the dark gunmetal industrial steel theme (`#2B3036`), beveled borders, corner rivets, and recessed slot wells to seamlessly match the Grinder and Metal Press.
+  - Re-aligned 8 input slots (4x2 grid) and 8 output slots (4x2 grid) with clean spacing, plus centered fuel slot at (89, 62).
+  - Repositioned title and inventory labels to avoid overlaps (`titleLabelX=8, titleLabelY=6`, `inventoryLabelX=8, inventoryLabelY=74`).
+  - Integrated energy gauge rendering with hover tooltips (RF stored / max capacity) at (10, 18).
+  - Added animated combustion flame indicator at (70, 63) and induction heating indicator at (110, 63) with descriptive tooltips.
+  - Moved parallel cook progress bars to dedicated 2px grooves under each input slot (`Y=36` and `Y=56`), eliminating all item slot overlapping.
+
+---
+
+### Version 1.9.7 (Guide Book Click Fix)
+- Fixed the Industrial Field Manual ignoring all mouse clicks (sidebar, Table of Contents, Back, tabs, layer pills); left-click is button 1 in Minecraft 26.3.
+
+---
+
+### Version 1.9.6 (Informative Pipe Tooltips & Transfer Rates)
+- **Comprehensive Pipe Tooltips (`PipeBlockItem`)**:
+  - Added rich hover tooltips to all 22 industrial item and fluid pipes.
+  - Displays functional role, exact fluid transfer rates (mB/t), internal buffer capacities, item speed multipliers, and operational tips (filter GUI, wrench rotation, merge selection, and pulse gate requirements).
+
+---
+
+### Version 1.9.5 (In-Game Industrial Field Manual / Guide Book)
+- **In-Game Industrial Field Manual (`refinery:guide_book`)**:
+  - Added craftable guide book (`minecraft:book` + `minecraft:iron_ingot`).
+  - Right-clicking opens the interactive manual GUI (`RefineryGuideScreen`).
+  - Features category sidebar filtering, scrollable Table of Contents cards, and direct machine links.
+  - Multiblock pages feature a complete **Bill of Materials** showing exact block counts, an interactive **Layer Layout Viewer** with 2D top-down grid blueprints for each layer (`L0` to `L4`), orientation guides, cell hover coordinates, and recipe tables.
+
+---
+
+### Version 1.9.4 (Wood Extraction Pipe Filter GUI & Pulse Gate Extraction)
+- **Wood Extraction Pipe Filter GUI**:
+  - Right-clicking a Wood Item Pipe opens a 9-slot filter interface (3x3 grid) allowing players to define which items may be extracted.
+  - When filter slots are empty, all items are eligible for extraction; when items are configured in the filter, only matching items are extracted.
+  - Filter contents persist through saves and drop when the pipe is broken.
+- **Autarchic Pulse Gate Gated Extraction**:
+  - Wood Item Extraction Pipes now strictly extract items when pulsed by an Autarchic Pulse Gate, preventing unmetered passive extraction.
+  - Autarchic pulsar actions (`PULSAR_PULL_ITEM`, `PULSAR_PULL_ITEM_5`, and `PULSAR_PULL_ITEM_10`) respect the Wood Pipe filter configuration before withdrawing items.
+
+---
+
+### Version 1.9.3 (Cross-Mod Conveyor Belt Handoff & Trapped Item Resolution)
+- **Cross-Mod Conveyor Belt Handoff & Trapped Item Resolution**:
+  - Implemented universal cross-mod conveyor detection (`ConveyorBeltBlock.isAnyConveyorBlock`), preventing conveyor belts from mistakenly identifying external conveyor blocks (such as Ole Saw Mill's conveyors) as static inventory endpoints.
+  - Eliminated the infinite capability insertion/respawn cycle at conveyor transfer seams that caused items to bunch up, get trapped in an unpickable state with reset pickup delays, and stall at the handoff boundary.
+  - Adjusted conveyor item surface height to $pos.getY() + 0.32$ (above 5px / 0.3125 collision height), ensuring items glide seamlessly across block transitions without catching on the leading edges of adjacent belts.
+  - Connected front and back conveyor models to external matching conveyors seamlessly.
+
+---
+
+### Version 1.9.2 (Autarchic Pulse Item x5 / x10)
+- **New Gate Actions**: Autarchic Pulse (Item x5) and Autarchic Pulse (Item x10) pull 5 or 10 items at a time from the adjacent container into the pipe (autarchic gates only).
 
 ---
 

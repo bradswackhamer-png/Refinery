@@ -130,18 +130,14 @@ public class SlopedConveyorBeltBlockEntity extends BlockEntity implements Contai
 
         // If target is another conveyor, let it roll smoothly
         BlockState targetState = level.getBlockState(targetPos);
-        if (targetState.getBlock() instanceof ConveyorBeltBlock
-                || targetState.getBlock() instanceof SlopedConveyorBeltBlock
-                || targetState.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock) {
+        if (ConveyorBeltBlock.isAnyConveyorBlock(targetState)) {
             return;
         }
 
         // Also check direct forward block
         BlockPos directForward = pos.relative(facing);
         BlockState directForwardState = level.getBlockState(directForward);
-        if (directForwardState.getBlock() instanceof ConveyorBeltBlock
-                || directForwardState.getBlock() instanceof SlopedConveyorBeltBlock
-                || directForwardState.getBlock() instanceof com.refinery.block.RightAngleConveyorBeltBlock) {
+        if (ConveyorBeltBlock.isAnyConveyorBlock(directForwardState)) {
             return;
         }
 

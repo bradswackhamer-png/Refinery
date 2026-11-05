@@ -1,11 +1,15 @@
 package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
+import com.refinery.block.ConveyorBeltBlock;
 import com.refinery.block.MultiSmelterControllerBlock;
+import com.refinery.block.RightAngleConveyorBeltBlock;
+import com.refinery.block.SlopedConveyorBeltBlock;
 import com.refinery.block.SmelterCasingBlock;
 import com.refinery.block.SmelterChamberBlock;
 import com.refinery.block.SmelterPortBlock;
 import com.refinery.fluid.RefineryFluids;
+import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.menu.MultiSmelterMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,6 +39,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -44,8 +49,10 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class MultiSmelterControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INPUT_SLOTS_COUNT = 8;
@@ -65,6 +72,8 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
 
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
+    private int exportCooldown = 0;
+    private int lastExportSlot = 0;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
@@ -198,6 +207,12 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                 level.setBlock(pos, current.setValue(MultiSmelterControllerBlock.ACTIVE, false), 3);
             }
             return;
+        }
+
+        // Auto-export finished smelted items (charcoal, ingots, etc.) from Output Slots 8..15 to adjacent conveyor, pipe, or container
+        if (--be.exportCooldown <= 0) {
+            be.exportCooldown = 5;
+            be.tryExportOutput(serverLevel);
         }
 
         boolean wasActive = state.getValue(MultiSmelterControllerBlock.ACTIVE);
@@ -569,6 +584,8 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         output.putInt("Energy", this.energy);
         output.putInt("BurnTime", this.burnTime);
         output.putInt("MaxBurnTime", this.maxBurnTime);
+        output.putInt("ExportCooldown", this.exportCooldown);
+        output.putInt("LastExportSlot", this.lastExportSlot);
         for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
             output.putInt("CookProgress_" + i, this.cookProgress[i]);
         }
@@ -582,6 +599,8 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         this.energy = input.getIntOr("Energy", 0);
         this.burnTime = input.getIntOr("BurnTime", 0);
         this.maxBurnTime = input.getIntOr("MaxBurnTime", 0);
+        this.exportCooldown = input.getIntOr("ExportCooldown", 0);
+        this.lastExportSlot = input.getIntOr("LastExportSlot", 0);
         for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
             this.cookProgress[i] = input.getIntOr("CookProgress_" + i, 0);
         }
@@ -679,5 +698,225 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
     @Override
     public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
         return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    public boolean isMultiblockPart(BlockPos pos) {
+        BlockState state = getBlockState();
+        Direction facing = (state.getBlock() instanceof MultiSmelterControllerBlock && state.hasProperty(MultiSmelterControllerBlock.FACING))
+                ? state.getValue(MultiSmelterControllerBlock.FACING)
+                : Direction.NORTH;
+        for (BlueprintRequirement req : getRequirements()) {
+            if (getRelativePos(req.x(), req.y(), req.z(), facing).equals(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void tryExportOutput(ServerLevel level) {
+        Direction facing = getBlockState().getValue(MultiSmelterControllerBlock.FACING);
+        Direction right = facing.getClockWise();
+
+        // Check if there are any finished items to export from output buffer slots 8..15
+        boolean hasOutput = false;
+        for (int slot = 8; slot <= 15; slot++) {
+            if (!this.items.get(slot).isEmpty()) {
+                hasOutput = true;
+                break;
+            }
+        }
+        if (!hasOutput) return;
+
+        // Collect all potential export target positions in priority order:
+        Set<BlockPos> targetPositions = new LinkedHashSet<>();
+
+        // 1. Output Ports: Check all 6 adjacent directions around any SMELTER_OUTPUT_PORT in the structure
+        for (int y = 0; y < 4; y++) {
+            for (int z = 0; z < 3; z++) {
+                for (int x = -2; x <= 2; x++) {
+                    BlockPos p = getRelativePos(x, y, z, facing);
+                    if (this.level.getBlockEntity(p) instanceof SmelterPortBlockEntity portBE) {
+                        if (portBE.getPortType() == SmelterPortBlock.PortType.OUTPUT) {
+                            for (Direction dir : Direction.values()) {
+                                targetPositions.add(p.relative(dir));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Default output port (2, 0, 0) adjacent positions
+        BlockPos defaultPortPos = getRelativePos(2, 0, 0, facing);
+        targetPositions.add(defaultPortPos.relative(facing));        // In front of output port
+        targetPositions.add(defaultPortPos.relative(right));         // To the right of output port
+        targetPositions.add(defaultPortPos.below());                 // Below output port
+        targetPositions.add(defaultPortPos.relative(facing).below());// Below in front of output port
+
+        // 3. Directly in front of the Controller (0, 0, 0)
+        BlockPos controllerPos = this.worldPosition;
+        targetPositions.add(controllerPos.relative(facing));         // In front of controller
+        targetPositions.add(controllerPos.relative(facing).below()); // Below in front of controller
+
+        // 4. Front face of the entire 5-wide base (X: -2..2, Z = -1, Y = 0, Y = -1, and Y = 1)
+        for (int x = -2; x <= 2; x++) {
+            BlockPos frontPos = getRelativePos(x, 0, -1, facing);
+            targetPositions.add(frontPos);
+            targetPositions.add(frontPos.below());
+            targetPositions.add(frontPos.above());
+        }
+
+        // 5. Perimeter blocks around the 5x3 base (Layer 0)
+        for (int x = -2; x <= 2; x++) {
+            for (int z = 0; z <= 2; z++) {
+                if (x == -2) targetPositions.add(getRelativePos(x - 1, 0, z, facing));
+                if (x == 2)  targetPositions.add(getRelativePos(x + 1, 0, z, facing));
+                if (z == 0)  targetPositions.add(getRelativePos(x, 0, z - 1, facing));
+                if (z == 2)  targetPositions.add(getRelativePos(x, 0, z + 1, facing));
+            }
+        }
+
+        for (BlockPos targetPos : targetPositions) {
+            if (isMultiblockPart(targetPos)) continue;
+
+            BlockState targetState = level.getBlockState(targetPos);
+            BlockEntity targetBE = level.getBlockEntity(targetPos);
+
+            boolean isConveyor = ConveyorBeltBlock.isAnyConveyorBlock(targetState)
+                    || targetBE instanceof ConveyorBeltBlockEntity
+                    || targetBE instanceof RightAngleConveyorBeltBlockEntity
+                    || targetBE instanceof SlopedConveyorBeltBlockEntity;
+
+            if (isConveyor) {
+                // Ensure conveyor doesn't lead directly back into the multi-smelter
+                Direction conveyorForward = null;
+                if (targetState.getBlock() instanceof ConveyorBeltBlock) {
+                    conveyorForward = targetState.getValue(ConveyorBeltBlock.FACING);
+                } else if (targetState.getBlock() instanceof RightAngleConveyorBeltBlock) {
+                    conveyorForward = RightAngleConveyorBeltBlock.getExitDirection(targetState);
+                } else if (targetState.getBlock() instanceof SlopedConveyorBeltBlock) {
+                    conveyorForward = targetState.getValue(SlopedConveyorBeltBlock.FACING);
+                } else if (targetState.hasProperty(HorizontalDirectionalBlock.FACING)) {
+                    conveyorForward = targetState.getValue(HorizontalDirectionalBlock.FACING);
+                }
+                if (conveyorForward != null && isMultiblockPart(targetPos.relative(conveyorForward))) {
+                    continue; // Skip conveyor pointing back into smelter
+                }
+
+                // Check that the conveyor belt surface near spawn point isn't currently occupied by an item entity
+                double cx = targetPos.getX() + 0.5;
+                double cz = targetPos.getZ() + 0.5;
+                net.minecraft.world.phys.AABB beltBox = new net.minecraft.world.phys.AABB(
+                        cx - 0.25, targetPos.getY() + 0.10, cz - 0.25,
+                        cx + 0.25, targetPos.getY() + 0.70, cz + 0.25
+                );
+                List<net.minecraft.world.entity.item.ItemEntity> itemsOnBelt = level.getEntitiesOfClass(
+                        net.minecraft.world.entity.item.ItemEntity.class, beltBox);
+                if (!itemsOnBelt.isEmpty()) {
+                    continue;
+                }
+
+                for (int i = 0; i < OUTPUT_SLOTS_COUNT; i++) {
+                    int slot = 8 + ((this.lastExportSlot + i) % OUTPUT_SLOTS_COUNT);
+                    ItemStack sourceStack = this.items.get(slot);
+                    if (sourceStack.isEmpty()) continue;
+
+                    ItemStack single = sourceStack.copyWithCount(1);
+                    if (targetBE instanceof Container container) {
+                        container.setItem(0, single);
+                    } else {
+                        Direction forwardDir = conveyorForward != null ? conveyorForward : facing;
+                        double spawnX = targetPos.getX() + 0.5;
+                        double spawnY = targetPos.getY() + 0.35;
+                        double spawnZ = targetPos.getZ() + 0.5;
+                        net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(
+                                level, spawnX, spawnY, spawnZ, single);
+                        itemEntity.setDeltaMovement(forwardDir.getStepX() * 0.05, 0.0, forwardDir.getStepZ() * 0.05);
+                        itemEntity.setPickUpDelay(10);
+                        level.addFreshEntity(itemEntity);
+                    }
+
+                    sourceStack.shrink(1);
+                    if (sourceStack.isEmpty()) {
+                        this.items.set(slot, ItemStack.EMPTY);
+                    }
+                    this.lastExportSlot = (slot - 8 + 1) % OUTPUT_SLOTS_COUNT;
+                    setChanged();
+                    syncToClient();
+                    return;
+                }
+                continue;
+            }
+
+            // Direct pipe insertion
+            if (targetBE instanceof IndustrialPipeBlockEntity pipeBE && pipeBE.getPipeType().handlesItems()) {
+                for (int i = 0; i < OUTPUT_SLOTS_COUNT; i++) {
+                    int slot = 8 + ((this.lastExportSlot + i) % OUTPUT_SLOTS_COUNT);
+                    ItemStack sourceStack = this.items.get(slot);
+                    if (sourceStack.isEmpty()) continue;
+
+                    ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(pipeBE, sourceStack.copy());
+                    if (remainder.getCount() != sourceStack.getCount()) {
+                        this.items.set(slot, remainder);
+                        this.lastExportSlot = (slot - 8 + 1) % OUTPUT_SLOTS_COUNT;
+                        setChanged();
+                        syncToClient();
+                        return;
+                    }
+                }
+                continue;
+            }
+
+            // Target is a standard Container (chests, barrels, hoppers, crates)
+            if (targetBE instanceof Container targetContainer) {
+                for (int i = 0; i < OUTPUT_SLOTS_COUNT; i++) {
+                    int slot = 8 + ((this.lastExportSlot + i) % OUTPUT_SLOTS_COUNT);
+                    ItemStack sourceStack = this.items.get(slot);
+                    if (sourceStack.isEmpty()) continue;
+
+                    ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(targetContainer, sourceStack.copy());
+                    if (remainder.getCount() != sourceStack.getCount()) {
+                        this.items.set(slot, remainder);
+                        this.lastExportSlot = (slot - 8 + 1) % OUTPUT_SLOTS_COUNT;
+                        setChanged();
+                        targetContainer.setChanged();
+                        syncToClient();
+                        return;
+                    }
+                }
+            } else {
+                // External NeoForge item capability handler
+                var handler = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK, targetPos, Direction.UP);
+                if (handler != null) {
+                    for (int i = 0; i < OUTPUT_SLOTS_COUNT; i++) {
+                        int slot = 8 + ((this.lastExportSlot + i) % OUTPUT_SLOTS_COUNT);
+                        ItemStack sourceStack = this.items.get(slot);
+                        if (sourceStack.isEmpty()) continue;
+
+                        try (net.neoforged.neoforge.transfer.transaction.Transaction tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                            int inserted = handler.insert(net.neoforged.neoforge.transfer.item.ItemResource.of(sourceStack), sourceStack.getCount(), tx);
+                            if (inserted > 0) {
+                                tx.commit();
+                                sourceStack.shrink(inserted);
+                                if (sourceStack.isEmpty()) {
+                                    this.items.set(slot, ItemStack.EMPTY);
+                                }
+                                this.lastExportSlot = (slot - 8 + 1) % OUTPUT_SLOTS_COUNT;
+                                setChanged();
+                                syncToClient();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

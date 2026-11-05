@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#c:corrugated_steel_panels",
+    "minecraft:red_dye"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:red_corrugated_steel_panel"
+  }
+}

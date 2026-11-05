@@ -44,6 +44,8 @@ public class IndustrialPipeModel {
             RefineryMod.MODID, "textures/block/pipe/void_pipe.png");
     public static final Identifier TEXTURE_QUARTZ = Identifier.fromNamespaceAndPath(
             RefineryMod.MODID, "textures/block/pipe/quartz_pipe.png");
+    public static final Identifier TEXTURE_STRUCTURE = Identifier.fromNamespaceAndPath(
+            RefineryMod.MODID, "textures/block/pipe/structure_pipe.png");
     public static final Identifier TEXTURE_WINDOW = Identifier.fromNamespaceAndPath(
             RefineryMod.MODID, "textures/block/pipe/pipe_window.png");
 
@@ -51,6 +53,10 @@ public class IndustrialPipeModel {
     private static final float PIPE_RADIUS = 3.2f / 16.0f; // 0.20 normalized
     private static final float HUB_RADIUS = 3.65f / 16.0f;  // 0.228 normalized - cleanly encloses entering arms
     private static final float FLANGE_RADIUS = 4.4f / 16.0f; // 0.275 normalized
+    private static final float CAP_RADIUS = PIPE_RADIUS + 0.012f; // 0.212 normalized
+    private static final float CAP_COLLAR = 0.045f;
+    private static final float NUT_RADIUS = PIPE_RADIUS * 0.45f;
+    private static final float NUT_HEIGHT = 0.022f;
     private static final float CX = 0.5f;
     private static final float CY = 0.5f;
     private static final float CZ = 0.5f;
@@ -145,6 +151,7 @@ public class IndustrialPipeModel {
             case CAST_IRON -> TEXTURE_CAST_IRON;
             case VOID -> TEXTURE_VOID;
             case QUARTZ -> TEXTURE_QUARTZ;
+            case STRUCTURE -> TEXTURE_STRUCTURE;
             default -> TEXTURE_STEEL;
         };
     }
@@ -157,7 +164,7 @@ public class IndustrialPipeModel {
             int light,
             int overlay
     ) {
-        render(matrix, consumer, connections, material, null, light, overlay);
+        render(matrix, consumer, connections, material, null, false, light, overlay);
     }
 
     public void render(
@@ -169,6 +176,23 @@ public class IndustrialPipeModel {
             int light,
             int overlay
     ) {
+        render(matrix, consumer, connections, material, mergeOutput, false, light, overlay);
+    }
+
+    public void render(
+            Matrix4f matrix,
+            VertexConsumer consumer,
+            Map<Direction, PipeConnectionType> connections,
+            IndustrialPipeMaterial material,
+            Direction mergeOutput,
+            boolean isItemPipe,
+            int light,
+            int overlay
+    ) {
+        if (isItemPipe) {
+            renderItemPipeFittings(matrix, consumer, connections, material, mergeOutput, light, overlay);
+            return;
+        }
         boolean north = connections.getOrDefault(Direction.NORTH, PipeConnectionType.NONE).isConnected();
         boolean south = connections.getOrDefault(Direction.SOUTH, PipeConnectionType.NONE).isConnected();
         boolean west  = connections.getOrDefault(Direction.WEST, PipeConnectionType.NONE).isConnected();
@@ -438,73 +462,274 @@ public class IndustrialPipeModel {
     }
 
     /**
-     * Circular disk cap for standalone pipe ends along Z.
+     * Heavy-duty 3D industrial pipe end cap with outer sleeve collar, front face plate, and raised central hex nut.
      */
     private void renderDiskZ(Matrix4f m, VertexConsumer c, float z, int normalZ, int light, int overlay) {
+        float backZ = z - normalZ * CAP_COLLAR;
+        float zMin = Math.min(backZ, z);
+        float zMax = Math.max(backZ, z);
+        float nutZ = z + normalZ * NUT_HEIGHT;
+
         for (int i = 0; i < SEGMENTS; i++) {
-            float x0 = CX + PIPE_RADIUS * COS[i];
-            float y0 = CY + PIPE_RADIUS * SIN[i];
-            float x1 = CX + PIPE_RADIUS * COS[i + 1];
-            float y1 = CY + PIPE_RADIUS * SIN[i + 1];
+            float c0 = COS[i];
+            float s0 = SIN[i];
+            float c1 = COS[i + 1];
+            float s1 = SIN[i + 1];
+
+            // 1. Outer collar sleeve
+            float ox0 = CX + CAP_RADIUS * c0;
+            float oy0 = CY + CAP_RADIUS * s0;
+            float ox1 = CX + CAP_RADIUS * c1;
+            float oy1 = CY + CAP_RADIUS * s1;
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = zMin * 2.0f;
+            float v1 = zMax * 2.0f;
+            float nx = 0.5f * (c0 + c1);
+            float ny = 0.5f * (s0 + s1);
+
+            c.addVertex(m, ox0, oy0, zMin).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, ox1, oy1, zMin).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, ox1, oy1, zMax).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, ox0, oy0, zMax).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+
+            // 2. Back lip
+            float px0 = CX + PIPE_RADIUS * c0;
+            float py0 = CY + PIPE_RADIUS * s0;
+            float px1 = CX + PIPE_RADIUS * c1;
+            float py1 = CY + PIPE_RADIUS * s1;
+            float normBack = -normalZ;
+            if (normalZ > 0) {
+                c.addVertex(m, px0, py0, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+                c.addVertex(m, px1, py1, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+                c.addVertex(m, ox1, oy1, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+                c.addVertex(m, ox0, oy0, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+            } else {
+                c.addVertex(m, px1, py1, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+                c.addVertex(m, px0, py0, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+                c.addVertex(m, ox0, oy0, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+                c.addVertex(m, ox1, oy1, backZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, normBack);
+            }
+
+            // 3. Cap face plate at z
+            float nZ = (float) normalZ;
+            if (normalZ > 0) {
+                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, ox0, oy0, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, ox1, oy1, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+            } else {
+                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, ox1, oy1, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, ox0, oy0, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+            }
+
+            // 4. Raised center hex boss / nut
+            float hx0 = CX + NUT_RADIUS * c0;
+            float hy0 = CY + NUT_RADIUS * s0;
+            float hx1 = CX + NUT_RADIUS * c1;
+            float hy1 = CY + NUT_RADIUS * s1;
+            float nutZMin = Math.min(z, nutZ);
+            float nutZMax = Math.max(z, nutZ);
+
+            c.addVertex(m, hx0, hy0, nutZMin).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, 0.2f).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, hx1, hy1, nutZMin).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, 0.2f).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, hx1, hy1, nutZMax).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, 0.3f).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, hx0, hy0, nutZMax).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, 0.3f).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
 
             if (normalZ > 0) {
-                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, 1.0f);
-                c.addVertex(m, x0, y0, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, 1.0f);
-                c.addVertex(m, x1, y1, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, 1.0f);
-                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, 1.0f);
+                c.addVertex(m, CX, CY, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, hx0, hy0, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.45f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, hx1, hy1, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.55f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, CX, CY, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
             } else {
-                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, -1.0f);
-                c.addVertex(m, x1, y1, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, -1.0f);
-                c.addVertex(m, x0, y0, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, -1.0f);
-                c.addVertex(m, CX, CY, z).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, -1.0f);
+                c.addVertex(m, CX, CY, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, hx1, hy1, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.55f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, hx0, hy0, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.45f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
+                c.addVertex(m, CX, CY, nutZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 0.0f, nZ);
             }
         }
     }
 
     /**
-     * Circular disk cap for pipe ends along X.
+     * Heavy-duty 3D industrial pipe end cap with outer sleeve collar, front face plate, and raised central hex nut along X.
      */
     private void renderDiskX(Matrix4f m, VertexConsumer c, float x, int normalX, int light, int overlay) {
+        float backX = x - normalX * CAP_COLLAR;
+        float xMin = Math.min(backX, x);
+        float xMax = Math.max(backX, x);
+        float nutX = x + normalX * NUT_HEIGHT;
+
         for (int i = 0; i < SEGMENTS; i++) {
-            float y0 = CY + PIPE_RADIUS * COS[i];
-            float z0 = CZ + PIPE_RADIUS * SIN[i];
-            float y1 = CY + PIPE_RADIUS * COS[i + 1];
-            float z1 = CZ + PIPE_RADIUS * SIN[i + 1];
+            float c0 = COS[i];
+            float s0 = SIN[i];
+            float c1 = COS[i + 1];
+            float s1 = SIN[i + 1];
+
+            // 1. Outer collar sleeve
+            float oy0 = CY + CAP_RADIUS * c0;
+            float oz0 = CZ + CAP_RADIUS * s0;
+            float oy1 = CY + CAP_RADIUS * c1;
+            float oz1 = CZ + CAP_RADIUS * s1;
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = xMin * 2.0f;
+            float v1 = xMax * 2.0f;
+            float ny = 0.5f * (c0 + c1);
+            float nz = 0.5f * (s0 + s1);
+
+            c.addVertex(m, xMin, oy0, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, xMin, oy1, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, xMax, oy1, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, xMax, oy0, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+
+            // 2. Back lip
+            float py0 = CY + PIPE_RADIUS * c0;
+            float pz0 = CZ + PIPE_RADIUS * s0;
+            float py1 = CY + PIPE_RADIUS * c1;
+            float pz1 = CZ + PIPE_RADIUS * s1;
+            float normBack = -normalX;
+            if (normalX > 0) {
+                c.addVertex(m, backX, py0, pz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+                c.addVertex(m, backX, py1, pz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+                c.addVertex(m, backX, oy1, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.6f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+                c.addVertex(m, backX, oy0, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.6f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+            } else {
+                c.addVertex(m, backX, py1, pz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+                c.addVertex(m, backX, py0, pz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+                c.addVertex(m, backX, oy0, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.6f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+                c.addVertex(m, backX, oy1, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.6f).setOverlay(overlay).setLight(light).setNormal(normBack, 0.0f, 0.0f);
+            }
+
+            // 3. Cap face plate at x
+            float nX = (float) normalX;
+            if (normalX > 0) {
+                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, x, oy0, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, x, oy1, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+            } else {
+                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, x, oy1, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, x, oy0, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+            }
+
+            // 4. Raised center hex nut
+            float hy0 = CY + NUT_RADIUS * c0;
+            float hz0 = CZ + NUT_RADIUS * s0;
+            float hy1 = CY + NUT_RADIUS * c1;
+            float hz1 = CZ + NUT_RADIUS * s1;
+            float nutXMin = Math.min(x, nutX);
+            float nutXMax = Math.max(x, nutX);
+
+            c.addVertex(m, nutXMin, hy0, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, 0.2f).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, nutXMin, hy1, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, 0.2f).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, nutXMax, hy1, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, 0.3f).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, nutXMax, hy0, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, 0.3f).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
 
             if (normalX > 0) {
-                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(1.0f, 0.0f, 0.0f);
-                c.addVertex(m, x, y0, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(1.0f, 0.0f, 0.0f);
-                c.addVertex(m, x, y1, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(1.0f, 0.0f, 0.0f);
-                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(1.0f, 0.0f, 0.0f);
+                c.addVertex(m, nutX, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, nutX, hy0, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.45f, 0.45f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, nutX, hy1, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.55f, 0.45f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, nutX, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
             } else {
-                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(-1.0f, 0.0f, 0.0f);
-                c.addVertex(m, x, y1, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(-1.0f, 0.0f, 0.0f);
-                c.addVertex(m, x, y0, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(-1.0f, 0.0f, 0.0f);
-                c.addVertex(m, x, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(-1.0f, 0.0f, 0.0f);
+                c.addVertex(m, nutX, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, nutX, hy1, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.55f, 0.45f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, nutX, hy0, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.45f, 0.45f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
+                c.addVertex(m, nutX, CY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(nX, 0.0f, 0.0f);
             }
         }
     }
 
     /**
-     * Circular disk cap for pipe ends along Y.
+     * Heavy-duty 3D industrial pipe end cap with outer sleeve collar, front face plate, and raised central hex nut along Y.
      */
     private void renderDiskY(Matrix4f m, VertexConsumer c, float y, int normalY, int light, int overlay) {
+        float backY = y - normalY * CAP_COLLAR;
+        float yMin = Math.min(backY, y);
+        float yMax = Math.max(backY, y);
+        float nutY = y + normalY * NUT_HEIGHT;
+
         for (int i = 0; i < SEGMENTS; i++) {
-            float x0 = CX + PIPE_RADIUS * COS[i];
-            float z0 = CZ + PIPE_RADIUS * SIN[i];
-            float x1 = CX + PIPE_RADIUS * COS[i + 1];
-            float z1 = CZ + PIPE_RADIUS * SIN[i + 1];
+            float c0 = COS[i];
+            float s0 = SIN[i];
+            float c1 = COS[i + 1];
+            float s1 = SIN[i + 1];
+
+            // 1. Outer collar sleeve
+            float ox0 = CX + CAP_RADIUS * c0;
+            float oz0 = CZ + CAP_RADIUS * s0;
+            float ox1 = CX + CAP_RADIUS * c1;
+            float oz1 = CZ + CAP_RADIUS * s1;
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = yMin * 2.0f;
+            float v1 = yMax * 2.0f;
+            float nx = 0.5f * (c0 + c1);
+            float nz = 0.5f * (s0 + s1);
+
+            c.addVertex(m, ox1, yMin, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, ox0, yMin, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, ox0, yMax, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, ox1, yMax, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+
+            // 2. Back lip
+            float px0 = CX + PIPE_RADIUS * c0;
+            float pz0 = CZ + PIPE_RADIUS * s0;
+            float px1 = CX + PIPE_RADIUS * c1;
+            float pz1 = CZ + PIPE_RADIUS * s1;
+            float normBack = -normalY;
+            if (normalY > 0) {
+                c.addVertex(m, px0, backY, pz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+                c.addVertex(m, px1, backY, pz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+                c.addVertex(m, ox1, backY, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+                c.addVertex(m, ox0, backY, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+            } else {
+                c.addVertex(m, px1, backY, pz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+                c.addVertex(m, px0, backY, pz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+                c.addVertex(m, ox0, backY, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+                c.addVertex(m, ox1, backY, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.6f).setOverlay(overlay).setLight(light).setNormal(0.0f, normBack, 0.0f);
+            }
+
+            // 3. Cap face plate at y
+            float nY = (float) normalY;
+            if (normalY > 0) {
+                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, ox0, y, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, ox1, y, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+            } else {
+                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, ox1, y, oz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, ox0, y, oz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+            }
+
+            // 4. Raised center hex nut
+            float hx0 = CX + NUT_RADIUS * c0;
+            float hz0 = CZ + NUT_RADIUS * s0;
+            float hx1 = CX + NUT_RADIUS * c1;
+            float hz1 = CZ + NUT_RADIUS * s1;
+            float nutYMin = Math.min(y, nutY);
+            float nutYMax = Math.max(y, nutY);
+
+            c.addVertex(m, hx1, nutYMin, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, 0.2f).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, hx0, nutYMin, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, 0.2f).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, hx0, nutYMax, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, 0.3f).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, hx1, nutYMax, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, 0.3f).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
 
             if (normalY > 0) {
-                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 1.0f, 0.0f);
-                c.addVertex(m, x0, y, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 1.0f, 0.0f);
-                c.addVertex(m, x1, y, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, 1.0f, 0.0f);
-                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, 1.0f, 0.0f);
+                c.addVertex(m, CX, nutY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, hx0, nutY, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.45f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, hx1, nutY, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.55f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, CX, nutY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
             } else {
-                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, -1.0f, 0.0f);
-                c.addVertex(m, x1, y, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.6f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, -1.0f, 0.0f);
-                c.addVertex(m, x0, y, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.4f, 0.4f).setOverlay(overlay).setLight(light).setNormal(0.0f, -1.0f, 0.0f);
-                c.addVertex(m, CX, y, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, -1.0f, 0.0f);
+                c.addVertex(m, CX, nutY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, hx1, nutY, hz1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.55f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, hx0, nutY, hz0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.45f, 0.45f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
+                c.addVertex(m, CX, nutY, CZ).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(0.0f, nY, 0.0f);
             }
         }
     }
@@ -801,6 +1026,17 @@ public class IndustrialPipeModel {
             int light,
             int overlay
     ) {
+        renderSightGlassWindows(m, c, connections, false, light, overlay);
+    }
+
+    public void renderSightGlassWindows(
+            Matrix4f m,
+            VertexConsumer c,
+            Map<Direction, PipeConnectionType> connections,
+            boolean isItemPipe,
+            int light,
+            int overlay
+    ) {
         boolean north = connections.getOrDefault(Direction.NORTH, PipeConnectionType.NONE).isConnected();
         boolean south = connections.getOrDefault(Direction.SOUTH, PipeConnectionType.NONE).isConnected();
         boolean west  = connections.getOrDefault(Direction.WEST, PipeConnectionType.NONE).isConnected();
@@ -810,6 +1046,47 @@ public class IndustrialPipeModel {
 
         int connectionCount = (north ? 1 : 0) + (south ? 1 : 0) + (west ? 1 : 0) +
                               (east ? 1 : 0) + (down ? 1 : 0) + (up ? 1 : 0);
+
+        if (isItemPipe) {
+            // Full 360-degree clear cylindrical glass body for item pipes
+            if (connectionCount == 0) {
+                renderGlassCylinderZ(m, c, 0.20f, 0.80f, light, overlay);
+                return;
+            }
+
+            if (connectionCount == 1) {
+                if (north) renderGlassCylinderZ(m, c, 0.0f, 0.80f, light, overlay);
+                else if (south) renderGlassCylinderZ(m, c, 0.20f, 1.0f, light, overlay);
+                else if (west) renderGlassCylinderX(m, c, 0.0f, 0.80f, light, overlay);
+                else if (east) renderGlassCylinderX(m, c, 0.20f, 1.0f, light, overlay);
+                else if (down) renderGlassCylinderY(m, c, 0.0f, 0.80f, light, overlay);
+                else if (up) renderGlassCylinderY(m, c, 0.20f, 1.0f, light, overlay);
+                return;
+            }
+
+            if (connectionCount == 2) {
+                if (north && south) {
+                    renderGlassCylinderZ(m, c, 0.0f, 1.0f, light, overlay);
+                    return;
+                } else if (west && east) {
+                    renderGlassCylinderX(m, c, 0.0f, 1.0f, light, overlay);
+                    return;
+                } else if (down && up) {
+                    renderGlassCylinderY(m, c, 0.0f, 1.0f, light, overlay);
+                    return;
+                }
+            }
+
+            // Junctions, elbows, tees:
+            if (north) renderGlassCylinderZ(m, c, 0.0f, 0.5f - HUB_STOP, light, overlay);
+            if (south) renderGlassCylinderZ(m, c, 0.5f + HUB_STOP, 1.0f, light, overlay);
+            if (west)  renderGlassCylinderX(m, c, 0.0f, 0.5f - HUB_STOP, light, overlay);
+            if (east)  renderGlassCylinderX(m, c, 0.5f + HUB_STOP, 1.0f, light, overlay);
+            if (down)  renderGlassCylinderY(m, c, 0.0f, 0.5f - HUB_STOP, light, overlay);
+            if (up)    renderGlassCylinderY(m, c, 0.5f + HUB_STOP, 1.0f, light, overlay);
+            renderGlassJunction(m, c, light, overlay);
+            return;
+        }
 
         if (connectionCount == 0) {
             renderWindowZ(m, c, 0.22f, 0.78f, light, overlay);
@@ -1012,6 +1289,330 @@ public class IndustrialPipeModel {
             c.addVertex(m, x0, y0, z0).setColor(red, green, blue, alpha).setUv(uv, uv).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
             c.addVertex(m, x0, y1, z0).setColor(red, green, blue, alpha).setUv(uv, uv).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
             c.addVertex(m, x1, y1, z1).setColor(red, green, blue, alpha).setUv(uv, uv).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+        }
+    }
+
+    // =========================================================================
+    // ITEM PIPE GLASS BODY & INDUSTRIAL FITTINGS
+    // =========================================================================
+
+    private void renderItemPipeFittings(
+            Matrix4f matrix,
+            VertexConsumer consumer,
+            Map<Direction, PipeConnectionType> connections,
+            IndustrialPipeMaterial material,
+            Direction mergeOutput,
+            int light,
+            int overlay
+    ) {
+        boolean north = connections.getOrDefault(Direction.NORTH, PipeConnectionType.NONE).isConnected();
+        boolean south = connections.getOrDefault(Direction.SOUTH, PipeConnectionType.NONE).isConnected();
+        boolean west  = connections.getOrDefault(Direction.WEST, PipeConnectionType.NONE).isConnected();
+        boolean east  = connections.getOrDefault(Direction.EAST, PipeConnectionType.NONE).isConnected();
+        boolean down  = connections.getOrDefault(Direction.DOWN, PipeConnectionType.NONE).isConnected();
+        boolean up    = connections.getOrDefault(Direction.UP, PipeConnectionType.NONE).isConnected();
+
+        int connectionCount = (north ? 1 : 0) + (south ? 1 : 0) + (west ? 1 : 0) +
+                              (east ? 1 : 0) + (down ? 1 : 0) + (up ? 1 : 0);
+
+        if (connectionCount == 0) {
+            renderCollarRingZ(matrix, consumer, 0.20f, 0.28f, light, overlay);
+            renderCollarRingZ(matrix, consumer, 0.72f, 0.80f, light, overlay);
+            renderDiskZ(matrix, consumer, 0.20f, -1, light, overlay);
+            renderDiskZ(matrix, consumer, 0.80f, 1, light, overlay);
+            return;
+        }
+
+        if (connectionCount == 1) {
+            if (north) {
+                renderCollarRingZ(matrix, consumer, 0.0f, 0.08f, light, overlay);
+                renderCollarRingZ(matrix, consumer, 0.72f, 0.80f, light, overlay);
+                renderDiskZ(matrix, consumer, 0.80f, 1, light, overlay);
+                if (connections.get(Direction.NORTH) == PipeConnectionType.MACHINE) renderMachineFlange(matrix, consumer, Direction.NORTH, light, overlay);
+            } else if (south) {
+                renderCollarRingZ(matrix, consumer, 0.20f, 0.28f, light, overlay);
+                renderCollarRingZ(matrix, consumer, 0.92f, 1.0f, light, overlay);
+                renderDiskZ(matrix, consumer, 0.20f, -1, light, overlay);
+                if (connections.get(Direction.SOUTH) == PipeConnectionType.MACHINE) renderMachineFlange(matrix, consumer, Direction.SOUTH, light, overlay);
+            } else if (west) {
+                renderCollarRingX(matrix, consumer, 0.0f, 0.08f, light, overlay);
+                renderCollarRingX(matrix, consumer, 0.72f, 0.80f, light, overlay);
+                renderDiskX(matrix, consumer, 0.80f, 1, light, overlay);
+                if (connections.get(Direction.WEST) == PipeConnectionType.MACHINE) renderMachineFlange(matrix, consumer, Direction.WEST, light, overlay);
+            } else if (east) {
+                renderCollarRingX(matrix, consumer, 0.20f, 0.28f, light, overlay);
+                renderCollarRingX(matrix, consumer, 0.92f, 1.0f, light, overlay);
+                renderDiskX(matrix, consumer, 0.20f, -1, light, overlay);
+                if (connections.get(Direction.EAST) == PipeConnectionType.MACHINE) renderMachineFlange(matrix, consumer, Direction.EAST, light, overlay);
+            } else if (down) {
+                renderCollarRingY(matrix, consumer, 0.0f, 0.08f, light, overlay);
+                renderCollarRingY(matrix, consumer, 0.72f, 0.80f, light, overlay);
+                renderDiskY(matrix, consumer, 0.80f, 1, light, overlay);
+                if (connections.get(Direction.DOWN) == PipeConnectionType.MACHINE) renderMachineFlange(matrix, consumer, Direction.DOWN, light, overlay);
+            } else if (up) {
+                renderCollarRingY(matrix, consumer, 0.20f, 0.28f, light, overlay);
+                renderCollarRingY(matrix, consumer, 0.92f, 1.0f, light, overlay);
+                renderDiskY(matrix, consumer, 0.20f, -1, light, overlay);
+                if (connections.get(Direction.UP) == PipeConnectionType.MACHINE) renderMachineFlange(matrix, consumer, Direction.UP, light, overlay);
+            }
+            if (material == IndustrialPipeMaterial.QUARTZ && mergeOutput != null) renderMergeOutputIndicator(matrix, consumer, mergeOutput, light, overlay);
+            if (material == IndustrialPipeMaterial.DIAMOND) renderDiamondSortingBands(matrix, consumer, connections, light, overlay);
+            return;
+        }
+
+        if (connectionCount == 2) {
+            if (north && south) {
+                renderCollarRingZ(matrix, consumer, 0.0f, 0.08f, light, overlay);
+                renderCollarRingZ(matrix, consumer, 0.92f, 1.0f, light, overlay);
+                checkMachineFlanges(matrix, consumer, connections, Direction.NORTH, Direction.SOUTH, light, overlay);
+                if (material == IndustrialPipeMaterial.QUARTZ && mergeOutput != null) renderMergeOutputIndicator(matrix, consumer, mergeOutput, light, overlay);
+                if (material == IndustrialPipeMaterial.DIAMOND) renderDiamondSortingBands(matrix, consumer, connections, light, overlay);
+                return;
+            } else if (west && east) {
+                renderCollarRingX(matrix, consumer, 0.0f, 0.08f, light, overlay);
+                renderCollarRingX(matrix, consumer, 0.92f, 1.0f, light, overlay);
+                checkMachineFlanges(matrix, consumer, connections, Direction.WEST, Direction.EAST, light, overlay);
+                if (material == IndustrialPipeMaterial.QUARTZ && mergeOutput != null) renderMergeOutputIndicator(matrix, consumer, mergeOutput, light, overlay);
+                if (material == IndustrialPipeMaterial.DIAMOND) renderDiamondSortingBands(matrix, consumer, connections, light, overlay);
+                return;
+            } else if (down && up) {
+                renderCollarRingY(matrix, consumer, 0.0f, 0.08f, light, overlay);
+                renderCollarRingY(matrix, consumer, 0.92f, 1.0f, light, overlay);
+                checkMachineFlanges(matrix, consumer, connections, Direction.DOWN, Direction.UP, light, overlay);
+                if (material == IndustrialPipeMaterial.QUARTZ && mergeOutput != null) renderMergeOutputIndicator(matrix, consumer, mergeOutput, light, overlay);
+                if (material == IndustrialPipeMaterial.DIAMOND) renderDiamondSortingBands(matrix, consumer, connections, light, overlay);
+                return;
+            }
+        }
+
+        // Multi-way elbows, tees, crosses
+        if (north) {
+            renderCollarRingZ(matrix, consumer, 0.0f, 0.08f, light, overlay);
+            renderCollarRingZ(matrix, consumer, 0.5f - HUB_STOP - 0.04f, 0.5f - HUB_STOP, light, overlay);
+        }
+        if (south) {
+            renderCollarRingZ(matrix, consumer, 0.5f + HUB_STOP, 0.5f + HUB_STOP + 0.04f, light, overlay);
+            renderCollarRingZ(matrix, consumer, 0.92f, 1.0f, light, overlay);
+        }
+        if (west) {
+            renderCollarRingX(matrix, consumer, 0.0f, 0.08f, light, overlay);
+            renderCollarRingX(matrix, consumer, 0.5f - HUB_STOP - 0.04f, 0.5f - HUB_STOP, light, overlay);
+        }
+        if (east) {
+            renderCollarRingX(matrix, consumer, 0.5f + HUB_STOP, 0.5f + HUB_STOP + 0.04f, light, overlay);
+            renderCollarRingX(matrix, consumer, 0.92f, 1.0f, light, overlay);
+        }
+        if (down) {
+            renderCollarRingY(matrix, consumer, 0.0f, 0.08f, light, overlay);
+            renderCollarRingY(matrix, consumer, 0.5f - HUB_STOP - 0.04f, 0.5f - HUB_STOP, light, overlay);
+        }
+        if (up) {
+            renderCollarRingY(matrix, consumer, 0.5f + HUB_STOP, 0.5f + HUB_STOP + 0.04f, light, overlay);
+            renderCollarRingY(matrix, consumer, 0.92f, 1.0f, light, overlay);
+        }
+
+        for (Direction dir : Direction.values()) {
+            if (connections.getOrDefault(dir, PipeConnectionType.NONE) == PipeConnectionType.MACHINE) {
+                renderMachineFlange(matrix, consumer, dir, light, overlay);
+            }
+        }
+
+        if (material == IndustrialPipeMaterial.QUARTZ && mergeOutput != null) renderMergeOutputIndicator(matrix, consumer, mergeOutput, light, overlay);
+        if (material == IndustrialPipeMaterial.DIAMOND) renderDiamondSortingBands(matrix, consumer, connections, light, overlay);
+    }
+
+    private void renderCollarRingZ(Matrix4f m, VertexConsumer c, float z0, float z1, int light, int overlay) {
+        float r = PIPE_RADIUS + 0.006f;
+        for (int i = 0; i < SEGMENTS; i++) {
+            float x0 = CX + r * COS[i];
+            float y0 = CY + r * SIN[i];
+            float x1 = CX + r * COS[i + 1];
+            float y1 = CY + r * SIN[i + 1];
+
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = z0 * 2.0f;
+            float v1 = z1 * 2.0f;
+
+            float nx = 0.5f * (COS[i] + COS[i + 1]);
+            float ny = 0.5f * (SIN[i] + SIN[i + 1]);
+
+            c.addVertex(m, x0, y0, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, x1, y1, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, x1, y1, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, x0, y0, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+        }
+    }
+
+    private void renderCollarRingX(Matrix4f m, VertexConsumer c, float x0, float x1, int light, int overlay) {
+        float r = PIPE_RADIUS + 0.006f;
+        for (int i = 0; i < SEGMENTS; i++) {
+            float y0 = CY + r * COS[i];
+            float z0 = CZ + r * SIN[i];
+            float y1 = CY + r * COS[i + 1];
+            float z1 = CZ + r * SIN[i + 1];
+
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = x0 * 2.0f;
+            float v1 = x1 * 2.0f;
+
+            float ny = 0.5f * (COS[i] + COS[i + 1]);
+            float nz = 0.5f * (SIN[i] + SIN[i + 1]);
+
+            c.addVertex(m, x0, y0, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, x0, y1, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, x1, y1, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, x1, y0, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+        }
+    }
+
+    private void renderCollarRingY(Matrix4f m, VertexConsumer c, float y0, float y1, int light, int overlay) {
+        float r = PIPE_RADIUS + 0.006f;
+        for (int i = 0; i < SEGMENTS; i++) {
+            float x0 = CX + r * COS[i];
+            float z0 = CZ + r * SIN[i];
+            float x1 = CX + r * COS[i + 1];
+            float z1 = CZ + r * SIN[i + 1];
+
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = y0 * 2.0f;
+            float v1 = y1 * 2.0f;
+
+            float nx = 0.5f * (COS[i] + COS[i + 1]);
+            float nz = 0.5f * (SIN[i] + SIN[i + 1]);
+
+            c.addVertex(m, x1, y0, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, x0, y0, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, x0, y1, z0).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, x1, y1, z1).setColor(1.0f, 1.0f, 1.0f, 1.0f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+        }
+    }
+
+    private void renderGlassCylinderZ(Matrix4f m, VertexConsumer c, float z0, float z1, int light, int overlay) {
+        for (int i = 0; i < SEGMENTS; i++) {
+            float x0 = CX + PIPE_RADIUS * COS[i];
+            float y0 = CY + PIPE_RADIUS * SIN[i];
+            float x1 = CX + PIPE_RADIUS * COS[i + 1];
+            float y1 = CY + PIPE_RADIUS * SIN[i + 1];
+
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = z0;
+            float v1 = z1;
+
+            float nx = 0.5f * (COS[i] + COS[i + 1]);
+            float ny = 0.5f * (SIN[i] + SIN[i + 1]);
+
+            c.addVertex(m, x0, y0, z0).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, x1, y1, z0).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, x1, y1, z1).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+            c.addVertex(m, x0, y0, z1).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, 0.0f);
+        }
+    }
+
+    private void renderGlassCylinderX(Matrix4f m, VertexConsumer c, float x0, float x1, int light, int overlay) {
+        for (int i = 0; i < SEGMENTS; i++) {
+            float y0 = CY + PIPE_RADIUS * COS[i];
+            float z0 = CZ + PIPE_RADIUS * SIN[i];
+            float y1 = CY + PIPE_RADIUS * COS[i + 1];
+            float z1 = CZ + PIPE_RADIUS * SIN[i + 1];
+
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = x0;
+            float v1 = x1;
+
+            float ny = 0.5f * (COS[i] + COS[i + 1]);
+            float nz = 0.5f * (SIN[i] + SIN[i + 1]);
+
+            c.addVertex(m, x0, y0, z0).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, x0, y1, z1).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, x1, y1, z1).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+            c.addVertex(m, x1, y0, z0).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0.0f, ny, nz);
+        }
+    }
+
+    private void renderGlassCylinderY(Matrix4f m, VertexConsumer c, float y0, float y1, int light, int overlay) {
+        for (int i = 0; i < SEGMENTS; i++) {
+            float x0 = CX + PIPE_RADIUS * COS[i];
+            float z0 = CZ + PIPE_RADIUS * SIN[i];
+            float x1 = CX + PIPE_RADIUS * COS[i + 1];
+            float z1 = CZ + PIPE_RADIUS * SIN[i + 1];
+
+            float u0 = (float) i / SEGMENTS;
+            float u1 = (float) (i + 1) / SEGMENTS;
+            float v0 = y0;
+            float v1 = y1;
+
+            float nx = 0.5f * (COS[i] + COS[i + 1]);
+            float nz = 0.5f * (SIN[i] + SIN[i + 1]);
+
+            c.addVertex(m, x1, y0, z1).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, x0, y0, z0).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, x0, y1, z0).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+            c.addVertex(m, x1, y1, z1).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, 0.0f, nz);
+        }
+    }
+
+    private void renderGlassJunction(Matrix4f m, VertexConsumer c, int light, int overlay) {
+        float r = HUB_RADIUS;
+        int latBands = 6;
+        int lonBands = SEGMENTS;
+
+        for (int lat = 0; lat < latBands; lat++) {
+            double theta0 = Math.PI * (double) lat / latBands;
+            double theta1 = Math.PI * (double) (lat + 1) / latBands;
+
+            float y0 = CY + r * (float) Math.cos(theta0);
+            float y1 = CY + r * (float) Math.cos(theta1);
+            float r0 = r * (float) Math.sin(theta0);
+            float r1 = r * (float) Math.sin(theta1);
+
+            float v0 = (float) lat / latBands;
+            float v1 = (float) (lat + 1) / latBands;
+
+            for (int lon = 0; lon < lonBands; lon++) {
+                double phi0 = 2.0 * Math.PI * (double) lon / lonBands;
+                double phi1 = 2.0 * Math.PI * (double) (lon + 1) / lonBands;
+
+                float x00 = CX + r0 * (float) Math.cos(phi0);
+                float z00 = CZ + r0 * (float) Math.sin(phi0);
+
+                float x01 = CX + r0 * (float) Math.cos(phi1);
+                float z01 = CZ + r0 * (float) Math.sin(phi1);
+
+                float x10 = CX + r1 * (float) Math.cos(phi0);
+                float z10 = CZ + r1 * (float) Math.sin(phi0);
+
+                float x11 = CX + r1 * (float) Math.cos(phi1);
+                float z11 = CZ + r1 * (float) Math.sin(phi1);
+
+                float u0 = (float) lon / lonBands;
+                float u1 = (float) (lon + 1) / lonBands;
+
+                float nx = (float) (Math.sin((theta0 + theta1) * 0.5) * Math.cos((phi0 + phi1) * 0.5));
+                float ny = (float) Math.cos((theta0 + theta1) * 0.5);
+                float nz = (float) (Math.sin((theta0 + theta1) * 0.5) * Math.sin((phi0 + phi1) * 0.5));
+
+                if (lat == 0) {
+                    c.addVertex(m, CX, CY + r, CZ).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv((u0 + u1) * 0.5f, 0.0f).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x11, y1, z11).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x10, y1, z10).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, CX, CY + r, CZ).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv((u0 + u1) * 0.5f, 0.0f).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                } else if (lat == latBands - 1) {
+                    c.addVertex(m, CX, CY - r, CZ).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv((u0 + u1) * 0.5f, 1.0f).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x00, y0, z00).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x01, y0, z01).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, CX, CY - r, CZ).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv((u0 + u1) * 0.5f, 1.0f).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                } else {
+                    c.addVertex(m, x00, y0, z00).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x01, y0, z01).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x11, y1, z11).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                    c.addVertex(m, x10, y1, z10).setColor(1.0f, 1.0f, 1.0f, 0.70f).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+                }
+            }
         }
     }
 }

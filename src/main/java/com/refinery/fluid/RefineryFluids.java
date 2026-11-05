@@ -1,13 +1,26 @@
 package com.refinery.fluid;
 
 import com.refinery.RefineryMod;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
@@ -17,6 +30,7 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
+import org.jspecify.annotations.Nullable;
 
 public class RefineryFluids {
 
@@ -121,11 +135,28 @@ public class RefineryFluids {
             () -> new BaseFlowingFluid.Flowing(RefineryFluids.STEAM_PROPERTIES));
 
     public static final DeferredBlock<LiquidBlock> STEAM_BLOCK = RefineryMod.BLOCKS.registerBlock("steam",
-            p -> new LiquidBlock(STEAM_SOURCE.get(), p),
+            p -> new LiquidBlock(STEAM_SOURCE.get(), p) {
+                @Override
+                public ItemStack pickupBlock(@Nullable LivingEntity entity, LevelAccessor level, BlockPos pos, BlockState state) {
+                    if (entity instanceof Player player && player.isCreative()) {
+                        return super.pickupBlock(entity, level, pos, state);
+                    }
+                    if (level instanceof Level lvl && !lvl.isClientSide()) {
+                        lvl.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
+                    }
+                    return ItemStack.EMPTY;
+                }
+            },
             p -> liquidProperties(MapColor.SNOW));
 
     public static final DeferredItem<BucketItem> STEAM_BUCKET = RefineryMod.ITEMS.registerItem("steam_bucket",
-            p -> new BucketItem(STEAM_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+            p -> new BucketItem(STEAM_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)) {
+                @Override
+                public void appendHoverText(ItemStack itemStack, TooltipContext context, TooltipDisplay display, java.util.function.Consumer<Component> builder, TooltipFlag tooltipFlag) {
+                    super.appendHoverText(itemStack, context, display, builder, tooltipFlag);
+                    builder.accept(Component.translatable("tooltip.refinery.steam_bucket").withStyle(ChatFormatting.GRAY));
+                }
+            });
 
     public static final BaseFlowingFluid.Properties STEAM_PROPERTIES = new BaseFlowingFluid.Properties(
             STEAM_TYPE, STEAM_SOURCE, STEAM_FLOWING)

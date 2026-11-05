@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "refinery:oil_sand"
+    "refinery:oil_sand",
+    "refinery:oil_red_sand"
   ]
 }

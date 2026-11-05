@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "refinery:block/light_blue_corrugated_steel_panel_top",
+    "side": "refinery:block/light_blue_corrugated_steel_panel"
+  }
+}

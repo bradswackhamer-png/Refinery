@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "refinery:corrugated_steel_panel",
+    "D": "minecraft:lime_dye"
+  },
+  "pattern": [
+    "###",
+    "#D#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "refinery:lime_corrugated_steel_panel"
+  }
+}

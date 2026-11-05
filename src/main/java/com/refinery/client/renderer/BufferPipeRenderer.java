@@ -59,8 +59,13 @@ public class BufferPipeRenderer implements BlockEntityRenderer<BufferPipeBlockEn
         BlockEntityRenderState.extractBase(be, state, breakProgress);
 
         state.pos = be.getBlockPos();
+        state.facades.clear();
         for (Direction dir : Direction.values()) {
             state.connections.put(dir, be.getConnection(dir));
+            var fac = be.getFacade(dir);
+            if (fac != null) {
+                state.facades.put(dir, fac);
+            }
         }
 
         ItemStack stack = be.getItem(0);
@@ -84,7 +89,7 @@ public class BufferPipeRenderer implements BlockEntityRenderer<BufferPipeBlockEn
     ) {
         Identifier texture = IndustrialPipeModel.TEXTURE_STEEL;
 
-        // 1. Submit seamless 3D cylindrical pipe geometry
+        // 1. Submit seamless 3D cylindrical pipe geometry / fittings
         poseStack.pushPose();
         submitNodeCollector.submitCustomGeometry(
                 poseStack,
@@ -95,6 +100,7 @@ public class BufferPipeRenderer implements BlockEntityRenderer<BufferPipeBlockEn
                         state.connections,
                         IndustrialPipeMaterial.STEEL,
                         null,
+                        true,
                         state.lightCoords,
                         OverlayTexture.NO_OVERLAY
                 )
@@ -113,7 +119,7 @@ public class BufferPipeRenderer implements BlockEntityRenderer<BufferPipeBlockEn
             poseStack.popPose();
         }
 
-        // 3. Submit translucent sight-glass inspection windows
+        // 3. Submit translucent glass body
         poseStack.pushPose();
         submitNodeCollector.submitCustomGeometry(
                 poseStack,
@@ -122,10 +128,16 @@ public class BufferPipeRenderer implements BlockEntityRenderer<BufferPipeBlockEn
                         pose.pose(),
                         consumer,
                         state.connections,
+                        true,
                         state.lightCoords,
                         OverlayTexture.NO_OVERLAY
                 )
         );
         poseStack.popPose();
+
+        // 4. Submit 3D Pipe Facades
+        if (!state.facades.isEmpty()) {
+            PipeFacadeRenderer.submitFacades(state.facades, poseStack, submitNodeCollector, state.lightCoords);
+        }
     }
 }

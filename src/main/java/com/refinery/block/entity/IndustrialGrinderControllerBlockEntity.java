@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import java.util.Optional;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -381,9 +382,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             BlockState targetState = level.getBlockState(targetPos);
             BlockEntity targetBE = level.getBlockEntity(targetPos);
 
-            boolean isConveyor = targetState.getBlock() instanceof ConveyorBeltBlock
-                    || targetState.getBlock() instanceof RightAngleConveyorBeltBlock
-                    || targetState.getBlock() instanceof SlopedConveyorBeltBlock
+            boolean isConveyor = ConveyorBeltBlock.isAnyConveyorBlock(targetState)
                     || targetBE instanceof ConveyorBeltBlockEntity
                     || targetBE instanceof RightAngleConveyorBeltBlockEntity
                     || targetBE instanceof SlopedConveyorBeltBlockEntity;
@@ -397,6 +396,8 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
                     conveyorForward = RightAngleConveyorBeltBlock.getExitDirection(targetState);
                 } else if (targetState.getBlock() instanceof SlopedConveyorBeltBlock) {
                     conveyorForward = targetState.getValue(SlopedConveyorBeltBlock.FACING);
+                } else if (targetState.hasProperty(HorizontalDirectionalBlock.FACING)) {
+                    conveyorForward = targetState.getValue(HorizontalDirectionalBlock.FACING);
                 }
                 if (conveyorForward != null && isMultiblockPart(targetPos.relative(conveyorForward))) {
                     continue; // Skip conveyor pointing back into grinder

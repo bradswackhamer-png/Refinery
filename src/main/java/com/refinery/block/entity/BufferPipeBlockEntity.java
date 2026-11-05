@@ -2,17 +2,22 @@ package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
 import com.refinery.block.pipe.BufferPipeBlock;
+import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.block.pipe.PipeConnectionType;
+import com.refinery.block.pipe.PipeFacadeHelper;
 import com.refinery.menu.BufferPipeMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -37,6 +42,7 @@ public class BufferPipeBlockEntity extends BlockEntity implements WorldlyContain
 
     private final Map<Direction, PipeConnectionType> connections = new EnumMap<>(Direction.class);
     private final Map<Direction, Boolean> manualDisconnections = new EnumMap<>(Direction.class);
+    private final Map<Direction, PipeFacadeHelper.FacadeData> facades = new EnumMap<>(Direction.class);
 
     public BufferPipeBlockEntity(BlockPos pos, BlockState state) {
         super(RefineryMod.BUFFER_PIPE_BE.get(), pos, state);
@@ -52,6 +58,37 @@ public class BufferPipeBlockEntity extends BlockEntity implements WorldlyContain
 
     public Map<Direction, PipeConnectionType> getConnections() {
         return connections;
+    }
+
+    public Map<Direction, PipeFacadeHelper.FacadeData> getFacades() {
+        return facades;
+    }
+
+    public PipeFacadeHelper.@Nullable FacadeData getFacade(Direction dir) {
+        return facades.get(dir);
+    }
+
+    public void setFacade(Direction dir, PipeFacadeHelper.@Nullable FacadeData data) {
+        if (data == null) {
+            facades.remove(dir);
+        } else {
+            facades.put(dir, data);
+        }
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public void dropAllFacades() {
+        if (level == null || level.isClientSide() || facades.isEmpty()) return;
+        for (PipeFacadeHelper.FacadeData data : facades.values()) {
+            if (data != null) {
+                Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, data.toItemStack(1));
+            }
+        }
+        facades.clear();
+        setChanged();
     }
 
     public void toggleSideConnection(Direction dir) {
@@ -92,7 +129,7 @@ public class BufferPipeBlockEntity extends BlockEntity implements WorldlyContain
             if (targetBe instanceof BufferPipeBlockEntity) {
                 detected = PipeConnectionType.PIPE;
             } else if (targetBe instanceof IndustrialPipeBlockEntity pipeBe) {
-                if (pipeBe.getPipeType().handlesItems()) {
+                if (pipeBe.getPipeType().handlesItems() || pipeBe.getPipeType() == IndustrialPipeType.STRUCTURE || pipeBe.getPipeType() == IndustrialPipeType.VOID) {
                     detected = PipeConnectionType.PIPE;
                 }
             } else {
@@ -248,8 +285,21 @@ public class BufferPipeBlockEntity extends BlockEntity implements WorldlyContain
         super.saveAdditional(output);
         ContainerHelper.saveAllItems(output, this.items);
         for (Direction dir : Direction.values()) {
+            output.putString("Conn_" + dir.getName(), connections.getOrDefault(dir, PipeConnectionType.NONE).name());
             if (manualDisconnections.getOrDefault(dir, false)) {
                 output.putBoolean("manual_" + dir.getSerializedName(), true);
+            }
+        }
+        if (!facades.isEmpty()) {
+            var facList = output.childrenList("Facades");
+            for (Map.Entry<Direction, PipeFacadeHelper.FacadeData> entry : facades.entrySet()) {
+                PipeFacadeHelper.FacadeData fd = entry.getValue();
+                if (fd != null && fd.block() != null) {
+                    var child = facList.addChild();
+                    child.putInt("Side", entry.getKey().get3DDataValue());
+                    child.putString("Block", fd.getBlockId().toString());
+                    child.putBoolean("Hollow", fd.hollow());
+                }
             }
         }
     }
@@ -259,7 +309,28 @@ public class BufferPipeBlockEntity extends BlockEntity implements WorldlyContain
         super.loadAdditional(input);
         ContainerHelper.loadAllItems(input, this.items);
         for (Direction dir : Direction.values()) {
+            String cName = input.getStringOr("Conn_" + dir.getName(), PipeConnectionType.NONE.name());
+            try {
+                connections.put(dir, PipeConnectionType.valueOf(cName));
+            } catch (Exception e) {
+                connections.put(dir, PipeConnectionType.NONE);
+            }
             manualDisconnections.put(dir, input.getBooleanOr("manual_" + dir.getSerializedName(), false));
+        }
+        this.facades.clear();
+        for (ValueInput facIn : input.childrenListOrEmpty("Facades")) {
+            int sideIdx = facIn.getIntOr("Side", -1);
+            String blockIdStr = facIn.getStringOr("Block", "");
+            boolean hollow = facIn.getBooleanOr("Hollow", false);
+            if (sideIdx >= 0 && sideIdx < 6 && !blockIdStr.isEmpty()) {
+                Identifier id = Identifier.tryParse(blockIdStr);
+                if (id != null) {
+                    net.minecraft.world.level.block.Block blk = BuiltInRegistries.BLOCK.getValue(id);
+                    if (blk != null && blk != net.minecraft.world.level.block.Blocks.AIR) {
+                        this.facades.put(Direction.from3DDataValue(sideIdx), new PipeFacadeHelper.FacadeData(blk, hollow));
+                    }
+                }
+            }
         }
     }
 

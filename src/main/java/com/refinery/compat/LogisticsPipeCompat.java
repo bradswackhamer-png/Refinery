@@ -76,9 +76,12 @@ public class LogisticsPipeCompat {
     public static boolean injectItemIntoPipe(BlockEntity pipeBe, Direction fromDir, ItemStack stack) {
         if (pipeBe == null || stack == null || stack.isEmpty()) return false;
         if (pipeBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity pipe) {
-            Direction toDir = fromDir.getOpposite();
+            Direction toDir = pipe.chooseNextItemDirection(pipe, fromDir, stack);
             pipe.getTravelingItems().add(new com.refinery.block.entity.IndustrialPipeBlockEntity.TravelingItem(stack, fromDir, toDir, 0.05f));
             pipe.setChanged();
+            if (pipe.getLevel() != null && !pipe.getLevel().isClientSide()) {
+                pipe.getLevel().sendBlockUpdated(pipe.getBlockPos(), pipe.getBlockState(), pipe.getBlockState(), 3);
+            }
             return true;
         }
         if (!isLogisticsItemPipe(pipeBe)) return false;

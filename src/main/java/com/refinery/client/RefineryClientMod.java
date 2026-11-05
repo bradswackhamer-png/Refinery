@@ -29,6 +29,10 @@ import java.util.function.Supplier;
 @Mod(value = RefineryMod.MODID, dist = Dist.CLIENT)
 public class RefineryClientMod {
 
+    public static void openGuideBook() {
+        net.minecraft.client.Minecraft.getInstance().setScreenAndShow(new com.refinery.client.gui.RefineryGuideScreen());
+    }
+
     public RefineryClientMod(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::registerMenuScreens);
         modEventBus.addListener(this::registerRenderers);
@@ -60,6 +64,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.FEEDING_TROUGH_MENU.get(), FeedingTroughScreen::new);
         event.register((MenuType) RefineryMod.STORAGE_TANK_MENU.get(), StorageTankScreen::new);
         event.register((MenuType) RefineryMod.DIAMOND_PIPE_MENU.get(), DiamondPipeScreen::new);
+        event.register((MenuType) RefineryMod.WOOD_PIPE_MENU.get(), WoodPipeScreen::new);
         event.register((MenuType) RefineryMod.DIESEL_GENERATOR_MENU.get(), DieselGeneratorScreen::new);
         event.register((MenuType) RefineryMod.BUFFER_PIPE_MENU.get(), BufferPipeScreen::new);
     }

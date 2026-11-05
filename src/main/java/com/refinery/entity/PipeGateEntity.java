@@ -512,6 +512,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         // Execute actions every tick
         boolean shouldEmitRedstone = false;
         boolean hasPulsarActive = false;
+        int pulsarCount = 1;
         boolean hasAnyActive = false;
 
         Set<PipeWireColor> wiresToBroadcast = EnumSet.noneOf(PipeWireColor.class);
@@ -529,6 +530,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                     }
                 } else if (action.isPulsar() && isAutarchic()) {
                     hasPulsarActive = true;
+                    pulsarCount = Math.max(pulsarCount, action.getItemCount());
                 } else if (action.isWireAction()) {
                     PipeWireColor color = action.getWireColor();
                     if (color != null) wiresToBroadcast.add(color);
@@ -546,7 +548,7 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             this.pulsarTimer++;
             if (this.pulsarTimer >= 20) {
                 this.pulsarTimer = 0;
-                executePulsar(level(), pipePos, facing);
+                executePulsar(level(), pipePos, facing, pulsarCount);
             }
         } else {
             this.pulsarTimer = 0;
@@ -759,20 +761,25 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
         };
     }
 
-    private void executePulsar(Level level, BlockPos basePos, Direction facing) {
+    private void executePulsar(Level level, BlockPos basePos, Direction facing, int count) {
         PipeAndTarget pat = findPipeAndInventory(level, basePos, facing);
         if (pat == null) return;
 
         BlockEntity invBe = level.getBlockEntity(pat.invPos);
+        com.refinery.block.entity.IndustrialPipeBlockEntity pipeBe = pat.pipeBe instanceof com.refinery.block.entity.IndustrialPipeBlockEntity p ? p : null;
 
         // 1. Item Pull Action from Container
         if (invBe instanceof Container container) {
             for (int slot = 0; slot < container.getContainerSize(); slot++) {
                 ItemStack st = container.getItem(slot);
                 if (!st.isEmpty()) {
-                    ItemStack one = st.copyWithCount(1);
+                    if (pipeBe != null && !pipeBe.matchesWoodFilter(st)) {
+                        continue;
+                    }
+                    int n = Math.min(count, st.getCount());
+                    ItemStack one = st.copyWithCount(n);
                     if (LogisticsPipeCompat.injectItemIntoPipe(pat.pipeBe, pat.fromPipeToInv, one.copy())) {
-                        container.removeItem(slot, 1);
+                        container.removeItem(slot, n);
                         spawnPulsarEffect(level, pat.pipePos);
                         return;
                     }
@@ -780,10 +787,10 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                     if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pat.pipePos, null);
                     if (pipeHandler != null) {
                         try (Transaction tx = Transaction.openRoot()) {
-                            int ins = pipeHandler.insert(ItemResource.of(one), 1, tx);
+                            int ins = pipeHandler.insert(ItemResource.of(one), n, tx);
                             if (ins > 0) {
                                 tx.commit();
-                                container.removeItem(slot, 1);
+                                container.removeItem(slot, ins);
                                 spawnPulsarEffect(level, pat.pipePos);
                                 return;
                             }
@@ -800,10 +807,14 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
             for (int s = 0; s < itemHandler.size(); s++) {
                 ItemResource res = itemHandler.getResource(s);
                 if (!res.isEmpty() && itemHandler.getAmountAsLong(s) > 0) {
-                    ItemStack one = res.toStack(1);
+                    if (pipeBe != null && !pipeBe.matchesWoodFilter(res.toStack(1))) {
+                        continue;
+                    }
+                    int n = (int) Math.min(count, itemHandler.getAmountAsLong(s));
+                    ItemStack one = res.toStack(n);
                     if (LogisticsPipeCompat.injectItemIntoPipe(pat.pipeBe, pat.fromPipeToInv, one.copy())) {
                         try (Transaction tx = Transaction.openRoot()) {
-                            itemHandler.extract(s, res, 1, tx);
+                            itemHandler.extract(s, res, n, tx);
                             tx.commit();
                         }
                         spawnPulsarEffect(level, pat.pipePos);
@@ -813,9 +824,9 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                     if (pipeHandler == null) pipeHandler = level.getCapability(Capabilities.Item.BLOCK, pat.pipePos, null);
                     if (pipeHandler != null) {
                         try (Transaction tx = Transaction.openRoot()) {
-                            int ins = pipeHandler.insert(res, 1, tx);
+                            int ins = pipeHandler.insert(res, n, tx);
                             if (ins > 0) {
-                                itemHandler.extract(s, res, 1, tx);
+                                itemHandler.extract(s, res, ins, tx);
                                 tx.commit();
                                 spawnPulsarEffect(level, pat.pipePos);
                                 return;

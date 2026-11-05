@@ -78,7 +78,12 @@ public class BufferPipeBlock extends Block implements EntityBlock {
                 }
             }
             if (!anyConnected) {
-                return Block.box(4.8, 4.8, 3.2, 11.2, 11.2, 12.8);
+                shape = Block.box(4.8, 4.8, 3.2, 11.2, 11.2, 12.8);
+            }
+            for (Direction dir : Direction.values()) {
+                if (pipeBe.getFacade(dir) != null) {
+                    shape = Shapes.or(shape, IndustrialPipeBlock.FACADE_SHAPES.get(dir));
+                }
             }
             return shape;
         }
@@ -137,10 +142,51 @@ public class BufferPipeBlock extends Block implements EntityBlock {
         if (stack.getItem() instanceof com.refinery.item.PipeGateItem || stack.getItem() instanceof com.refinery.item.PipeWireItem) {
             return InteractionResult.PASS;
         }
+        if (stack.getItem() instanceof com.refinery.item.PipeFacadeItem facadeItem) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof BufferPipeBlockEntity pipeBe) {
+                Direction targetSide = PipeFacadeHelper.resolveTargetFace(pos, hitResult);
+                Block facadeBlock = PipeFacadeHelper.getFacadeBlock(stack);
+                PipeFacadeHelper.FacadeData newData = new PipeFacadeHelper.FacadeData(facadeBlock, facadeItem.isHollow());
+                PipeFacadeHelper.FacadeData existing = pipeBe.getFacade(targetSide);
+                if (existing != null && existing.block() == newData.block() && existing.hollow() == newData.hollow()) {
+                    return InteractionResult.PASS;
+                }
+                if (!level.isClientSide()) {
+                    if (existing != null) {
+                        ItemStack oldStack = existing.toItemStack(1);
+                        if (!player.getInventory().add(oldStack)) {
+                            Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, oldStack);
+                        }
+                    }
+                    pipeBe.setFacade(targetSide, newData);
+                    SoundType soundType = facadeBlock.defaultBlockState().getSoundType(level, pos, player);
+                    level.playSound(null, pos, soundType.getPlaceSound(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
         if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
-            if (!level.isClientSide()) {
-                BlockEntity be = level.getBlockEntity(pos);
-                if (be instanceof BufferPipeBlockEntity pipeBe) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof BufferPipeBlockEntity pipeBe) {
+                Direction targetSide = PipeFacadeHelper.resolveTargetFace(pos, hitResult);
+                PipeFacadeHelper.FacadeData existingFacade = pipeBe.getFacade(targetSide);
+                if (existingFacade != null && player.isShiftKeyDown()) {
+                    if (!level.isClientSide()) {
+                        pipeBe.setFacade(targetSide, null);
+                        ItemStack drop = existingFacade.toItemStack(1);
+                        if (!player.getInventory().add(drop)) {
+                            Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                        }
+                        SoundType soundType = existingFacade.block().defaultBlockState().getSoundType(level, pos, player);
+                        level.playSound(null, pos, soundType.getBreakSound(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    }
+                    return InteractionResult.SUCCESS;
+                }
+                if (!level.isClientSide()) {
                     pipeBe.toggleSideConnection(hitResult.getDirection());
                 }
             }
@@ -162,6 +208,25 @@ public class BufferPipeBlock extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (player.isShiftKeyDown()) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof BufferPipeBlockEntity pipeBe) {
+                Direction targetSide = PipeFacadeHelper.resolveTargetFace(pos, hitResult);
+                PipeFacadeHelper.FacadeData existingFacade = pipeBe.getFacade(targetSide);
+                if (existingFacade != null) {
+                    if (!level.isClientSide()) {
+                        pipeBe.setFacade(targetSide, null);
+                        ItemStack drop = existingFacade.toItemStack(1);
+                        if (!player.getInventory().add(drop)) {
+                            Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                        }
+                        SoundType soundType = existingFacade.block().defaultBlockState().getSoundType(level, pos, player);
+                        level.playSound(null, pos, soundType.getBreakSound(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    }
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        }
         if (!player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
                 BlockEntity be = level.getBlockEntity(pos);
@@ -179,6 +244,7 @@ public class BufferPipeBlock extends Block implements EntityBlock {
         if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof BufferPipeBlockEntity pipeBe) {
+                pipeBe.dropAllFacades();
                 Containers.dropContents(level, pos, pipeBe);
                 level.updateNeighbourForOutputSignal(pos, this);
             }
@@ -191,6 +257,7 @@ public class BufferPipeBlock extends Block implements EntityBlock {
         if (level instanceof Level l && !l.isClientSide()) {
             BlockEntity be = l.getBlockEntity(pos);
             if (be instanceof BufferPipeBlockEntity pipeBe) {
+                pipeBe.dropAllFacades();
                 Containers.dropContents(l, pos, pipeBe);
                 l.updateNeighbourForOutputSignal(pos, this);
             }

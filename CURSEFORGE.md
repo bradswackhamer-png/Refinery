@@ -1,4 +1,4 @@
-﻿# CurseForge Upload Template & Metadata Guide: Industrial Refinery
+# CurseForge Upload Template & Metadata Guide: Industrial Refinery
 
 This document contains everything needed to publish and update **Industrial Refinery** on CurseForge. You can copy-paste each section directly into the CurseForge Project Creation and File Upload forms.
 
@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.9.0.jar`
+`refinery-1.10.10.jar`
 
 ### Display Name
-`Industrial Refinery 1.9.0 (NeoForge 26.3)`
+`Industrial Refinery 1.10.10 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,170 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.10.10
+
+### What's New in v1.10.10:
+- **BuildCraft-Style Pipe Facades (`refinery:pipe_facade` & `refinery:pipe_facade_hole`)**:
+  - Added **Solid Pipe Facades** (`refinery:pipe_facade`) and **Pass-Through (Hollow) Pipe Facades** (`refinery:pipe_facade_hole`) that conceal pipes behind 2/16-inch (`0.125` block) structural wall panels on any of the 6 faces (`DOWN`, `UP`, `NORTH`, `SOUTH`, `WEST`, `EAST`) of any Industrial Pipe or Buffer Pipe.
+  - **Live Registry Scanning & Dynamic Texture Wrapping**:
+    - Automatically scans `BuiltInRegistries.BLOCK` at runtime to support any full-cube, opaque block from Vanilla, Industrial Refinery (including all 17 Corrugated Steel Panels, metal/ore storage blocks, Oil Shale, and industrial casings), and third-party mods without pre-generating static asset files per block.
+    - Excludes non-solid or problematic blocks (glass, ice, leaves, grass blocks, slime/honey, TNT, redstone components, spawners, portals, liquids, falling blocks, and block entities).
+    - Wraps the disguised block's native `TextureAtlasSprite`s directly onto the facade geometry on `TextureAtlas.LOCATION_BLOCKS`, preserving **LabPBR 1.3 metallic specular reflections (`_s`)** and **Parallax Occlusion Mapping (`_n`)** in Complementary Unbound and Iris shaders.
+  - **Crafting & Conversion Recipes**:
+    - **Solid Pipe Facade (x8)**: 1 eligible full block in the center surrounded by 8 Copper Item Pipes (`refinery:copper_item_pipe`).
+    - **Solid <-> Pass-Through Conversion**: Craft any Solid Pipe Facade 1-to-1 into a Pass-Through Facade (with a centered pipe opening) and back at any time.
+  - **In-World Placement & Removal**:
+    - Right-click any pipe with a facade to attach it to the clicked side; Shift + Right-Click with a **Refinery Wrench** or empty hand to pop the facade off.
+- **Structure Pipe (`refinery:structure_pipe`)**:
+  - Added an inexpensive structural pipe (`2 Cobblestone + 1 Gravel -> 8 Structure Pipes`) with a solid cobblestone-gray finish.
+  - Transfers neither items nor fluids, serving as a dedicated structural conduit for bridging **Pipe Wires** (`Red`, `Blue`, `Green`, `Yellow`), mounting **Pipe Logic Gates**, and anchoring **Pipe Facades**.
+
+# Industrial Refinery v1.10.9
+
+### What's New in v1.10.9:
+- **Cross-Mod Conveyor Belt Transition & Item Sticking (Ole Saw Mill Compatibility)**:
+  - Fixed item collision box height in `ConveyorBeltBlock` and `RightAngleConveyorBeltBlock` from 4.0 px (`0.25`) to 5.0 px (`0.3125`), matching the standard 5-pixel surface height used by adjacent conveyor mods such as Ole Saw Mill (`olesawmill:sawmill_conveyor`). This eliminates the 1-pixel collision lip that previously stopped items from crossing the block seam.
+  - Implemented boundary handoff release in `ConveyorBeltBlockEntity` and `RightAngleConveyorBeltBlockEntity`: once an item physically crosses the forward boundary into a connected conveyor belt block, our conveyor immediately yields ownership, eliminating conflicting dual-conveyor velocity overrides and seam jitter.
+  - Added forward velocity boost (`1.3x`) when items approach the exit threshold of an attached conveyor belt, guaranteeing uninterrupted gliding across block boundaries.
+
+# Industrial Refinery v1.10.7
+
+### What's New in v1.10.7:
+- **LabPBR 1.3 & POM (Parallax Occlusion Mapping) Support for Corrugated Steel Panels**:
+  - Full LabPBR 1.3 Normal Maps (`_n.png`) and Specular Maps (`_s.png`) added for all 17 Corrugated Steel Panel variants (raw steel and 16 dyed colors) across both side panels and cross-section caps (102 textures total).
+  - **Parallax Occlusion Mapping (POM) Depth**: Encoded physical height profiles into the Alpha channel of `_n.png` (rib crests at 245, valleys at 36, stiffening micro-ribs at 90), rendering authentic 3D depth, sloped folds, and raymarched self-shadows in shaders like Complementary Unbound.
+  - **DirectX Normal Vectors & Ambient Occlusion**: Analytically derived tangent-space normal vectors with DirectX Y-down orientation and linear contact ambient occlusion baked into the Blue channel (`B = 140-250`) for deep contact shadows in panel crevices.
+  - **Metallic Specular Reflectance (LabPBR 1.3)**:
+    - Raw Corrugated Steel Panel configured with Hardcoded Iron/Steel ID (`G = 230`) for physically accurate metallic Fresnel reflectance.
+    - 16 Dyed Corrugated Steel Panels configured with Custom Metal mode (`G = 255`) for glossy, colored metallic specular highlights matching the panel's powder-coat color.
+    - Smoothness calibrated to a crisp satin industrial metal finish (`R = 186-214`, roughness 0.16–0.27).
+    - Porosity set to non-porous metal (`B = 0`), creating realistic rainwater slick reflections during rainfall.
+- **Enhanced Galvanized & Powder-Coat Diffuse Textures**:
+  - Implemented Voronoi crystallization zinc spangle lattices on the raw Corrugated Steel Panel diffuse map.
+  - Refined specular crest highlights, shadow contrast in trough valleys, and cold-rolling mill micro-streaks across all variants.
+
+# Industrial Refinery v1.10.5
+
+### What's New in v1.10.5:
+- **Steam Bucket Creative-Only Restriction**:
+  - Gaseous steam can no longer be collected into an open bucket in Survival mode. Attempting to scoop steam plays a vapor dissipation sound (`SoundEvents.FIRE_EXTINGUISH`) without filling the bucket.
+  - The Steam Bucket (`refinery:steam_bucket`) remains accessible in Creative mode for world building and testing, featuring an explanatory tooltip: *"Creative Only: Steam cannot be contained in an open bucket in Survival."*
+- **Item Pipe Traveling Item Traversal & Continuous Visibility**:
+  - Replaced legacy `ItemStackWithSlot` serialization with dedicated NBT `childrenList` storage for `"TravelingItems"`, fixing packet encoding failures where direction and progress bitmasks exceeded the Minecraft `UNSIGNED_BYTE` 255-slot limitation.
+  - Added immediate block entity update broadcasts (`sendBlockUpdated` with flag 3) when an item exits a pipe and enters an adjacent pipe block entity, ensuring uninterrupted visual traversal through every pipe piece across the entire transport network.
+  - Increased in-transit item synchronization frequency to every 2 ticks for responsive client-side progress tracking and sub-tick partial tick animation.
+  - Applied minimum ambient lighting (`0x00D000D0`) to traveling items inside transparent pipe casings, ensuring items remain distinctly visible even when passing through dark, enclosed, or unlit factory environments.
+
+# Industrial Refinery v1.10.3
+
+### What's New in v1.10.3:
+- **Recipe Syntax Migration (Minecraft 26.3 / 1.21.4+)**:
+  - Migrated Corrugated Steel Panel recipes (shaped, shapeless re-dyeing, water-bucket washing, stonecutting) to Minecraft 26.3 string-based ingredient IDs (`"#c:corrugated_steel_panels"`, `"refinery:corrugated_steel_panel"`, etc.), resolving recipe registry deserialization warnings.
+- **Model & Blockstate Resolution**:
+  - Added missing item model for `oil_shale` (`assets/refinery/models/item/oil_shale.json`).
+  - Added missing blockstate and block model for `buffer_pipe` (`assets/refinery/blockstates/buffer_pipe.json`, `models/block/buffer_pipe.json`).
+  - Cleaned up `casting_input_port`, `casting_output_port`, `melter_input_port`, and `melter_output_port` blockstates by removing invalid `facing=up` and `facing=down` entries, aligning with `HorizontalDirectionalBlock`.
+
+# Industrial Refinery v1.10.2
+
+### What's New in v1.10.2:
+- **Corrugated Steel Panels (Industrial Cladding & Siding)**:
+  - Added the **Corrugated Steel Panel** (`refinery:corrugated_steel_panel`) and **16 dyed color variants** (White, Orange, Magenta, Light Blue, Yellow, Lime, Pink, Gray, Light Gray, Cyan, Purple, Blue, Brown, Green, Red, Black).
+  - Modeled after industrial R-panel / standing seam corrugated steel sheet siding with 64x64 high-resolution textures, specular ridge crests, directional drop shadows in the troughs, fine stiffening micro-ribs, and metallic galvanized stippling.
+  - **100% Seamless Wall & Roof Flow**: Rib spacing (16-pixel pitch, 4 major ribs per block) and micro-flutes align mathematically with zero boundary lines or edge seams, allowing walls and roofs of any height and width to tile into an uninterrupted continuous corrugated sheet metal surface.
+  - **3-Axis Pillar Orientation**: Can be placed vertically (`axis=y`) for warehouse/factory siding, or horizontally (`axis=x`, `axis=z`) for metal roofing and horizontal industrial cladding. The cross-section end faces render the corrugated profile plate.
+  - **Full Crafting & Dyeing Suite**:
+    - Crafted with 4 Iron Ingots in a 2x2 grid -> 4 Corrugated Steel Panels.
+    - Stonecutting support: 1 Iron Ingot -> 2 Corrugated Steel Panels.
+    - 8 Corrugated Steel Panels around any dye -> 8 Dyed Corrugated Steel Panels.
+    - Direct 1-to-1 re-dyeing with any dye.
+    - Washing back to unpainted galvanized steel with a water bucket in a crafting grid.
+
+# Industrial Refinery v1.10.1
+
+### What's New in v1.10.1:
+- **Bituminous Tar Sands & Animated Crude Oil Sync**:
+  - Synchronized Crude Oil still and flowing fluid textures with animated 32x1024 and 16x512 high-resolution textures and `.mcmeta` animation timings.
+  - Replaced standard Oil Sand with authentic bituminous tar sand texturing.
+  - Added **Oil Red Sand** (`refinery:oil_red_sand`) with badlands red sand bituminous texture and custom reddish dust particles (`0x8C381E`).
+  - Added **Oil Shale** (`refinery:oil_shale`) stone-tier bituminous ore block mineable with pickaxe.
+  - Fully integrated into world generation: Oil Red Sand generates in badlands and red sand surface deposits, while Oil Shale lines subterranean deepslate and cavern oil reservoirs.
+  - Both new blocks are fully supported in the Industrial Grinder and Petroleum Refinery distillation column for crude oil extraction.
+- **Heavy-Duty 3D Industrial Pipe End Caps**:
+  - Modeled 3D industrial pipe caps on all unconnected pipe termination ends and standalone pipes (`IndustrialPipeModel`).
+  - Features an outer sleeve collar wrapping the pipe end, a circular front cap plate, and a raised central hex nut / bolt head boss for a heavy industrial appearance.
+- **Pipe Item Ejection on Dead Ends & Full Containers**:
+  - When traveling items in an item pipe reach a dead end (unconnected pipe terminal) or an attached container whose inventory is full or rejects the item, the items are cleanly ejected out onto the ground with realistic velocity and sound (`IndustrialPipeBlockEntity`).
+  - Partial insertion leftovers are similarly ejected rather than looping or freezing inside the pipe network.
+
+# Industrial Refinery v1.9.9
+
+### What's New in v1.9.9:
+- **Multi-Smelter Auto-Export to Conveyors & Automation**:
+  - The Industrial Multi-Smelter now automatically detects conveyor belts placed in front of it (in front of the Controller or front face) or adjacent to its Output Port, and auto-exports finished smelted items (such as charcoal from wood/logs, ingots, glass).
+  - Automatically verifies conveyor direction to ensure items are never sent into backward-running belts.
+  - Features single-item spacing checks on conveyor belt surfaces, allowing smelted products to ride along factory lines in neatly spaced rows.
+  - Also auto-exports into adjacent item pipes, chests, barrels, hoppers, and external item capabilities.
+- **Metal Press & Blast Furnace Auto-Export Parity**:
+  - The Metal Press now automatically exports finished stamped items (plates, rods, gears) onto conveyors or containers at its bed discharge or in front.
+  - Upgraded Blast Furnace auto-export with full conveyor orientation verification and smooth item spacing.
+
+# Industrial Refinery v1.9.8
+
+### What's New in v1.9.8:
+- **Item Pipe Traveling Item Visibility & Rendering**:
+  - Implemented 360-degree clear cylindrical glass pipe bodies with heavy industrial structural collar rings for all item pipes (Wood, Stone, Iron, Gold, Diamond, Netherite, Emerald, Quartz, Obsidian, Void, and Buffer).
+  - Traveling items are now fully visible inside pipes as they move between inventories.
+  - Smooth partial-tick client interpolation animates items traveling between blocks seamlessly.
+  - Fixed client network synchronization and added full NBT persistence for traveling items in transit.
+- **Multi-Smelter GUI Alignment & Dark Gunmetal Styling**:
+  - Completely restyled the Industrial Multi-Smelter GUI with dark gunmetal industrial steel styling matching the Grinder and Metal Press.
+  - Aligned all 8 input and 8 output slots and the centered fuel slot with clean recessed slot wells.
+  - Fixed label positioning and removed clashing text overlays.
+  - Added energy gauge rendering with hover tooltip, animated combustion flame and induction heating indicators, and dedicated 2px cook progress bar grooves under each input slot.
+
+# Industrial Refinery v1.9.7
+
+### What's New in v1.9.7:
+- **Guide Book Fix**: The Industrial Field Manual now responds to clicks (sidebar, Table of Contents, tabs, Back button, layer pills).
+
+# Industrial Refinery v1.9.6
+
+### What's New in v1.9.6:
+- **Comprehensive Informative Pipe Tooltips**:
+  - Implemented `PipeBlockItem` across all 22 industrial pipes.
+  - Hovering over any pipe item now displays its functional role, fluid transfer rates (mB/t), buffer capacities, item travel speeds, and operational tips (filter GUI, wrench configuration, and pulse gate requirements).
+
+# Industrial Refinery v1.9.5
+
+### What's New in v1.9.5:
+- **In-Game Industrial Field Manual / Guide Book**:
+  - Added the craftable Industrial Field Manual (`refinery:guide_book`) with a comprehensive in-game GUI.
+  - Interactive Table of Contents with category filtering across all mod machines, tools, pipes, and logistics.
+  - Multiblock pages feature an exact Bill of Materials (counts and item icons) and an interactive Layer Layout Viewer with 2D layer-by-layer blueprints (`L0` to `L4`), orientation guides, cell tooltips, and recipes.
+
+# Industrial Refinery v1.9.4
+
+### What's New in v1.9.4:
+- **Wood Extraction Pipe Filter GUI**:
+  - Right-clicking a Wood Item Pipe opens a 9-slot filter inventory (3x3 grid) to configure which items are allowed to be extracted.
+  - An empty filter extracts any item; when configured, only matching items are extracted.
+- **Autarchic Pulse Gate Extraction Gating**:
+  - Wood Item Extraction Pipes now only extract items when pulsed by an Autarchic Pulse Gate, preventing continuous unmetered passive draining.
+  - Autarchic pulsar actions strictly honor the Wood Pipe filter configuration.
+
+# Industrial Refinery v1.9.3
+
+### What's New in v1.9.3:
+- **Cross-Mod Conveyor Belt Handoff & Trapped Item Resolution**:
+  - Implemented universal cross-mod conveyor detection, preventing conveyor belts from mistakenly identifying external conveyor blocks (such as Ole Saw Mill's conveyors) as static inventory endpoints.
+  - Eliminated the infinite capability insertion/respawn cycle at conveyor transfer seams that caused items to bunch up and become unpickable.
+  - Adjusted conveyor item surface height to $pos.getY() + 0.32$, allowing items to glide smoothly across block transitions without catching on adjacent conveyor edges.
+
+# Industrial Refinery v1.9.2
+
+### What's New in v1.9.2:
+- **Autarchic Pulse (Item) x5 and x10 modes**: Autarchic gates can now pull 5 or 10 items at a time (instead of 1) per pulse.
 # Industrial Refinery v1.9.0
 
 ### What's New in v1.9.0:

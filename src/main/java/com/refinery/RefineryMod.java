@@ -26,6 +26,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -59,6 +60,24 @@ public class RefineryMod {
     public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
+    public static final DeferredRegister<net.minecraft.core.component.DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
+    public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
+
+    public static final DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<String>> FACADE_BLOCK =
+            DATA_COMPONENT_TYPES.register("facade_block", () -> net.minecraft.core.component.DataComponentType.<String>builder()
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                    .build());
+
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.refinery.recipe.PipeFacadeRecipe>> PIPE_FACADE_RECIPE_SERIALIZER =
+            RECIPE_SERIALIZERS.register("pipe_facade_crafting", () -> new net.minecraft.world.item.crafting.RecipeSerializer<>(
+                    com.mojang.serialization.MapCodec.unit(com.refinery.recipe.PipeFacadeRecipe::new),
+                    net.minecraft.network.codec.StreamCodec.unit(new com.refinery.recipe.PipeFacadeRecipe())));
+
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.refinery.recipe.PipeFacadeSwapRecipe>> PIPE_FACADE_SWAP_SERIALIZER =
+            RECIPE_SERIALIZERS.register("pipe_facade_swap", () -> new net.minecraft.world.item.crafting.RecipeSerializer<>(
+                    com.mojang.serialization.MapCodec.unit(com.refinery.recipe.PipeFacadeSwapRecipe::new),
+                    net.minecraft.network.codec.StreamCodec.unit(new com.refinery.recipe.PipeFacadeSwapRecipe())));
 
     public static final java.util.function.Supplier<AttachmentType<Boolean>> OIL_CHUNK_BURNT = ATTACHMENT_TYPES.register(
             "oil_chunk_burnt",
@@ -316,6 +335,83 @@ public class RefineryMod {
             OilSandBlock::new);
     public static final DeferredItem<BlockItem> OIL_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_sand", OIL_SAND);
 
+    public static final DeferredBlock<OilSandBlock> OIL_RED_SAND = BLOCKS.registerBlock("oil_red_sand",
+            p -> new OilSandBlock(p, 0x8C381E));
+    public static final DeferredItem<BlockItem> OIL_RED_SAND_ITEM = ITEMS.registerSimpleBlockItem("oil_red_sand", OIL_RED_SAND);
+
+    public static final DeferredBlock<Block> OIL_SHALE = BLOCKS.registerBlock("oil_shale",
+            p -> new Block(p.sound(SoundType.STONE).strength(2.0f, 3.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> OIL_SHALE_ITEM = ITEMS.registerSimpleBlockItem("oil_shale", OIL_SHALE);
+
+    // === Corrugated Steel Panels (Industrial Siding & Roofing) ===
+    public static final DeferredBlock<RotatedPillarBlock> CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("corrugated_steel_panel", CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> WHITE_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("white_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> WHITE_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("white_corrugated_steel_panel", WHITE_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> ORANGE_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("orange_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> ORANGE_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("orange_corrugated_steel_panel", ORANGE_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> MAGENTA_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("magenta_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> MAGENTA_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("magenta_corrugated_steel_panel", MAGENTA_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> LIGHT_BLUE_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("light_blue_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> LIGHT_BLUE_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("light_blue_corrugated_steel_panel", LIGHT_BLUE_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> YELLOW_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("yellow_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> YELLOW_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("yellow_corrugated_steel_panel", YELLOW_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> LIME_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("lime_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> LIME_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("lime_corrugated_steel_panel", LIME_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> PINK_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("pink_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> PINK_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("pink_corrugated_steel_panel", PINK_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> GRAY_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("gray_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> GRAY_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("gray_corrugated_steel_panel", GRAY_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> LIGHT_GRAY_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("light_gray_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> LIGHT_GRAY_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("light_gray_corrugated_steel_panel", LIGHT_GRAY_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> CYAN_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("cyan_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> CYAN_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("cyan_corrugated_steel_panel", CYAN_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> PURPLE_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("purple_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> PURPLE_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("purple_corrugated_steel_panel", PURPLE_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> BLUE_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("blue_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> BLUE_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("blue_corrugated_steel_panel", BLUE_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> BROWN_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("brown_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> BROWN_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("brown_corrugated_steel_panel", BROWN_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> GREEN_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("green_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> GREEN_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("green_corrugated_steel_panel", GREEN_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> RED_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("red_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> RED_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("red_corrugated_steel_panel", RED_CORRUGATED_STEEL_PANEL);
+
+    public static final DeferredBlock<RotatedPillarBlock> BLACK_CORRUGATED_STEEL_PANEL = BLOCKS.registerBlock("black_corrugated_steel_panel",
+            p -> new RotatedPillarBlock(p.sound(SoundType.METAL).strength(2.5f, 6.0f).requiresCorrectToolForDrops()));
+    public static final DeferredItem<BlockItem> BLACK_CORRUGATED_STEEL_PANEL_ITEM = ITEMS.registerSimpleBlockItem("black_corrugated_steel_panel", BLACK_CORRUGATED_STEEL_PANEL);
+
     // === Tin & Bronze Ores & Blocks ===
     public static final DeferredBlock<Block> TIN_ORE = BLOCKS.registerBlock("tin_ore",
             p -> new Block(p.sound(SoundType.STONE).strength(3.0f, 3.0f).requiresCorrectToolForDrops()));
@@ -474,100 +570,134 @@ public class RefineryMod {
     // Wood (Extraction)
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> WOOD_ITEM_PIPE = BLOCKS.registerBlock("wood_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.WOOD));
-    public static final DeferredItem<BlockItem> WOOD_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("wood_item_pipe", WOOD_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> WOOD_ITEM_PIPE_ITEM = ITEMS.registerItem("wood_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(WOOD_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> WOOD_FLUID_PIPE = BLOCKS.registerBlock("wood_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.WOOD));
-    public static final DeferredItem<BlockItem> WOOD_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("wood_fluid_pipe", WOOD_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> WOOD_FLUID_PIPE_ITEM = ITEMS.registerItem("wood_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(WOOD_FLUID_PIPE.get(), p));
 
     // Copper
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> COPPER_ITEM_PIPE = BLOCKS.registerBlock("copper_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.COPPER));
-    public static final DeferredItem<BlockItem> COPPER_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("copper_item_pipe", COPPER_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> COPPER_ITEM_PIPE_ITEM = ITEMS.registerItem("copper_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(COPPER_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> COPPER_FLUID_PIPE = BLOCKS.registerBlock("copper_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.COPPER));
-    public static final DeferredItem<BlockItem> COPPER_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("copper_fluid_pipe", COPPER_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> COPPER_FLUID_PIPE_ITEM = ITEMS.registerItem("copper_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(COPPER_FLUID_PIPE.get(), p));
 
     // Iron
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> IRON_ITEM_PIPE = BLOCKS.registerBlock("iron_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.IRON));
-    public static final DeferredItem<BlockItem> IRON_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("iron_item_pipe", IRON_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> IRON_ITEM_PIPE_ITEM = ITEMS.registerItem("iron_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(IRON_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> IRON_FLUID_PIPE = BLOCKS.registerBlock("iron_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.IRON));
-    public static final DeferredItem<BlockItem> IRON_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("iron_fluid_pipe", IRON_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> IRON_FLUID_PIPE_ITEM = ITEMS.registerItem("iron_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(IRON_FLUID_PIPE.get(), p));
 
     // Steel
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> STEEL_ITEM_PIPE = BLOCKS.registerBlock("steel_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.STEEL));
-    public static final DeferredItem<BlockItem> STEEL_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("steel_item_pipe", STEEL_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> STEEL_ITEM_PIPE_ITEM = ITEMS.registerItem("steel_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(STEEL_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> STEEL_FLUID_PIPE = BLOCKS.registerBlock("steel_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.STEEL));
-    public static final DeferredItem<BlockItem> STEEL_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("steel_fluid_pipe", STEEL_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> STEEL_FLUID_PIPE_ITEM = ITEMS.registerItem("steel_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(STEEL_FLUID_PIPE.get(), p));
 
     // Gold (Insertion)
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> GOLD_ITEM_PIPE = BLOCKS.registerBlock("gold_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.GOLD));
-    public static final DeferredItem<BlockItem> GOLD_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("gold_item_pipe", GOLD_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> GOLD_ITEM_PIPE_ITEM = ITEMS.registerItem("gold_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(GOLD_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> GOLD_FLUID_PIPE = BLOCKS.registerBlock("gold_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.GOLD));
-    public static final DeferredItem<BlockItem> GOLD_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("gold_fluid_pipe", GOLD_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> GOLD_FLUID_PIPE_ITEM = ITEMS.registerItem("gold_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(GOLD_FLUID_PIPE.get(), p));
 
     // Diamond (Sorting)
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> DIAMOND_ITEM_PIPE = BLOCKS.registerBlock("diamond_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.DIAMOND));
-    public static final DeferredItem<BlockItem> DIAMOND_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("diamond_item_pipe", DIAMOND_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> DIAMOND_ITEM_PIPE_ITEM = ITEMS.registerItem("diamond_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(DIAMOND_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> DIAMOND_FLUID_PIPE = BLOCKS.registerBlock("diamond_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.DIAMOND));
-    public static final DeferredItem<BlockItem> DIAMOND_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("diamond_fluid_pipe", DIAMOND_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> DIAMOND_FLUID_PIPE_ITEM = ITEMS.registerItem("diamond_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(DIAMOND_FLUID_PIPE.get(), p));
 
     // Emerald (Round-Robin Item Pipe)
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> EMERALD_ITEM_PIPE = BLOCKS.registerBlock("emerald_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.EMERALD));
-    public static final DeferredItem<BlockItem> EMERALD_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("emerald_item_pipe", EMERALD_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> EMERALD_ITEM_PIPE_ITEM = ITEMS.registerItem("emerald_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(EMERALD_ITEM_PIPE.get(), p));
 
     // Legacy & Utility Pipes
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> CAST_IRON_FLUID_PIPE = BLOCKS.registerBlock("cast_iron_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.CAST_IRON));
-    public static final DeferredItem<BlockItem> CAST_IRON_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("cast_iron_fluid_pipe", CAST_IRON_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> CAST_IRON_FLUID_PIPE_ITEM = ITEMS.registerItem("cast_iron_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(CAST_IRON_FLUID_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> BRASS_ITEM_PIPE = BLOCKS.registerBlock("brass_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.BRASS));
-    public static final DeferredItem<BlockItem> BRASS_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("brass_item_pipe", BRASS_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> BRASS_ITEM_PIPE_ITEM = ITEMS.registerItem("brass_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(BRASS_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> FLUID_EXTRACTOR_PIPE = BLOCKS.registerBlock("fluid_extractor_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID_EXTRACTOR, com.refinery.block.pipe.IndustrialPipeMaterial.STEEL));
-    public static final DeferredItem<BlockItem> FLUID_EXTRACTOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("fluid_extractor_pipe", FLUID_EXTRACTOR_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> FLUID_EXTRACTOR_PIPE_ITEM = ITEMS.registerItem("fluid_extractor_pipe",
+            p -> new com.refinery.item.PipeBlockItem(FLUID_EXTRACTOR_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> ITEM_EXTRACTOR_PIPE = BLOCKS.registerBlock("item_extractor_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM_EXTRACTOR, com.refinery.block.pipe.IndustrialPipeMaterial.STEEL));
-    public static final DeferredItem<BlockItem> ITEM_EXTRACTOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("item_extractor_pipe", ITEM_EXTRACTOR_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> ITEM_EXTRACTOR_PIPE_ITEM = ITEMS.registerItem("item_extractor_pipe",
+            p -> new com.refinery.item.PipeBlockItem(ITEM_EXTRACTOR_PIPE.get(), p));
 
     // Buffer Pipe (1-Slot Item Storage Pipe)
     public static final DeferredBlock<com.refinery.block.pipe.BufferPipeBlock> BUFFER_PIPE = BLOCKS.registerBlock("buffer_pipe",
             com.refinery.block.pipe.BufferPipeBlock::new);
-    public static final DeferredItem<BlockItem> BUFFER_PIPE_ITEM = ITEMS.registerSimpleBlockItem("buffer_pipe", BUFFER_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> BUFFER_PIPE_ITEM = ITEMS.registerItem("buffer_pipe",
+            p -> new com.refinery.item.PipeBlockItem(BUFFER_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> VOID_PIPE = BLOCKS.registerBlock("void_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.VOID, com.refinery.block.pipe.IndustrialPipeMaterial.VOID));
-    public static final DeferredItem<BlockItem> VOID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("void_pipe", VOID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> VOID_PIPE_ITEM = ITEMS.registerItem("void_pipe",
+            p -> new com.refinery.item.PipeBlockItem(VOID_PIPE.get(), p));
 
     // Quartz / Merge Pipes (Selectable Output, all other connections become inputs)
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> MERGE_PIPE = BLOCKS.registerBlock("merge_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.QUARTZ));
-    public static final DeferredItem<BlockItem> MERGE_PIPE_ITEM = ITEMS.registerSimpleBlockItem("merge_pipe", MERGE_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> MERGE_PIPE_ITEM = ITEMS.registerItem("merge_pipe",
+            p -> new com.refinery.item.PipeBlockItem(MERGE_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> MERGE_ITEM_PIPE = BLOCKS.registerBlock("merge_item_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.QUARTZ));
-    public static final DeferredItem<BlockItem> MERGE_ITEM_PIPE_ITEM = ITEMS.registerSimpleBlockItem("merge_item_pipe", MERGE_ITEM_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> MERGE_ITEM_PIPE_ITEM = ITEMS.registerItem("merge_item_pipe",
+            p -> new com.refinery.item.PipeBlockItem(MERGE_ITEM_PIPE.get(), p));
 
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> MERGE_FLUID_PIPE = BLOCKS.registerBlock("merge_fluid_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.FLUID, com.refinery.block.pipe.IndustrialPipeMaterial.QUARTZ));
-    public static final DeferredItem<BlockItem> MERGE_FLUID_PIPE_ITEM = ITEMS.registerSimpleBlockItem("merge_fluid_pipe", MERGE_FLUID_PIPE);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> MERGE_FLUID_PIPE_ITEM = ITEMS.registerItem("merge_fluid_pipe",
+            p -> new com.refinery.item.PipeBlockItem(MERGE_FLUID_PIPE.get(), p));
+
+    // Structure Pipe (Non-transport structural pipe for Pipe Wires, Pipe Gates, and Pipe Facades)
+    public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> STRUCTURE_PIPE = BLOCKS.registerBlock("structure_pipe",
+            p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.STRUCTURE, com.refinery.block.pipe.IndustrialPipeMaterial.STRUCTURE));
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> STRUCTURE_PIPE_ITEM = ITEMS.registerItem("structure_pipe",
+            p -> new com.refinery.item.PipeBlockItem(STRUCTURE_PIPE.get(), p));
+
+    // Pipe Facades (Solid & Pass-Through / Hollow)
+    public static final DeferredItem<com.refinery.item.PipeFacadeItem> PIPE_FACADE = ITEMS.registerItem("pipe_facade",
+            p -> new com.refinery.item.PipeFacadeItem(false, p), Item.Properties::new);
+    public static final DeferredItem<com.refinery.item.PipeFacadeItem> PIPE_FACADE_HOLE = ITEMS.registerItem("pipe_facade_hole",
+            p -> new com.refinery.item.PipeFacadeItem(true, p), Item.Properties::new);
 
     // === Gate Upgrades & Wires ===
     public static final DeferredItem<Item> AUTARCHIC_CHIPSET = ITEMS.registerItem("autarchic_chipset",
@@ -602,6 +732,9 @@ public class RefineryMod {
 
     public static final DeferredItem<RefineryWrenchItem> REFINERY_WRENCH = ITEMS.registerItem("refinery_wrench",
             RefineryWrenchItem::new, Item.Properties::new);
+
+    public static final DeferredItem<com.refinery.item.GuideBookItem> GUIDE_BOOK = ITEMS.registerItem("guide_book",
+            com.refinery.item.GuideBookItem::new, Item.Properties::new);
 
     // === New Modded Materials ===
     public static final DeferredItem<MaterialItem> RAW_TIN = ITEMS.registerItem("raw_tin",
@@ -804,7 +937,8 @@ public class RefineryMod {
                             VOID_PIPE.get(),
                             MERGE_PIPE.get(),
                             MERGE_ITEM_PIPE.get(),
-                            MERGE_FLUID_PIPE.get()));
+                            MERGE_FLUID_PIPE.get(),
+                            STRUCTURE_PIPE.get()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageTankFillValveBlockEntity>> STORAGE_TANK_FILL_VALVE_BE =
             BLOCK_ENTITY_TYPES.register("storage_tank_fill_valve",
@@ -884,6 +1018,9 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.DiamondPipeMenu>> DIAMOND_PIPE_MENU =
             MENUS.register("diamond_pipe", () -> new MenuType<>(com.refinery.menu.DiamondPipeMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.WoodPipeMenu>> WOOD_PIPE_MENU =
+            MENUS.register("wood_pipe", () -> new MenuType<>(com.refinery.menu.WoodPipeMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     public static final DeferredHolder<MenuType<?>, MenuType<DieselGeneratorMenu>> DIESEL_GENERATOR_MENU =
             MENUS.register("diesel_generator", () -> new MenuType<>(DieselGeneratorMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
@@ -896,6 +1033,7 @@ public class RefineryMod {
                     .title(Component.translatable("itemGroup.refinery"))
                     .icon(() -> REFINERY_CONTROLLER_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
+                        output.accept(GUIDE_BOOK.get());
                         output.accept(REFINERY_CONTROLLER_ITEM.get());
                         output.accept(REINFORCED_CASING_ITEM.get());
                         output.accept(COMBUSTION_CHAMBER_ITEM.get());
@@ -970,6 +1108,25 @@ public class RefineryMod {
                         output.accept(STORAGE_TANK_DRAIN_VALVE_ITEM.get());
                         output.accept(STORAGE_TANK_FILL_VALVE_ITEM.get());
                         output.accept(OIL_SAND_ITEM.get());
+                        output.accept(OIL_RED_SAND_ITEM.get());
+                        output.accept(OIL_SHALE_ITEM.get());
+                        output.accept(CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(WHITE_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(ORANGE_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(MAGENTA_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(LIGHT_BLUE_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(YELLOW_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(LIME_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(PINK_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(GRAY_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(LIGHT_GRAY_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(CYAN_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(PURPLE_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(BLUE_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(BROWN_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(GREEN_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(RED_CORRUGATED_STEEL_PANEL_ITEM.get());
+                        output.accept(BLACK_CORRUGATED_STEEL_PANEL_ITEM.get());
                         output.accept(TIN_ORE_ITEM.get());
                         output.accept(DEEPSLATE_TIN_ORE_ITEM.get());
                         output.accept(RAW_TIN_BLOCK_ITEM.get());
@@ -1007,6 +1164,7 @@ public class RefineryMod {
                         output.accept(VOID_PIPE_ITEM.get());
                         output.accept(MERGE_PIPE_ITEM.get());
                         output.accept(MERGE_FLUID_PIPE_ITEM.get());
+                        output.accept(STRUCTURE_PIPE_ITEM.get());
                         output.accept(AUTARCHIC_CHIPSET.get());
                         output.accept(PIPE_WIRE_RED.get());
                         output.accept(PIPE_WIRE_BLUE.get());
@@ -1042,6 +1200,11 @@ public class RefineryMod {
                         output.accept(RefineryFluids.MOLTEN_BRONZE_BUCKET.get());
                         output.accept(RefineryFluids.MOLTEN_GLASS_BUCKET.get());
                         output.accept(RefineryFluids.ETHANOL_BUCKET.get());
+                        // Dynamically populate Pipe Facades for all eligible full-cube blocks
+                        for (Block eligible : com.refinery.block.pipe.PipeFacadeHelper.getAllEligibleBlocks()) {
+                            output.accept(com.refinery.block.pipe.PipeFacadeHelper.createFacadeStack(PIPE_FACADE.get(), eligible, 1));
+                            output.accept(com.refinery.block.pipe.PipeFacadeHelper.createFacadeStack(PIPE_FACADE_HOLE.get(), eligible, 1));
+                        }
                     })
                     .build());
 
@@ -1058,6 +1221,8 @@ public class RefineryMod {
         FLUIDS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         ATTACHMENT_TYPES.register(modEventBus);
+        DATA_COMPONENT_TYPES.register(modEventBus);
+        RECIPE_SERIALIZERS.register(modEventBus);
 
         RefineryFluids.init();
 

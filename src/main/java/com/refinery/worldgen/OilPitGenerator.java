@@ -42,6 +42,8 @@ public class OilPitGenerator {
 
         BlockState oilBlock = RefineryFluids.CRUDE_OIL_BLOCK.get().defaultBlockState();
         BlockState oilSand = RefineryMod.OIL_SAND.get().defaultBlockState();
+        BlockState oilRedSand = RefineryMod.OIL_RED_SAND.get().defaultBlockState();
+        BlockState oilShale = RefineryMod.OIL_SHALE.get().defaultBlockState();
 
         int cavernY = Math.max(level.getMinY() + 20, surfaceY - (isGeyser ? 50 : 40));
 
@@ -186,10 +188,19 @@ public class OilPitGenerator {
             }
         }
 
-        // 6. Write oil sand casing into world
+        // 6. Write oil sand / red sand / shale casing into world
         for (BlockPos pos : sandCasingPositions) {
-            if (!oilPositions.contains(pos) && isReplaceable(level.getBlockState(pos))) {
-                level.setBlock(pos, oilSand, 2);
+            if (!oilPositions.contains(pos)) {
+                BlockState current = level.getBlockState(pos);
+                if (isReplaceable(current)) {
+                    BlockState casingToPlace = oilSand;
+                    if (current.is(Blocks.RED_SAND) || current.is(Blocks.RED_SANDSTONE) || current.is(Blocks.TERRACOTTA)) {
+                        casingToPlace = oilRedSand;
+                    } else if (pos.getY() <= 0 || current.is(Blocks.DEEPSLATE) || current.is(Blocks.TUFF) || (pos.getY() < surfaceY - 12 && current.is(BlockTags.BASE_STONE_OVERWORLD))) {
+                        casingToPlace = oilShale;
+                    }
+                    level.setBlock(pos, casingToPlace, 2);
+                }
             }
         }
 
@@ -223,6 +234,8 @@ public class OilPitGenerator {
                 || state.is(Blocks.WATER)
                 || state.is(Blocks.ICE)
                 || state.is(RefineryMod.OIL_SAND.get())
+                || state.is(RefineryMod.OIL_RED_SAND.get())
+                || state.is(RefineryMod.OIL_SHALE.get())
                 || state.is(RefineryFluids.CRUDE_OIL_BLOCK.get());
     }
 }

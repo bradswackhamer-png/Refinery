@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#c:corrugated_steel_panels",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:corrugated_steel_panel"
+  }
+}

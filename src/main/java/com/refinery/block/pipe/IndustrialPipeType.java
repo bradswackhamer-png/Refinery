@@ -7,7 +7,8 @@ public enum IndustrialPipeType implements StringRepresentable {
     ITEM("item", false, true, false),
     FLUID_EXTRACTOR("fluid_extractor", true, false, true),
     ITEM_EXTRACTOR("item_extractor", false, true, true),
-    VOID("void", true, true, false);
+    VOID("void", true, true, false),
+    STRUCTURE("structure", false, false, false);
 
     private final String name;
     private final boolean handlesFluid;

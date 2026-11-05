@@ -9,7 +9,10 @@ public enum GateAction {
     EMIT_WIRE_RED("Emit Red Wire", "Broadcasts Red Wire signal along pipe network", 0xFF2222, "Red Wire"),
     EMIT_WIRE_BLUE("Emit Blue Wire", "Broadcasts Blue Wire signal along pipe network", 0x2266FF, "Blue Wire"),
     EMIT_WIRE_GREEN("Emit Green Wire", "Broadcasts Green Wire signal along pipe network", 0x22DD22, "Grn Wire"),
-    EMIT_WIRE_YELLOW("Emit Yellow Wire", "Broadcasts Yellow Wire signal along pipe network", 0xFFFF22, "Yel Wire");
+    EMIT_WIRE_YELLOW("Emit Yellow Wire", "Broadcasts Yellow Wire signal along pipe network", 0xFFFF22, "Yel Wire"),
+    // Appended last to keep saved ordinals stable
+    PULSAR_PULL_ITEM_5("Autarchic Pulse (Item x5)", "Pulls 5 items at a time from container into pipe", 0x22EEFF, "Pull x5"),
+    PULSAR_PULL_ITEM_10("Autarchic Pulse (Item x10)", "Pulls 10 items at a time from container into pipe", 0x22EEFF, "Pull x10");
 
     private final String label;
     private final String description;
@@ -40,7 +43,16 @@ public enum GateAction {
     }
 
     public boolean isPulsar() {
-        return this == PULSAR_PULL_ITEM || this == PULSAR_PUMP_FLUID;
+        return this == PULSAR_PULL_ITEM || this == PULSAR_PULL_ITEM_5 || this == PULSAR_PULL_ITEM_10 || this == PULSAR_PUMP_FLUID;
+    }
+
+    /** Number of items moved per pulse for item-pull actions. */
+    public int getItemCount() {
+        return switch (this) {
+            case PULSAR_PULL_ITEM_5 -> 5;
+            case PULSAR_PULL_ITEM_10 -> 10;
+            default -> 1;
+        };
     }
 
     public boolean isWireAction() {

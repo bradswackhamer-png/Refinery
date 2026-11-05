@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "refinery:block/gray_corrugated_steel_panel_top",
+    "side": "refinery:block/gray_corrugated_steel_panel"
+  }
+}

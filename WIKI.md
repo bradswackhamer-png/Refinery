@@ -790,6 +790,7 @@ Gates can communicate across long distances without bulky redstone dust lines:
 - `Emit Redstone`: Constant redstone signal (power 15).
 - `Redstone Pulse`: Pulses redstone on and off every 1 second (ideal for clocks).
 - `Autarchic Pulse (Item)`: Extracts 1 item from adjacent container into pipe.
+- Autarchic Pulse (Item x5) / Autarchic Pulse (Item x10): Same, but extracts 5 or 10 items per pulse.
 - `Autarchic Pulse (Fluid)`: Pumps 250 mB from adjacent tank into fluid pipe.
 - `Emit Red / Blue / Green / Yellow Wire`: Broadcasts logic signal to other gates along connected pipes.
 
