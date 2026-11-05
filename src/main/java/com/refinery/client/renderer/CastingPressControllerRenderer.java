@@ -27,9 +27,11 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class CastingPressControllerRenderer implements BlockEntityRenderer<CastingPressControllerBlockEntity, CastingPressControllerRenderState> {
     private final ItemModelResolver itemModelResolver;
+    private final CastingPressModel pressModel;
 
     public CastingPressControllerRenderer(BlockEntityRendererProvider.Context context) {
         this.itemModelResolver = context.itemModelResolver();
+        this.pressModel = new CastingPressModel();
     }
 
     @Override
@@ -162,7 +164,7 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
 
             boolean pressingNow = state.isActive || state.progress > 0;
 
-            CastingPressModel.render(
+            this.pressModel.render(
                     poseStack,
                     submitNodeCollector,
                     state.lightCoords,

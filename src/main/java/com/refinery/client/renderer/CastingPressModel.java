@@ -2,129 +2,262 @@ package com.refinery.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.refinery.RefineryMod;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 
-/**
- * High-detail 3x3x3 monolithic model for the Heavy Hydraulic Continuous Casting & Quenching Press.
- *
- * Coordinate space matches the 3x3x3 multiblock relative to the controller at (0, 0, 0):
- *   X: -16 .. 32  (Left = -16..0, Center = 0..16, Right = 16..32; Center X = 8.0)
- *   Y:   0 .. 48  (Bottom = 0..16, Middle = 16..32, Top = 32..48)
- *   Z:   0 .. 48  (Front = 0..16, Middle = 16..32, Back = 32..48; Center Z = 24.0)
- *
- * Key functional ports:
- *   - Controller:          (0, 0, 0) -> X:  0..16, Y:  0..16, Z:  0..16
- *   - Discharge Output:    (1, 0, 0) -> X: 16..32, Y:  0..16, Z:  0..16 (Run-out roller table)
- *   - Casting Mold Basin:  (0, 0, 1) -> X:  0..16, Y:  0..16, Z: 16..32
- *   - Safety Grille Window:(0, 1, 0) -> X:  0..16, Y: 16..32, Z:  0..16
- *   - Molten Inflow Port:  (0, 1, 2) -> X:  0..16, Y: 16..32, Z: 32..48 (plus Y=0 launder receivers)
- */
-public class CastingPressModel {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath("refinery", "textures/entity/casting_press.png");
+/**
+ * High-Fidelity Monolithic 3x3x3 Model for the Continuous Casting Press:
+ * - Reinforced cast-steel foundation bed with corner anchor pads and run-out table
+ * - 4 precision-ground chrome tie-rod columns with castle locknuts
+ * - Overhead cast-steel crown platen topped by a high-tonnage crimson-amber hydraulic cylinder
+ * - Central water-cooled copper crystallizer mold cavity at (0, 0, 1)
+ * - Front safety grille observation window at (0, 1, 0)
+ * - Upper refractory tundish & chute at (0, 1, 2) plus lower channel receivers at (0, 0, 2) and (-1, 0, 1)
+ * - Right-side water-cooling manifold cabinet with blue supply and red return pipes
+ * - Motorized steel run-out roller table extending through (1, 0, 0)
+ * - Front-left PLC operator control console at (-1, 0, 0) with digital screen, dial, and E-stop
+ * - Dynamic reciprocating hydraulic ram crosshead with hazard stripes and water-cooled stamping die
+ */
+@OnlyIn(Dist.CLIENT)
+public class CastingPressModel {
+    public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
+            RefineryMod.MODID, "textures/entity/casting_press.png"
+    );
+
+    private static final float TEX_W = 256.0f;
+    private static final float TEX_H = 256.0f;
     private static final int FULL_BRIGHT = 15728880;
 
-    // 256x256 Atlas UV Regions: {u0, v0, u1, v1} in 0..256 pixel space
-    private static final float[] UV_BODY        = {  0,   0,  64,  64};
-    private static final float[] UV_FRAME       = { 64,   0, 128,  64};
-    private static final float[] UV_COPPER_MOLD = {128,   0, 192,  64};
-    private static final float[] UV_CHROME      = {192,   0, 256,  64};
-
-    private static final float[] UV_HYDRAULIC   = {  0,  64,  64, 128};
-    private static final float[] UV_REFRACTORY  = { 64,  64, 128, 128};
-    private static final float[] UV_GRILLE      = {128,  64, 192, 128};
-    private static final float[] UV_HAZARD      = {192,  64, 256, 128};
-
-    private static final float[] UV_CONSOLE     = {  0, 128,  64, 192};
-    private static final float[] UV_MOLTEN      = { 64, 128, 128, 192};
-    private static final float[] UV_COOLING     = {128, 128, 192, 192};
-    private static final float[] UV_ROLLERS     = {192, 128, 256, 192};
-
-    private static final float[] UV_BASE        = {  0, 192,  64, 256};
-    private static final float[] UV_LOUVERS     = { 64, 192, 128, 256};
-    private static final float[] UV_STATUS_ON   = {128, 192, 160, 224};
-    private static final float[] UV_STATUS_OFF  = {160, 192, 192, 224};
-    private static final float[] UV_BILLET_HOT  = {192, 192, 256, 256};
-
-    private static class BoxBuilder {
-        final VertexConsumer vc;
-        final Matrix4f mat;
-        final int light;
-        final int overlay;
-
-        BoxBuilder(VertexConsumer vc, Matrix4f mat, int light, int overlay) {
-            this.vc = vc;
-            this.mat = mat;
-            this.light = light;
-            this.overlay = overlay;
-        }
-
-        void box(float x0, float y0, float z0, float x1, float y1, float z1, float[] uv) {
-            boxColored(x0, y0, z0, x1, y1, z1, uv, 1f, 1f, 1f, 1f, this.light);
-        }
-
-        void boxEmissive(float x0, float y0, float z0, float x1, float y1, float z1, float[] uv,
-                         float r, float g, float b, float a) {
-            boxColored(x0, y0, z0, x1, y1, z1, uv, r, g, b, a, FULL_BRIGHT);
-        }
-
-        void boxColored(float x0, float y0, float z0, float x1, float y1, float z1, float[] uv,
-                        float r, float g, float b, float a, int packedLight) {
-            float X0 = x0 / 16f, Y0 = y0 / 16f, Z0 = z0 / 16f;
-            float X1 = x1 / 16f, Y1 = y1 / 16f, Z1 = z1 / 16f;
-
-            float u0 = uv[0] / 256f;
-            float v0 = uv[1] / 256f;
-            float u1 = uv[2] / 256f;
-            float v1 = uv[3] / 256f;
-
-            // North (-Z)
-            quad(X1, Y1, Z0, X0, Y1, Z0, X0, Y0, Z0, X1, Y0, Z0, u0, v0, u1, v1, 0, 0, -1, r, g, b, a, packedLight);
-            // South (+Z)
-            quad(X0, Y1, Z1, X1, Y1, Z1, X1, Y0, Z1, X0, Y0, Z1, u0, v0, u1, v1, 0, 0, 1, r, g, b, a, packedLight);
-            // West (-X)
-            quad(X0, Y1, Z0, X0, Y1, Z1, X0, Y0, Z1, X0, Y0, Z0, u0, v0, u1, v1, -1, 0, 0, r, g, b, a, packedLight);
-            // East (+X)
-            quad(X1, Y1, Z1, X1, Y1, Z0, X1, Y0, Z0, X1, Y0, Z1, u0, v0, u1, v1, 1, 0, 0, r, g, b, a, packedLight);
-            // Up (+Y)
-            quad(X0, Y1, Z0, X1, Y1, Z0, X1, Y1, Z1, X0, Y1, Z1, u0, v0, u1, v1, 0, 1, 0, r, g, b, a, packedLight);
-            // Down (-Y)
-            quad(X0, Y0, Z1, X1, Y0, Z1, X1, Y0, Z0, X0, Y0, Z0, u0, v0, u1, v1, 0, -1, 0, r, g, b, a, packedLight);
-        }
-
-        void quad(float x0, float y0, float z0,
-                  float x1, float y1, float z1,
-                  float x2, float y2, float z2,
-                  float x3, float y3, float z3,
-                  float u0, float v0, float u1, float v1,
-                  float nx, float ny, float nz,
-                  float r, float g, float b, float a, int packedLight) {
-            vc.addVertex(mat, x0, y0, z0).setColor(r, g, b, a).setUv(u0, v0).setOverlay(overlay).setLight(packedLight).setNormal(nx, ny, nz);
-            vc.addVertex(mat, x1, y1, z1).setColor(r, g, b, a).setUv(u1, v0).setOverlay(overlay).setLight(packedLight).setNormal(nx, ny, nz);
-            vc.addVertex(mat, x2, y2, z2).setColor(r, g, b, a).setUv(u1, v1).setOverlay(overlay).setLight(packedLight).setNormal(nx, ny, nz);
-            vc.addVertex(mat, x3, y3, z3).setColor(r, g, b, a).setUv(u0, v1).setOverlay(overlay).setLight(packedLight).setNormal(nx, ny, nz);
+    public record UVRect(float u0, float v0, float u1, float v1) {
+        public static UVRect of(int x, int y, int w, int h) {
+            return new UVRect(
+                    (x + 0.15f) / TEX_W,
+                    (y + 0.15f) / TEX_H,
+                    (x + w - 0.15f) / TEX_W,
+                    (y + h - 0.15f) / TEX_H
+            );
         }
     }
 
-    public static void render(PoseStack poseStack, SubmitNodeCollector collector, int light,
-                              boolean isActive, int progress, long gameTime, float partialTicks,
-                              int moltenAmount, Fluid moltenFluid) {
-        RenderType renderType = RenderTypes.entitySolid(TEXTURE);
+    public record Cuboid(
+            float x0, float y0, float z0,
+            float x1, float y1, float z1,
+            UVRect north, UVRect south,
+            UVRect west, UVRect east,
+            UVRect up, UVRect down
+    ) {
+        public static Cuboid uniform(float x0, float y0, float z0, float x1, float y1, float z1, UVRect uv) {
+            return new Cuboid(x0, y0, z0, x1, y1, z1, uv, uv, uv, uv, uv, uv);
+        }
+    }
+
+    // Atlas UV Regions (matching ArcCastingAssetGenerator 256x256 layout)
+    private static final UVRect UV_CROWN_FRAME       = UVRect.of(0, 0, 96, 48);
+    private static final UVRect UV_CHROME_TIE_ROD   = UVRect.of(96, 0, 64, 48);
+    private static final UVRect UV_COPPER_MOLD      = UVRect.of(160, 0, 48, 48);
+    private static final UVRect UV_MAIN_CYLINDER    = UVRect.of(208, 0, 48, 48);
+
+    private static final UVRect UV_RAM_CROSSHEAD    = UVRect.of(0, 48, 64, 48);
+    private static final UVRect UV_STAMPING_DIE     = UVRect.of(64, 48, 48, 48);
+    private static final UVRect UV_INFLOW_LAUNDER   = UVRect.of(112, 48, 48, 48);
+    private static final UVRect UV_RUNOUT_ROLLERS   = UVRect.of(160, 48, 48, 48);
+    private static final UVRect UV_COOLING_MANIFOLD = UVRect.of(208, 48, 48, 48);
+
+    private static final UVRect UV_PLC_FRONT        = UVRect.of(0, 96, 64, 48);
+    private static final UVRect UV_CAST_BILLET      = UVRect.of(64, 96, 48, 48);
+    private static final UVRect UV_SAFETY_GRILLE    = UVRect.of(112, 96, 48, 48);
+
+    private static final UVRect UV_PLC_CASING       = UVRect.of(0, 144, 64, 48);
+    private static final UVRect UV_HAZARD_STRIPES   = UVRect.of(64, 144, 48, 48);
+    private static final UVRect UV_CHROME_SHAFTS    = UVRect.of(112, 144, 48, 48);
+    private static final UVRect UV_RADIATOR_VENTS   = UVRect.of(160, 144, 48, 48);
+    private static final UVRect UV_MOLTEN_INFLOW    = UVRect.of(208, 144, 48, 48);
+
+    private static final UVRect UV_STATUS_ON        = UVRect.of(0, 192, 24, 24);
+    private static final UVRect UV_STATUS_OFF       = UVRect.of(24, 192, 24, 24);
+    private static final UVRect UV_FOUNDATION_BED   = UVRect.of(48, 192, 64, 48);
+
+    private final List<Cuboid> staticCuboids = new ArrayList<>();
+    private final Cuboid beaconActive;
+    private final Cuboid beaconIdle;
+
+    public CastingPressModel() {
+        // =========================================================================
+        // 1. REINFORCED FOUNDATION BED & RUNNERS (Y: 0..6)
+        // =========================================================================
+        // Left longitudinal base runner
+        staticCuboids.add(Cuboid.uniform(-15.0f, 0.0f, 1.0f, -9.0f, 4.0f, 47.0f, UV_CROWN_FRAME));
+        // Right longitudinal base runner
+        staticCuboids.add(Cuboid.uniform(25.0f, 0.0f, 1.0f, 31.0f, 4.0f, 47.0f, UV_CROWN_FRAME));
+        // Center support runner
+        staticCuboids.add(Cuboid.uniform(6.0f, 0.0f, 1.0f, 10.0f, 4.0f, 47.0f, UV_CROWN_FRAME));
+
+        // Front, mid, and rear cross-beams
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 1.0f, 25.0f, 4.0f, 5.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 22.0f, 25.0f, 4.0f, 26.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 43.0f, 25.0f, 4.0f, 47.0f, UV_CROWN_FRAME));
+
+        // Foundation steel deck bed
+        staticCuboids.add(Cuboid.uniform(-9.0f, 3.5f, 5.0f, 25.0f, 4.0f, 43.0f, UV_FOUNDATION_BED));
+
+        // Front safety hazard stripe toe-kick
+        staticCuboids.add(new Cuboid(
+                -15.2f, 0.0f, 0.0f,
+                31.2f, 2.5f, 1.0f,
+                UV_HAZARD_STRIPES, UV_CROWN_FRAME,
+                UV_HAZARD_STRIPES, UV_HAZARD_STRIPES,
+                UV_HAZARD_STRIPES, UV_CROWN_FRAME
+        ));
+
+        // 4 Corner heavy tie-rod anchor bolting plinths
+        staticCuboids.add(Cuboid.uniform(-14.0f, 4.0f, 2.0f, -6.0f, 6.0f, 10.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(22.0f, 4.0f, 2.0f, 30.0f, 6.0f, 10.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-14.0f, 4.0f, 38.0f, -6.0f, 6.0f, 46.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(22.0f, 4.0f, 38.0f, 30.0f, 6.0f, 46.0f, UV_CROWN_FRAME));
+
+        // =========================================================================
+        // 2. FOUR PRECISION-GROUND CHROME TIE-ROD COLUMNS (Y: 6..42)
+        // =========================================================================
+        staticCuboids.add(Cuboid.uniform(-11.5f, 6.0f, 4.5f, -8.5f, 42.0f, 7.5f, UV_CHROME_TIE_ROD));
+        staticCuboids.add(Cuboid.uniform(24.5f, 6.0f, 4.5f, 27.5f, 42.0f, 7.5f, UV_CHROME_TIE_ROD));
+        staticCuboids.add(Cuboid.uniform(-11.5f, 6.0f, 40.5f, -8.5f, 42.0f, 43.5f, UV_CHROME_TIE_ROD));
+        staticCuboids.add(Cuboid.uniform(24.5f, 6.0f, 40.5f, 27.5f, 42.0f, 43.5f, UV_CHROME_TIE_ROD));
+
+        // Heavy threaded locknuts at column tops and bases
+        for (float[] p : new float[][]{{-12f, 4f}, {24f, 4f}, {-12f, 40f}, {24f, 40f}}) {
+            staticCuboids.add(Cuboid.uniform(p[0] - 0.5f, 6.0f, p[1] - 0.5f, p[0] + 4.5f, 8.5f, p[1] + 4.5f, UV_CROWN_FRAME));
+            staticCuboids.add(Cuboid.uniform(p[0] - 0.5f, 39.5f, p[1] - 0.5f, p[0] + 4.5f, 42.0f, p[1] + 4.5f, UV_CROWN_FRAME));
+        }
+
+        // =========================================================================
+        // 3. OVERHEAD CAST-STEEL CROWN PLATEN & MAIN HYDRAULIC CYLINDERS (Y: 41..56)
+        // =========================================================================
+        // Massive crown platen
+        staticCuboids.add(Cuboid.uniform(-14.0f, 41.5f, 2.0f, 30.0f, 45.5f, 46.0f, UV_CROWN_FRAME));
+        // Main high-tonnage hydraulic cylinder barrel
+        staticCuboids.add(Cuboid.uniform(3.0f, 45.5f, 19.0f, 13.0f, 56.0f, 29.0f, UV_MAIN_CYLINDER));
+        // Twin hydraulic return booster cylinders
+        staticCuboids.add(Cuboid.uniform(-4.0f, 45.5f, 22.0f, 0.0f, 52.0f, 26.0f, UV_MAIN_CYLINDER));
+        staticCuboids.add(Cuboid.uniform(16.0f, 45.5f, 22.0f, 20.0f, 52.0f, 26.0f, UV_MAIN_CYLINDER));
+
+        // =========================================================================
+        // 4. WATER-COOLED COPPER CRYSTALLIZER MOLD BASIN AT (0, 0, 1) (Y: 4..20)
+        // =========================================================================
+        // Heavy steel outer mold enclosure
+        staticCuboids.add(Cuboid.uniform(-1.0f, 4.0f, 15.0f, 17.0f, 18.0f, 33.0f, UV_CROWN_FRAME));
+        // Inner water-cooled copper crystallizer mold cavity (X: 1..15, Z: 17..31, Y: 6..18)
+        staticCuboids.add(Cuboid.uniform(1.0f, 4.5f, 17.0f, 15.0f, 6.0f, 31.0f, UV_COPPER_MOLD)); // Basin hearth
+        staticCuboids.add(Cuboid.uniform(1.0f, 6.0f, 15.5f, 15.0f, 18.0f, 17.0f, UV_COPPER_MOLD)); // North inner
+        staticCuboids.add(Cuboid.uniform(1.0f, 6.0f, 31.0f, 15.0f, 18.0f, 32.5f, UV_COPPER_MOLD)); // South inner
+        staticCuboids.add(Cuboid.uniform(-0.5f, 6.0f, 17.0f, 1.0f, 18.0f, 31.0f, UV_COPPER_MOLD));  // West inner
+        staticCuboids.add(Cuboid.uniform(15.0f, 6.0f, 17.0f, 16.5f, 18.0f, 31.0f, UV_COPPER_MOLD)); // East inner
+
+        // =========================================================================
+        // 5. FRONT SAFETY OBSERVATION GRILLE AT (0, 1, 0) (Y: 14..26)
+        // =========================================================================
+        staticCuboids.add(new Cuboid(
+                2.0f, 14.0f, 5.0f,
+                14.0f, 26.0f, 8.0f,
+                UV_SAFETY_GRILLE,   // North -> Safety grille & window!
+                UV_CROWN_FRAME,     // South
+                UV_CROWN_FRAME,     // West
+                UV_CROWN_FRAME,     // East
+                UV_CROWN_FRAME,     // Up
+                UV_CROWN_FRAME      // Down
+        ));
+
+        // =========================================================================
+        // 6. UPPER REFRACTORY TUNDISH & LOWER CHANNEL RECEIVERS (0, 1, 2) & (0, 0, 2)
+        // =========================================================================
+        // Upper tundish & sloped pouring launder chute at (0, 1, 2)
+        staticCuboids.add(Cuboid.uniform(1.0f, 16.0f, 32.5f, 15.0f, 26.0f, 45.0f, UV_INFLOW_LAUNDER));
+        // Lower channel receiver trough at (0, 0, 2) (Y: 3.5..9.0, aligns with channels at Y=0!)
+        staticCuboids.add(Cuboid.uniform(3.0f, 3.5f, 33.0f, 13.0f, 5.0f, 48.0f, UV_INFLOW_LAUNDER));
+        staticCuboids.add(Cuboid.uniform(1.5f, 3.5f, 33.0f, 3.0f, 9.0f, 48.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(13.0f, 3.5f, 33.0f, 14.5f, 9.0f, 48.0f, UV_CROWN_FRAME));
+        // Lower channel receiver trough at (-1, 0, 1) (West side of mold, aligns with channels from West)
+        staticCuboids.add(Cuboid.uniform(-16.0f, 3.5f, 19.0f, -1.0f, 5.0f, 29.0f, UV_INFLOW_LAUNDER));
+        staticCuboids.add(Cuboid.uniform(-16.0f, 3.5f, 17.5f, -1.0f, 9.0f, 19.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-16.0f, 3.5f, 29.0f, -1.0f, 9.0f, 30.5f, UV_CROWN_FRAME));
+
+        // =========================================================================
+        // 7. RIGHT WATER-COOLING MANIFOLD CABINET (X: 25..31, Y: 4..30, Z: 14..34)
+        // =========================================================================
+        staticCuboids.add(new Cuboid(
+                25.0f, 4.0f, 14.0f,
+                31.0f, 30.0f, 34.0f,
+                UV_COOLING_MANIFOLD,    // North
+                UV_COOLING_MANIFOLD,    // South
+                UV_COOLING_MANIFOLD,    // West
+                UV_COOLING_MANIFOLD,    // East -> blue & red water lines!
+                UV_CROWN_FRAME,         // Up
+                UV_CROWN_FRAME          // Down
+        ));
+
+        // =========================================================================
+        // 8. MOTORIZED RUN-OUT ROLLER TABLE AT (1, 0, 0) (X: 16..32, Y: 4..10, Z: 8..24)
+        // =========================================================================
+        // Run-out table side frame rails
+        staticCuboids.add(Cuboid.uniform(16.0f, 4.0f, 8.0f, 32.0f, 9.5f, 10.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(16.0f, 4.0f, 22.0f, 32.0f, 9.5f, 24.0f, UV_CROWN_FRAME));
+        // Driven steel conveyor rollers
+        for (float rx = 18.0f; rx <= 30.0f; rx += 2.0f) {
+            staticCuboids.add(Cuboid.uniform(rx - 0.6f, 7.0f, 10.0f, rx + 0.6f, 9.2f, 22.0f, UV_RUNOUT_ROLLERS));
+        }
+
+        // =========================================================================
+        // 9. OPERATOR PLC CONTROL CONSOLE AT FRONT-LEFT (-1, 0, 0)
+        // =========================================================================
+        // Pedestal base
+        staticCuboids.add(Cuboid.uniform(-14.0f, 0.0f, 2.0f, -2.0f, 16.0f, 10.0f, UV_PLC_CASING));
+        // Upper console cabinet (front face = PLC screen, hydraulic gauge, yellow E-stop!)
+        staticCuboids.add(new Cuboid(
+                -14.0f, 16.0f, 2.0f,
+                -2.0f, 26.0f, 9.0f,
+                UV_PLC_FRONT,   // North (facing operator/player!)
+                UV_PLC_CASING,  // South
+                UV_PLC_CASING,  // West
+                UV_PLC_CASING,  // East
+                UV_PLC_CASING,  // Up
+                UV_PLC_CASING   // Down
+        ));
+        // Beacon stem
+        staticCuboids.add(Cuboid.uniform(-9.0f, 26.0f, 4.5f, -7.0f, 27.5f, 6.5f, UV_CHROME_SHAFTS));
+
+        // Beacon lenses
+        this.beaconActive = Cuboid.uniform(-9.5f, 27.5f, 4.0f, -6.5f, 30.5f, 7.0f, UV_STATUS_ON);
+        this.beaconIdle   = Cuboid.uniform(-9.5f, 27.5f, 4.0f, -6.5f, 30.5f, 7.0f, UV_STATUS_OFF);
+    }
+
+    public void render(
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            int light,
+            boolean isActive,
+            int progress,
+            long gameTime,
+            float partialTicks,
+            int moltenAmount,
+            Fluid moltenFluid
+    ) {
         float time = (gameTime + partialTicks);
         float[] fluidRgb = ArcMelterModel.getMoltenFluidColor(moltenFluid, isActive);
 
-        // Compute smooth hydraulic press ram stroke (0.0 = top retracted, 1.0 = bottom stamping hold)
-        // Casting Press maxProgress = 240 ticks:
-        //   0..90:   Downward stamping stroke
-        //   90..150: Bottom high-pressure dwell & water-quench solidification
-        //   150..240:Smooth upward hydraulic retraction
+        // Smooth hydraulic press ram stroke (0.0 = top retracted, 1.0 = bottom stamping hold)
+        // 0..90:   Downward stamping stroke
+        // 90..150: Bottom high-pressure dwell & water-quench solidification
+        // 150..240:Smooth upward hydraulic retraction
         float strokeRatio = 0.0f;
         if (isActive || progress > 0) {
             float p = Mth.clamp(progress + (isActive ? partialTicks : 0f), 0f, 240f);
@@ -135,231 +268,199 @@ public class CastingPressModel {
                 strokeRatio = 1.0f + 0.02f * Mth.sin(time * 0.8f); // high-pressure dwell throb
             } else {
                 float t = (p - 150f) / 90f;
-                strokeRatio = 1.0f - (t * t * (3f - 2f * t)); // smooth retraction
+                strokeRatio = 1.0f - (t * t * (3f - 2f * t)); // smooth hydraulic retraction
             }
         }
 
-        final float ramStroke = strokeRatio;
+        final float ramDisplacement = strokeRatio * 11.5f;
 
-        collector.submitCustomGeometry(poseStack, renderType, (pose, vc) -> {
-            Matrix4f mat = pose.pose();
-            BoxBuilder b = new BoxBuilder(vc, mat, light, OverlayTexture.NO_OVERLAY);
+        collector.submitCustomGeometry(poseStack, RenderTypes.entitySolid(TEXTURE), (pose, consumer) -> {
+            Matrix4f matrix = pose.pose();
 
-            // =========================================================================
-            // 1. HEAVY FOUNDATION BEDPLATE, ANCHOR PADS & SAFETY CURBING (Y: 0..6)
-            // =========================================================================
-            b.box(-15, 0, 1, 31, 3, 47, UV_BASE);
-            // Yellow/black safety toe-kick curbing along front & right discharge table
-            b.box(-15.2f, 0, 0.8f, 31.2f, 2.2f, 2.4f, UV_HAZARD);
-            b.box(29.6f, 0, 2.4f, 31.2f, 2.2f, 47.2f, UV_HAZARD);
-            // Press anvil bolster bed under center bay
-            b.box(-6, 3, 9, 22, 7, 39, UV_FRAME);
-
-            // =========================================================================
-            // 2. WATER-COOLED COPPER & REFRACTORY CRYSTALLIZER MOLD BASIN AT (0, 0, 1)
-            //    (X: -2..18, Y: 7..15, Z: 14..34)
-            // =========================================================================
-            // Outer copper water-jacketed crystallizer housing
-            b.box(-2, 7, 14, 18, 14.5f, 17, UV_COPPER_MOLD);  // North mold jacket
-            b.box(-2, 7, 31, 18, 14.5f, 34, UV_COPPER_MOLD);  // South mold jacket
-            b.box(-2, 7, 17, 1, 14.5f, 31, UV_COPPER_MOLD);   // West mold jacket
-            b.box(15, 7, 17, 18, 14.5f, 31, UV_COPPER_MOLD);  // East mold jacket (with billet discharge gate)
-            // Inner refractory mold liner & bottom anvil plate (cavity X: 1.5..14.5, Z: 17.5..30.5)
-            b.box(1, 7, 17, 15, 9.2f, 31, UV_REFRACTORY);
-            // Heavy steel clamping lugs around the mold basin
-            b.box(-3, 7, 13, 0, 13, 16, UV_FRAME);
-            b.box(16, 7, 13, 19, 13, 16, UV_FRAME);
-            b.box(-3, 7, 32, 0, 13, 35, UV_FRAME);
-            b.box(16, 7, 32, 19, 13, 35, UV_FRAME);
-
-            // =========================================================================
-            // 3. FOUR CHROME TIE-ROD COLUMNS, OVERHEAD CROWN PLATEN & MAIN HYDRAULIC CYLINDER
-            // =========================================================================
-            float[][] columns = {
-                    { -4.5f, 10.5f }, // Front-Left column
-                    { 17.5f, 10.5f }, // Front-Right column
-                    { -4.5f, 34.5f }, // Rear-Left column
-                    { 17.5f, 34.5f }  // Rear-Right column
-            };
-            for (float[] col : columns) {
-                float cx = col[0];
-                float cz = col[1];
-                // Lower column nut & base boss
-                b.box(cx - 0.6f, 7, cz - 0.6f, cx + 3.6f, 10, cz + 3.6f, UV_FRAME);
-                // Precision-ground chrome tie-rod shaft (Y: 10..38)
-                b.box(cx, 10, cz, cx + 3.0f, 38, cz + 3.0f, UV_CHROME);
-                // Upper castle locknut above crown platen (Y: 44..46.5)
-                b.box(cx - 0.5f, 44, cz - 0.5f, cx + 3.5f, 46.5f, cz + 3.5f, UV_FRAME);
+            // 1. Render all static cuboids
+            for (Cuboid c : staticCuboids) {
+                emitCuboid(pose, matrix, consumer, c, 0.0f, light, OverlayTexture.NO_OVERLAY);
             }
 
-            // Overhead Cast-Steel Crown Platen (X: -7..23, Y: 38..44, Z: 9..39)
-            b.box(-7, 38, 9, 23, 44, 39, UV_BODY);
-            b.box(-7.5f, 38, 8.5f, 23.5f, 40, 39.5f, UV_FRAME);
-            b.box(-7.5f, 42.5f, 8.5f, 23.5f, 44, 39.5f, UV_FRAME);
-
-            // Main High-Tonnage Hydraulic Press Cylinder on top of Crown (X: 2..14, Y: 44..48, Z: 18..30)
-            b.box(2, 44, 18, 14, 48, 30, UV_HYDRAULIC);
-            b.box(1.5f, 47, 17.5f, 14.5f, 48, 30.5f, UV_FRAME);
-            // Twin side hydraulic return booster cylinders
-            b.box(-3, 44, 21, 0, 47.5f, 27, UV_HYDRAULIC);
-            b.box(16, 44, 21, 19, 47.5f, 27, UV_HYDRAULIC);
-
-            // =========================================================================
-            // 4. FRONT SAFETY GRILLE WINDOW AT (0, 1, 0) (X: -1..17, Y: 14..36, Z: 6..10)
-            // =========================================================================
-            // Framed safety guard assembly on the front face
-            b.box(-1, 14, 6, 17, 16, 9, UV_FRAME);
-            b.box(-1, 34, 6, 17, 36, 9, UV_FRAME);
-            b.box(-1, 16, 6, 1.5f, 34, 9, UV_FRAME);
-            b.box(14.5f, 16, 6, 17, 34, 9, UV_FRAME);
-            // Safety hazard stripe lintel above viewing window
-            b.box(-1.2f, 34.2f, 5.8f, 17.2f, 35.8f, 6.2f, UV_HAZARD);
-            // Perforated wire-mesh safety observation glazing
-            b.box(1.5f, 16, 6.8f, 14.5f, 34, 7.8f, UV_GRILLE);
-
-            // =========================================================================
-            // 5. MOLTEN INFLOW TUNDISH AT (0, 1, 2) & LOWER CHANNEL RECEIVERS AT Y=0
-            //    Supports both overhead/pipe feed at (0, 1, 2) AND direct Y=0 CastingChannel feed!
-            // =========================================================================
-            // Upper Refractory Tundish & Sloped Launder Chute from Rear Port (0, 1, 2) (Z: 32..48)
-            b.box(2, 16, 33, 14, 21, 48, UV_REFRACTORY);
-            b.box(1.5f, 19, 33, 3.5f, 25, 48, UV_FRAME);
-            b.box(12.5f, 19, 33, 14.5f, 25, 48, UV_FRAME);
-            // Rear input port flange collar at Z=46.5..48, Y=16..26
-            b.box(1, 15.5f, 46.5f, 15, 26, 48, UV_HAZARD);
-
-            // Lower Level (Y: 3..9) Refractory Channel Receiver Troughs:
-            //   1) Rear bottom receiver at (0, 0, 2) (X: 3..13, Y: 3..9, Z: 33..48)
-            b.box(3, 3, 33, 13, 5.2f, 48, UV_REFRACTORY);
-            b.box(2.5f, 4, 33, 4.5f, 9.2f, 48, UV_FRAME);
-            b.box(11.5f, 4, 33, 13.5f, 9.2f, 48, UV_FRAME);
-            b.box(2, 3, 46.5f, 14, 9.8f, 48, UV_HAZARD);
-
-            //   2) Left-side bottom receiver at (-1, 0, 1) (X: -16..-1, Y: 3..9, Z: 19..29)
-            //      Allows side-by-side placement next to Arc Melter's (1, 0, 0) output via CastingChannels!
-            b.box(-16, 3, 19, -1, 5.2f, 29, UV_REFRACTORY);
-            b.box(-16, 4, 18.5f, -1, 9.2f, 20.5f, UV_FRAME);
-            b.box(-16, 4, 27.5f, -1, 9.2f, 29.5f, UV_FRAME);
-            b.box(-16, 3, 18, -14.5f, 9.8f, 30, UV_HAZARD);
-
-            // Animated Molten Metal Inflow Streams when active or holding molten metal
-            if (isActive || moltenAmount > 0) {
-                float flowPulse = 0.90f + 0.10f * Mth.sin(time * 0.40f);
-                float r = fluidRgb[0] * flowPulse;
-                float g = fluidRgb[1] * flowPulse;
-                float bl = fluidRgb[2] * flowPulse;
-
-                // Stream in upper tundish (0, 1, 2) cascading into mold basin
-                b.boxEmissive(3.5f, 21.0f, 33.5f, 12.5f, 23.2f, 47.8f, UV_MOLTEN, r, g, bl, 1.0f);
-                b.boxEmissive(5.0f, 11.0f, 30.2f, 11.0f, 22.5f, 33.8f, UV_MOLTEN, r, g, bl, 1.0f);
-
-                // Stream in lower rear & left channel receivers (Y: 5.2..7.6) matching CastingChannelBlock!
-                b.boxEmissive(4.5f, 5.2f, 33.0f, 11.5f, 7.6f, 47.9f, UV_MOLTEN, r, g, bl, 1.0f);
-                b.boxEmissive(-15.9f, 5.2f, 20.5f, -1.0f, 7.6f, 27.5f, UV_MOLTEN, r, g, bl, 1.0f);
-            }
-
-            // =========================================================================
-            // 6. RIGHT-SIDE WATER QUENCH MANIFOLD & MOTORIZED RUN-OUT ROLLER TABLE AT (1, 0, 0)
-            // =========================================================================
-            // Water-cooling manifold cabinet at right-rear (X: 20..31, Y: 14..36, Z: 18..44)
-            b.box(20, 14, 18, 31, 36, 44, UV_BODY);
-            b.box(29.8f, 16, 20, 31.2f, 34, 42, UV_LOUVERS);
-            // Blue supply & red return cooling water manifold panel facing front/side
-            b.box(21, 16, 17.5f, 30, 34, 18.2f, UV_COOLING);
-
-            // Motorized Ingot Run-Out Roller Table extending from Mold Basin through Output Port (1, 0, 0)
-            // Spans X: 18..31, Z: 0..32, Y: 3..11 so cast billets roll forward to Z=0 and East to X=32!
-            // Roller table side rails
-            b.box(18.5f, 3, 0, 20.5f, 10.5f, 32, UV_FRAME);
-            b.box(28.5f, 3, 0, 30.5f, 10.5f, 32, UV_FRAME);
-            // Roller table bed & motorized steel rollers
-            b.box(20.5f, 3, 0, 28.5f, 6.5f, 32, UV_BASE);
-            b.box(20.5f, 6.5f, 0.5f, 28.5f, 9.2f, 31.5f, UV_ROLLERS);
-            // Output discharge arch at Front-Right (1, 0, 0) (Z=0..2)
-            b.box(18, 3, 0, 31, 13, 2, UV_HAZARD);
-
-            // =========================================================================
-            // 7. FRONT-LEFT PLC OPERATOR CONTROL CABINET AT (-1, 0, 0) (X: -15..-4, Y: 3..28, Z: 2..15)
-            // =========================================================================
-            b.box(-15, 3, 2, -4, 27, 15, UV_BODY);
-            b.box(-15.4f, 25, 1.6f, -3.6f, 27.5f, 15.4f, UV_FRAME);
-            // Louvered hydraulic pump bay on West side
-            b.box(-15.3f, 5, 4, -14.7f, 23, 13, UV_LOUVERS);
-            // Front hydraulic tonnage gauge, PLC screen & E-stop faceplate
-            b.box(-14.2f, 12, 1.7f, -4.8f, 24.5f, 2.2f, UV_CONSOLE);
-            // Status beacon on top of cabinet
-            b.box(-10.5f, 27.5f, 7, -8.5f, 29.5f, 9, UV_CHROME);
+            // 2. Render status beacon on top of PLC console
             if (isActive) {
-                b.boxEmissive(-10.8f, 29.5f, 6.7f, -8.2f, 32.3f, 9.3f, UV_STATUS_ON, 0.3f, 1.0f, 0.5f, 1.0f);
+                emitCuboid(pose, matrix, consumer, beaconActive, 0.0f, FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
             } else {
-                b.box(-10.6f, 29.5f, 6.9f, -8.4f, 32.0f, 9.1f, UV_STATUS_OFF);
+                emitCuboid(pose, matrix, consumer, beaconIdle, 0.0f, light, OverlayTexture.NO_OVERLAY);
             }
 
-            // =========================================================================
-            // 8. DYNAMIC MOLTEN POOL / SOLIDIFYING BILLET IN MOLD BASIN
-            // =========================================================================
-            float fillRatio = Mth.clamp(moltenAmount / 16000.0f, 0.0f, 1.0f);
-            if (isActive && fillRatio < 0.35f) {
-                fillRatio = 0.35f;
-            }
-            float poolTopY = 9.3f + fillRatio * 4.5f;
+            // 3. Render Reciprocating Hydraulic Ram Crosshead (slides vertically by -ramDisplacement)
+            float dy = -ramDisplacement;
 
-            if (isActive && progress >= 95) {
-                // During quench & retraction (ticks 95..240), render the newly formed incandescent-to-metallic billet!
-                float coolFactor = Mth.clamp((progress - 95f) / 145f, 0f, 1f);
-                float r = Mth.lerp(coolFactor, fluidRgb[0], 0.90f);
-                float g = Mth.lerp(coolFactor, fluidRgb[1], 0.92f);
-                float bl = Mth.lerp(coolFactor, fluidRgb[2], 0.96f);
+            // Main moving crosshead platen (X: -12..28, Z: 3..45)
+            Cuboid ramPlaten = new Cuboid(
+                    -12.0f, 33.0f, 3.0f,
+                    28.0f, 39.0f, 45.0f,
+                    UV_RAM_CROSSHEAD, UV_RAM_CROSSHEAD,
+                    UV_CROWN_FRAME, UV_CROWN_FRAME,
+                    UV_CROWN_FRAME, UV_CROWN_FRAME
+            );
+            emitCuboid(pose, matrix, consumer, ramPlaten, dy, light, OverlayTexture.NO_OVERLAY);
 
-                // Solidified billet inside mold cavity
-                b.boxEmissive(2.2f, 9.2f, 18.2f, 13.8f, 13.2f, 29.8f, UV_BILLET_HOT, r, g, bl, 1.0f);
+            // 4 Chrome guide rods extending from crown into ram crosshead
+            Cuboid centerPiston = Cuboid.uniform(6.0f, 39.0f + dy, 22.0f, 10.0f, 45.5f, 26.0f, UV_CHROME_SHAFTS);
+            emitCuboid(pose, matrix, consumer, centerPiston, 0.0f, light, OverlayTexture.NO_OVERLAY);
 
-                // During retraction (ticks 150..240), slide a freshly ejected billet along the right-hand roller table (1, 0, 0)!
-                if (progress >= 145) {
-                    float rollT = Mth.clamp((progress - 145f) / 95f, 0f, 1f);
-                    float billetZ = Mth.lerp(rollT, 20.0f, 3.0f);
-                    b.boxEmissive(21.5f, 9.3f, billetZ, 27.5f, 12.0f, billetZ + 7.0f, UV_BILLET_HOT, r, g, bl, 1.0f);
+            // Water-cooled copper upper stamping die
+            Cuboid stampingDie = new Cuboid(
+                    1.0f, 29.0f, 17.0f,
+                    15.0f, 33.0f, 31.0f,
+                    UV_STAMPING_DIE, UV_STAMPING_DIE,
+                    UV_STAMPING_DIE, UV_STAMPING_DIE,
+                    UV_STAMPING_DIE, UV_COPPER_MOLD
+            );
+            emitCuboid(pose, matrix, consumer, stampingDie, dy, light, OverlayTexture.NO_OVERLAY);
+
+            // 4. Molten Inflow and Solidified Billet inside the crystallizer mold basin
+            if (isActive || progress > 0 || moltenAmount > 0) {
+                boolean solidifying = (progress >= 90);
+                float alpha = solidifying ? 1.0f : 0.95f;
+
+                if (solidifying) {
+                    // Quenched incandescent solidified slab/billet under stamping die
+                    Cuboid billet = Cuboid.uniform(1.2f, 6.0f, 17.2f, 14.8f, 11.0f, 30.8f, UV_CAST_BILLET);
+                    emitCuboidColored(pose, matrix, consumer, billet, 0.0f, 1.0f, 0.85f, 0.65f, alpha, FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+                } else {
+                    // Glowing molten pool filling crystallizer basin
+                    float wave = 0.92f + 0.08f * Mth.sin(time * 0.45f);
+                    Cuboid moltenPool = Cuboid.uniform(1.2f, 6.0f, 17.2f, 14.8f, 10.5f, 30.8f, UV_MOLTEN_INFLOW);
+                    emitCuboidColored(pose, matrix, consumer, moltenPool, 0.0f, fluidRgb[0] * wave, fluidRgb[1] * wave, fluidRgb[2] * wave, alpha, FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
                 }
-            } else if (isActive || moltenAmount > 0) {
-                // Liquid molten metal pool glowing inside the copper crystallizer mold
-                float ripple = isActive ? (0.92f + 0.08f * Mth.sin(time * 0.5f)) : 0.88f;
-                b.boxEmissive(1.6f, 9.2f, 17.6f, 14.4f, poolTopY, 30.4f, UV_MOLTEN,
-                        fluidRgb[0] * ripple, fluidRgb[1] * ripple, fluidRgb[2] * ripple, 1.0f);
+
+                // Inflow streams entering mold from rear and west troughs
+                float inWave = 0.90f + 0.10f * Mth.sin(time * 0.40f);
+                Cuboid rearInflow = Cuboid.uniform(3.5f, 4.8f, 33.0f, 12.5f, 6.5f, 47.9f, UV_MOLTEN_INFLOW);
+                emitCuboidColored(pose, matrix, consumer, rearInflow, 0.0f, fluidRgb[0] * inWave, fluidRgb[1] * inWave, fluidRgb[2] * inWave, 1.0f, FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+
+                Cuboid westInflow = Cuboid.uniform(-15.9f, 4.8f, 19.5f, -0.1f, 6.5f, 28.5f, UV_MOLTEN_INFLOW);
+                emitCuboidColored(pose, matrix, consumer, westInflow, 0.0f, fluidRgb[0] * inWave, fluidRgb[1] * inWave, fluidRgb[2] * inWave, 1.0f, FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
             }
-
-            // =========================================================================
-            // 9. ANIMATED RECIPROCATING HYDRAULIC RAM CROSSHEAD & UPPER STAMPING DIE
-            // =========================================================================
-            // At strokeRatio = 0.0 (retracted): crosshead sits at Y: 28..33, upper die at Y: 23..28
-            // At strokeRatio = 1.0 (stamping):  crosshead sits at Y: 18..23, upper die at Y: 13..18 (pressing into mold!)
-            float travel = ramStroke * 10.0f;
-            float crossBotY = 28.0f - travel;
-            float crossTopY = 33.0f - travel;
-            float dieBotY   = 23.0f - travel;
-            float dieTopY   = 28.0f - travel;
-
-            // Main central chrome hydraulic piston rod extending from crown (Y=38) down to crosshead (crossTopY)
-            b.box(5.0f, crossTopY, 21.0f, 11.0f, 38.5f, 27.0f, UV_CHROME);
-            // Twin side return piston rods
-            b.box(-2.2f, crossTopY, 22.8f, -0.8f, 38.5f, 25.2f, UV_CHROME);
-            b.box(16.8f, crossTopY, 22.8f, 18.2f, 38.5f, 25.2f, UV_CHROME);
-
-            // Moving Steel Crosshead Platen (X: -5.5..21.5, Y: crossBotY..crossTopY, Z: 9.5..38.5)
-            b.box(-5.5f, crossBotY, 9.5f, 21.5f, crossTopY, 38.5f, UV_FRAME);
-            // High-visibility diagonal yellow/black hazard warning band across the moving crosshead front & back
-            b.box(-5.7f, crossBotY + 0.8f, 9.3f, 21.7f, crossTopY - 0.8f, 10.2f, UV_HAZARD);
-            b.box(-5.7f, crossBotY + 0.8f, 37.8f, 21.7f, crossTopY - 0.8f, 38.7f, UV_HAZARD);
-
-            // 4 Sliding Guide Bushings wrapping the 4 chrome tie-rod columns
-            for (float[] col : columns) {
-                float cx = col[0];
-                float cz = col[1];
-                b.box(cx - 0.8f, crossBotY - 1.0f, cz - 0.8f, cx + 3.8f, crossTopY + 1.0f, cz + 3.8f, UV_COPPER_MOLD);
-            }
-
-            // Upper Water-Cooled Copper & Tool-Steel Stamping Die Block under the Crosshead
-            b.box(0.5f, dieBotY + 2.0f, 16.5f, 15.5f, dieTopY, 31.5f, UV_FRAME);
-            b.box(1.8f, dieBotY, 17.8f, 14.2f, dieBotY + 2.0f, 30.2f, UV_COPPER_MOLD);
         });
+    }
+
+    private static void emitCuboid(
+            PoseStack.Pose pose,
+            Matrix4f matrix,
+            VertexConsumer consumer,
+            Cuboid c,
+            float yOffset,
+            int light,
+            int overlay
+    ) {
+        emitCuboidColored(pose, matrix, consumer, c, yOffset, 1.0f, 1.0f, 1.0f, 1.0f, light, overlay);
+    }
+
+    private static void emitCuboidColored(
+            PoseStack.Pose pose,
+            Matrix4f matrix,
+            VertexConsumer consumer,
+            Cuboid c,
+            float yOffset,
+            float r, float g, float b, float a,
+            int light,
+            int overlay
+    ) {
+        float x0 = c.x0() / 16.0f;
+        float y0 = (c.y0() + yOffset) / 16.0f;
+        float z0 = c.z0() / 16.0f;
+        float x1 = c.x1() / 16.0f;
+        float y1 = (c.y1() + yOffset) / 16.0f;
+        float z1 = c.z1() / 16.0f;
+
+        // NORTH Face (z = z0, normal 0, 0, -1)
+        emitQuad(pose, matrix, consumer,
+                x1, y1, z0,
+                x1, y0, z0,
+                x0, y0, z0,
+                x0, y1, z0,
+                c.north(), 0.0f, 0.0f, -1.0f, r, g, b, a, light, overlay);
+
+        // SOUTH Face (z = z1, normal 0, 0, +1)
+        emitQuad(pose, matrix, consumer,
+                x0, y1, z1,
+                x0, y0, z1,
+                x1, y0, z1,
+                x1, y1, z1,
+                c.south(), 0.0f, 0.0f, 1.0f, r, g, b, a, light, overlay);
+
+        // WEST Face (x = x0, normal -1, 0, 0)
+        emitQuad(pose, matrix, consumer,
+                x0, y1, z0,
+                x0, y0, z0,
+                x0, y0, z1,
+                x0, y1, z1,
+                c.west(), -1.0f, 0.0f, 0.0f, r, g, b, a, light, overlay);
+
+        // EAST Face (x = x1, normal +1, 0, 0)
+        emitQuad(pose, matrix, consumer,
+                x1, y1, z1,
+                x1, y0, z1,
+                x1, y0, z0,
+                x1, y1, z0,
+                c.east(), 1.0f, 0.0f, 0.0f, r, g, b, a, light, overlay);
+
+        // UP Face (y = y1, normal 0, +1, 0)
+        emitQuad(pose, matrix, consumer,
+                x0, y1, z0,
+                x0, y1, z1,
+                x1, y1, z1,
+                x1, y1, z0,
+                c.up(), 0.0f, 1.0f, 0.0f, r, g, b, a, light, overlay);
+
+        // DOWN Face (y = y0, normal 0, -1, 0)
+        emitQuad(pose, matrix, consumer,
+                x0, y0, z1,
+                x1, y0, z1,
+                x1, y0, z0,
+                x0, y0, z0,
+                c.down(), 0.0f, -1.0f, 0.0f, r, g, b, a, light, overlay);
+    }
+
+    private static void emitQuad(
+            PoseStack.Pose pose,
+            Matrix4f matrix,
+            VertexConsumer consumer,
+            float xA, float yA, float zA,
+            float xB, float yB, float zB,
+            float xC, float yC, float zC,
+            float xD, float yD, float zD,
+            UVRect uv,
+            float nx, float ny, float nz,
+            float r, float g, float b, float a,
+            int light,
+            int overlay
+    ) {
+        consumer.addVertex(matrix, xA, yA, zA)
+                .setColor(r, g, b, a)
+                .setUv(uv.u0(), uv.v0())
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
+
+        consumer.addVertex(matrix, xB, yB, zB)
+                .setColor(r, g, b, a)
+                .setUv(uv.u0(), uv.v1())
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
+
+        consumer.addVertex(matrix, xC, yC, zC)
+                .setColor(r, g, b, a)
+                .setUv(uv.u1(), uv.v1())
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
+
+        consumer.addVertex(matrix, xD, yD, zD)
+                .setColor(r, g, b, a)
+                .setUv(uv.u1(), uv.v0())
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
     }
 }

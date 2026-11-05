@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.10.23.jar`
+`refinery-1.10.25.jar`
 
 ### Display Name
-`Industrial Refinery 1.10.23 (NeoForge 26.3)`
+`Industrial Refinery 1.10.25 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,22 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.10.25
+
+### What's New in v1.10.25:
+- **Texture Wrapping & Control Panel UV Alignment (`ArcMelterModel`, `CastingPressModel`, `ArcCastingAssetGenerator`)**:
+  - Fixed severe texture wrapping distortion and empty/black regions on the Electric Arc Melter operator control console and Casting Press PLC console.
+  - Aligned UV coordinate mappings in `ArcMelterModel` and `CastingPressModel` with the generator's atlas layout: North face maps `UV_CONSOLE_FRONT` / `UV_PLC_FRONT` (`(0, 96, 64, 48)`), South/East/West/Up/Down faces map dedicated metallic casing (`(0, 144, 64, 48)`), eliminating face-bleeding of button textures over narrow edges.
+- **Zero-Flicker Monolithic Rendering & Z-Fighting Resolution**:
+  - Implemented 0.15px margin inset padding (`((coord + 0.15f) / 256f)`) across all quad UV calculations to eliminate bilinear edge bleeding and texture shimmering during camera rotation.
+  - Eliminated all coplanar and penetrating box volumes across foundation skids, trunnions, shell walls, and operator console cabinets.
+  - Converted quad normal generation to use pose-matrix transformed normals (`consumer.setNormal(pose, nx, ny, nz)`), preventing normal fighting across directional facings.
+  - Cached single model instances in `ArcMelterControllerRenderer` and `CastingPressControllerRenderer` constructors to avoid per-frame allocations.
+- **Developer & Modder Monolithic 3D Model Guide (`MONOLITHIC_3D_MODEL_GUIDE.md`)**:
+  - Added comprehensive engineering and implementation guide for building flicker-free 3D monolithic multiblocks with procedural 256×256 texture atlases in modern NeoForge (26.3+), complete with zero-Z-fighting rules, atlas UV budgeting, member concealment, and copy-paste ready starter templates.
+
+---
+
 # Industrial Refinery v1.10.23
 
 ### What's New in v1.10.23:

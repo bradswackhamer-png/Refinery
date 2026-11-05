@@ -28,9 +28,11 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelterControllerBlockEntity, ArcMelterControllerRenderState> {
     private final ItemModelResolver itemModelResolver;
+    private final ArcMelterModel melterModel;
 
     public ArcMelterControllerRenderer(BlockEntityRendererProvider.Context context) {
         this.itemModelResolver = context.itemModelResolver();
+        this.melterModel = new ArcMelterModel();
     }
 
     @Override
@@ -163,7 +165,7 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
 
             boolean smeltingNow = state.isActive || state.progress > 0;
 
-            ArcMelterModel.render(
+            this.melterModel.render(
                     poseStack,
                     submitNodeCollector,
                     state.lightCoords,

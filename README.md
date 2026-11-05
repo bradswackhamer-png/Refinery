@@ -53,6 +53,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.10.25 (Texture Flickering Resolution, Control Panel UV Fix & 3D Monolithic Guide)](#version-11025-texture-flickering-resolution-control-panel-uv-fix--3d-monolithic-guide)
    - [Version 1.10.23 (Monolithic 3D Electric Arc Melter & Continuous Casting Press Overhaul)](#version-11023-monolithic-3d-electric-arc-melter--continuous-casting-press-overhaul)
    - [Version 1.10.21 (Plate Stamping Die Progression Fix)](#version-11021-plate-stamping-die-progression-fix)
    - [Version 1.10.19 (Steel Gear Tag & Valve Pipe Upgrade Recipe Fix)](#version-11019-steel-gear-tag--valve-pipe-upgrade-recipe-fix)
@@ -1729,6 +1730,19 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.10.25 (Texture Flickering Resolution, Control Panel UV Fix & 3D Monolithic Guide)
+- **Texture Flickering & Z-Fighting Resolution**:
+  - Replaced ad-hoc quad generation with the standardized `Cuboid` + `UVRect` model architecture using a $0.15\text{px}$ inset padding margin across both `ArcMelterModel` and `CastingPressModel`.
+  - Removed all coplanar surface overlap and penetrating box geometry on foundation skids, trunnions, and control consoles, completely eliminating visual flickering.
+  - Linked active `PoseStack.Pose` into `consumer.setNormal(pose, nx, ny, nz)` to ensure mathematically correct lighting normals when rotated across all 4 cardinal facings.
+- **Operator Control Console Texture Wrapping & Alignment**:
+  - Re-aligned `UV_CONSOLE_FRONT` and `UV_PLC_FRONT` to the exact atlas coordinates at `(0, 96, 64, 48)` in `ArcCastingAssetGenerator`, rendering crisp OLED screens, ammeter dials, pushbuttons, and E-stops.
+  - Formatted consoles as single non-overlapping cuboids with dedicated faceplates on the front face and clean metal enclosure panels on side/top faces.
+- **Monolithic 3D Model & Texture Atlas Engineering Guide**:
+  - Authored [`MONOLITHIC_3D_MODEL_GUIDE.md`](file:///c:/Users/swack/Desktop/refinery/MONOLITHIC_3D_MODEL_GUIDE.md) providing complete architectural instructions, zero-overlap rules, UV padding formulas, and copy-paste ready Java templates for creating monolithic 3D models and procedural texture atlases for other industrial buildings.
 
 ---
 

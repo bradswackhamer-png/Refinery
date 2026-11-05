@@ -4,6 +4,24 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.10.25] - 2026-11-05
+
+### Fixed
+- **Texture Flickering & Z-Fighting Resolution (`ArcMelterModel` & `CastingPressModel`)**:
+  - Re-architected both monolithic models to use the robust pre-computed `Cuboid` + `UVRect` system with $0.15\text{px}$ margin padding, eliminating edge-bleeding and polygon border shimmer.
+  - Eliminated all coplanar surface overlap and penetrating box geometry on foundation skids, trunnions, and control consoles that previously caused severe Z-fighting and visual flickering.
+  - Corrected face normal transformations by passing the active `PoseStack.Pose` into `consumer.setNormal(pose, nx, ny, nz)`, guaranteeing consistent diffuse shading and lighting as models rotate across cardinal directions.
+- **Operator Control Console Texture Wrapping & Alignment**:
+  - Corrected UV coordinates for `UV_CONSOLE_FRONT` and `UV_PLC_FRONT` to exactly match the $256\times 256$ atlas definitions at `(0, 96, 64, 48)`, properly rendering digital touchscreens, ammeter and hydraulic tonnage dials, pushbuttons, and yellow emergency stop collars.
+  - Mapped operator consoles as single non-overlapping cuboids: the North face displays the instrument faceplate while the remaining 5 faces render seamless painted metal enclosure casing (`UV_CONSOLE_CASING` and `UV_PLC_CASING`), preventing texture stretching across thin edges.
+
+### Added
+- **Monolithic 3D Model & Procedural Texture Atlas Engineering Guide (`MONOLITHIC_3D_MODEL_GUIDE.md`)**:
+  - Added a comprehensive architectural reference and blueprint guide for creating high-fidelity monolithic 3D models and procedural texture atlases for multiblock machines in Minecraft 26.3 NeoForge.
+  - Includes full explanations of the 0.15px padding formula, zero-overlap rules, procedural Java2D painting techniques, multiblock member block concealment, and complete copy-paste ready Java code templates.
+
+---
+
 ## [1.10.23] - 2026-11-05
 
 ### Added

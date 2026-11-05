@@ -86,8 +86,6 @@ public class ArcCastingAssetGenerator {
         ImageIO.write(img, "PNG", out);
         System.out.println("Generated Arc Melter atlas at: " + out.getAbsolutePath());
     }
-        System.out.println("Generated Arc Melter atlas at: " + out.getAbsolutePath());
-    }
 
     private static void drawFurnaceShell(Graphics2D g, int x, int y, int w, int h) {
         fillNoisyRect(g, x, y, w, h, new Color(0x28, 0x2E, 0x37), 4, 5101L);
@@ -399,41 +397,53 @@ public class ArcCastingAssetGenerator {
         // Background base: Dark industrial foundry steel
         fillNoisyRect(g, 0, 0, 256, 256, new Color(0x21, 0x26, 0x2E), 4, 7001L);
 
+        // Row 1 (y: 0..48)
         // 1. Heavy 4-Column Tie-Rod Frame & Crown Platen (0, 0, 96, 48)
         drawPressCrownAndFrame(g, 0, 0, 96, 48);
-
         // 2. Precision Ground Chrome Tie Rods & Guide Columns (96, 0, 64, 48)
         drawChromeTieRods(g, 96, 0, 64, 48);
-
         // 3. Refractory Tundish / Water-Cooled Copper Mold Basin (160, 0, 48, 48)
         drawCopperMoldBasin(g, 160, 0, 48, 48);
-
         // 4. High-Tonnage Main Hydraulic Cylinder (Amber/Orange-Red) (208, 0, 48, 48)
         drawMainHydraulicCylinder(g, 208, 0, 48, 48);
 
+        // Row 2 (y: 48..96)
         // 5. Moving Ram Crosshead with Safety-Yellow/Black Hazard Stripes (0, 48, 64, 48)
         drawMovingRamCrosshead(g, 0, 48, 64, 48);
-
         // 6. Water-Cooled Copper/Tool-Steel Stamping Die Block (64, 48, 48, 48)
         drawWaterCooledDie(g, 64, 48, 48, 48);
-
         // 7. Rear Molten Inflow Launder Box & Refractory Chute (112, 48, 48, 48)
         drawInflowLaunder(g, 112, 48, 48, 48);
-
         // 8. Run-Out Roller Table & Driven Steel Rollers (160, 48, 48, 48)
         drawRunoutRollers(g, 160, 48, 48, 48);
-
         // 9. Cooling Water Manifolds & Blue/Red Supply Pipes (208, 48, 48, 48)
         drawCoolingManifolds(g, 208, 48, 48, 48);
 
-        // 10. Operator PLC Console & Hydraulic Pressure Gauges (0, 96, 64, 48)
+        // Row 3 (y: 96..144)
+        // 10. Operator PLC Console Front Faceplate (0, 96, 64, 48)
         drawCastingControlConsole(g, 0, 96, 64, 48);
-
         // 11. Solidified Hot/Quenched Metal Billet Texture (64, 96, 48, 48)
         drawQuenchedBillet(g, 64, 96, 48, 48);
-
         // 12. Safety Grille Guard Mesh (112, 96, 48, 48)
         drawSafetyGrille(g, 112, 96, 48, 48);
+
+        // Row 4 (y: 144..192)
+        // 13. Light Gray PLC Console Enclosure Casing (0, 144, 64, 48)
+        drawCastingConsoleCasing(g, 0, 144, 64, 48);
+        // 14. Yellow & Black Safety Hazard Stripes (64, 144, 48, 48)
+        drawSafetyHazardStripes(g, 64, 144, 48, 48);
+        // 15. Polished Chrome Shafts & Cylinder Rods (112, 144, 48, 48)
+        drawChromeSteelTexture(g, 112, 144, 48, 48);
+        // 16. Cooling Radiator Fins & Vents (160, 144, 48, 48)
+        drawRadiatorFinBank(g, 160, 144, 48, 48);
+        // 17. Molten Metal Inflow Liquid (208, 144, 48, 48)
+        drawMoltenLaunderStream(g, 208, 144, 48, 48);
+
+        // Row 5 (y: 192..240)
+        // 18. Status Beacon ON (0, 192, 24, 24) & OFF (24, 192, 24, 24)
+        drawStatusBeaconLenses(g, 0, 192);
+        // 19. Cast-Steel Foundation Bed Plates (48, 192, 64, 48)
+        drawFoundationBaseplate(g, 48, 192, 64, 48);
 
         g.dispose();
 
@@ -634,6 +644,116 @@ public class ArcCastingAssetGenerator {
         }
         for (int gy = y + 6; gy < y + h - 4; gy += 6) {
             g.drawLine(x + 2, gy, x + w - 3, gy);
+        }
+    }
+
+    private static void drawDarkConsoleCasing(Graphics2D g, int x, int y, int w, int h) {
+        fillNoisyRect(g, x, y, w, h, new Color(0x27, 0x2D, 0x36), 3, 6401L);
+        g.setColor(new Color(0x3B, 0x44, 0x52));
+        g.drawRect(x, y, w - 1, h - 1);
+        g.setColor(new Color(0x18, 0x1C, 0x22));
+        g.drawLine(x, y + h - 1, x + w - 1, y + h - 1);
+        // Clean ventilation louvers
+        for (int ly = y + 8; ly < y + h - 8; ly += 5) {
+            g.setColor(new Color(0x14, 0x17, 0x1C));
+            g.fillRect(x + 8, ly, w - 16, 2);
+            g.setColor(new Color(0x4A, 0x55, 0x66));
+            g.drawLine(x + 8, ly + 2, x + w - 9, ly + 2);
+        }
+    }
+
+    private static void drawCastingConsoleCasing(Graphics2D g, int x, int y, int w, int h) {
+        fillNoisyRect(g, x, y, w, h, new Color(0x94, 0xA3, 0xB8), 3, 8301L);
+        g.setColor(new Color(0xCB, 0xD5, 0xE1));
+        g.drawRect(x, y, w - 1, h - 1);
+        g.setColor(new Color(0x47, 0x55, 0x69));
+        g.drawLine(x, y + h - 1, x + w - 1, y + h - 1);
+        for (int ly = y + 8; ly < y + h - 8; ly += 5) {
+            g.setColor(new Color(0x33, 0x41, 0x55));
+            g.fillRect(x + 8, ly, w - 16, 2);
+            g.setColor(new Color(0xE2, 0xE8, 0xF0));
+            g.drawLine(x + 8, ly + 2, x + w - 9, ly + 2);
+        }
+    }
+
+    private static void drawSafetyHazardStripes(Graphics2D g, int x, int y, int w, int h) {
+        fillNoisyRect(g, x, y, w, h, new Color(0xFA, 0xCC, 0x15), 3, 6501L);
+        g.setColor(new Color(0x18, 0x18, 0x1B));
+        for (int sx = x - h; sx < x + w + h; sx += 8) {
+            for (int lineW = 0; lineW < 4; lineW++) {
+                int x1 = sx + lineW;
+                int x2 = sx + h + lineW;
+                if ((x1 >= x && x1 < x + w) || (x2 >= x && x2 < x + w)) {
+                    g.drawLine(Math.max(x, Math.min(x + w - 1, x1)), y,
+                            Math.max(x, Math.min(x + w - 1, x2)), y + h - 1);
+                }
+            }
+        }
+        g.setColor(new Color(0x71, 0x3F, 0x12));
+        g.drawRect(x, y, w - 1, h - 1);
+    }
+
+    private static void drawChromeSteelTexture(Graphics2D g, int x, int y, int w, int h) {
+        for (int px = 0; px < w; px++) {
+            double norm = Math.sin((px / (double) w) * Math.PI);
+            int c = clamp((int) (140 + 105 * norm));
+            g.setColor(new Color(c, clamp(c + 2), clamp(c + 6)));
+            g.fillRect(x + px, y, 1, h);
+        }
+        g.setColor(new Color(0x33, 0x41, 0x55));
+        g.drawRect(x, y, w - 1, h - 1);
+    }
+
+    private static void drawRadiatorFinBank(Graphics2D g, int x, int y, int w, int h) {
+        fillNoisyRect(g, x, y, w, h, new Color(0x1E, 0x24, 0x2B), 3, 6601L);
+        for (int fx = x + 3; fx < x + w - 3; fx += 4) {
+            g.setColor(new Color(0x0F, 0x13, 0x18));
+            g.fillRect(fx, y + 2, 2, h - 4);
+            g.setColor(new Color(0x47, 0x55, 0x69));
+            g.drawLine(fx + 2, y + 2, fx + 2, y + h - 3);
+        }
+    }
+
+    private static void drawMoltenLaunderStream(Graphics2D g, int x, int y, int w, int h) {
+        for (int py = 0; py < h; py++) {
+            double norm = Math.sin((py / (double) h) * Math.PI);
+            int r = 255;
+            int gr = clamp((int) (120 + 95 * norm));
+            int b = clamp((int) (30 + 50 * norm));
+            g.setColor(new Color(r, gr, b));
+            g.fillRect(x, y + py, w, 1);
+        }
+        Random rnd = new Random(6701L);
+        for (int i = 0; i < 20; i++) {
+            g.setColor(new Color(0xFF, 0xFB, 0xEB));
+            g.fillRect(x + rnd.nextInt(w - 3), y + rnd.nextInt(h - 2), 3, 2);
+        }
+    }
+
+    private static void drawStatusBeaconLenses(Graphics2D g, int x, int y) {
+        // ON status: vibrant illuminated emerald/cyan
+        fillNoisyRect(g, x, y, 24, 24, new Color(0x10, 0xB9, 0x81), 4, 6801L);
+        g.setColor(new Color(0x6E, 0xEE, 0xC7));
+        g.fillOval(x + 4, y + 4, 16, 16);
+        g.setColor(new Color(0xFF, 0xFF, 0xFF));
+        g.fillOval(x + 7, y + 7, 10, 10);
+
+        // OFF status: dark standby lens
+        fillNoisyRect(g, x + 24, y, 24, 24, new Color(0x1C, 0x22, 0x2B), 2, 6802L);
+        g.setColor(new Color(0x33, 0x41, 0x55));
+        g.drawOval(x + 28, y + 4, 16, 16);
+    }
+
+    private static void drawFoundationBaseplate(Graphics2D g, int x, int y, int w, int h) {
+        fillNoisyRect(g, x, y, w, h, new Color(0x1B, 0x20, 0x27), 4, 6901L);
+        g.setColor(new Color(0x2E, 0x36, 0x42));
+        g.fillRect(x, y, w, 3);
+        g.fillRect(x, y + h - 3, w, 3);
+        g.setColor(new Color(0x43, 0x4F, 0x60));
+        g.drawLine(x, y, x + w - 1, y);
+        for (int rx = x + 8; rx < x + w - 4; rx += 14) {
+            drawRivet(g, rx, y + 4);
+            drawRivet(g, rx, y + h - 5);
         }
     }
 
