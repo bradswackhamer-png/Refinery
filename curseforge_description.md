@@ -198,7 +198,7 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.7.jar`
+`refinery-1.11.10.jar`
 
 ### Display Name
 `Industrial Refinery 1.11.4 (NeoForge 26.3)`
@@ -217,9 +217,41 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.11.7
+# Industrial Refinery v1.11.10
 
-### What's New in v1.11.7:
+### What's New in v1.11.10:
+- **Sloped Conveyor Belt Ground Support Legs & Foot Pads (`SlopedConveyorBeltModel` & `SlopedConveyorBeltRenderer`)**:
+  - Dynamically extended support leg trestles downwards to reach the floor or solid ground when chaining sloped conveyors together in multi-block ramps or elevated inclines.
+  - Automatically raycasts down up to 32 blocks beneath the elevated conveyor's support legs, detecting the exact top elevation of floor blocks, slabs, machine housings, or containers.
+  - Renders continuous aluminum support leg columns from the inclined bed frame all the way down to the surface, complete with heavy bolted foot pads (`UV_FOOT_PAD`) resting on the floor.
+  - Adds horizontal cross-bracing ties every 1-meter block interval down the entire height of the extended support legs.
+  - Expanded `SlopedConveyorBeltRenderer.getRenderBoundingBox` downwards (`expandTowards(0.0, -32.0, 0.0)`) to ensure tall support legs are never frustum-culled.
+
+---
+
+# Industrial Refinery v1.11.9
+
+### What's New in v1.11.9:
+- **Refinery Tower South Takeoff Pipes Height Realignment (`RefineryTowerModel`)**:
+  - Realigned all three South-facing horizontal takeoff pipe and valve assemblies to match the exact block center elevations of connected pipes and output ports:
+    - Stage 1 (Liquid Tar, `TAR_PORT` at Layer 0): lowered from `Y = 22.0f` to `Y = 8.0f` (`0.5 * 16.0f`), extending from the central drain sump cone (`Z = 4.0f`) out to the South face (`Z = 18.5f .. 23.5f`).
+    - Stage 2 (Diesel, `DIESEL_PORT` at Layer 3): lowered from `Y = 60.0f` to `Y = 56.0f` (`3.5 * 16.0f`), aligning dead-center with the Diesel Output Port.
+    - Stage 3 (Gasoline, `GAS_PORT` at Layer 6): lowered from `Y = 115.0f` to `Y = 104.0f` (`6.5 * 16.0f`), aligning dead-center with the Gasoline Output Port.
+- **Electric Arc Melter Hazard Stripe Texture Removal (`ArcMelterModel`)**:
+  - Removed yellow and black diagonal hazard stripe overlays from the Electric Arc Melter model, restoring authentic dark industrial metallurgy textures across all highlighted zones:
+    - Overhead raw ore charge hopper top intake flange: replaced with heavy steel `UV_CHARGE_HOPPER`.
+    - Foundation perimeter toe-kick strip: replaced with cast machine base `UV_TRUNNION_BASE`.
+    - Front and East tapping spout flange collars: replaced with ribbed refractory furnace shell `UV_FURNACE_SHELL`.
+
+---
+
+# Industrial Refinery v1.11.8
+
+### What's New in v1.11.8:
+- **Refinery Output Port Fluid Auto-Push to Connected Pipes & Tanks (`RefineryPortBlockEntity`)**:
+  - Resolved an issue where distillation output liquids (Liquid Tar, Diesel, Gasoline) would not exit the Petroleum Refinery multiblock into connected fluid pipes or fluid storage containers.
+  - Implemented active fluid pushing in `RefineryPortBlockEntity.serverTick`: every tick, fluid output ports (`TAR_OUT`, `DIESEL_OUT`, `GAS_OUT`, and `BYPRODUCT_OUT`) inspect all adjacent faces (`Direction.values()`) for connected NeoForge fluid handlers (`Capabilities.Fluid.BLOCK`, including `IndustrialPipeBlockEntity`, tanks, and fluid containers) and automatically push up to 1,000 mB/t of matching output fluid directly into the connected network using transaction-safe transfers.
+  - Enhanced controller lookup with fallback via `ReinforcedCasingBlock.findNearbyController(...)` and automatic multiblock re-assembly synchronization (`syncAssembly()`), ensuring ports stay firmly connected to the tower even after block updates or chunk reloads.
 - **Refinery Tower Stage 1 Liquid Tar South Takeoff Pipe Assembly (`RefineryTowerModel`)**:
   - Added a third South-facing horizontal takeoff valve assembly at `Y = 22.0f` on the bottom section (Stage 1: Heavy Residue / Liquid Tar) of the 3×9×3 Petroleum Refinery Tower.
   - Symmetrically matches the rotated Stage 2 (`Y = 60.0f`, Diesel) and Stage 3 (`Y = 115.0f`, Gasoline) takeoff valve assemblies, projecting cleanly towards the South (+Z) face with a crimson indicator handwheel when Stage 1 is active (`UV_STAGE1_CRIMSON`), completing the 3-stage visual takeoff system.

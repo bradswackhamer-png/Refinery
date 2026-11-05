@@ -3,8 +3,10 @@ package com.refinery.block.entity;
 import com.refinery.RefineryMod;
 import com.refinery.block.ConveyorBeltBlock;
 import com.refinery.block.RefineryPortBlock;
+import com.refinery.block.ReinforcedCasingBlock;
 import com.refinery.block.RightAngleConveyorBeltBlock;
 import com.refinery.block.SlopedConveyorBeltBlock;
+import com.refinery.fluid.RefineryFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +25,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
@@ -67,17 +70,24 @@ public class RefineryPortBlockEntity extends BlockEntity implements WorldlyConta
     public RefineryControllerBlockEntity getController() {
         if (this.level != null && this.controllerPos != null && this.level.isLoaded(this.controllerPos)) {
             if (this.level.getBlockEntity(this.controllerPos) instanceof RefineryControllerBlockEntity controllerBE) {
+                if (!controllerBE.isAssembled()) {
+                    controllerBE.syncAssembly();
+                }
                 if (controllerBE.isAssembled()) {
                     return controllerBE;
                 }
             }
         }
         if (this.level != null) {
-            for (BlockPos p : BlockPos.betweenClosed(this.worldPosition.offset(-3, -9, -3), this.worldPosition.offset(3, 2, 3))) {
-                if (this.level.getBlockEntity(p) instanceof RefineryControllerBlockEntity c && c.isAssembled()) {
-                    this.controllerPos = p.immutable();
+            RefineryControllerBlockEntity nearby = ReinforcedCasingBlock.findNearbyController(this.level, this.worldPosition);
+            if (nearby != null) {
+                if (!nearby.isAssembled()) {
+                    nearby.syncAssembly();
+                }
+                if (nearby.isAssembled()) {
+                    this.controllerPos = nearby.getBlockPos();
                     setChanged();
-                    return c;
+                    return nearby;
                 }
             }
         }
@@ -99,17 +109,100 @@ public class RefineryPortBlockEntity extends BlockEntity implements WorldlyConta
     }
 
     /**
-     * Periodically checks adjacent blocks below and beside the port to auto-eject solid byproducts (bitumen, etc.)
-     * onto conveyors or into item pipes/containers.
+     * Periodically checks adjacent blocks:
+     * 1. Ejects solid byproducts (bitumen, sand) to conveyors or item pipes.
+     * 2. Auto-pushes liquid outputs (Liquid Tar, Diesel, Gasoline) into connected fluid pipes or tanks.
      */
     public void serverTick(ServerLevel level, BlockPos pos, BlockState state) {
-        if (this.portType != RefineryPortBlock.PortType.BYPRODUCT_OUT) {
-            return;
+        // Auto-eject solid byproducts (bitumen, sand) to conveyors / item pipes
+        if (this.portType == RefineryPortBlock.PortType.BYPRODUCT_OUT) {
+            if ((level.getGameTime() + Math.abs(pos.hashCode())) % 4 == 0) {
+                tryExportByproducts(level, pos, state);
+            }
         }
-        if ((level.getGameTime() + Math.abs(pos.hashCode())) % 4 != 0) {
-            return;
+
+        // Auto-push liquids into adjacent fluid pipes, tanks, or fluid handlers
+        if (this.portType == RefineryPortBlock.PortType.TAR_OUT
+                || this.portType == RefineryPortBlock.PortType.DIESEL_OUT
+                || this.portType == RefineryPortBlock.PortType.GAS_OUT
+                || this.portType == RefineryPortBlock.PortType.BYPRODUCT_OUT) {
+            tryAutoPushFluids(level, pos, state);
         }
-        tryExportByproducts(level, pos, state);
+    }
+
+    /**
+     * Auto-pushes output liquids (Liquid Tar, Diesel, Gasoline) into adjacent fluid handlers or pipes!
+     * When attaching a regular fluid pipe or storage tank adjacent to an output port,
+     * the fluid flows directly into the pipe without requiring an external extractor servo.
+     */
+    private void tryAutoPushFluids(ServerLevel level, BlockPos pos, BlockState state) {
+        RefineryControllerBlockEntity controller = getController();
+        if (controller == null || !controller.isAssembled()) return;
+
+        FluidResource resource;
+        int available;
+
+        switch (this.portType) {
+            case DIESEL_OUT -> {
+                available = controller.getDiesel();
+                resource = FluidResource.of(RefineryFluids.DIESEL_SOURCE.get());
+            }
+            case GAS_OUT -> {
+                available = controller.getGasoline();
+                resource = FluidResource.of(RefineryFluids.GASOLINE_SOURCE.get());
+            }
+            case TAR_OUT, BYPRODUCT_OUT -> {
+                available = controller.getLiquidTar();
+                resource = FluidResource.of(RefineryFluids.LIQUID_TAR_SOURCE.get());
+            }
+            default -> {
+                return;
+            }
+        }
+
+        if (available <= 0) return;
+
+        for (Direction dir : Direction.values()) {
+            BlockPos target = pos.relative(dir);
+            BlockEntity targetBE = level.getBlockEntity(target);
+
+            // Don't push into other ports of the same refinery
+            if (targetBE instanceof RefineryPortBlockEntity portBE && this.controllerPos != null && this.controllerPos.equals(portBE.getControllerPos())) {
+                continue;
+            }
+            if (targetBE instanceof RefineryControllerBlockEntity controllerBE && this.controllerPos != null && this.controllerPos.equals(controllerBE.getBlockPos())) {
+                continue;
+            }
+
+            var handler = level.getCapability(Capabilities.Fluid.BLOCK, target, dir.getOpposite());
+            if (handler == null) {
+                handler = level.getCapability(Capabilities.Fluid.BLOCK, target, null);
+            }
+            if (handler != null) {
+                int toPush = Math.min(available, 1000);
+                int inserted = 0;
+                try (Transaction tx = Transaction.openRoot()) {
+                    for (int i = 0; i < handler.size(); i++) {
+                        int space = toPush - inserted;
+                        if (space <= 0) break;
+                        int ins = handler.insert(i, resource, space, tx);
+                        inserted += ins;
+                    }
+                    if (inserted > 0) {
+                        tx.commit();
+                        switch (this.portType) {
+                            case DIESEL_OUT -> controller.drainDiesel(inserted);
+                            case GAS_OUT -> controller.drainGasoline(inserted);
+                            case TAR_OUT, BYPRODUCT_OUT -> controller.drainLiquidTar(inserted);
+                        }
+                        controller.setChanged();
+                        setChanged();
+                        available -= inserted;
+                        if (available <= 0) break;
+                    }
+                }
+            }
+        }
     }
 
     private void tryExportByproducts(ServerLevel level, BlockPos pos, BlockState state) {

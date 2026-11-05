@@ -13,4 +13,5 @@ public class SlopedConveyorBeltRenderState extends BlockEntityRenderState {
     public boolean isRunning = true;
     public long gameTime = 0;
     public float partialTicks = 0.0f;
+    public float groundDrop = 0.0f;
 }

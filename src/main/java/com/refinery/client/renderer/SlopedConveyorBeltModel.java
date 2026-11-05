@@ -44,6 +44,19 @@ public class SlopedConveyorBeltModel {
             int light,
             int overlay
     ) {
+        render(m, c, slope, isRunning, animTime, light, overlay, 0.0f);
+    }
+
+    public void render(
+            Matrix4f m,
+            VertexConsumer c,
+            SlopedConveyorBeltBlock.SlopeDirection slope,
+            boolean isRunning,
+            float animTime,
+            int light,
+            int overlay,
+            float groundDrop
+    ) {
         boolean isUp = slope == SlopedConveyorBeltBlock.SlopeDirection.UP;
 
         // Heights in meters (blocks) - perfectly aligned to 4.6px (0.2875) horizontal conveyor belt height
@@ -63,13 +76,23 @@ public class SlopedConveyorBeltModel {
         emitSlopedQuad(m, c, 0.10f, 0.90f, yEntry - 0.03f, yExit - 0.03f, 0.0f, 1.0f,
                 UV_SLIDER_BED.u0(), UV_SLIDER_BED.u1(), UV_SLIDER_BED.v0(), UV_SLIDER_BED.v1(), light, overlay);
 
-        // 4. Vertical Sturdy Support Legs at high end
+        // 4. Vertical Sturdy Support Legs at high end extending down to ground
         float legZ = isUp ? 0.92f : 0.08f;
         float legHeight = yHigh - 0.05f;
-        emitBox(m, c, 0.02f, 0.0f, legZ - 0.05f, 0.09f, legHeight, legZ + 0.05f, UV_ALUMINUM_RAIL, light, overlay);
-        emitBox(m, c, 0.91f, 0.0f, legZ - 0.05f, 0.98f, legHeight, legZ + 0.05f, UV_ALUMINUM_RAIL, light, overlay);
-        // Cross-brace
-        emitBox(m, c, 0.09f, legHeight * 0.5f - 0.02f, legZ - 0.03f, 0.91f, legHeight * 0.5f + 0.02f, legZ + 0.03f, UV_ALUMINUM_RAIL, light, overlay);
+        float yBottom = -groundDrop;
+
+        // Vertical leg columns
+        emitBox(m, c, 0.02f, yBottom, legZ - 0.05f, 0.09f, legHeight, legZ + 0.05f, UV_ALUMINUM_RAIL, light, overlay);
+        emitBox(m, c, 0.91f, yBottom, legZ - 0.05f, 0.98f, legHeight, legZ + 0.05f, UV_ALUMINUM_RAIL, light, overlay);
+
+        // Foot pads at the bottom of the legs
+        emitFullBox(m, c, 0.005f, yBottom, legZ - 0.07f, 0.105f, yBottom + 0.025f, legZ + 0.07f, UV_FOOT_PAD, light, overlay);
+        emitFullBox(m, c, 0.895f, yBottom, legZ - 0.07f, 0.995f, yBottom + 0.025f, legZ + 0.07f, UV_FOOT_PAD, light, overlay);
+
+        // Horizontal Cross-bracing every 1.0 block height
+        for (float braceY = legHeight * 0.5f; braceY >= yBottom + 0.15f; braceY -= 1.0f) {
+            emitBox(m, c, 0.09f, braceY - 0.02f, legZ - 0.03f, 0.91f, braceY + 0.02f, legZ + 0.03f, UV_ALUMINUM_RAIL, light, overlay);
+        }
 
         // 5. Rollers at both ends (tucked cleanly under the belt)
         float rollAngle = isRunning ? (animTime * 0.25f) : 0.0f;
@@ -192,6 +215,26 @@ public class SlopedConveyorBeltModel {
         c.addVertex(m, x1, y1, z0).setColor(1f, 1f, 1f, 1f).setUv(uv.u0(), uv.v0()).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
         c.addVertex(m, x1, y1, z1).setColor(1f, 1f, 1f, 1f).setUv(uv.u1(), uv.v0()).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
         c.addVertex(m, x1, y0, z1).setColor(1f, 1f, 1f, 1f).setUv(uv.u1(), uv.v1()).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+    }
+
+    private static void emitFullBox(
+            Matrix4f m, VertexConsumer c,
+            float x0, float y0, float z0, float x1, float y1, float z1,
+            UVRect uv, int light, int overlay
+    ) {
+        emitBox(m, c, x0, y0, z0, x1, y1, z1, uv, light, overlay);
+
+        // Top (+Y)
+        c.addVertex(m, x0, y1, z0).setColor(1f, 1f, 1f, 1f).setUv(uv.u0(), uv.v0()).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        c.addVertex(m, x0, y1, z1).setColor(1f, 1f, 1f, 1f).setUv(uv.u0(), uv.v1()).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        c.addVertex(m, x1, y1, z1).setColor(1f, 1f, 1f, 1f).setUv(uv.u1(), uv.v1()).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        c.addVertex(m, x1, y1, z0).setColor(1f, 1f, 1f, 1f).setUv(uv.u1(), uv.v0()).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+
+        // Bottom (-Y)
+        c.addVertex(m, x0, y0, z1).setColor(1f, 1f, 1f, 1f).setUv(uv.u0(), uv.v1()).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        c.addVertex(m, x0, y0, z0).setColor(1f, 1f, 1f, 1f).setUv(uv.u0(), uv.v0()).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        c.addVertex(m, x1, y0, z0).setColor(1f, 1f, 1f, 1f).setUv(uv.u1(), uv.v0()).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        c.addVertex(m, x1, y0, z1).setColor(1f, 1f, 1f, 1f).setUv(uv.u1(), uv.v1()).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
     }
 
     private static void emitRoller(

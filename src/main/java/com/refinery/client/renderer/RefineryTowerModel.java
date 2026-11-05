@@ -149,10 +149,14 @@ public final class RefineryTowerModel {
         // =========================================================================
         // 4. SOUTH (+Z) 3-STAGE PRODUCT TAKEOFF VALVES (TAR, DIESEL & GASOLINE)
         //    Rotated 90 degrees to point South (+Z) towards the Tar, Diesel & Gas ports.
+        //    Positioned to line up exactly with adjacent external pipes and output ports:
+        //    - Stage 1 (Tar):      Layer 0 (Y = 0) -> centerY = 8.0f  (extends from bottom sump at Z = 4.0f)
+        //    - Stage 2 (Diesel):   Layer 3 (Y = 3) -> centerY = 56.0f (extends from shell at Z = 14.5f)
+        //    - Stage 3 (Gasoline): Layer 6 (Y = 6) -> centerY = 104.0f (extends from shell at Z = 14.5f)
         // =========================================================================
-        emitTakeoffValveAssemblySouth(pose, matrix, vc, 22.0f, stage1Enabled ? UV_STAGE1_CRIMSON : UV_DARK_STEEL, packedLight, packedOverlay);
-        emitTakeoffValveAssemblySouth(pose, matrix, vc, 60.0f, stage2Enabled ? UV_STAGE2_AMBER : UV_DARK_STEEL, packedLight, packedOverlay);
-        emitTakeoffValveAssemblySouth(pose, matrix, vc, 115.0f, stage3Enabled ? UV_STAGE3_BLUE : UV_DARK_STEEL, packedLight, packedOverlay);
+        emitTakeoffValveAssemblySouth(pose, matrix, vc, 8.0f, 4.0f, stage1Enabled ? UV_STAGE1_CRIMSON : UV_DARK_STEEL, packedLight, packedOverlay);
+        emitTakeoffValveAssemblySouth(pose, matrix, vc, 56.0f, 14.5f, stage2Enabled ? UV_STAGE2_AMBER : UV_DARK_STEEL, packedLight, packedOverlay);
+        emitTakeoffValveAssemblySouth(pose, matrix, vc, 104.0f, 14.5f, stage3Enabled ? UV_STAGE3_BLUE : UV_DARK_STEEL, packedLight, packedOverlay);
 
         // =========================================================================
         // 5. LEFT SIDE (-X) HEATED CRUDE INLET PIPE & CAGED SAFETY LADDER (Y = 6..134)
@@ -196,12 +200,13 @@ public final class RefineryTowerModel {
             Matrix4f matrix,
             VertexConsumer vc,
             float centerY,
+            float fromZ,
             int[] valveUV,
             int light,
             int overlay
     ) {
-        // Horizontal pipe extending South (+Z) from cylinder outer wall (Z = 15.1f to 18.5f)
-        emitBox(pose, matrix, vc, -1.2f, centerY - 1.2f, 15.1f, 1.2f, centerY + 1.2f, 18.5f, UV_BRUSHED_STEEL, light, overlay, true, true);
+        // Horizontal pipe extending South (+Z) from cylinder outer wall (Z = fromZ to 18.5f)
+        emitBox(pose, matrix, vc, -1.2f, centerY - 1.2f, fromZ, 1.2f, centerY + 1.2f, 18.5f, UV_BRUSHED_STEEL, light, overlay, true, true);
         // Flange ring / collar (Z = 18.5f to 19.5f)
         emitBox(pose, matrix, vc, -2.0f, centerY - 2.0f, 18.5f, 2.0f, centerY + 2.0f, 19.5f, UV_STAINLESS_SILVER, light, overlay, true, true);
         // Valve body / box (Z = 19.5f to 22.5f)

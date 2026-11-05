@@ -118,13 +118,11 @@ public class ArcMelterModel {
         // Foundation steel deck plate
         staticCuboids.add(Cuboid.uniform(-9.0f, 3.0f, 5.0f, 25.0f, 3.5f, 43.0f, UV_BASEPLATE));
 
-        // Front perimeter safety hazard toe-kick strip
-        staticCuboids.add(new Cuboid(
+        // Front perimeter toe-kick strip
+        staticCuboids.add(Cuboid.uniform(
                 -15.2f, 0.0f, 0.0f,
                 31.2f, 2.5f, 0.95f,
-                UV_HAZARD_STRIPES, UV_TRUNNION_BASE,
-                UV_HAZARD_STRIPES, UV_HAZARD_STRIPES,
-                UV_HAZARD_STRIPES, UV_TRUNNION_BASE
+                UV_TRUNNION_BASE
         ));
 
         // Corner anchor bolting plinths
@@ -218,21 +216,17 @@ public class ArcMelterModel {
         // East branch walls
         staticCuboids.add(Cuboid.uniform(28.0f, 3.5f, 3.5f, 32.0f, 9.0f, 5.0f, UV_FURNACE_SHELL));
         staticCuboids.add(Cuboid.uniform(28.0f, 3.5f, 11.0f, 32.0f, 9.0f, 12.5f, UV_FURNACE_SHELL));
-        // Front hazard tapping flange collar at Z=0
-        staticCuboids.add(new Cuboid(
+        // Front tapping flange collar at Z=0
+        staticCuboids.add(Cuboid.uniform(
                 18.0f, 3.0f, 0.0f,
                 30.0f, 9.5f, 1.0f,
-                UV_HAZARD_STRIPES, UV_FURNACE_SHELL,
-                UV_FURNACE_SHELL, UV_FURNACE_SHELL,
-                UV_HAZARD_STRIPES, UV_FURNACE_SHELL
+                UV_FURNACE_SHELL
         ));
-        // East hazard tapping flange collar at X=32
-        staticCuboids.add(new Cuboid(
+        // East tapping flange collar at X=32
+        staticCuboids.add(Cuboid.uniform(
                 31.0f, 3.0f, 3.0f,
                 32.0f, 9.5f, 13.0f,
-                UV_FURNACE_SHELL, UV_FURNACE_SHELL,
-                UV_FURNACE_SHELL, UV_HAZARD_STRIPES,
-                UV_HAZARD_STRIPES, UV_FURNACE_SHELL
+                UV_FURNACE_SHELL
         ));
 
         // =========================================================================
@@ -277,12 +271,10 @@ public class ArcMelterModel {
         staticCuboids.add(Cuboid.uniform(2.0f, 36.0f, 20.0f, 4.0f, 45.0f, 28.0f, UV_CHARGE_HOPPER));  // West
         staticCuboids.add(Cuboid.uniform(12.0f, 36.0f, 20.0f, 14.0f, 45.0f, 28.0f, UV_CHARGE_HOPPER)); // East
         // Top intake collar flange at Y: 45..48
-        staticCuboids.add(new Cuboid(
+        staticCuboids.add(Cuboid.uniform(
                 1.0f, 45.0f, 17.0f,
                 15.0f, 48.0f, 31.0f,
-                UV_HAZARD_STRIPES, UV_HAZARD_STRIPES,
-                UV_HAZARD_STRIPES, UV_HAZARD_STRIPES,
-                UV_HAZARD_STRIPES, UV_FURNACE_SHELL
+                UV_CHARGE_HOPPER
         ));
 
         // =========================================================================

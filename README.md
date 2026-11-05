@@ -54,6 +54,9 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.10 (Sloped Conveyor Belt Ground Support Legs & Foot Pads)](#version-11110-sloped-conveyor-belt-ground-support-legs--foot-pads)
+   - [Version 1.11.9 (Refinery Tower South Takeoff Pipes Realignment, Arc Melter Hazard Stripe Removal)](#version-1119-refinery-tower-south-takeoff-pipes-realignment-arc-melter-hazard-stripe-removal)
+   - [Version 1.11.8 (Refinery Output Fluid Auto-Push, Stage 1 South Takeoff Pipe, Anti-Flicker Fixes)](#version-1118-refinery-output-fluid-auto-push-stage-1-south-takeoff-pipe-anti-flicker-fixes)
    - [Version 1.11.4 (Refinery Tower South Takeoff Pipes Re-orientation & Vertical Header Removal)](#version-1114-refinery-tower-south-takeoff-pipes-re-orientation--vertical-header-removal)
    - [Version 1.11.3 (Dark Gunmetal Industrial GUI Redesign & Stage Toggle Button Fix)](#version-1113-dark-gunmetal-industrial-gui-redesign--stage-toggle-button-fix)
    - [Version 1.11.2 (3-Stage 3×9×3 Petroleum Refinery Rebuild, Burner & Electric Refinery Furnaces, Liquid Tar)](#version-1112-3-stage-393-petroleum-refinery-rebuild-burner--electric-refinery-furnaces-liquid-tar)
@@ -1757,6 +1760,44 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.10 (Sloped Conveyor Belt Ground Support Legs & Foot Pads)
+- **Sloped Conveyor Belt Ground Support Legs & Foot Pads (`SlopedConveyorBeltModel` & `SlopedConveyorBeltRenderer`)**:
+  - Dynamically extended support leg trestles downwards to reach the floor or solid ground when chaining sloped conveyors together in multi-block ramps or elevated inclines.
+  - Automatically raycasts down up to 32 blocks beneath the elevated conveyor's support legs, detecting the exact top elevation of floor blocks, slabs, machine housings, or containers.
+  - Renders continuous aluminum support leg columns from the inclined bed frame all the way down to the surface, complete with heavy bolted foot pads (`UV_FOOT_PAD`) resting on the floor.
+  - Adds horizontal cross-bracing ties every 1-meter block interval down the entire height of the extended support legs.
+  - Expanded `SlopedConveyorBeltRenderer.getRenderBoundingBox` downwards (`expandTowards(0.0, -32.0, 0.0)`) to ensure tall support legs are never frustum-culled.
+
+---
+
+### Version 1.11.9 (Refinery Tower South Takeoff Pipes Realignment, Arc Melter Hazard Stripe Removal)
+- **Refinery Tower South Takeoff Pipes Height Realignment (`RefineryTowerModel`)**:
+  - Realigned all three South-facing horizontal takeoff pipe and valve assemblies to match the exact block center elevations of connected pipes and output ports:
+    - Stage 1 (Liquid Tar, `TAR_PORT` at Layer 0): lowered from `Y = 22.0f` to `Y = 8.0f` (`0.5 * 16.0f`), extending from the central drain sump cone (`Z = 4.0f`) out to the South face (`Z = 18.5f .. 23.5f`).
+    - Stage 2 (Diesel, `DIESEL_PORT` at Layer 3): lowered from `Y = 60.0f` to `Y = 56.0f` (`3.5 * 16.0f`), aligning dead-center with the Diesel Output Port.
+    - Stage 3 (Gasoline, `GAS_PORT` at Layer 6): lowered from `Y = 115.0f` to `Y = 104.0f` (`6.5 * 16.0f`), aligning dead-center with the Gasoline Output Port.
+- **Electric Arc Melter Hazard Stripe Texture Removal (`ArcMelterModel`)**:
+  - Removed yellow and black diagonal hazard stripe overlays from the Electric Arc Melter model, restoring authentic dark industrial metallurgy textures across all highlighted zones:
+    - Overhead raw ore charge hopper top intake flange: replaced with heavy steel `UV_CHARGE_HOPPER`.
+    - Foundation perimeter toe-kick strip: replaced with cast machine base `UV_TRUNNION_BASE`.
+    - Front and East tapping spout flange collars: replaced with ribbed refractory furnace shell `UV_FURNACE_SHELL`.
+
+---
+
+### Version 1.11.8 (Refinery Output Fluid Auto-Push, Stage 1 South Takeoff Pipe, Anti-Flicker Fixes)
+- **Refinery Output Port Fluid Auto-Push to Adjacent Pipes & Tanks (`RefineryPortBlockEntity`)**:
+  - Distillation output liquids (Liquid Tar, Diesel, Gasoline) now automatically push outward from output ports (`TAR_OUT`, `DIESEL_OUT`, `GAS_OUT`, and `BYPRODUCT_OUT`) into adjacent fluid pipes (`IndustrialPipeBlockEntity`), fluid storage tanks, and third-party fluid capability handlers at up to 1,000 mB/t.
+  - Active multiblock controller discovery with fallback via `ReinforcedCasingBlock.findNearbyController(...)` and automated multiblock synchronization (`syncAssembly()`).
+- **Refinery Tower Stage 1 Liquid Tar South Takeoff Pipe Assembly (`RefineryTowerModel`)**:
+  - Added a third South-facing horizontal takeoff valve assembly at `Y = 22.0f` on the bottom section (Stage 1: Heavy Residue / Liquid Tar) of the 3×9×3 Petroleum Refinery Tower.
+  - Symmetrically matches the rotated Stage 2 (`Y = 60.0f`, Diesel) and Stage 3 (`Y = 115.0f`, Gasoline) takeoff valve assemblies, projecting cleanly towards the South (+Z) face with a crimson indicator handwheel when Stage 1 is active (`UV_STAGE1_CRIMSON`), completing the 3-stage visual takeoff system.
+- **Electric Arc Melter & Hydraulic Casting Press Anti-Flicker & Z-Fighting Resolution (`ArcMelterModel` & `CastingPressModel`)**:
+  - Upgraded atlas margin padding in `UVRect.of` from 0.15px to 0.5px to eliminate edge bleeding across tiles during camera movement and mipmapping.
+  - Suppressed downward ground quads (`y0 <= 0.01f`) to prevent z-fighting against floor blocks.
+  - Adjusted base cross-beam heights below deck plates and offset flange rings/locknuts to prevent coplanar rendering conflicts.
 
 ---
 

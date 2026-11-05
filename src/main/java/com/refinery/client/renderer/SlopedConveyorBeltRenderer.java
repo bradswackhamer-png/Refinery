@@ -12,9 +12,13 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -38,8 +42,8 @@ public class SlopedConveyorBeltRenderer implements BlockEntityRenderer<SlopedCon
 
     @Override
     public AABB getRenderBoundingBox(SlopedConveyorBeltBlockEntity blockEntity) {
-        // Taller bounding box because it extends upward to the next block height
-        return new AABB(blockEntity.getBlockPos()).inflate(0.0, 0.5, 0.0);
+        // Taller bounding box extending upward to the crest and downward for ground support legs
+        return new AABB(blockEntity.getBlockPos()).inflate(0.0, 0.5, 0.0).expandTowards(0.0, -32.0, 0.0);
     }
 
     @Override
@@ -70,6 +74,26 @@ public class SlopedConveyorBeltRenderer implements BlockEntityRenderer<SlopedCon
 
         state.gameTime = be.getLevel() != null ? be.getLevel().getGameTime() : 0L;
         state.partialTicks = partialTicks;
+
+        // Trace ground depth below the conveyor's elevated support legs
+        state.groundDrop = 0.0f;
+        Level level = be.getLevel();
+        BlockPos pos = be.getBlockPos();
+        if (level != null) {
+            for (int drop = 1; drop <= 32; drop++) {
+                BlockPos checkPos = pos.below(drop);
+                BlockState checkState = level.getBlockState(checkPos);
+                if (checkState.isAir()) {
+                    continue;
+                }
+                VoxelShape collision = checkState.getCollisionShape(level, checkPos);
+                if (!collision.isEmpty()) {
+                    double topY = collision.max(Direction.Axis.Y);
+                    state.groundDrop = (float) ((drop - 1) + (1.0 - topY));
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -112,7 +136,8 @@ public class SlopedConveyorBeltRenderer implements BlockEntityRenderer<SlopedCon
                         state.isRunning,
                         animTicks,
                         state.lightCoords,
-                        OverlayTexture.NO_OVERLAY
+                        OverlayTexture.NO_OVERLAY,
+                        state.groundDrop
                 )
         );
 

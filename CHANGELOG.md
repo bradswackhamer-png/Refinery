@@ -4,7 +4,35 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-## [1.11.7] - 2026-11-05
+## [1.11.10] - 2026-11-05
+
+### Added
+- **Sloped Conveyor Belt Ground Support Legs & Foot Pads (`SlopedConveyorBeltModel` & `SlopedConveyorBeltRenderer`)**:
+  - Dynamically extended support leg trestles downwards to reach the floor or solid ground when chaining sloped conveyors together in multi-block ramps or elevated inclines.
+  - Automatically raycasts down up to 32 blocks beneath the elevated conveyor's support legs, detecting the exact top elevation of floor blocks, slabs, machine housings, or containers.
+  - Renders continuous aluminum support leg columns from the inclined bed frame all the way down to the surface, complete with heavy bolted foot pads (`UV_FOOT_PAD`) resting on the floor.
+  - Adds horizontal cross-bracing ties every 1-meter block interval down the entire height of the extended support legs.
+  - Expanded `SlopedConveyorBeltRenderer.getRenderBoundingBox` downwards (`expandTowards(0.0, -32.0, 0.0)`) to ensure tall support legs are never frustum-culled.
+
+---
+
+## [1.11.9] - 2026-11-05
+
+### Changed
+- **Refinery Tower South Takeoff Pipes Height Realignment (`RefineryTowerModel`)**:
+  - Realigned all three South-facing horizontal takeoff pipe and valve assemblies to match the exact block center elevations of connected pipes and output ports:
+    - Stage 1 (Liquid Tar, `TAR_PORT` at Layer 0): lowered from `Y = 22.0f` to `Y = 8.0f` (`0.5 * 16.0f`), extending from the central drain sump cone (`Z = 4.0f`) out to the South face (`Z = 18.5f .. 23.5f`).
+    - Stage 2 (Diesel, `DIESEL_PORT` at Layer 3): lowered from `Y = 60.0f` to `Y = 56.0f` (`3.5 * 16.0f`), aligning dead-center with the Diesel Output Port.
+    - Stage 3 (Gasoline, `GAS_PORT` at Layer 6): lowered from `Y = 115.0f` to `Y = 104.0f` (`6.5 * 16.0f`), aligning dead-center with the Gasoline Output Port.
+- **Electric Arc Melter Hazard Stripe Texture Removal (`ArcMelterModel`)**:
+  - Removed yellow and black diagonal hazard stripe overlays from the Electric Arc Melter model, restoring authentic dark industrial metallurgy textures across all highlighted zones:
+    - Overhead raw ore charge hopper top intake flange: replaced with heavy steel `UV_CHARGE_HOPPER`.
+    - Foundation perimeter toe-kick strip: replaced with cast machine base `UV_TRUNNION_BASE`.
+    - Front and East tapping spout flange collars: replaced with ribbed refractory furnace shell `UV_FURNACE_SHELL`.
+
+---
+
+## [1.11.8] - 2026-11-05
 
 ### Added
 - **Refinery Tower Stage 1 Liquid Tar South Takeoff Pipe Assembly (`RefineryTowerModel`)**:
@@ -12,6 +40,10 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Symmetrically matches the rotated Stage 2 (`Y = 60.0f`, Diesel) and Stage 3 (`Y = 115.0f`, Gasoline) takeoff valve assemblies, projecting cleanly towards the South (+Z) face with a crimson indicator handwheel when Stage 1 is active (`UV_STAGE1_CRIMSON`), completing the 3-stage visual takeoff system.
 
 ### Fixed
+- **Refinery Output Port Fluid Auto-Push to Connected Pipes & Tanks (`RefineryPortBlockEntity`)**:
+  - Resolved an issue where distillation output liquids (Liquid Tar, Diesel, Gasoline) would not exit the Petroleum Refinery multiblock into connected fluid pipes or fluid storage containers.
+  - Implemented active fluid pushing in `RefineryPortBlockEntity.serverTick`: every tick, fluid output ports (`TAR_OUT`, `DIESEL_OUT`, `GAS_OUT`, and `BYPRODUCT_OUT`) inspect all adjacent faces (`Direction.values()`) for connected NeoForge fluid handlers (`Capabilities.Fluid.BLOCK`, including `IndustrialPipeBlockEntity`, tanks, and fluid containers) and automatically push up to 1,000 mB/t of matching output fluid directly into the connected network using transaction-safe transfers.
+  - Enhanced controller lookup with fallback via `ReinforcedCasingBlock.findNearbyController(...)` and automatic multiblock re-assembly synchronization (`syncAssembly()`), ensuring ports stay firmly connected to the tower even after block updates or chunk reloads.
 - **Electric Arc Melter & Hydraulic Casting Press Texture Flickering & Z-Fighting Resolution (`ArcMelterModel` & `CastingPressModel`)**:
   - **Atlas UV Padding Inset**: Upgraded `UVRect.of` margin inset padding from `0.15px` to a robust `0.5px` (`(coord + 0.5f) / 256.0f`), completely eliminating texture bleeding, shimmering, and edge flickering across adjacent atlas tiles during camera movement and mipmapping.
   - **Ground Floor Z-Fighting Elimination**: Suppressed emitting downward-facing (`DOWN`) quads for foundation cuboids sitting on the ground (`y0 <= 0.01f`), preventing bottom runner faces from fighting with the top surface of floor blocks.
