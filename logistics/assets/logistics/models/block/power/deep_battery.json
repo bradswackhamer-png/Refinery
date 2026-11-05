@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "side": "logistics:block/power/deep_battery_sides",
-    "top": "logistics:block/power/deep_battery_top",
-    "bottom": "logistics:block/power/deep_battery_bottom",
-    "particle": "logistics:block/power/deep_battery_sides"
-  }
-}

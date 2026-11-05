@@ -1,5 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": ["#c:ingots/lumenite"],
-  "result": { "count": 9, "id": "logistics:core/lumenite_nugget" }
-}

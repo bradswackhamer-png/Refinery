@@ -1,4 +1,0 @@
-{
-  "parent": "logistics:block/automation/crucible",
-  "textures": { "front": "logistics:block/automation/crucible_on" }
-}

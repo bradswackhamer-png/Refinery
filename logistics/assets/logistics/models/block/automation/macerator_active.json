@@ -1,4 +1,0 @@
-{
-  "parent": "logistics:block/automation/macerator",
-  "textures": { "front": "logistics:block/automation/macerator_on" }
-}

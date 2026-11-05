@@ -1,8 +1,0 @@
-{
-  "type": "logistics:sawmill",
-  "ingredient": "minecraft:birch_stairs",
-  "count": 2,
-  "result": { "id": "minecraft:birch_planks", "count": 1 },
-  "byproduct": { "id": "logistics:core/sawdust", "chance": 0.25 },
-  "energy": 2000
-}

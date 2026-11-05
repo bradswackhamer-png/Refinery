@@ -1,7 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "logistics:core/tin_ore",
-    "logistics:core/deepslate_tin_ore"
-  ]
-}

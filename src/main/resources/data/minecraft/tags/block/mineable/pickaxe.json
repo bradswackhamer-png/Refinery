@@ -87,6 +87,9 @@
         "refinery:raw_tin_block",
         "refinery:tin_block",
         "refinery:bronze_block",
-        "refinery:diesel_generator"
+        "refinery:diesel_generator",
+        "refinery:tar_port",
+        "refinery:burner_refinery_furnace",
+        "refinery:electric_refinery_furnace"
     ]
 }

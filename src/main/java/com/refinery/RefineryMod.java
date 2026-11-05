@@ -143,6 +143,19 @@ public class RefineryMod {
             p -> new RefineryPortBlock(RefineryPortBlock.PortType.BYPRODUCT_OUT, p));
     public static final DeferredItem<BlockItem> BYPRODUCT_PORT_ITEM = ITEMS.registerSimpleBlockItem("byproduct_port", BYPRODUCT_PORT);
 
+    public static final DeferredBlock<RefineryPortBlock> TAR_PORT = BLOCKS.registerBlock("tar_port",
+            p -> new RefineryPortBlock(RefineryPortBlock.PortType.TAR_OUT, p));
+    public static final DeferredItem<BlockItem> TAR_PORT_ITEM = ITEMS.registerSimpleBlockItem("tar_port", TAR_PORT);
+
+    // Refinery Furnaces (2-Block Vertical Heat Sources for the 3-Stage Refinery Tower)
+    public static final DeferredBlock<com.refinery.block.BurnerRefineryFurnaceBlock> BURNER_REFINERY_FURNACE = BLOCKS.registerBlock("burner_refinery_furnace",
+            com.refinery.block.BurnerRefineryFurnaceBlock::new);
+    public static final DeferredItem<BlockItem> BURNER_REFINERY_FURNACE_ITEM = ITEMS.registerSimpleBlockItem("burner_refinery_furnace", BURNER_REFINERY_FURNACE);
+
+    public static final DeferredBlock<com.refinery.block.ElectricRefineryFurnaceBlock> ELECTRIC_REFINERY_FURNACE = BLOCKS.registerBlock("electric_refinery_furnace",
+            com.refinery.block.ElectricRefineryFurnaceBlock::new);
+    public static final DeferredItem<BlockItem> ELECTRIC_REFINERY_FURNACE_ITEM = ITEMS.registerSimpleBlockItem("electric_refinery_furnace", ELECTRIC_REFINERY_FURNACE);
+
     public static final DeferredBlock<AutoPlanterBlock> AUTO_PLANTER = BLOCKS.registerBlock("auto_planter",
             AutoPlanterBlock::new);
     public static final DeferredItem<BlockItem> AUTO_PLANTER_ITEM = ITEMS.registerSimpleBlockItem("auto_planter", AUTO_PLANTER);
@@ -797,7 +810,15 @@ public class RefineryMod {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RefineryPortBlockEntity>> REFINERY_PORT_BE =
             BLOCK_ENTITY_TYPES.register("refinery_port",
                     () -> new BlockEntityType<>(RefineryPortBlockEntity::new,
-                            CRUDE_OIL_PORT.get(), DIESEL_PORT.get(), GAS_PORT.get(), BYPRODUCT_PORT.get()));
+                            CRUDE_OIL_PORT.get(), TAR_PORT.get(), DIESEL_PORT.get(), GAS_PORT.get(), BYPRODUCT_PORT.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.refinery.block.entity.BurnerRefineryFurnaceBlockEntity>> BURNER_REFINERY_FURNACE_BE =
+            BLOCK_ENTITY_TYPES.register("burner_refinery_furnace",
+                    () -> new BlockEntityType<>(com.refinery.block.entity.BurnerRefineryFurnaceBlockEntity::new, BURNER_REFINERY_FURNACE.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.refinery.block.entity.ElectricRefineryFurnaceBlockEntity>> ELECTRIC_REFINERY_FURNACE_BE =
+            BLOCK_ENTITY_TYPES.register("electric_refinery_furnace",
+                    () -> new BlockEntityType<>(com.refinery.block.entity.ElectricRefineryFurnaceBlockEntity::new, ELECTRIC_REFINERY_FURNACE.get()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AutoPlanterBlockEntity>> AUTO_PLANTER_BE =
             BLOCK_ENTITY_TYPES.register("auto_planter",
@@ -981,6 +1002,12 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<RefineryMenu>> REFINERY_MENU =
             MENUS.register("refinery", () -> new MenuType<>(RefineryMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.BurnerRefineryFurnaceMenu>> BURNER_REFINERY_FURNACE_MENU =
+            MENUS.register("burner_refinery_furnace", () -> new MenuType<>(com.refinery.menu.BurnerRefineryFurnaceMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.ElectricRefineryFurnaceMenu>> ELECTRIC_REFINERY_FURNACE_MENU =
+            MENUS.register("electric_refinery_furnace", () -> new MenuType<>(com.refinery.menu.ElectricRefineryFurnaceMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     public static final DeferredHolder<MenuType<?>, MenuType<AutoPlanterMenu>> AUTO_PLANTER_MENU =
             MENUS.register("auto_planter", () -> new MenuType<>(AutoPlanterMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
@@ -1069,9 +1096,12 @@ public class RefineryMod {
                         output.accept(DISTILLATION_COLUMN_ITEM.get());
                         output.accept(HEAT_EXCHANGER_ITEM.get());
                         output.accept(CRUDE_OIL_PORT_ITEM.get());
+                        output.accept(TAR_PORT_ITEM.get());
                         output.accept(DIESEL_PORT_ITEM.get());
                         output.accept(GAS_PORT_ITEM.get());
                         output.accept(BYPRODUCT_PORT_ITEM.get());
+                        output.accept(BURNER_REFINERY_FURNACE_ITEM.get());
+                        output.accept(ELECTRIC_REFINERY_FURNACE_ITEM.get());
                         output.accept(AUTO_PLANTER_ITEM.get());
                         output.accept(AUTO_HARVESTER_ITEM.get());
                         output.accept(BLAST_FURNACE_CONTROLLER_ITEM.get());
@@ -1230,6 +1260,7 @@ public class RefineryMod {
                         output.accept(GOLD_GEAR.get());
                         output.accept(TIN_GEAR.get());
                         output.accept(RefineryFluids.CRUDE_OIL_BUCKET.get());
+                        output.accept(RefineryFluids.LIQUID_TAR_BUCKET.get());
                         output.accept(RefineryFluids.DIESEL_BUCKET.get());
                         output.accept(RefineryFluids.GASOLINE_BUCKET.get());
                         output.accept(RefineryFluids.STEAM_BUCKET.get());
@@ -1283,9 +1314,12 @@ public class RefineryMod {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        // Energy capability on Controller
-        event.registerBlockEntity(Capabilities.Energy.BLOCK, REFINERY_CONTROLLER_BE.get(),
-                (be, side) -> be.energyStorage);
+        // Capabilities on Burner & Electric Refinery Furnaces
+        event.registerBlockEntity(Capabilities.Item.BLOCK, BURNER_REFINERY_FURNACE_BE.get(),
+                (be, side) -> new WorldlyContainerWrapper(be.getMaster(), side));
+
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, ELECTRIC_REFINERY_FURNACE_BE.get(),
+                (be, side) -> be.getEnergyStorage());
 
         // Fluid capability on Ports
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, REFINERY_PORT_BE.get(),
@@ -1299,6 +1333,12 @@ public class RefineryMod {
                                 controller::setCrudeOil,
                                 RefineryControllerBlockEntity.TANK_CAPACITY,
                                 true, false, controller::setChanged);
+                        case TAR_OUT, BYPRODUCT_OUT -> new SingleFluidHandler(
+                                RefineryFluids.LIQUID_TAR_SOURCE::get,
+                                controller::getLiquidTar,
+                                controller::setLiquidTar,
+                                RefineryControllerBlockEntity.TANK_CAPACITY,
+                                false, true, controller::setChanged);
                         case DIESEL_OUT -> new SingleFluidHandler(
                                 RefineryFluids.DIESEL_SOURCE::get,
                                 controller::getDiesel,
@@ -1311,30 +1351,35 @@ public class RefineryMod {
                                 controller::setGasoline,
                                 RefineryControllerBlockEntity.TANK_CAPACITY,
                                 false, true, controller::setChanged);
-                        default -> null;
                     };
                 });
 
-        // Fluid capability directly on Refinery Controller (exposes all 3 tanks!)
+        // Fluid capability directly on Refinery Controller (exposes all 4 tanks!)
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, REFINERY_CONTROLLER_BE.get(),
                 (be, side) -> {
                     if (!be.isAssembled()) return null;
                     return new MultiFluidHandler(
                             new SingleFluidHandler(RefineryFluids.CRUDE_OIL_SOURCE::get, be::getCrudeOil, be::setCrudeOil, RefineryControllerBlockEntity.TANK_CAPACITY, true, false, be::setChanged),
+                            new SingleFluidHandler(RefineryFluids.LIQUID_TAR_SOURCE::get, be::getLiquidTar, be::setLiquidTar, RefineryControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged),
                             new SingleFluidHandler(RefineryFluids.DIESEL_SOURCE::get, be::getDiesel, be::setDiesel, RefineryControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged),
                             new SingleFluidHandler(RefineryFluids.GASOLINE_SOURCE::get, be::getGasoline, be::setGasoline, RefineryControllerBlockEntity.TANK_CAPACITY, false, true, be::setChanged)
                     );
                 });
 
-        // Item capability on Ports (Crude Oil Port accepts Oil Sand, Byproduct Port outputs Sand/Tar/Sulfur)
+        // Item capability on Ports & Controller (Crude Oil Port accepts Buckets/Oil Sand, Byproduct/Tar Port outputs Bitumen/Buckets)
         event.registerBlockEntity(Capabilities.Item.BLOCK, REFINERY_PORT_BE.get(),
                 (be, side) -> {
                     var controller = be.getController();
-                    if (controller != null && (be.getPortType() == RefineryPortBlock.PortType.BYPRODUCT_OUT || be.getPortType() == RefineryPortBlock.PortType.CRUDE_OIL_IN)) {
-                        return VanillaContainerWrapper.of(controller);
+                    if (controller != null && (be.getPortType() == RefineryPortBlock.PortType.BYPRODUCT_OUT
+                            || be.getPortType() == RefineryPortBlock.PortType.TAR_OUT
+                            || be.getPortType() == RefineryPortBlock.PortType.CRUDE_OIL_IN)) {
+                        return new WorldlyContainerWrapper(be, side);
                     }
                     return null;
                 });
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, REFINERY_CONTROLLER_BE.get(),
+                (be, side) -> new WorldlyContainerWrapper(be, side));
 
         // Capabilities on Auto Planter (Energy & Item Container)
         event.registerBlockEntity(Capabilities.Energy.BLOCK, AUTO_PLANTER_BE.get(),

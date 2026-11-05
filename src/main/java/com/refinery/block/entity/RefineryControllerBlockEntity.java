@@ -8,16 +8,17 @@ import com.refinery.fluid.RefineryFluids;
 import com.refinery.menu.RefineryMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
@@ -29,7 +30,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import java.util.Optional;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,60 +41,51 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class RefineryControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int TANK_CAPACITY = 16_000;
     public static final int ENERGY_CAPACITY = 100_000;
-    public static final int ENERGY_PER_TICK = 40;
-    public static final int OIL_PER_RECIPE = 200;
-    public static final int DIESEL_PER_RECIPE = 120;
-    public static final int GAS_PER_RECIPE = 60;
+    public static final int OIL_PER_RECIPE = 1_000;
     public static final int RECIPE_TICKS = 100;
     public static final int OIL_SAND_TICKS = 60;
 
     private boolean assembled = false;
     private int crudeOil = 0;
+    private int liquidTar = 0;
     private int diesel = 0;
     private int gasoline = 0;
-    private int energy = 0;
-    private int burnTime = 0;
-    private int maxBurnTime = 0;
+
+    private boolean stage1Enabled = true;
+    private boolean stage2Enabled = true;
+    private boolean stage3Enabled = true;
+
+    private int currentHeat = IRefineryFurnace.AMBIENT_TEMP;
+    private int furnaceType = 0; // 0 = None, 1 = Burner Furnace, 2 = Electric Furnace
     private int progress = 0;
     private int oilSandProgress = 0;
+
+    // Retained for backward compatibility with any external energy queries
+    private int energy = 0;
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1_000, 0);
 
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(RefineryMenu.CONTAINER_SIZE, ItemStack.EMPTY);
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1_000, 0) {
-        @Override
-        public void set(int amount) {
-            super.set(amount);
-            RefineryControllerBlockEntity.this.energy = amount;
-            setChanged();
-        }
-
-        @Override
-        public int insert(int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-            int inserted = super.insert(amount, transaction);
-            RefineryControllerBlockEntity.this.energy = this.energy;
-            return inserted;
-        }
-    };
-
     private final ContainerData dataAccess = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
-                case 0 -> RefineryControllerBlockEntity.this.energy & 0xFFFF;
-                case 1 -> (RefineryControllerBlockEntity.this.energy >> 16) & 0xFFFF;
-                case 2 -> RefineryControllerBlockEntity.this.burnTime;
-                case 3 -> RefineryControllerBlockEntity.this.maxBurnTime;
+                case 0 -> RefineryControllerBlockEntity.this.crudeOil;
+                case 1 -> RefineryControllerBlockEntity.this.liquidTar;
+                case 2 -> RefineryControllerBlockEntity.this.diesel;
+                case 3 -> RefineryControllerBlockEntity.this.gasoline;
                 case 4 -> RefineryControllerBlockEntity.this.progress;
-                case 5 -> RefineryControllerBlockEntity.this.crudeOil;
-                case 6 -> RefineryControllerBlockEntity.this.diesel;
-                case 7 -> RefineryControllerBlockEntity.this.gasoline;
+                case 5 -> RefineryControllerBlockEntity.this.currentHeat;
+                case 6 -> RefineryControllerBlockEntity.this.furnaceType;
+                case 7 -> RefineryControllerBlockEntity.this.getStageFlags();
                 case 8 -> RefineryControllerBlockEntity.this.assembled ? 1 : 0;
                 case 9 -> RefineryControllerBlockEntity.this.oilSandProgress;
                 case 10 -> OIL_SAND_TICKS;
@@ -105,12 +96,14 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         @Override
         public void set(int index, int value) {
             switch (index) {
-                case 2 -> RefineryControllerBlockEntity.this.burnTime = value;
-                case 3 -> RefineryControllerBlockEntity.this.maxBurnTime = value;
+                case 0 -> RefineryControllerBlockEntity.this.crudeOil = value;
+                case 1 -> RefineryControllerBlockEntity.this.liquidTar = value;
+                case 2 -> RefineryControllerBlockEntity.this.diesel = value;
+                case 3 -> RefineryControllerBlockEntity.this.gasoline = value;
                 case 4 -> RefineryControllerBlockEntity.this.progress = value;
-                case 5 -> RefineryControllerBlockEntity.this.crudeOil = value;
-                case 6 -> RefineryControllerBlockEntity.this.diesel = value;
-                case 7 -> RefineryControllerBlockEntity.this.gasoline = value;
+                case 5 -> RefineryControllerBlockEntity.this.currentHeat = value;
+                case 6 -> RefineryControllerBlockEntity.this.furnaceType = value;
+                case 7 -> RefineryControllerBlockEntity.this.setStageFlags(value);
                 case 8 -> RefineryControllerBlockEntity.this.assembled = (value != 0);
                 case 9 -> RefineryControllerBlockEntity.this.oilSandProgress = value;
             }
@@ -131,23 +124,67 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     }
 
     public int getCrudeOil() { return this.crudeOil; }
+    public int getLiquidTar() { return this.liquidTar; }
     public int getDiesel() { return this.diesel; }
     public int getGasoline() { return this.gasoline; }
+    public int getCurrentHeat() { return this.currentHeat; }
+    public int getFurnaceType() { return this.furnaceType; }
+    public int getProgress() { return this.progress; }
     public int getStoredEnergy() { return this.energy; }
+
+    public boolean isStage1Enabled() { return this.stage1Enabled; }
+    public boolean isStage2Enabled() { return this.stage2Enabled; }
+    public boolean isStage3Enabled() { return this.stage3Enabled; }
+
+    public int getStageFlags() {
+        int flags = 0;
+        if (this.stage1Enabled) flags |= 1;
+        if (this.stage2Enabled) flags |= 2;
+        if (this.stage3Enabled) flags |= 4;
+        return flags;
+    }
+
+    public void setStageFlags(int flags) {
+        this.stage1Enabled = (flags & 1) != 0;
+        this.stage2Enabled = (flags & 2) != 0;
+        this.stage3Enabled = (flags & 4) != 0;
+        setChanged();
+        syncToClient();
+    }
+
+    public void toggleStage(int stage) {
+        switch (stage) {
+            case 1 -> this.stage1Enabled = !this.stage1Enabled;
+            case 2 -> this.stage2Enabled = !this.stage2Enabled;
+            case 3 -> this.stage3Enabled = !this.stage3Enabled;
+        }
+        this.progress = 0;
+        setChanged();
+        syncToClient();
+    }
 
     public void setCrudeOil(int amt) {
         this.crudeOil = Math.clamp(amt, 0, TANK_CAPACITY);
         setChanged();
+        syncToClient();
+    }
+
+    public void setLiquidTar(int amt) {
+        this.liquidTar = Math.clamp(amt, 0, TANK_CAPACITY);
+        setChanged();
+        syncToClient();
     }
 
     public void setDiesel(int amt) {
         this.diesel = Math.clamp(amt, 0, TANK_CAPACITY);
         setChanged();
+        syncToClient();
     }
 
     public void setGasoline(int amt) {
         this.gasoline = Math.clamp(amt, 0, TANK_CAPACITY);
         setChanged();
+        syncToClient();
     }
 
     public int fillCrudeOil(int amount) {
@@ -156,8 +193,19 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         if (filled > 0) {
             this.crudeOil += filled;
             setChanged();
+            syncToClient();
         }
         return filled;
+    }
+
+    public int drainLiquidTar(int amount) {
+        int drained = Math.min(this.liquidTar, amount);
+        if (drained > 0) {
+            this.liquidTar -= drained;
+            setChanged();
+            syncToClient();
+        }
+        return drained;
     }
 
     public int drainDiesel(int amount) {
@@ -165,6 +213,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         if (drained > 0) {
             this.diesel -= drained;
             setChanged();
+            syncToClient();
         }
         return drained;
     }
@@ -174,6 +223,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         if (drained > 0) {
             this.gasoline -= drained;
             setChanged();
+            syncToClient();
         }
         return drained;
     }
@@ -182,17 +232,89 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         return this.items;
     }
 
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
     public void disassemble() {
         if (this.assembled) {
             this.assembled = false;
+            updateMemberBlockStates(false);
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState state = this.getBlockState();
                 if (state.getBlock() instanceof RefineryControllerBlock) {
-                    this.level.setBlock(this.worldPosition, state.setValue(RefineryControllerBlock.ASSEMBLED, false).setValue(RefineryControllerBlock.ACTIVE, false).setValue(RefineryControllerBlock.BLUEPRINT, false), 3);
+                    this.level.setBlock(this.worldPosition, state
+                            .setValue(RefineryControllerBlock.ASSEMBLED, false)
+                            .setValue(RefineryControllerBlock.ACTIVE, false)
+                            .setValue(RefineryControllerBlock.BLUEPRINT, false), 3);
                 }
             }
             setChanged();
+            syncToClient();
         }
+    }
+
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        Direction facing = (getBlockState().getBlock() instanceof RefineryControllerBlock && getBlockState().hasProperty(RefineryControllerBlock.FACING))
+                ? getBlockState().getValue(RefineryControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x == 0 && req.y == 0 && req.z == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(RefineryControllerBlock.ASSEMBLED)) {
+                if (targetState.getValue(RefineryControllerBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(RefineryControllerBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
+        }
+    }
+
+    // === Stage Distillation Yield Calculations per 1,000 mB Crude Oil ===
+
+    public int getRecipeTarOutput() {
+        return getRecipeTarOutput(this.stage1Enabled, this.stage2Enabled, this.stage3Enabled);
+    }
+
+    public int getRecipeDieselOutput() {
+        return getRecipeDieselOutput(this.stage1Enabled, this.stage2Enabled, this.stage3Enabled);
+    }
+
+    public int getRecipeGasolineOutput() {
+        return getRecipeGasolineOutput(this.stage1Enabled, this.stage2Enabled, this.stage3Enabled);
+    }
+
+    public float getRecipeBitumenChance() {
+        return getRecipeBitumenChance(this.stage1Enabled, this.stage2Enabled, this.stage3Enabled);
+    }
+
+    public static int getRecipeTarOutput(boolean s1, boolean s2, boolean s3) {
+        if (!s1) return 0;
+        if (!s2 && !s3) return 500;
+        return 250;
+    }
+
+    public static int getRecipeDieselOutput(boolean s1, boolean s2, boolean s3) {
+        if (!s2) return 0;
+        if (!s1 && !s3) return 500;
+        return 250;
+    }
+
+    public static int getRecipeGasolineOutput(boolean s1, boolean s2, boolean s3) {
+        if (!s3) return 0;
+        if (!s1 && !s2) return 500;
+        return 250;
+    }
+
+    public static float getRecipeBitumenChance(boolean s1, boolean s2, boolean s3) {
+        if (!s1) return 0.0f;
+        if (s2 && s3) return 0.25f;
+        return 1.0f;
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -219,6 +341,9 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
             }
         }
 
+        // Scan adjacent blocks around Stage 1 for a connected Refinery Furnace (Heat Source)
+        scanConnectedFurnace(serverLevel, state.getValue(RefineryControllerBlock.FACING));
+
         if (!this.assembled) {
             if (state.getValue(RefineryControllerBlock.ACTIVE)) {
                 level.setBlock(pos, state.setValue(RefineryControllerBlock.ACTIVE, false), 3);
@@ -226,132 +351,87 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
             return;
         }
 
+        // Process Crude Oil Buckets placed into Slot 0
+        processCrudeBucketSlot();
+
         boolean wasActive = state.getValue(RefineryControllerBlock.ACTIVE);
         boolean isActive = false;
+        boolean hasHeat = this.currentHeat >= IRefineryFurnace.MIN_OPERATING_TEMP;
 
-        // Burner Chamber Logic (Dual Power: Burns solid fuel to generate internal energy)
-        if (this.burnTime > 0) {
-            this.burnTime--;
-            if (this.energy + 50 <= ENERGY_CAPACITY) {
-                this.energy += 50;
-                this.energyStorage.set(this.energy);
+        // 1. Fractional Distillation Process (1,000 mB Crude Oil -> Stage Outputs)
+        boolean anyStageEnabled = this.stage1Enabled || this.stage2Enabled || this.stage3Enabled;
+        int tarOut = getRecipeTarOutput();
+        int dieselOut = getRecipeDieselOutput();
+        int gasOut = getRecipeGasolineOutput();
+        float bitumenChance = getRecipeBitumenChance();
+
+        boolean hasTankSpace = (TANK_CAPACITY - this.liquidTar) >= tarOut
+                && (TANK_CAPACITY - this.diesel) >= dieselOut
+                && (TANK_CAPACITY - this.gasoline) >= gasOut;
+        boolean hasItemSpace = bitumenChance <= 0.0f || canInsertByproduct(new ItemStack(RefineryMod.BITUMEN.get(), 1));
+
+        boolean canDistill = anyStageEnabled
+                && this.crudeOil >= OIL_PER_RECIPE
+                && hasTankSpace
+                && hasItemSpace;
+
+        if (canDistill && hasHeat) {
+            isActive = true;
+            this.progress++;
+
+            // Distillation steam/vapor from top of Stage 3 column (Y = 8)
+            if (level.getRandom().nextInt(4) == 0) {
+                Direction facing = state.getValue(RefineryControllerBlock.FACING);
+                BlockPos topCenter = getRelativePos(0, 8, 1, facing);
+                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                        topCenter.getX() + 0.5, topCenter.getY() + 1.1, topCenter.getZ() + 0.5,
+                        1, 0.05, 0.1, 0.05, 0.02);
+            }
+
+            if (this.progress >= RECIPE_TICKS) {
+                this.progress = 0;
+                this.crudeOil -= OIL_PER_RECIPE;
+                this.liquidTar = Math.min(TANK_CAPACITY, this.liquidTar + tarOut);
+                this.diesel = Math.min(TANK_CAPACITY, this.diesel + dieselOut);
+                this.gasoline = Math.min(TANK_CAPACITY, this.gasoline + gasOut);
+
+                if (bitumenChance >= 1.0f || (bitumenChance > 0.0f && level.getRandom().nextFloat() < bitumenChance)) {
+                    insertByproduct(new ItemStack(RefineryMod.BITUMEN.get(), 1));
+                }
+
+                serverLevel.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
+                setChanged();
+                syncToClient();
             }
         } else {
-            ItemStack fuelStack = this.items.get(0);
-            if (!fuelStack.isEmpty() && this.energy < ENERGY_CAPACITY) {
-                int fuelDuration = getFuelBurnDuration(fuelStack);
-                if (fuelDuration > 0) {
-                    this.burnTime = fuelDuration;
-                    this.maxBurnTime = fuelDuration;
-                    fuelStack.shrink(1);
-                    setChanged();
-                }
-            }
-        }
-
-        // Update combustion chamber LIT state
-        updateCombustionChamberState(serverLevel, this.burnTime > 0);
-
-        // Distillation Refining Process
-        // 1. Distillation Refining Process (Crude Oil -> Diesel + Gasoline + Byproducts)
-        boolean hasDistillationRecipe = this.crudeOil >= OIL_PER_RECIPE
-                && (TANK_CAPACITY - this.diesel) >= DIESEL_PER_RECIPE
-                && (TANK_CAPACITY - this.gasoline) >= GAS_PER_RECIPE
-                && canInsertByproducts();
-
-        if (hasDistillationRecipe) {
-            int requiredEnergy = (RECIPE_TICKS - this.progress) * ENERGY_PER_TICK;
-            boolean hasPower = this.burnTime > 0 || this.energy >= requiredEnergy;
-
-            if (hasPower) {
-                isActive = true;
-                if (this.burnTime <= 0 && this.energy >= ENERGY_PER_TICK) {
-                    this.energy -= ENERGY_PER_TICK;
-                    this.energyStorage.set(this.energy);
-                }
-                this.progress++;
-
-                // Subtle distillation steam from top column
-                if (level.getRandom().nextInt(4) == 0) {
-                    Direction facing = state.getValue(RefineryControllerBlock.FACING);
-                    BlockPos topCenter = getRelativePos(0, 2, 1, facing);
-                    serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                            topCenter.getX() + 0.5, topCenter.getY() + 1.1, topCenter.getZ() + 0.5,
-                            1, 0.05, 0.1, 0.05, 0.02);
-                }
-
-                if (this.progress >= RECIPE_TICKS) {
-                    this.progress = 0;
-                    this.crudeOil -= OIL_PER_RECIPE;
-                    this.diesel += DIESEL_PER_RECIPE;
-                    this.gasoline += GAS_PER_RECIPE;
-
-                    // Byproducts: Tar (40%) and Sulfur (30%)
-                    if (level.getRandom().nextFloat() < 0.40f) {
-                        insertByproduct(new ItemStack(getPreferredTarItem(), 1));
-                    }
-                    if (level.getRandom().nextFloat() < 0.30f) {
-                        insertByproduct(new ItemStack(RefineryMod.SULFUR_DUST_ITEM.get(), 1));
-                    }
-
-                    serverLevel.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
-                    setChanged();
-                }
-            }
-        } else {
-            if (this.progress > 0) {
+            if (!canDistill && this.progress > 0) {
                 this.progress = 0;
                 setChanged();
+                syncToClient();
             }
         }
 
-        // 2. Oil Sand Feedstock Extraction Process (Oil Sand -> 200 mB Crude Oil + 100% Sand + 40% Tar)
-        ItemStack feedstock = this.items.get(1);
+        // 2. Oil Sand Feedstock Extraction Process (Oil Sand -> 200 mB Crude Oil + 1 Sand) when heated
+        ItemStack feedstock = this.items.get(0);
         boolean isOilSandFeed = isOilSand(feedstock);
-        boolean hasOilSandRecipe = isOilSandFeed && (TANK_CAPACITY - this.crudeOil) >= 200 && canInsertByproducts();
+        boolean hasOilSandRecipe = isOilSandFeed && (TANK_CAPACITY - this.crudeOil) >= 200 && canInsertSandSlot();
 
-        if (hasOilSandRecipe) {
-            int requiredOilSandEnergy = (OIL_SAND_TICKS - this.oilSandProgress) * 20;
-            boolean hasPower = this.burnTime > 0 || this.energy >= requiredOilSandEnergy;
+        if (hasOilSandRecipe && hasHeat) {
+            isActive = true;
+            this.oilSandProgress++;
 
-            if (hasPower) {
-                isActive = true;
-                if (this.burnTime <= 0 && this.energy >= 20) {
-                    this.energy -= 20;
-                    this.energyStorage.set(this.energy);
-                }
-                this.oilSandProgress++;
-
-                if (level.getRandom().nextInt(4) == 0) {
-                    Direction facing = state.getValue(RefineryControllerBlock.FACING);
-                    BlockPos portPos = getRelativePos(-1, 0, 1, facing);
-                    serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                            portPos.getX() + 0.5, portPos.getY() + 0.9, portPos.getZ() + 0.5,
-                            1, 0.05, 0.05, 0.05, 0.01);
-                }
-
-                if (this.oilSandProgress >= OIL_SAND_TICKS) {
-                    this.oilSandProgress = 0;
-                    feedstock.shrink(1);
-                    this.crudeOil = Math.min(TANK_CAPACITY, this.crudeOil + 200);
-
-                    // 100% chance for 1 Sand
-                    insertByproduct(new ItemStack(Items.SAND, 1));
-
-                    // 40% chance for Tar
-                    if (level.getRandom().nextFloat() < 0.40f) {
-                        insertByproduct(new ItemStack(getPreferredTarItem(), 1));
-                    }
-
-                    serverLevel.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.7f, 1.0f);
-                    setChanged();
-                }
-            }
-        } else {
-            if (this.oilSandProgress > 0) {
+            if (this.oilSandProgress >= OIL_SAND_TICKS) {
                 this.oilSandProgress = 0;
+                feedstock.shrink(1);
+                this.crudeOil = Math.min(TANK_CAPACITY, this.crudeOil + 200);
+                insertSandReturn(new ItemStack(Items.SAND, 1));
+                serverLevel.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.7f, 1.0f);
                 setChanged();
+                syncToClient();
             }
+        } else if (!hasOilSandRecipe && this.oilSandProgress > 0) {
+            this.oilSandProgress = 0;
+            setChanged();
         }
 
         if (wasActive != isActive) {
@@ -359,6 +439,72 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
             if (latest.getBlock() instanceof RefineryControllerBlock) {
                 level.setBlock(pos, latest.setValue(RefineryControllerBlock.ACTIVE, isActive), 3);
             }
+            syncToClient();
+        }
+    }
+
+    private void scanConnectedFurnace(ServerLevel level, Direction facing) {
+        int bestTemp = IRefineryFurnace.AMBIENT_TEMP;
+        int bestType = 0;
+
+        // Check perimeter around Stage 1 (localX: -2..2, localY: 0..2, localZ: -1..3)
+        for (int ly = 0; ly <= 1; ly++) {
+            for (int lx = -2; lx <= 2; lx++) {
+                for (int lz = -1; lz <= 3; lz++) {
+                    // Only check outside or edge of the 3x3 tower footprint
+                    if (lx >= -1 && lx <= 1 && lz >= 0 && lz <= 2) continue;
+                    BlockPos checkPos = getRelativePos(lx, ly, lz, facing);
+                    BlockEntity be = level.getBlockEntity(checkPos);
+                    if (be instanceof IRefineryFurnace furnace) {
+                        int t = furnace.getTemperature();
+                        int type = furnace.isElectric() ? 2 : 1;
+                        if (bestType == 0 || t > bestTemp) {
+                            bestTemp = t;
+                            bestType = type;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (this.currentHeat != bestTemp || this.furnaceType != bestType) {
+            this.currentHeat = bestTemp;
+            this.furnaceType = bestType;
+            setChanged();
+        }
+    }
+
+    private void processCrudeBucketSlot() {
+        ItemStack input = this.items.get(0);
+        if (input.is(RefineryFluids.CRUDE_OIL_BUCKET.get())) {
+            if (this.crudeOil + 1000 <= TANK_CAPACITY) {
+                ItemStack ret = this.items.get(1);
+                if (ret.isEmpty() || (ret.is(Items.BUCKET) && ret.getCount() < ret.getMaxStackSize())) {
+                    this.crudeOil += 1000;
+                    input.shrink(1);
+                    if (ret.isEmpty()) {
+                        this.items.set(1, new ItemStack(Items.BUCKET));
+                    } else {
+                        ret.grow(1);
+                    }
+                    setChanged();
+                    syncToClient();
+                }
+            }
+        }
+    }
+
+    private boolean canInsertSandSlot() {
+        ItemStack ret = this.items.get(1);
+        return ret.isEmpty() || (ret.is(Items.SAND) && ret.getCount() < ret.getMaxStackSize());
+    }
+
+    private void insertSandReturn(ItemStack sand) {
+        ItemStack ret = this.items.get(1);
+        if (ret.isEmpty()) {
+            this.items.set(1, sand);
+        } else if (ret.is(Items.SAND) && ret.getCount() < ret.getMaxStackSize()) {
+            ret.grow(sand.getCount());
         }
     }
 
@@ -371,6 +517,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         boolean blockAssembled = currentState.getValue(RefineryControllerBlock.ASSEMBLED);
         if (valid != this.assembled || blockAssembled != valid) {
             this.assembled = valid;
+            updateMemberBlockStates(valid);
             BlockState newState = currentState.setValue(RefineryControllerBlock.ASSEMBLED, valid);
             if (valid) {
                 newState = newState.setValue(RefineryControllerBlock.BLUEPRINT, false);
@@ -378,27 +525,25 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 linkPorts();
                 if (this.level instanceof ServerLevel serverLevel) {
                     serverLevel.playSound(null, this.worldPosition, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 0.9f);
-                    serverLevel.sendParticles(ParticleTypes.EXPLOSION, this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 2.5, this.worldPosition.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.05);
+                    serverLevel.sendParticles(ParticleTypes.EXPLOSION, this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 4.5, this.worldPosition.getZ() + 0.5, 4, 0.3, 1.5, 0.3, 0.05);
                 }
+            } else {
+                newState = newState.setValue(RefineryControllerBlock.ACTIVE, false);
             }
             this.level.setBlock(this.worldPosition, newState, 3);
             setChanged();
+            syncToClient();
+        } else if (valid) {
+            updateMemberBlockStates(true);
+            linkPorts();
         }
     }
 
-    private void updateCombustionChamberState(ServerLevel level, boolean lit) {
-        Direction facing = getBlockState().getValue(RefineryControllerBlock.FACING);
-        BlockPos chamberPos = getRelativePos(0, 0, 1, facing);
-        BlockState chamberState = level.getBlockState(chamberPos);
-        if (chamberState.getBlock() instanceof CombustionChamberBlock && chamberState.getValue(CombustionChamberBlock.LIT) != lit) {
-            level.setBlock(chamberPos, chamberState.setValue(CombustionChamberBlock.LIT, lit), 3);
-        }
-    }
-
-    private boolean canInsertByproducts() {
+    private boolean canInsertByproduct(ItemStack byproduct) {
         for (int i = 2; i <= 5; i++) {
             ItemStack stack = this.items.get(i);
-            if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
+            if (stack.isEmpty()) return true;
+            if (ItemStack.isSameItemSameComponents(stack, byproduct) && stack.getCount() + byproduct.getCount() <= stack.getMaxStackSize()) {
                 return true;
             }
         }
@@ -420,7 +565,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
 
     public static boolean isOilSand(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        if (stack.is(RefineryMod.OIL_SAND_ITEM.get())) return true;
+        if (stack.is(RefineryMod.OIL_SAND_ITEM.get()) || stack.is(RefineryMod.OIL_RED_SAND_ITEM.get())) return true;
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id != null) {
             String path = id.getPath();
@@ -430,18 +575,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
     }
 
     public static int getFuelBurnDuration(ItemStack stack) {
-        if (stack.isEmpty()) return 0;
-        if (stack.is(ItemTags.COALS)) return 1600;
-        if (stack.is(Items.COAL_BLOCK)) return 16000;
-        if (stack.is(Items.LAVA_BUCKET)) return 20000;
-        if (stack.is(Items.BLAZE_ROD)) return 2400;
-        if (stack.is(RefineryMod.TAR_ITEM.get())) return 1600;
-        if (stack.is(RefineryMod.BITUMEN.get())) return 1600;
-        if (stack.is(RefineryFluids.ETHANOL_BUCKET.get())) return 4000;
-        net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
-        if (id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"))) return 1600;
-        if (stack.has(DataComponents.COOKING_FUEL)) return 1600;
-        return 0;
+        return BurnerRefineryFurnaceBlockEntity.getFuelBurnDuration(stack);
     }
 
     public static Item getPreferredTarItem() {
@@ -454,6 +588,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         if (formed) {
             this.assembled = true;
             this.blueprintProjectionTicks = 0;
+            updateMemberBlockStates(true);
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
                 if (current.getBlock() instanceof RefineryControllerBlock) {
@@ -462,11 +597,12 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 linkPorts();
             }
             if (player != null) {
-                player.sendSystemMessage(Component.literal("§a[Industrial Refinery]§r Multiblock is §2VALID & OPERATIONAL§r!"));
+                player.sendSystemMessage(Component.literal("§a[Industrial Refinery]§r 3-Stage Fractional Tower (3x9x3) is §2VALID & OPERATIONAL§r!"));
             }
         } else {
             this.assembled = false;
             this.blueprintProjectionTicks = 600; // 30 seconds
+            updateMemberBlockStates(false);
             if (this.level != null && !this.level.isClientSide()) {
                 BlockState current = getBlockState();
                 if (current.getBlock() instanceof RefineryControllerBlock) {
@@ -474,28 +610,39 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 }
             }
             if (player != null) {
-                player.sendSystemMessage(Component.literal("§6[Industrial Refinery]§r Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
+                player.sendSystemMessage(Component.literal("§6[Industrial Refinery]§r 3-Stage Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
 
+    /**
+     * 3-Stage Fractional Distillation Tower (3x9x3 total = three 3x3x3 vertical stages):
+     * - Stage 1 (Bottom 3x3x3, Y = 0..2): Liquid Tar & Bitumen Fraction
+     * - Stage 2 (Middle 3x3x3, Y = 3..5): Diesel Fuel Fraction
+     * - Stage 3 (Top 3x3x3,    Y = 6..8): Gasoline / Light Gas Fraction
+     */
     public List<BlueprintRequirement> getRequirements() {
-        List<BlueprintRequirement> list = new ArrayList<>(27);
-        // Layer 0
+        List<BlueprintRequirement> list = new ArrayList<>(81);
+
+        // =====================================================================
+        // STAGE 1 (BOTTOM 3x3x3: Y = 0, 1, 2) - Liquid Tar & Bitumen
+        // =====================================================================
+        // Layer 0 (Y = 0)
         list.add(new BlueprintRequirement(-1, 0, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 0, RefineryMod.REFINERY_CONTROLLER.get(), "Refinery Controller", 0xFF10B981));
         list.add(new BlueprintRequirement( 1, 0, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
         list.add(new BlueprintRequirement(-1, 0, 1, RefineryMod.CRUDE_OIL_PORT.get(), "Crude Oil Port", 0xFF18181B));
-        list.add(new BlueprintRequirement( 0, 0, 1, RefineryMod.COMBUSTION_CHAMBER.get(), "Combustion Chamber", 0xFFEA580C));
-        list.add(new BlueprintRequirement( 1, 0, 1, RefineryMod.BYPRODUCT_PORT.get(), "Byproduct Port", 0xFF475569));
+        list.add(new BlueprintRequirement( 0, 0, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+        list.add(new BlueprintRequirement( 1, 0, 1, RefineryMod.BYPRODUCT_PORT.get(), "Byproduct Port (Bitumen / Tar)", 0xFF475569));
         list.add(new BlueprintRequirement(-1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 2, RefineryMod.DIESEL_PORT.get(), "Diesel Port", 0xFFEAB308));
+        list.add(new BlueprintRequirement( 0, 0, 2, RefineryMod.TAR_PORT.get(), "Liquid Tar Port", 0xFF78350F));
         list.add(new BlueprintRequirement( 1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
 
-        // Layer 1
+        // Layer 1 (Y = 1)
         list.add(new BlueprintRequirement(-1, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 1, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
@@ -506,18 +653,116 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         list.add(new BlueprintRequirement( 0, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
 
-        // Layer 2
-        list.add(new BlueprintRequirement(-1, 2, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 2, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 2, 1, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
-        list.add(new BlueprintRequirement( 1, 2, 1, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 2, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 2, RefineryMod.GAS_PORT.get(), "Gas Port", 0xFF06B6D4));
-        list.add(new BlueprintRequirement( 1, 2, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+        // Layer 2 (Y = 2)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 2, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else {
+                    list.add(new BlueprintRequirement(x, 2, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 2 (MIDDLE 3x3x3: Y = 3, 4, 5) - Diesel Fuel
+        // =====================================================================
+        // Layer 3 (Y = 3)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 3, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else if (x == 0 && z == 2) {
+                    list.add(new BlueprintRequirement(0, 3, 2, RefineryMod.DIESEL_PORT.get(), "Diesel Port", 0xFFEAB308));
+                } else {
+                    list.add(new BlueprintRequirement(x, 3, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
+
+        // Layer 4 (Y = 4)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 4, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else if ((x == -1 || x == 1) && z == 1) {
+                    list.add(new BlueprintRequirement(x, 4, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
+                } else {
+                    list.add(new BlueprintRequirement(x, 4, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
+
+        // Layer 5 (Y = 5)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 5, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else {
+                    list.add(new BlueprintRequirement(x, 5, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 3 (TOP 3x3x3: Y = 6, 7, 8) - Gasoline
+        // =====================================================================
+        // Layer 6 (Y = 6)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 6, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else if (x == 0 && z == 2) {
+                    list.add(new BlueprintRequirement(0, 6, 2, RefineryMod.GAS_PORT.get(), "Gas Port", 0xFF06B6D4));
+                } else {
+                    list.add(new BlueprintRequirement(x, 6, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
+
+        // Layer 7 (Y = 7)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 7, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else if ((x == -1 || x == 1) && z == 1) {
+                    list.add(new BlueprintRequirement(x, 7, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
+                } else {
+                    list.add(new BlueprintRequirement(x, 7, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
+
+        // Layer 8 (Y = 8)
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (x == 0 && z == 1) {
+                    list.add(new BlueprintRequirement(0, 8, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
+                } else {
+                    list.add(new BlueprintRequirement(x, 8, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                }
+            }
+        }
 
         return list;
+    }
+
+    public boolean matchesBlockRequirement(BlueprintRequirement req, BlockState state) {
+        if (state.is(req.expectedBlock)) return true;
+        // Controller at (0, 0, 0) is strict
+        if (req.x == 0 && req.y == 0 && req.z == 0) {
+            return state.is(RefineryMod.REFINERY_CONTROLLER.get());
+        }
+        // Center column spine (0, y, 1) accepts Distillation Column or Combustion Chamber
+        if (req.x == 0 && req.z == 1) {
+            return state.is(RefineryMod.DISTILLATION_COLUMN.get()) || state.is(RefineryMod.COMBUSTION_CHAMBER.get());
+        }
+        // Outer shell positions flexibly allow Reinforced Casing, Heat Exchanger, Combustion Chamber, or any Refinery Port
+        // so players can place ports at convenient pipe heights if desired!
+        return state.is(RefineryMod.REINFORCED_CASING.get())
+                || state.is(RefineryMod.HEAT_EXCHANGER.get())
+                || state.is(RefineryMod.COMBUSTION_CHAMBER.get())
+                || state.getBlock() instanceof RefineryPortBlock;
     }
 
     public BlockPos getRelativePos(int localX, int localY, int localZ, Direction facing) {
@@ -527,6 +772,17 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 .relative(right, localX)
                 .relative(Direction.UP, localY)
                 .relative(back, localZ);
+    }
+
+    public boolean isMultiblockPart(BlockPos pos) {
+        if (this.worldPosition.equals(pos)) return true;
+        Direction facing = getBlockState().getValue(RefineryControllerBlock.FACING);
+        for (BlueprintRequirement req : getRequirements()) {
+            if (getRelativePos(req.x, req.y, req.z, facing).equals(pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean checkStructure(boolean notifyPlayer, @Nullable Player player) {
@@ -539,17 +795,18 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         for (BlueprintRequirement req : reqs) {
             BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
             BlockState state = this.level.getBlockState(targetPos);
-            if (state.is(req.expectedBlock)) {
+            if (matchesBlockRequirement(req, state)) {
                 matched++;
             } else {
                 if (missing.size() < 4) {
-                    missing.add("Layer " + req.y + ": " + req.name + " at [" + targetPos.toShortString() + "]");
+                    int stageNum = (req.y / 3) + 1;
+                    missing.add("Stage " + stageNum + " (Layer " + req.y + "): " + req.name + " at [" + targetPos.toShortString() + "]");
                 }
             }
         }
 
         if (notifyPlayer && player != null) {
-            player.sendSystemMessage(Component.literal("§e[Refinery Diagnostic]§r Blocks in place: §a" + matched + " / " + reqs.size()));
+            player.sendSystemMessage(Component.literal("§e[Refinery Diagnostic]§r 3-Stage Tower blocks in place: §a" + matched + " / " + reqs.size()));
             if (!missing.isEmpty()) {
                 player.sendSystemMessage(Component.literal("§cMissing components:"));
                 for (String m : missing) {
@@ -580,11 +837,14 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         super.saveAdditional(output);
         output.putBoolean("assembled", this.assembled);
         output.putInt("crudeOil", this.crudeOil);
+        output.putInt("liquidTar", this.liquidTar);
         output.putInt("diesel", this.diesel);
         output.putInt("gasoline", this.gasoline);
-        output.putInt("energy", this.energy);
-        output.putInt("burnTime", this.burnTime);
-        output.putInt("maxBurnTime", this.maxBurnTime);
+        output.putBoolean("stage1Enabled", this.stage1Enabled);
+        output.putBoolean("stage2Enabled", this.stage2Enabled);
+        output.putBoolean("stage3Enabled", this.stage3Enabled);
+        output.putInt("currentHeat", this.currentHeat);
+        output.putInt("furnaceType", this.furnaceType);
         output.putInt("progress", this.progress);
         output.putInt("oilSandProgress", this.oilSandProgress);
 
@@ -596,32 +856,40 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         super.loadAdditional(input);
         this.assembled = input.getBooleanOr("assembled", false);
         this.crudeOil = input.getIntOr("crudeOil", 0);
+        this.liquidTar = input.getIntOr("liquidTar", 0);
         this.diesel = input.getIntOr("diesel", 0);
         this.gasoline = input.getIntOr("gasoline", 0);
-        this.energy = input.getIntOr("energy", 0);
-        this.energyStorage.set(this.energy);
-        this.burnTime = input.getIntOr("burnTime", 0);
-        this.maxBurnTime = input.getIntOr("maxBurnTime", 0);
+        this.stage1Enabled = input.getBooleanOr("stage1Enabled", true);
+        this.stage2Enabled = input.getBooleanOr("stage2Enabled", true);
+        this.stage3Enabled = input.getBooleanOr("stage3Enabled", true);
+        this.currentHeat = input.getIntOr("currentHeat", IRefineryFurnace.AMBIENT_TEMP);
+        this.furnaceType = input.getIntOr("furnaceType", 0);
         this.progress = input.getIntOr("progress", 0);
         this.oilSandProgress = input.getIntOr("oilSandProgress", 0);
 
         ContainerHelper.loadAllItems(input, this.items);
     }
 
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
     // === WorldlyContainer Implementation ===
-    private static final int[] SLOTS_DOWN = new int[]{2, 3, 4, 5};
-    private static final int[] SLOTS_UP = new int[]{1};
-    private static final int[] SLOTS_SIDES = new int[]{0, 1};
+    private static final int[] SLOTS_DOWN = new int[]{1, 2, 3, 4, 5};
+    private static final int[] SLOTS_INPUT = new int[]{0};
 
     @Override
     public int[] getSlotsForFace(Direction side) {
         if (side == Direction.DOWN) {
             return SLOTS_DOWN;
         }
-        if (side == Direction.UP) {
-            return SLOTS_UP;
-        }
-        return SLOTS_SIDES;
+        return SLOTS_INPUT;
     }
 
     @Override
@@ -631,13 +899,14 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
 
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
-        return slot >= 2;
+        return slot >= 1;
     }
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        if (slot == 0) return getFuelBurnDuration(stack) > 0;
-        if (slot == 1) return isOilSand(stack);
+        if (slot == 0) {
+            return stack.is(RefineryFluids.CRUDE_OIL_BUCKET.get()) || isOilSand(stack);
+        }
         return false;
     }
 
@@ -681,7 +950,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
 
     @Override
     public boolean stillValid(Player player) {
-        return Container.stillValidBlockEntity(this, player);
+        return Container.stillValidBlockEntity(this, player, 16.0F);
     }
 
     @Override

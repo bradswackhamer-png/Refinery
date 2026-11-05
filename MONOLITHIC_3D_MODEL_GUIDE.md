@@ -24,16 +24,16 @@ Flickering (Z-fighting) and distorted textures are caused by three common mistak
 
 ### The 4 Rules of Flicker-Free Geometry:
 
-#### Rule 1: The `0.15px` UV Padding Formula
-Never map texture regions directly from integer edge to integer edge. In modern OpenGL/Vulkan pipelines, mipmapping samples neighboring pixels. Use a $0.15\text{px}$ inset margin:
+#### Rule 1: The `0.5px` UV Padding Formula
+Never map texture regions directly from integer edge to integer edge. In modern OpenGL/Vulkan pipelines, mipmapping and texture filtering sample neighboring pixels. Use a $0.5\text{px}$ (half-texel) inset margin:
 ```java
 public record UVRect(float u0, float v0, float u1, float v1) {
     public static UVRect of(int x, int y, int w, int h) {
         return new UVRect(
-                (x + 0.15f) / 256.0f,
-                (y + 0.15f) / 256.0f,
-                (x + w - 0.15f) / 256.0f,
-                (y + h - 0.15f) / 256.0f
+                (x + 0.5f) / 256.0f,
+                (y + 0.5f) / 256.0f,
+                (x + w - 0.5f) / 256.0f,
+                (y + h - 0.5f) / 256.0f
         );
     }
 }
@@ -367,3 +367,17 @@ public class MonolithicRendererTemplate implements BlockEntityRenderer<MyBlockEn
     }
 }
 ```
+
+---
+
+## 9. Eliminating Cylindrical & Stepped-Box Flickering (Polygonal Prism Emitter + 0.5px Inset)
+
+When building cylindrical towers, boilers, domes, or smokestacks (such as `RefineryTowerModel` and `RefineryFurnaceModel`), **never** approximate a cylinder by crossing two wide rectangular boxes (e.g., an X-wide box intersecting a Z-wide box) or stacking overlapping plates that share identical top/bottom `Y` planes. Even if their outer side walls are at different coordinates, their internal top/bottom caps and intersecting side walls overlap in the depth buffer and flicker as the camera moves.
+
+### Rule 1: Use a True Polygonal Cylinder / Frustum Emitter (`emitCylinder`)
+Instead of intersecting boxes, emit a 12- or 16-sided polygonal ring of quads around `(cx, cz)` from `y0` to `y1` with strictly sequential, non-overlapping vertical intervals (`[y0, y1]`, `[y1, y2]`, ...), omitting internal horizontal caps between adjacent segments:
+- For projecting flange rings (`outerR > innerR`), emit only the outer cylindrical wall at `outerR` and the narrow top/bottom annular lips between `innerR` and `outerR` (`emitFlangeRing`). Zero geometry passes through the interior of the column.
+
+### Rule 2: Use `0.5f` Pixel UV Inset + 2px Tile Padding
+At steep viewing angles or far distances, GPU mipmapping and driver float rounding can sample up to `0.5px` across UV tile boundaries. Use a `0.5f` pixel UV inset (`(x + 0.5f) / 256.0f` to `(x + w - 0.5f) / 256.0f`) paired with a 2-pixel uniform inner border on each 32×32 atlas tile.
+

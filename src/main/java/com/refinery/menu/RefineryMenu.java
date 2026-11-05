@@ -2,13 +2,13 @@ package com.refinery.menu;
 
 import com.refinery.RefineryMod;
 import com.refinery.block.entity.RefineryControllerBlockEntity;
+import com.refinery.fluid.RefineryFluids;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -31,37 +31,42 @@ public class RefineryMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
 
-        // Slot 0: Burner Fuel Slot (Coal, Tar, Bitumen, Lava, Ethanol Bucket)
-        this.addSlot(new Slot(container, 0, 44, 53));
-
-        // Slot 1: Feedstock Input Slot (Oil Sand)
-        this.addSlot(new Slot(container, 1, 44, 17) {
+        // Slot 0: Crude Oil Bucket / Oil Sand Input Slot (well at 11, 58)
+        this.addSlot(new Slot(container, 0, 12, 59) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return RefineryControllerBlockEntity.isOilSand(stack);
+                return stack.is(RefineryFluids.CRUDE_OIL_BUCKET.get()) || RefineryControllerBlockEntity.isOilSand(stack);
             }
         });
 
-        // Slots 2-5: Byproduct Output Slots (Sand, Tar, Sulfur)
-        this.addSlot(new Slot(container, 2, 126, 44) {
+        // Slot 1: Empty Bucket / Sand Return Slot (well at 29, 58)
+        this.addSlot(new Slot(container, 1, 30, 59) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 3, 144, 44) {
+
+        // Slots 2-5: Bitumen Output Slots (2x2 at 132/150, 37/55)
+        this.addSlot(new Slot(container, 2, 132, 37) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 4, 126, 62) {
+        this.addSlot(new Slot(container, 3, 150, 37) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 5, 144, 62) {
+        this.addSlot(new Slot(container, 4, 132, 55) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+        this.addSlot(new Slot(container, 5, 150, 55) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -83,17 +88,34 @@ public class RefineryMenu extends AbstractContainerMenu {
         this.addDataSlots(data);
     }
 
-    public int getEnergy() {
-        int low = this.data.get(0) & 0xFFFF;
-        int high = this.data.get(1) & 0xFFFF;
-        return (high << 16) | low;
+    @Override
+    public boolean clickMenuButton(Player player, int id) {
+        if (id >= 0 && id <= 2) {
+            int stage = id + 1;
+            if (this.container instanceof RefineryControllerBlockEntity be) {
+                be.toggleStage(stage);
+            } else {
+                int flags = this.data.get(7);
+                this.data.set(7, flags ^ (1 << id));
+            }
+            return true;
+        }
+        return false;
     }
 
-    public int getBurnTime() {
+    public int getCrudeOil() {
+        return this.data.get(0);
+    }
+
+    public int getLiquidTar() {
+        return this.data.get(1);
+    }
+
+    public int getDiesel() {
         return this.data.get(2);
     }
 
-    public int getMaxBurnTime() {
+    public int getGasoline() {
         return this.data.get(3);
     }
 
@@ -101,24 +123,32 @@ public class RefineryMenu extends AbstractContainerMenu {
         return this.data.get(4);
     }
 
-    public int getCrudeOil() {
+    public int getCurrentHeat() {
         return this.data.get(5);
     }
 
-    public int getDiesel() {
+    public int getFurnaceType() {
         return this.data.get(6);
     }
 
-    public int getGasoline() {
+    public int getStageFlags() {
         return this.data.get(7);
+    }
+
+    public boolean isStage1Enabled() {
+        return (this.data.get(7) & 1) != 0;
+    }
+
+    public boolean isStage2Enabled() {
+        return (this.data.get(7) & 2) != 0;
+    }
+
+    public boolean isStage3Enabled() {
+        return (this.data.get(7) & 4) != 0;
     }
 
     public boolean isAssembled() {
         return this.data.get(8) != 0;
-    }
-
-    public boolean isBurning() {
-        return this.getBurnTime() > 0;
     }
 
     public int getOilSandProgress() {
@@ -142,11 +172,7 @@ public class RefineryMenu extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             } else {
-                if (RefineryControllerBlockEntity.isOilSand(slotStack)) {
-                    if (!this.moveItemStackTo(slotStack, 1, 2, false)) {
-                        return ItemStack.EMPTY;
-                    }
-                } else if (RefineryControllerBlockEntity.getFuelBurnDuration(slotStack) > 0) {
+                if (slotStack.is(RefineryFluids.CRUDE_OIL_BUCKET.get()) || RefineryControllerBlockEntity.isOilSand(slotStack)) {
                     if (!this.moveItemStackTo(slotStack, 0, 1, false)) {
                         return ItemStack.EMPTY;
                     }

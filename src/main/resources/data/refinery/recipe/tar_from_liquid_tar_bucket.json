@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "refinery:liquid_tar_bucket"
+  ],
+  "result": {
+    "count": 4,
+    "id": "refinery:tar"
+  }
+}

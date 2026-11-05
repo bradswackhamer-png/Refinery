@@ -436,6 +436,40 @@ public class RefineryFluids {
             .block(ETHANOL_BLOCK)
             .bucket(ETHANOL_BUCKET);
 
+    // === LIQUID TAR ===
+    public static final DeferredHolder<FluidType, FluidType> LIQUID_TAR_TYPE = RefineryMod.FLUID_TYPES.register("liquid_tar",
+            () -> new RefineryFluidType(FluidType.Properties.create()
+                    .density(1400)
+                    .viscosity(4500)
+                    .temperature(380)
+                    .fallDistanceModifier(0.25F)
+                    .motionScale(0.005D)
+                    .canSwim(true)
+                    .canDrown(true)
+                    .canPushEntity(true)
+                    .descriptionId("fluid.refinery.liquid_tar"),
+                    0.45D, 0.75D, 0.20D, 0.012F));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> LIQUID_TAR_SOURCE = RefineryMod.FLUIDS.register("liquid_tar",
+            () -> new BaseFlowingFluid.Source(RefineryFluids.LIQUID_TAR_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> LIQUID_TAR_FLOWING = RefineryMod.FLUIDS.register("flowing_liquid_tar",
+            () -> new BaseFlowingFluid.Flowing(RefineryFluids.LIQUID_TAR_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> LIQUID_TAR_BLOCK = RefineryMod.BLOCKS.registerBlock("liquid_tar",
+            p -> new LiquidBlock(LIQUID_TAR_SOURCE.get(), p),
+            p -> liquidProperties(MapColor.COLOR_BROWN));
+
+    public static final DeferredItem<BucketItem> LIQUID_TAR_BUCKET = RefineryMod.ITEMS.registerItem("liquid_tar_bucket",
+            p -> new BucketItem(LIQUID_TAR_SOURCE.get(), p.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties LIQUID_TAR_PROPERTIES = new BaseFlowingFluid.Properties(
+            LIQUID_TAR_TYPE, LIQUID_TAR_SOURCE, LIQUID_TAR_FLOWING)
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .block(LIQUID_TAR_BLOCK)
+            .bucket(LIQUID_TAR_BUCKET);
+
     public static void init() {
     }
 }

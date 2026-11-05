@@ -42,10 +42,10 @@ public class CastingPressModel {
     public record UVRect(float u0, float v0, float u1, float v1) {
         public static UVRect of(int x, int y, int w, int h) {
             return new UVRect(
-                    (x + 0.15f) / TEX_W,
-                    (y + 0.15f) / TEX_H,
-                    (x + w - 0.15f) / TEX_W,
-                    (y + h - 0.15f) / TEX_H
+                    (x + 0.5f) / TEX_W,
+                    (y + 0.5f) / TEX_H,
+                    (x + w - 0.5f) / TEX_W,
+                    (y + h - 0.5f) / TEX_H
             );
         }
     }
@@ -104,9 +104,9 @@ public class CastingPressModel {
         staticCuboids.add(Cuboid.uniform(6.0f, 0.0f, 1.0f, 10.0f, 4.0f, 47.0f, UV_CROWN_FRAME));
 
         // Front, mid, and rear cross-beams
-        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 1.0f, 25.0f, 4.0f, 5.0f, UV_CROWN_FRAME));
-        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 22.0f, 25.0f, 4.0f, 26.0f, UV_CROWN_FRAME));
-        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 43.0f, 25.0f, 4.0f, 47.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 1.0f, 25.0f, 3.5f, 5.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 22.0f, 25.0f, 3.5f, 26.0f, UV_CROWN_FRAME));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 43.0f, 25.0f, 3.5f, 47.0f, UV_CROWN_FRAME));
 
         // Foundation steel deck bed
         staticCuboids.add(Cuboid.uniform(-9.0f, 3.5f, 5.0f, 25.0f, 4.0f, 43.0f, UV_FOUNDATION_BED));
@@ -114,7 +114,7 @@ public class CastingPressModel {
         // Front safety hazard stripe toe-kick
         staticCuboids.add(new Cuboid(
                 -15.2f, 0.0f, 0.0f,
-                31.2f, 2.5f, 1.0f,
+                31.2f, 2.5f, 0.95f,
                 UV_HAZARD_STRIPES, UV_CROWN_FRAME,
                 UV_HAZARD_STRIPES, UV_HAZARD_STRIPES,
                 UV_HAZARD_STRIPES, UV_CROWN_FRAME
@@ -137,7 +137,7 @@ public class CastingPressModel {
         // Heavy threaded locknuts at column tops and bases
         for (float[] p : new float[][]{{-12f, 4f}, {24f, 4f}, {-12f, 40f}, {24f, 40f}}) {
             staticCuboids.add(Cuboid.uniform(p[0] - 0.5f, 6.0f, p[1] - 0.5f, p[0] + 4.5f, 8.5f, p[1] + 4.5f, UV_CROWN_FRAME));
-            staticCuboids.add(Cuboid.uniform(p[0] - 0.5f, 39.5f, p[1] - 0.5f, p[0] + 4.5f, 42.0f, p[1] + 4.5f, UV_CROWN_FRAME));
+            staticCuboids.add(Cuboid.uniform(p[0] - 0.5f, 39.5f, p[1] - 0.5f, p[0] + 4.5f, 41.5f, p[1] + 4.5f, UV_CROWN_FRAME));
         }
 
         // =========================================================================
@@ -413,12 +413,14 @@ public class CastingPressModel {
                 c.up(), 0.0f, 1.0f, 0.0f, r, g, b, a, light, overlay);
 
         // DOWN Face (y = y0, normal 0, -1, 0)
-        emitQuad(pose, matrix, consumer,
-                x0, y0, z1,
-                x1, y0, z1,
-                x1, y0, z0,
-                x0, y0, z0,
-                c.down(), 0.0f, -1.0f, 0.0f, r, g, b, a, light, overlay);
+        if (c.y0() + yOffset > 0.01f) {
+            emitQuad(pose, matrix, consumer,
+                    x0, y0, z1,
+                    x1, y0, z1,
+                    x1, y0, z0,
+                    x0, y0, z0,
+                    c.down(), 0.0f, -1.0f, 0.0f, r, g, b, a, light, overlay);
+        }
     }
 
     private static void emitQuad(

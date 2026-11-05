@@ -172,6 +172,7 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         if (id != null) {
             String path = id.getPath();
             if (path.contains("crude_oil")) return "Crude Oil";
+            if (path.contains("liquid_tar")) return "Liquid Tar";
             if (path.contains("diesel")) return "Diesel Fuel";
             if (path.contains("gasoline")) return "Gasoline";
             if (path.contains("ethanol")) return "Bio-Ethanol";
@@ -188,6 +189,7 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         if (id != null) {
             String p = id.getPath();
             if (p.contains("crude_oil")) return 0xFF171717; // Viscous black
+            if (p.contains("liquid_tar")) return 0xFF3F2314; // Dark pitch brown-black
             if (p.contains("diesel")) return 0xFFCA8A04; // Amber golden
             if (p.contains("gasoline")) return 0xFFEAB308; // Translucent yellow
             if (p.contains("ethanol")) return 0xFF10B981; // Green ethanol

@@ -1,6 +1,0 @@
-{
-  "parent": "logistics:block/automation/sequential_fabricator",
-  "textures": {
-    "front": "logistics:block/automation/sequential_fabricator_on"
-  }
-}

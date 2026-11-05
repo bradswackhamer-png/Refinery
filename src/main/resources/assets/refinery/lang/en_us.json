@@ -406,5 +406,16 @@
   "tooltip.refinery.bronze_gear.desc": "§7Wear-resistant bronze gear.",
   "tooltip.refinery.gold_gear.desc": "§7Low-friction gold gear for precision mechanisms.",
   "tooltip.refinery.tin_gear.desc": "§7Lightweight tin gear for small machinery.",
-  "tag.item.refinery.press_dies": "Metal Press Stamping Dies"
+  "tag.item.refinery.press_dies": "Metal Press Stamping Dies",
+  "fluid.refinery.liquid_tar": "Liquid Tar",
+  "block.refinery.liquid_tar": "Liquid Tar",
+  "item.refinery.liquid_tar_bucket": "Liquid Tar Bucket",
+  "block.refinery.tar_port": "Liquid Tar Port",
+  "item.refinery.tar_port": "Liquid Tar Port",
+  "block.refinery.burner_refinery_furnace": "Burner Refinery Furnace",
+  "item.refinery.burner_refinery_furnace": "Burner Refinery Furnace",
+  "container.refinery.burner_refinery_furnace": "Burner Refinery Furnace",
+  "block.refinery.electric_refinery_furnace": "Electric Refinery Furnace",
+  "item.refinery.electric_refinery_furnace": "Electric Refinery Furnace",
+  "container.refinery.electric_refinery_furnace": "Electric Refinery Furnace"
 }

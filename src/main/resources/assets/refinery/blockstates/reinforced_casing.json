@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "refinery:block/reinforced_casing" }
+    "assembled=false": { "model": "refinery:block/reinforced_casing" },
+    "assembled=true": { "model": "refinery:block/invisible" }
   }
 }

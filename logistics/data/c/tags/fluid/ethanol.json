@@ -1,7 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "logistics:core/bio_fuel",
-    "logistics:core/flowing_bio_fuel"
-  ]
-}

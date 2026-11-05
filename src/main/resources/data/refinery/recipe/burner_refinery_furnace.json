@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "refinery:reinforced_casing",
+    "H": "refinery:heat_exchanger",
+    "F": "refinery:combustion_chamber",
+    "B": "minecraft:blast_furnace"
+  },
+  "pattern": [
+    "CHC",
+    "CFC",
+    "CBC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:burner_refinery_furnace"
+  }
+}

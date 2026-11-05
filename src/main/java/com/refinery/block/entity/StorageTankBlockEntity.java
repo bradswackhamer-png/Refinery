@@ -263,6 +263,12 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
                 input.shrink(1);
                 addOutput(new ItemStack(Items.BUCKET));
             }
+        } else if (input.is(RefineryFluids.LIQUID_TAR_BUCKET.get()) && canAcceptFluid(RefineryFluids.LIQUID_TAR_SOURCE.get(), 1000)) {
+            if (output.isEmpty() || (output.is(Items.BUCKET) && output.getCount() < output.getMaxStackSize())) {
+                insertFluidInternal(RefineryFluids.LIQUID_TAR_SOURCE.get(), 1000);
+                input.shrink(1);
+                addOutput(new ItemStack(Items.BUCKET));
+            }
         } else if (input.is(RefineryFluids.DIESEL_BUCKET.get()) && canAcceptFluid(RefineryFluids.DIESEL_SOURCE.get(), 1000)) {
             if (output.isEmpty() || (output.is(Items.BUCKET) && output.getCount() < output.getMaxStackSize())) {
                 insertFluidInternal(RefineryFluids.DIESEL_SOURCE.get(), 1000);
@@ -319,6 +325,7 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
         if (fluid == Fluids.WATER) return new ItemStack(Items.WATER_BUCKET);
         if (fluid == Fluids.LAVA) return new ItemStack(Items.LAVA_BUCKET);
         if (fluid == RefineryFluids.CRUDE_OIL_SOURCE.get()) return new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get());
+        if (fluid == RefineryFluids.LIQUID_TAR_SOURCE.get()) return new ItemStack(RefineryFluids.LIQUID_TAR_BUCKET.get());
         if (fluid == RefineryFluids.DIESEL_SOURCE.get()) return new ItemStack(RefineryFluids.DIESEL_BUCKET.get());
         if (fluid == RefineryFluids.GASOLINE_SOURCE.get()) return new ItemStack(RefineryFluids.GASOLINE_BUCKET.get());
         if (fluid == RefineryFluids.ETHANOL_SOURCE.get()) return new ItemStack(RefineryFluids.ETHANOL_BUCKET.get());

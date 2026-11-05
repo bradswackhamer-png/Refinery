@@ -44,6 +44,8 @@ public class RefineryClientMod {
 
     private void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register((MenuType) RefineryMod.REFINERY_MENU.get(), RefineryScreen::new);
+        event.register((MenuType) RefineryMod.BURNER_REFINERY_FURNACE_MENU.get(), BurnerRefineryFurnaceScreen::new);
+        event.register((MenuType) RefineryMod.ELECTRIC_REFINERY_FURNACE_MENU.get(), ElectricRefineryFurnaceScreen::new);
         event.register((MenuType) RefineryMod.AUTO_PLANTER_MENU.get(), AutoPlanterScreen::new);
         event.register((MenuType) RefineryMod.AUTO_HARVESTER_MENU.get(), AutoHarvesterScreen::new);
         event.register((MenuType) RefineryMod.BLAST_FURNACE_MENU.get(), BlastFurnaceScreen::new);
@@ -73,6 +75,8 @@ public class RefineryClientMod {
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(RefineryMod.REFINERY_CONTROLLER_BE.get(), RefineryControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.BURNER_REFINERY_FURNACE_BE.get(), RefineryFurnaceRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.ELECTRIC_REFINERY_FURNACE_BE.get(), RefineryFurnaceRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.BLAST_FURNACE_CONTROLLER_BE.get(), BlastFurnaceControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.SMALL_BOILER_CONTROLLER_BE.get(), SmallBoilerControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.LARGE_BOILER_CONTROLLER_BE.get(), LargeBoilerControllerRenderer::new);
@@ -112,6 +116,12 @@ public class RefineryClientMod {
                 fluidFogColor.set(0.02f, 0.02f, 0.02f, 1.0f);
             }
         }, RefineryFluids.CRUDE_OIL_TYPE.get());
+        event.registerFluidType(new IClientFluidTypeExtensions() {
+            @Override
+            public void modifyFogColor(Camera camera, float partialTick, ClientLevel level, int renderDistance, float darkenWorldAmount, Vector4f fluidFogColor) {
+                fluidFogColor.set(0.10f, 0.05f, 0.02f, 1.0f);
+            }
+        }, RefineryFluids.LIQUID_TAR_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_IRON_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_GOLD_TYPE.get());
         event.registerFluidType(new IClientFluidTypeExtensions() {}, RefineryFluids.MOLTEN_COPPER_TYPE.get());
@@ -128,6 +138,7 @@ public class RefineryClientMod {
 
     private void registerFluidModels(RegisterFluidModelsEvent event) {
         registerFluidModel(event, "crude_oil", RefineryFluids.CRUDE_OIL_SOURCE, RefineryFluids.CRUDE_OIL_FLOWING);
+        registerFluidModel(event, "liquid_tar", RefineryFluids.LIQUID_TAR_SOURCE, RefineryFluids.LIQUID_TAR_FLOWING);
         registerFluidModel(event, "diesel", RefineryFluids.DIESEL_SOURCE, RefineryFluids.DIESEL_FLOWING);
         registerFluidModel(event, "gasoline", RefineryFluids.GASOLINE_SOURCE, RefineryFluids.GASOLINE_FLOWING);
         registerFluidModel(event, "steam", RefineryFluids.STEAM_SOURCE, RefineryFluids.STEAM_FLOWING);

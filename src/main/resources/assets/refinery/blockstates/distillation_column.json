@@ -1,1 +1,6 @@
-{ "variants": { "": { "model": "refinery:block/distillation_column" } } }
+{
+  "variants": {
+    "assembled=false": { "model": "refinery:block/distillation_column" },
+    "assembled=true": { "model": "refinery:block/invisible" }
+  }
+}

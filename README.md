@@ -20,7 +20,8 @@
    - [Steam Turbine Generator (3Ã—3Ã—3 Multiblock)](#steam-turbine-generator-333)
    - [The Closed-Loop Rankine Cycle](#the-closed-loop-rankine-cycle)
 6. [Petroleum Refining & Chemical Byproducts](#6-petroleum-refining--chemical-byproducts)
-   - [Petroleum Refinery (3Ã—3Ã—4 Multiblock)](#petroleum-refinery-334)
+   - [3-Stage Petroleum Refinery (3×9×3 Multiblock)](#3-stage-petroleum-refinery-393)
+   - [Refinery Furnaces: Burner & Electric Heat Sources (1×2×1)](#refinery-furnaces-burner--electric-heat-sources-121)
    - [Oil Sand Cracking & Extraction](#oil-sand-cracking--extraction)
    - [Fuels & Byproducts](#fuels--byproducts)
    - [Industrial Grinder & Pulverizer (3Ã—3Ã—3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
@@ -53,6 +54,9 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.4 (Refinery Tower South Takeoff Pipes Re-orientation & Vertical Header Removal)](#version-1114-refinery-tower-south-takeoff-pipes-re-orientation--vertical-header-removal)
+   - [Version 1.11.3 (Dark Gunmetal Industrial GUI Redesign & Stage Toggle Button Fix)](#version-1113-dark-gunmetal-industrial-gui-redesign--stage-toggle-button-fix)
+   - [Version 1.11.2 (3-Stage 3×9×3 Petroleum Refinery Rebuild, Burner & Electric Refinery Furnaces, Liquid Tar)](#version-1112-3-stage-393-petroleum-refinery-rebuild-burner--electric-refinery-furnaces-liquid-tar)
    - [Version 1.10.25 (Texture Flickering Resolution, Control Panel UV Fix & 3D Monolithic Guide)](#version-11025-texture-flickering-resolution-control-panel-uv-fix--3d-monolithic-guide)
    - [Version 1.10.23 (Monolithic 3D Electric Arc Melter & Continuous Casting Press Overhaul)](#version-11023-monolithic-3d-electric-arc-melter--continuous-casting-press-overhaul)
    - [Version 1.10.21 (Plate Stamping Die Progression Fix)](#version-11021-plate-stamping-die-progression-fix)
@@ -540,22 +544,45 @@ Since the turbine condenses steam back into water at a 2:1 ratio, a closed loop 
 
 ## 6. Petroleum Refining & Chemical Byproducts
 
-### Petroleum Refinery (3Ã—3Ã—4)
-A multi-stage fractional distillation column that refines raw Crude Oil into commercial fuels and chemical feedstocks.
+### 3-Stage Petroleum Refinery (3×9×3)
+A towering 3-stage fractional distillation column divided into three **3×3×3** vertical stages (81 blocks total) that refines **1,000 mB Crude Oil** per batch into **Liquid Tar**, **Diesel**, **Gasoline**, and **Bitumen**.
 
-- **Dimensions**: 3 wide Ã— 4 tall Ã— 3 deep (36 blocks total).
-- **Operation**: Consumes 200 mB Crude Oil + 40 FE/t over 100 ticks.
-- **Outputs**:
-  - **120 mB Diesel** (drained from Diesel Port)
-  - **60 mB Gasoline** (drained from Gas Port)
-  - **Petroleum Tar** (ejected to Byproduct Port)
-  - **Sulfur Dust** (ejected to Byproduct Port)
+- **Dimensions**: 3 wide × 9 tall × 3 deep (three 3×3×3 stages stacked vertically):
+  - **Bottom Third — Stage 1 (`Y = 0..2`, 3×3×3)**: Heavy Residue / Liquid Tar & Bitumen (`350–500 °C`).
+  - **Middle Third — Stage 2 (`Y = 3..5`, 3×3×3)**: Diesel Fuel fractionating zone (`180–350 °C`).
+  - **Top Third — Stage 3 (`Y = 6..8`, 3×3×3)**: Gasoline / Petrol & overhead condenser dome (`40–110 °C`).
+- **Heat Requirement**: Requires an external **Refinery Furnace** (`>= 350 °C`) placed adjacent to Stage 1 (`Y = 0..2`).
+- **Configurable Stage Yields (per 1,000 mB Crude Oil)**:
+  Players can independently enable or disable Stage 1, Stage 2, and Stage 3 in the Refinery GUI:
+  - **Stage 1 Only**: `500 mB` Liquid Tar + `1` Bitumen (100%).
+  - **Stage 2 Only (Stage 1 & 3 Disabled)**: `500 mB` Diesel.
+  - **Stage 3 Only (Stage 1 & 2 Disabled)**: `500 mB` Gasoline.
+  - **Stage 1 + Stage 2**: `250 mB` Liquid Tar + `250 mB` Diesel + `1` Bitumen (100%).
+  - **Stage 1 + Stage 3**: `250 mB` Liquid Tar + `250 mB` Gasoline + `1` Bitumen (100%).
+  - **Stage 2 + Stage 3 (Stage 1 Disabled)**: `250 mB` Diesel + `250 mB` Gasoline.
+  - **All 3 Stages Enabled (Stage 1 + 2 + 3)**: `250 mB` Liquid Tar + `250 mB` Diesel + `250 mB` Gasoline + **25% chance at `1` Bitumen**.
+- **Byproduct Port Active Ejection & Conveyor Automation**:
+  - The Byproduct Port (`refinery:byproduct_port`) automatically detects adjacent item conveyors (`refinery:conveyor_belt`, `sloped_conveyor_belt`, `right_angle_conveyor_belt`) and item pipes (`IndustrialPipeBlockEntity`, hoppers, chests, or item handlers) placed **below** (`pos.below()`) or **beside** the port (`pos.relative(NORTH/SOUTH/EAST/WEST)` and 1-block below).
+  - Every 4 ticks, the port actively ejects Bitumen (and solid byproducts) from the controller's byproduct slots directly onto the conveyor belt surface (or inserts into the pipe/container), complete with anti-clogging belt space checks and mechanical pickup audio feedback.
+- **South-Facing 3-Stage Takeoff Valve Piping**: Each of the 3 stages features a dedicated horizontal takeoff valve assembly pointing South (+Z) towards the output ports: Stage 1 (`Y = 22.0f`, Liquid Tar), Stage 2 (`Y = 60.0f`, Diesel), and Stage 3 (`Y = 115.0f`, Gasoline) with color-coded stage status indicator handwheels.
+
+### Refinery Furnaces: Burner & Electric Heat Sources (1×2×1)
+To operate the 3-Stage Refinery Tower, place either furnace directly adjacent to the outside of Stage 1:
+- **Burner Refinery Furnace (`refinery:burner_refinery_furnace`)**: Accepts burnable solid fuels and fuel buckets across 3 fuel slots with a **4× rapid burn rate** to heat the serpentine crude-oil coil up to `500 °C`.
+- **Electric Refinery Furnace (`refinery:electric_refinery_furnace`)**: High-voltage RF heater (`500,000 FE` buffer, consuming `500 FE/t`) that heats the tower cleanly using Forge Energy.
+- **2-Block Placement, Single-Item Drop**: Each furnace is placed from a single item and occupies a `1×2×1` vertical footprint (`LOWER` and `UPPER`), dropping exactly 1 item when destroyed from either block.
 
 #### Refinery Layer Schematic
-- **Layer 0 (Base)**: Controller front center `(0, 0, 0)`, Crude Oil Port `(-1, 0, 0)`, Diesel Port `(1, 0, 0)`, Gas Port `(0, 0, 2)`, Byproduct Port `(1, 0, 1)`. Reinforced Casings fill the rest.
-- **Layer 1 (Furnace)**: Combustion Chambers.
-- **Layer 2 (Distillation)**: Distillation Columns.
-- **Layer 3 (Condenser)**: Heat Exchangers.
+- **Stage 1 (`Y = 0..2`, 3×3×3)**:
+  - `Y = 0`: Controller front center `(0, 0, 0)`, Crude Oil Port `(-1, 0, 1)`, Combustion Chamber `(0, 0, 1)`, Liquid Tar / Byproduct Port `(1, 0, 1)`, Reinforced Casings on remaining perimeter.
+  - `Y = 1`: Heat Exchangers at `(-1, 1, 1)` and `(1, 1, 1)`, Distillation Column at `(0, 1, 1)`, Reinforced Casings around perimeter.
+  - `Y = 2`: Distillation Column at `(0, 2, 1)`, Reinforced Casings around perimeter.
+- **Stage 2 (`Y = 3..5`, 3×3×3)**:
+  - `Y = 3`: Diesel Port at `(0, 3, 2)`, Heat Exchangers at `(-1, 3, 1)` and `(1, 3, 1)`, Distillation Column at `(0, 3, 1)`, Reinforced Casings around perimeter.
+  - `Y = 4..5`: Distillation Column at `(0, y, 1)`, Reinforced Casings around perimeter.
+- **Stage 3 (`Y = 6..8`, 3×3×3)**:
+  - `Y = 6`: Gas Port at `(0, 6, 2)`, Heat Exchangers at `(-1, 6, 1)` and `(1, 6, 1)`, Distillation Column at `(0, 6, 1)`, Reinforced Casings around perimeter.
+  - `Y = 7..8`: Distillation Column at `(0, y, 1)`, Reinforced Casings around perimeter.
 
 ---
 
@@ -1730,6 +1757,60 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.4 (Refinery Tower South Takeoff Pipes Re-orientation & Vertical Header Removal)
+- **Refinery Tower Monolithic 3D Model Pipe Re-orientation & Vertical Header Removal**:
+  - Removed the tall vertical grey collection header pipe that previously ran up the East (+X) side of the 3×9×3 Petroleum Refinery Tower.
+  - Rotated the Stage 2 (Diesel, orange section at `Y = 60.0f`) and Stage 3 (Gasoline, green section at `Y = 115.0f`) horizontal takeoff valve assemblies by 90 degrees around the column shell. Both stubby takeoff pipes now project cleanly towards the **South (+Z)** face (`Z: 15.1f .. 23.5f`), directly aligning with the South-facing Diesel Output Port (`(0, 3, 2)`) and Gas Output Port (`(0, 6, 2)`).
+  - Cleared the redundant lower East bracket assembly at Stage 1, leaving the East side of the tower completely unencumbered for furnace placement.
+
+---
+
+### Version 1.11.3 (Dark Gunmetal Industrial GUI Redesign & Stage Toggle Button Fix)
+- **Refinery Tower Stage Toggle Button Click & Interaction Fix**:
+  - Fixed an issue where clicking the Stage 1, Stage 2, or Stage 3 buttons (`S1`, `S2`, `S3`) in `RefineryScreen` failed to toggle stages.
+  - Linked stage button click listeners to execute immediate client prediction (`this.menu.clickMenuButton(...)`) and server packet synchronization (`handleInventoryButtonClick(...)`) with UI click audio feedback.
+  - Upgraded `RefineryControllerBlockEntity.stillValid(Player)` to `Container.stillValidBlockEntity(this, player, 16.0F)`, ensuring players interacting with member blocks across the `3×9×3` multiblock structure do not trigger reach distance invalidation when clicking stage toggles.
+- **Dark Gunmetal Industrial Aesthetic Overhaul for Refinery & Furnace GUIs**:
+  - Restyled `refinery.png`, `burner_refinery_furnace.png`, and `electric_refinery_furnace.png` with heavy dark gunmetal steel panels (`#2B3036`), beveled frames, corner rivets, and recessed wells (`#1D2126` slots, `#0E1318` digital monitors) to match the machine aesthetic of the Multi-Smelter, Blast Furnace, and Grinder.
+  - **Burner Refinery Furnace GUI Alignment (`BurnerRefineryFurnaceScreen` & `BurnerRefineryFurnaceMenu`)**:
+    - Re-aligned the 3 fuel input slots horizontally to `(12, 20)`, `(30, 20)`, `(48, 20)` and bucket return slot to `(48, 47)` with downward fuel transfer arrow.
+    - Added recessed wells for the 4× burn flame indicator `(11, 45, w: 34, h: 20)` and furnace thermometer `(67, 19, w: 12, h: 46)` with a 350 °C operating threshold line.
+    - Integrated a dark CRT/LCD Digital Telemetry Monitor box `(88, 19, w: 77, h: 33)` and a 3D beveled Redstone Mode toggle button `(88, 54, w: 77, h: 14)`, completely eliminating overlapping text collisions.
+  - **Electric Refinery Furnace GUI Alignment (`ElectricRefineryFurnaceScreen` & `ElectricRefineryFurnaceMenu`)**:
+    - Added recessed wells for the RF Energy Buffer gauge `(12, 19, w: 18, h: 46)`, induction coil heating chamber `(34, 24, w: 28, h: 36)` with active coil glow, and thermometer `(66, 19, w: 12, h: 46)`.
+    - Integrated matching Digital Telemetry Monitor box `(88, 19, w: 77, h: 33)` and 3D beveled Redstone Mode button `(88, 54, w: 77, h: 14)`.
+  - **3-Stage Petroleum Refinery GUI Overhaul (`RefineryScreen` & `RefineryMenu`)**:
+    - Organized the interface into 3 dedicated riveted panel plates: Feed & Heat (left), Fractional Distillation & Product Tanks (center), and Bitumen Byproduct (right).
+    - Positioned Crude Oil feed tank `(11, 19)`, Heat Input thermometer `(31, 19)`, oil sand cracking groove `(11, 53)`, and crude input/bucket return slots `(12, 59)` and `(30, 59)`.
+    - Centered the 3 vertical stage toggle buttons `S3`, `S2`, `S1` at `(56, 19/37/55, w: 24, h: 16)` with 3D beveled styling, stage-specific active colors, and power LEDs.
+    - Recessed sight-glass wells for Liquid Tar `(83, 19)`, Diesel `(98, 19)`, and Gasoline `(113, 19)` with meniscus highlights, distillation progress groove `(56, 73, w: 69, h: 5)`, and 2×2 Bitumen byproduct output slots `(132/150, 37/55)`.
+    - Added a recessed LED status bezel in the top-right header `(161, 5, w: 8, h: 8)` with live green/red structure assembly status.
+
+---
+
+### Version 1.11.2 (3-Stage 3×9×3 Petroleum Refinery Rebuild, Burner & Electric Refinery Furnaces, Liquid Tar)
+- **3-Stage Petroleum Refinery Tower (`3×9×3` Multiblock — Three `3×3×3` Stages)**:
+  - Rebuilt the Petroleum Refinery into a 9-block-tall (`3×9×3`, 81 blocks) fractional distillation column divided into three `3×3×3` stages: Stage 1 (Bottom: Liquid Tar & Bitumen), Stage 2 (Middle: Diesel), and Stage 3 (Top: Gasoline).
+  - Added interactive Stage 1 / Stage 2 / Stage 3 toggle buttons in the Refinery GUI to customize distillation outputs per **1,000 mB Crude Oil**:
+    - Stage 1 only: `500 mB` Liquid Tar + `1` Bitumen.
+    - Stage 2 only: `500 mB` Diesel.
+    - Stage 3 only: `500 mB` Gasoline.
+    - Stage 1 + 2: `250 mB` Liquid Tar + `250 mB` Diesel + `1` Bitumen.
+    - Stage 1 + 3: `250 mB` Liquid Tar + `250 mB` Gasoline + `1` Bitumen.
+    - Stage 2 + 3: `250 mB` Diesel + `250 mB` Gasoline.
+    - All 3 Stages: `250 mB` Liquid Tar + `250 mB` Diesel + `250 mB` Gasoline + **25% chance at `1` Bitumen**.
+- **Two Refinery Furnaces (`Burner Refinery Furnace` & `Electric Refinery Furnace`)**:
+  - Added two `1×2×1` vertical 2-block heat sources that supply heat (`>= 350 °C` up to `500 °C`) when placed adjacent to Stage 1 of the Refinery Tower:
+    - **Burner Refinery Furnace**: Fast-burning (`4×` burn rate) solid/bucket fuel heater.
+    - **Electric Refinery Furnace**: High-RF (`500 FE/t`, `500,000 FE` buffer) electric heater.
+  - Placed as a single item occupying 2 vertical blocks and guaranteed to drop only 1 item when broken.
+- **Liquid Tar Fluid, Bucket & Port (`refinery:liquid_tar`, `refinery:liquid_tar_bucket`, `refinery:tar_port`)**:
+  - Added Liquid Tar fluid, bucket, and port block, plus shapeless crafting (`1 Liquid Tar Bucket -> 4 Petroleum Tar`).
+- **Zero-Flicker Monolithic 3D Models (`RefineryTowerModel` & `RefineryFurnaceModel`)**:
+  - Built using a 16-sided polygonal cylinder/frustum emitter (`emitCylinder` & `emitFlangeRing`) with strictly disjoint vertical segments and `0.5px` UV inset margins for zero texture flickering.
 
 ---
 

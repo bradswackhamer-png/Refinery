@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "refinery:block/electric_refinery_furnace" }
+  }
+}

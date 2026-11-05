@@ -229,16 +229,16 @@ public class GuideBookRegistry {
         }
 
         // =========================================================================
-        // 4. PETROLEUM REFINERY (3x3x4 Multiblock)
+        // 4. PETROLEUM REFINERY (3x9x3 3-Stage Fractional Distillation Tower)
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
             legend.put('C', new LayerSymbol('C', "Refinery Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.REFINERY_CONTROLLER.get())));
             legend.put('F', new LayerSymbol('F', "Combustion Chamber", 0xFFEA580C, () -> new ItemStack(RefineryMod.COMBUSTION_CHAMBER.get())));
             legend.put('I', new LayerSymbol('I', "Crude Oil Port (Input)", 0xFF18181B, () -> new ItemStack(RefineryMod.CRUDE_OIL_PORT.get())));
-            legend.put('D', new LayerSymbol('D', "Diesel Port (Output)", 0xFFEAB308, () -> new ItemStack(RefineryMod.DIESEL_PORT.get())));
-            legend.put('G', new LayerSymbol('G', "Gas Port (Output)", 0xFF38BDF8, () -> new ItemStack(RefineryMod.GAS_PORT.get())));
-            legend.put('B', new LayerSymbol('B', "Byproduct Port (Output)", 0xFF475569, () -> new ItemStack(RefineryMod.BYPRODUCT_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Tar / Byproduct Port (Stage 1 Out)", 0xFF991B1B, () -> new ItemStack(RefineryMod.TAR_PORT.get())));
+            legend.put('D', new LayerSymbol('D', "Diesel Port (Stage 2 Out)", 0xFFEAB308, () -> new ItemStack(RefineryMod.DIESEL_PORT.get())));
+            legend.put('G', new LayerSymbol('G', "Gas Port (Stage 3 Out)", 0xFF38BDF8, () -> new ItemStack(RefineryMod.GAS_PORT.get())));
             legend.put('H', new LayerSymbol('H', "Heat Exchanger", 0xFF38BDF8, () -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get())));
             legend.put('T', new LayerSymbol('T', "Distillation Column", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.DISTILLATION_COLUMN.get())));
             legend.put('X', new LayerSymbol('X', "Reinforced Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.REINFORCED_CASING.get())));
@@ -247,31 +247,56 @@ public class GuideBookRegistry {
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.REFINERY_CONTROLLER.get()), "Refinery Controller", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.COMBUSTION_CHAMBER.get()), "Combustion Chamber", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CRUDE_OIL_PORT.get()), "Crude Oil Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TAR_PORT.get()), "Liquid Tar / Byproduct Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.DIESEL_PORT.get()), "Diesel Output Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GAS_PORT.get()), "Gas Output Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BYPRODUCT_PORT.get()), "Byproduct Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.DISTILLATION_COLUMN.get()), "Distillation Column", 4),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get()), "Heat Exchanger", 4),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.REINFORCED_CASING.get()), "Reinforced Casing", 22)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.DISTILLATION_COLUMN.get()), "Distillation Column", 8),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get()), "Heat Exchanger", 6),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.REINFORCED_CASING.get()), "Reinforced Casing", 61)
             );
 
             List<GuideLayer> layers = List.of(
-                    new GuideLayer(0, "Layer 0 (Ground Tier & Ports)", new String[]{
-                            "XDX",
+                    new GuideLayer(0, "Stage 1 - Layer 0 (Base & Controller)", new String[]{
+                            "XXX",
                             "IFB",
                             "XCX"
                     }, legend),
-                    new GuideLayer(1, "Layer 1 (Thermal Cracking Columns)", new String[]{
+                    new GuideLayer(1, "Stage 1 - Layer 1 (350-500°C Tar Zone)", new String[]{
                             "XXX",
                             "HTH",
                             "XXX"
                     }, legend),
-                    new GuideLayer(2, "Layer 2 (Condensation & Gas Port)", new String[]{
+                    new GuideLayer(2, "Stage 1 - Layer 2 (Stage 1 Top)", new String[]{
+                            "XXX",
+                            "XTX",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(3, "Stage 2 - Layer 3 (Diesel Takeoff)", new String[]{
+                            "XDX",
+                            "HTH",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(4, "Stage 2 - Layer 4 (250-350°C Diesel Zone)", new String[]{
+                            "XXX",
+                            "XTX",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(5, "Stage 2 - Layer 5 (Stage 2 Top)", new String[]{
+                            "XXX",
+                            "XTX",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(6, "Stage 3 - Layer 6 (Gasoline Takeoff)", new String[]{
                             "XGX",
                             "HTH",
                             "XXX"
                     }, legend),
-                    new GuideLayer(3, "Layer 3 (Distillation Tower Crown)", new String[]{
+                    new GuideLayer(7, "Stage 3 - Layer 7 (40-110°C Petrol Zone)", new String[]{
+                            "XXX",
+                            "XTX",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(8, "Stage 3 - Layer 8 (Condenser Dome)", new String[]{
                             "XXX",
                             "XTX",
                             "XXX"
@@ -279,27 +304,44 @@ public class GuideBookRegistry {
             );
 
             List<GuideRecipe> recipes = List.of(
-                    new GuideRecipe("Fractional Distillation",
+                    new GuideRecipe("All 3 Stages Enabled (1,000 mB Crude)",
                             List.of(() -> new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get())),
-                            List.of(() -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(RefineryFluids.GASOLINE_BUCKET.get()), () -> new ItemStack(RefineryMod.TAR_ITEM.get())),
-                            "Fractionates Crude Oil into Diesel Fuel, Petroleum Gas, and Tar/Bitumen byproducts."),
-                    new GuideRecipe("Oil Sand Thermal Cracking",
-                            List.of(() -> new ItemStack(RefineryMod.BITUMEN.get())),
-                            List.of(() -> new ItemStack(RefineryMod.SULFUR_DUST_ITEM.get()), () -> new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get())),
-                            "Extracts synthetic crude and sulfur dust from raw oil sand deposits.")
+                            List.of(() -> new ItemStack(RefineryFluids.LIQUID_TAR_BUCKET.get()), () -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(RefineryFluids.GASOLINE_BUCKET.get()), () -> new ItemStack(RefineryMod.BITUMEN.get())),
+                            "250 mB Liquid Tar + 250 mB Diesel + 250 mB Gasoline + 25% chance at 1 Bitumen."),
+                    new GuideRecipe("Single Stage Enabled (1,000 mB Crude)",
+                            List.of(() -> new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get())),
+                            List.of(() -> new ItemStack(RefineryFluids.LIQUID_TAR_BUCKET.get()), () -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(RefineryFluids.GASOLINE_BUCKET.get())),
+                            "Stage 1 only: 500 mB Liquid Tar + 1 Bitumen | Stage 2 only: 500 mB Diesel | Stage 3 only: 500 mB Gasoline."),
+                    new GuideRecipe("Two Stages Enabled (1,000 mB Crude)",
+                            List.of(() -> new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get())),
+                            List.of(() -> new ItemStack(RefineryFluids.LIQUID_TAR_BUCKET.get()), () -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(RefineryMod.BITUMEN.get())),
+                            "S1+S2: 250 mB Tar + 250 mB Diesel + 1 Bitumen | S1+S3: 250 mB Tar + 250 mB Gas + 1 Bitumen | S2+S3: 250 mB Diesel + 250 mB Gas.")
             );
 
             register(new GuideEntry(
                     "refinery",
-                    "Petroleum Refinery",
-                    "3x3x4 Multiblock • Fractional Distillation",
+                    "3-Stage Petroleum Refinery",
+                    "3x9x3 Multiblock • Three 3x3x3 Stages",
                     GuideCategory.MULTIBLOCKS,
                     () -> new ItemStack(RefineryMod.REFINERY_CONTROLLER.get()),
-                    "The Petroleum Refinery is a heavy fractional distillation plant that cracks crude oil into valuable hydrocarbon fuels: Diesel, Gasoline/Gas, and heavy Tar/Bitumen.\n\nFueled by solid combustibles in its combustion chamber or powered electrically.",
-                    "Collect Tar from the Byproduct Port to craft high-durability synthetic pipes, torches, and asphalt blocks!",
+                    "The 3-Stage Petroleum Refinery is a 3x9x3 fractional distillation column divided into three 3x3x3 vertical stages:\n• Bottom Third (Stage 1): Liquid Tar & Bitumen\n• Middle Third (Stage 2): Diesel Fuel\n• Top Third (Stage 3): Gasoline\n\nRequires an external Heat Source (>= 350°C) from either a Burner Refinery Furnace or Electric Refinery Furnace placed adjacent to Stage 1!",
+                    "Toggle individual stages ON or OFF inside the Refinery GUI to customize your output ratios per 1,000 mB of Crude Oil!",
                     reqs,
                     layers,
                     recipes
+            ));
+
+            register(new GuideEntry(
+                    "refinery_furnaces",
+                    "Refinery Furnaces (Burner & Electric)",
+                    "1x2x1 Heat Sources • 350°C–500°C",
+                    GuideCategory.MACHINERY,
+                    () -> new ItemStack(RefineryMod.BURNER_REFINERY_FURNACE.get()),
+                    "The 3-Stage Petroleum Refinery requires an adjacent Refinery Furnace at >= 350°C to heat crude oil vapors.\n\n• Burner Refinery Furnace: Burns solid fuels and fuel buckets at 4x rapid combustion speed.\n• Electric Refinery Furnace: Consumes 500 FE/t of high-voltage RF power to heat cleanly without ash.\n\nEach furnace is placed as a single item occupying 2 vertical blocks (1x2x1) and drops 1 item when broken.",
+                    "Place your chosen Refinery Furnace directly touching the outside of Stage 1 (bottom 3x3x3 section) of the Refinery Tower!",
+                    null,
+                    null,
+                    List.of()
             ));
         }
 

@@ -46,10 +46,10 @@ public class ArcMelterModel {
     public record UVRect(float u0, float v0, float u1, float v1) {
         public static UVRect of(int x, int y, int w, int h) {
             return new UVRect(
-                    (x + 0.15f) / TEX_W,
-                    (y + 0.15f) / TEX_H,
-                    (x + w - 0.15f) / TEX_W,
-                    (y + h - 0.15f) / TEX_H
+                    (x + 0.5f) / TEX_W,
+                    (y + 0.5f) / TEX_H,
+                    (x + w - 0.5f) / TEX_W,
+                    (y + h - 0.5f) / TEX_H
             );
         }
     }
@@ -109,11 +109,11 @@ public class ArcMelterModel {
         staticCuboids.add(Cuboid.uniform(6.0f, 0.0f, 1.0f, 10.0f, 3.5f, 47.0f, UV_TRUNNION_BASE));
 
         // Front cross-beam
-        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 1.0f, 25.0f, 3.5f, 5.0f, UV_TRUNNION_BASE));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 1.0f, 25.0f, 3.0f, 5.0f, UV_TRUNNION_BASE));
         // Mid cross-beam
-        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 22.0f, 25.0f, 3.5f, 26.0f, UV_TRUNNION_BASE));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 22.0f, 25.0f, 3.0f, 26.0f, UV_TRUNNION_BASE));
         // Rear cross-beam
-        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 43.0f, 25.0f, 3.5f, 47.0f, UV_TRUNNION_BASE));
+        staticCuboids.add(Cuboid.uniform(-9.0f, 0.0f, 43.0f, 25.0f, 3.0f, 47.0f, UV_TRUNNION_BASE));
 
         // Foundation steel deck plate
         staticCuboids.add(Cuboid.uniform(-9.0f, 3.0f, 5.0f, 25.0f, 3.5f, 43.0f, UV_BASEPLATE));
@@ -121,7 +121,7 @@ public class ArcMelterModel {
         // Front perimeter safety hazard toe-kick strip
         staticCuboids.add(new Cuboid(
                 -15.2f, 0.0f, 0.0f,
-                31.2f, 2.5f, 1.0f,
+                31.2f, 2.5f, 0.95f,
                 UV_HAZARD_STRIPES, UV_TRUNNION_BASE,
                 UV_HAZARD_STRIPES, UV_HAZARD_STRIPES,
                 UV_HAZARD_STRIPES, UV_TRUNNION_BASE
@@ -165,8 +165,8 @@ public class ArcMelterModel {
         staticCuboids.add(Cuboid.uniform(17.0f, 8.0f, 34.0f, 21.0f, 30.0f, 38.0f, UV_FURNACE_SHELL));
 
         // Water-cooling girth flange rings
-        staticCuboids.add(Cuboid.uniform(-6.8f, 8.0f, 8.2f, 22.8f, 10.0f, 39.8f, UV_TRUNNION_BASE));
-        staticCuboids.add(Cuboid.uniform(-6.8f, 28.0f, 8.2f, 22.8f, 30.0f, 39.8f, UV_TRUNNION_BASE));
+        staticCuboids.add(Cuboid.uniform(-6.8f, 8.05f, 8.2f, 22.8f, 9.95f, 39.8f, UV_TRUNNION_BASE));
+        staticCuboids.add(Cuboid.uniform(-6.8f, 28.05f, 8.2f, 22.8f, 29.95f, 39.8f, UV_TRUNNION_BASE));
 
         // Cooling water header pipes wrapping outer shell
         staticCuboids.add(Cuboid.uniform(-6.5f, 18.0f, 8.5f, 22.5f, 19.5f, 9.5f, UV_COPPER_BUS));
@@ -502,12 +502,14 @@ public class ArcMelterModel {
                 c.up(), 0.0f, 1.0f, 0.0f, r, g, b, a, light, overlay);
 
         // DOWN Face (y = y0, normal 0, -1, 0)
-        emitQuad(pose, matrix, consumer,
-                x0, y0, z1,
-                x1, y0, z1,
-                x1, y0, z0,
-                x0, y0, z0,
-                c.down(), 0.0f, -1.0f, 0.0f, r, g, b, a, light, overlay);
+        if (c.y0() + yOffset > 0.01f) {
+            emitQuad(pose, matrix, consumer,
+                    x0, y0, z1,
+                    x1, y0, z1,
+                    x1, y0, z0,
+                    x0, y0, z0,
+                    c.down(), 0.0f, -1.0f, 0.0f, r, g, b, a, light, overlay);
+        }
     }
 
     private static void emitQuad(

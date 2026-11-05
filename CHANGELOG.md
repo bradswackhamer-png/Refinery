@@ -4,6 +4,99 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.7] - 2026-11-05
+
+### Added
+- **Refinery Tower Stage 1 Liquid Tar South Takeoff Pipe Assembly (`RefineryTowerModel`)**:
+  - Added a third South-facing horizontal takeoff valve assembly at `Y = 22.0f` on the bottom section (Stage 1: Heavy Residue / Liquid Tar) of the 3×9×3 Petroleum Refinery Tower.
+  - Symmetrically matches the rotated Stage 2 (`Y = 60.0f`, Diesel) and Stage 3 (`Y = 115.0f`, Gasoline) takeoff valve assemblies, projecting cleanly towards the South (+Z) face with a crimson indicator handwheel when Stage 1 is active (`UV_STAGE1_CRIMSON`), completing the 3-stage visual takeoff system.
+
+### Fixed
+- **Electric Arc Melter & Hydraulic Casting Press Texture Flickering & Z-Fighting Resolution (`ArcMelterModel` & `CastingPressModel`)**:
+  - **Atlas UV Padding Inset**: Upgraded `UVRect.of` margin inset padding from `0.15px` to a robust `0.5px` (`(coord + 0.5f) / 256.0f`), completely eliminating texture bleeding, shimmering, and edge flickering across adjacent atlas tiles during camera movement and mipmapping.
+  - **Ground Floor Z-Fighting Elimination**: Suppressed emitting downward-facing (`DOWN`) quads for foundation cuboids sitting on the ground (`y0 <= 0.01f`), preventing bottom runner faces from fighting with the top surface of floor blocks.
+  - **Foundation Cross-Beam & Deck Plate Disjoint Planes**: Adjusted cross-beam heights in both `ArcMelterModel` (`y1 = 3.0f`) and `CastingPressModel` (`y1 = 3.5f`) so the heavy foundation deck plates sit directly on top of the beams without sharing identical coplanar top surfaces.
+  - **Flange Ring & Platen Intersections**: Offset water-cooling girth flange rings in `ArcMelterModel` (`8.05f .. 9.95f` and `28.05f .. 29.95f`) and trimmed column locknuts in `CastingPressModel` (`39.5f .. 41.5f`) to prevent penetrating cuboids and edge collisions.
+
+---
+
+## [1.11.6] - 2026-11-05
+
+### Added
+- **Refinery Byproduct Port Automatic Conveyor & Pipe Ejection (`RefineryPortBlockEntity`)**:
+  - Implemented automatic item ejection for the Byproduct Port (`refinery:byproduct_port`) on the 3-Stage Petroleum Refinery multiblock tower.
+  - Automatically detects item conveyors (`refinery:conveyor_belt`, `sloped_conveyor_belt`, `right_angle_conveyor_belt`, and third-party conveyors via `isAnyConveyorBlock`) and item pipes (`IndustrialPipeBlockEntity`, hoppers, chests, barrels, crates, and NeoForge item capability handlers) attached **below** (`pos.below()`) or **beside** the Byproduct Port (`pos.relative(NORTH/SOUTH/EAST/WEST)` and 1-block below).
+  - Every 4 ticks, the Byproduct Port scans for adjacent conveyance channels and smoothly ejects solid byproducts (Bitumen, Tar, and extracted sand) from the controller's internal byproduct slots (slots 2–5 and 1) directly onto the conveyor belt surface or into connected pipes/containers.
+  - Integrated anti-clogging belt occupancy checks (`level.getEntitiesOfClass(ItemEntity.class, beltBox)`), preventing item stacking or clumping by waiting until previously ejected items advance along the belt.
+  - Implemented `WorldlyContainer` directly on `RefineryPortBlockEntity` and updated item capability registration to allow multi-directional extraction through all horizontal and bottom faces of Byproduct Ports.
+
+---
+
+## [1.11.4] - 2026-11-05
+
+### Changed
+- **Refinery Tower Monolithic 3D Model Pipe Re-orientation & Vertical Header Removal**:
+  - Removed the tall vertical grey collection header pipe that previously ran up the East (+X) side of the 3×9×3 Petroleum Refinery Tower.
+  - Rotated the Stage 2 (Diesel, orange section at `Y = 60.0f`) and Stage 3 (Gasoline, green section at `Y = 115.0f`) horizontal takeoff valve assemblies by 90 degrees around the column shell. Both stubby takeoff pipes now project cleanly towards the **South (+Z)** face (`Z: 15.1f .. 23.5f`), directly aligning with the South-facing Diesel Output Port (`(0, 3, 2)`) and Gas Output Port (`(0, 6, 2)`).
+  - Cleared the redundant lower East bracket assembly at Stage 1, leaving the East side of the tower completely unencumbered for furnace placement.
+
+---
+
+## [1.11.3] - 2026-11-05
+
+### Fixed
+- **Refinery Tower Stage Toggle Button Click & Interaction Resolution**:
+  - Resolved an issue where clicking the Stage 1, Stage 2, or Stage 3 buttons (`S1`, `S2`, `S3`) in `RefineryScreen` failed to toggle stages.
+  - Aligned stage button click listeners to execute immediate client prediction (`this.menu.clickMenuButton(...)`) and server packet synchronization (`handleInventoryButtonClick(...)`) with UI button click audio feedback.
+  - Upgraded `RefineryControllerBlockEntity.stillValid(Player)` to `Container.stillValidBlockEntity(this, player, 16.0F)`, ensuring players interacting with member blocks across the large `3×9×3` multiblock tower do not trigger container reach invalidation when clicking stage toggles.
+
+### Changed
+- **Dark Gunmetal Industrial Aesthetic Overhaul for Refinery & Furnace GUIs**:
+  - Completely restyled the GUI textures (`refinery.png`, `burner_refinery_furnace.png`, `electric_refinery_furnace.png`) using the dark gunmetal industrial steel palette (`#2B3036`), beveled frames, corner rivets, and recessed wells (`#1D2126` slots, `#0E1318` digital monitors) to match `MultiSmelterScreen`, `BlastFurnaceScreen`, and `IndustrialGrinderScreen`.
+  - **Burner Refinery Furnace GUI Alignment (`BurnerRefineryFurnaceScreen` & `BurnerRefineryFurnaceMenu`)**:
+    - Re-aligned the 3 fuel input slots horizontally to `(12, 20)`, `(30, 20)`, `(48, 20)` and the empty bucket return slot to `(48, 47)` with a downward fuel transfer arrow.
+    - Added recessed wells for the 4× burn flame indicator `(11, 45, w: 34, h: 20)` and furnace thermometer `(67, 19, w: 12, h: 46)` with 350 °C operating threshold line.
+    - Integrated a dark CRT/LCD Digital Telemetry Monitor box `(88, 19, w: 77, h: 33)` for temperature and flame status, plus a 3D beveled Redstone Mode toggle button `(88, 54, w: 77, h: 14)`, eliminating all overlapping text collisions.
+  - **Electric Refinery Furnace GUI Alignment (`ElectricRefineryFurnaceScreen` & `ElectricRefineryFurnaceMenu`)**:
+    - Added recessed wells for the RF Energy Buffer gauge `(12, 19, w: 18, h: 46)`, induction coil heating chamber `(34, 24, w: 28, h: 36)` with active coil glow, and thermometer `(66, 19, w: 12, h: 46)`.
+    - Integrated the matching Digital Telemetry Monitor box `(88, 19, w: 77, h: 33)` and 3D beveled Redstone Mode button `(88, 54, w: 77, h: 14)`.
+  - **3-Stage Petroleum Refinery GUI Overhaul (`RefineryScreen` & `RefineryMenu`)**:
+    - Organized the interface into 3 dedicated riveted panel plates: Feed & Heat (left), Fractional Distillation & Product Tanks (center), and Bitumen Byproduct (right).
+    - Positioned Crude Oil feed tank `(11, 19)`, Heat Input thermometer `(31, 19)`, oil sand cracking groove `(11, 53)`, and crude input/bucket return slots `(12, 59)` and `(30, 59)`.
+    - Centered the 3 vertical stage toggle buttons `S3`, `S2`, `S1` at `(56, 19/37/55, w: 24, h: 16)` with 3D beveled styling, stage-specific active colors, and power LEDs.
+    - Recessed sight-glass wells for Liquid Tar `(83, 19)`, Diesel `(98, 19)`, and Gasoline `(113, 19)` with meniscus highlights, distillation progress groove `(56, 73, w: 69, h: 5)`, and 2×2 Bitumen byproduct output slots `(132/150, 37/55)`.
+    - Added a recessed LED status bezel in the top-right header `(161, 5, w: 8, h: 8)` with live green/red structure assembly status.
+
+---
+
+## [1.11.2] - 2026-11-05
+
+### Added
+- **3-Stage Petroleum Refinery Tower Rebuild (`3×9×3` Multiblock — Three `3×3×3` Stages)**:
+  - Rebuilt the Petroleum Refinery into a towering **3×9×3** fractional distillation plant divided into three **3×3×3** vertical stages:
+    - **Stage 1 (Bottom Third, `Y = 0..2`)**: Heavy residue / Liquid Tar & Bitumen stage (`350–500 °C`).
+    - **Stage 2 (Middle Third, `Y = 3..5`)**: Diesel Oil fractionating stage (`180–350 °C`).
+    - **Stage 3 (Top Third, `Y = 6..8`)**: Gasoline / Petrol & overhead condenser stage (`40–110 °C`).
+  - Added individual **Stage 1 / Stage 2 / Stage 3 Enable/Disable Toggles** in the Refinery GUI (`RefineryScreen` & `RefineryMenu`) allowing players to dynamically customize distillation yields per **1,000 mB Crude Oil**:
+    - **Stage 1 only**: `500 mB` Liquid Tar + `1` Bitumen (100%).
+    - **Stage 2 only** (Stage 1 & 3 disabled): `500 mB` Diesel.
+    - **Stage 3 only** (Stage 1 & 2 disabled): `500 mB` Gasoline.
+    - **Stage 1 + Stage 2** (Stage 3 disabled): `250 mB` Liquid Tar + `250 mB` Diesel + `1` Bitumen (100%).
+    - **Stage 1 + Stage 3** (Stage 2 disabled): `250 mB` Liquid Tar + `250 mB` Gasoline + `1` Bitumen (100%).
+    - **Stage 2 + Stage 3** (Stage 1 disabled): `250 mB` Diesel + `250 mB` Gasoline.
+    - **All 3 Stages (Stage 1 + 2 + 3 enabled)**: `250 mB` Liquid Tar + `250 mB` Diesel + `250 mB` Gasoline + **25% chance at `1` Bitumen**.
+- **Two External Refinery Furnaces (Heat Sources — `1×2×1` Two-Block Vertical Units)**:
+  - The 3-Stage Refinery Tower requires a heat source (`>= 350 °C`, up to `500 °C`) placed adjacent to Stage 1 (`Y = 0..2`). Players choose which furnace to build and place:
+    - **Burner Refinery Furnace (`refinery:burner_refinery_furnace`)**: Burns solid fuels and fuel buckets at **4× fast burn speed** (`BURN_SPEED = 4`) across 3 fuel input slots with an empty bucket return slot.
+    - **Electric Refinery Furnace (`refinery:electric_refinery_furnace`)**: High-power RF/FE heater consuming **500 FE/t** from a **500,000 FE** internal energy buffer.
+  - Each furnace is placed from a **single item** as a 2-block-tall (`1×2×1`) structure (`FurnacePart.LOWER` & `FurnacePart.UPPER`) and strictly drops **only 1 item** when broken from either the top or bottom block.
+- **Liquid Tar Fluid, Bucket & Liquid Tar Port**:
+  - Registered **Liquid Tar** (`refinery:liquid_tar`, `refinery:flowing_liquid_tar`), **Liquid Tar Bucket** (`refinery:liquid_tar_bucket`), and **Liquid Tar Port** (`refinery:tar_port`), plus shapeless crafting of 1 Liquid Tar Bucket into 4 Petroleum Tar items and full Storage Tank support.
+- **Zero-Flicker Monolithic 3D Models (`RefineryTowerModel` & `RefineryFurnaceModel`)**:
+  - Created a 16-sided polygonal cylinder/frustum emitter (`emitCylinder` & `emitFlangeRing`) with strictly sequential, non-overlapping vertical segments and `0.5px` UV inset margins to completely eliminate coplanar Z-fighting and texture flickering on both the 3×9×3 Refinery Tower and 1×2×1 Refinery Furnaces.
+
+---
+
 ## [1.10.25] - 2026-11-05
 
 ### Fixed

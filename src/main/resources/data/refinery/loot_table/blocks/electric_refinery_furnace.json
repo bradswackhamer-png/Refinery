@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "refinery:electric_refinery_furnace",
+          "properties": {
+            "part": "lower"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "refinery:electric_refinery_furnace"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

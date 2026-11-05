@@ -48,7 +48,8 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 - **Real In-World Fluid Crude Oil**: Naturally occurring subterranean oil reservoirs and surface lakes rimmed with bituminous oil sand. Viscous black liquid following authentic fluid physics.
 - **Deposit Capacities & Spacing**: Standard oil pits yield **600,000 mB to 1,000,000 mB**, with rare high-pressure **Super-Geysers** erupting with **2,000,000 mB**! Generates ~1 in 200 chunks with an enforced **20-chunk (320-block) minimum spacing** between wells to prevent clustered lakes.
 - **Persistent Anti-Retrogen**: Oil deposits are strictly registered once generated. Even when drained completely dry, chunks will never re-generate oil over your quarries or drills.
-- **Fractional Distillation Column (3x3x4 Multiblock)**: Fractionates crude oil into high-energy **Diesel** (500 mB), **Gasoline** (300 mB), heavy **Bitumen** (burns 1,600t), and chemical **Sulfur Dust**. Also supports direct **Oil Sand Cracking** yielding crude oil, clean sand, and petroleum tar.
+- **3-Stage Fractional Distillation Column (3x9x3 Multiblock — Three 3x3x3 Stages)**: Divided into Stage 1 (Bottom: Liquid Tar & Bitumen), Stage 2 (Middle: Diesel), and Stage 3 (Top: Gasoline). Consumes **1,000 mB Crude Oil** per cycle with individually toggleable stages (e.g., Stage 1 only -> 500 mB Liquid Tar + 1 Bitumen; Stage 2 only -> 500 mB Diesel; Stage 3 only -> 500 mB Gasoline; S1+S2 -> 250 mB Tar + 250 mB Diesel + 1 Bitumen; S1+S3 -> 250 mB Tar + 250 mB Gas + 1 Bitumen; All 3 Stages -> 250 mB Tar + 250 mB Diesel + 250 mB Gasoline + 25% chance at 1 Bitumen).
+- **Burner & Electric Refinery Furnaces (1x2x1 Heat Sources)**: Choose between the fast-burning **Burner Refinery Furnace** (4x burn speed) or high-power **Electric Refinery Furnace** (500 FE/t) placed adjacent to Stage 1 to supply the `>= 350°C` operating heat required by the Refinery Tower!
 
 ### ⚡ 2. Thermodynamic Closed-Loop Steam Power (Rankine Cycle)
 - **Small (3x3x3) & Large Heavy (5x5x5) Steam Boilers**: Boil water with solid coal/coke or liquid petroleum fuels into pressurized Steam. Features authentic boiler overheating mechanics and monolithic 3D models!
@@ -196,10 +197,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.10.25.jar`
+`refinery-1.11.7.jar`
 
 ### Display Name
-`Industrial Refinery 1.10.25 (NeoForge 26.3)`
+`Industrial Refinery 1.11.4 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +216,51 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.7
+
+### What's New in v1.11.7:
+- **Refinery Tower Stage 1 Liquid Tar South Takeoff Pipe Assembly (`RefineryTowerModel`)**:
+  - Added a third South-facing horizontal takeoff valve assembly at `Y = 22.0f` on the bottom section (Stage 1: Heavy Residue / Liquid Tar) of the 3×9×3 Petroleum Refinery Tower.
+  - Symmetrically matches the rotated Stage 2 (`Y = 60.0f`, Diesel) and Stage 3 (`Y = 115.0f`, Gasoline) takeoff valve assemblies, projecting cleanly towards the South (+Z) face with a crimson indicator handwheel when Stage 1 is active (`UV_STAGE1_CRIMSON`), completing the 3-stage visual takeoff system.
+- **Electric Arc Melter & Hydraulic Casting Press Texture Flickering & Z-Fighting Resolution (`ArcMelterModel` & `CastingPressModel`)**:
+  - **Atlas UV Padding Inset**: Upgraded `UVRect.of` margin inset padding from `0.15px` to a robust `0.5px` (`(coord + 0.5f) / 256.0f`), completely eliminating texture bleeding, shimmering, and edge flickering across adjacent atlas tiles during camera movement and mipmapping.
+  - **Ground Floor Z-Fighting Elimination**: Suppressed emitting downward-facing (`DOWN`) quads for foundation cuboids sitting on the ground (`y0 <= 0.01f`), preventing bottom runner faces from fighting with the top surface of floor blocks.
+  - **Foundation Cross-Beam & Deck Plate Disjoint Planes**: Adjusted cross-beam heights in both `ArcMelterModel` (`y1 = 3.0f`) and `CastingPressModel` (`y1 = 3.5f`) so the heavy foundation deck plates sit directly on top of the beams without sharing identical coplanar top surfaces.
+  - **Flange Ring & Platen Intersections**: Offset water-cooling girth flange rings in `ArcMelterModel` (`8.05f .. 9.95f` and `28.05f .. 29.95f`) and trimmed column locknuts in `CastingPressModel` (`39.5f .. 41.5f`) to prevent penetrating cuboids and edge collisions.
+
+---
+
+# Industrial Refinery v1.11.6
+
+### What's New in v1.11.6:
+- **Refinery Byproduct Port Automatic Conveyor & Pipe Ejection (`RefineryPortBlockEntity`)**:
+  - Implemented automatic solid byproduct ejection for the Byproduct Port (`refinery:byproduct_port`) on the 3-Stage Petroleum Refinery multiblock tower.
+  - Automatically detects item conveyors (`refinery:conveyor_belt`, `sloped_conveyor_belt`, `right_angle_conveyor_belt`, and third-party conveyors) and item pipes (`IndustrialPipeBlockEntity`, hoppers, chests, barrels, crates, and NeoForge item capability handlers) attached **below** (`pos.below()`) or **beside** the Byproduct Port (`pos.relative(NORTH/SOUTH/EAST/WEST)` and 1-block below).
+  - Every 4 ticks, the port scans for adjacent conveyance channels and smoothly ejects solid byproducts (Bitumen, Tar, and extracted sand) from the controller's internal byproduct slots directly onto the conveyor belt surface or into connected pipes/containers.
+  - Integrated anti-clogging belt occupancy checks, preventing item stacking or clumping by waiting until previously ejected items advance along the belt.
+  - Implemented `WorldlyContainer` directly on `RefineryPortBlockEntity` and updated item capability registration to allow multi-directional extraction through all horizontal and bottom faces of Byproduct Ports.
+
+---
+
+# Industrial Refinery v1.11.4
+
+### What's New in v1.11.4:
+- **Refinery Tower South Takeoff Pipes Re-orientation & Vertical Header Removal**:
+  - Removed the tall vertical grey collection header pipe on the East (+X) side of the 3×9×3 Petroleum Refinery Tower.
+  - Rotated the Stage 2 (Diesel, orange section at `Y = 60.0f`) and Stage 3 (Gasoline, green section at `Y = 115.0f`) horizontal takeoff valve assemblies by 90 degrees around the column body. Both stubby takeoff pipes now project cleanly towards the **South (+Z)** face (`Z: 15.1f .. 23.5f`), directly aligning with the South-facing Diesel Output Port (`(0, 3, 2)`) and Gas Output Port (`(0, 6, 2)`).
+  - Cleared the redundant lower East bracket assembly at Stage 1, leaving the East side of the tower completely unencumbered for furnace placement.
+```
+  - The Refinery Tower requires a heat source (>= 350°C) placed adjacent to Stage 1. Players can choose between:
+    - **Burner Refinery Furnace (`refinery:burner_refinery_furnace`)**: Burns solid fuels and fuel buckets at 4x rapid burn speed across 3 fuel slots.
+    - **Electric Refinery Furnace (`refinery:electric_refinery_furnace`)**: Consumes 500 FE/t from a 500,000 FE buffer to generate up to 500°C of clean electric heat.
+  - Each furnace is placed from a single item as a 2-block-tall (1x2x1) unit with a glowing internal serpentine crude-oil heating coil and drops exactly 1 item when broken.
+- **Liquid Tar Fluid, Bucket & Port**:
+  - Added `refinery:liquid_tar`, `refinery:liquid_tar_bucket`, and `refinery:tar_port`, plus shapeless crafting of 1 Liquid Tar Bucket into 4 Petroleum Tar items.
+- **Zero-Flicker Monolithic 3D Models (`RefineryTowerModel` & `RefineryFurnaceModel`)**:
+  - Built with a 16-sided polygonal cylinder/frustum emitter (`emitCylinder` & `emitFlangeRing`), strictly non-overlapping vertical planes, and `0.5px` UV inset margins to eliminate Z-fighting and texture flickering.
+
+---
+
 # Industrial Refinery v1.10.25
 
 ### What's New in v1.10.25:
