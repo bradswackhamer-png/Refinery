@@ -197,10 +197,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.11.jar`
+`refinery-1.11.13.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.4 (NeoForge 26.3)`
+`Industrial Refinery 1.11.13 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -216,6 +216,19 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.13
+
+### What's New in v1.11.13:
+- **Conveyor Belt 90-Degree Corner & T-Intersection Adaptive Frame (`ConveyorBeltBlock`, `ConveyorBeltModel`, `ConveyorBeltRenderer`)**:
+  - Automatically adapts standard horizontal conveyor belt side frames and rear end caps when conveyors meet perpendicularly at 90 degrees or form T-intersections:
+    - **Side Frame Retraction**: When an incoming conveyor feeds into the side of a receiving conveyor (heading N/S into E/W or vice-versa), the side rail on that receiving side is automatically removed so items roll directly onto the belt without colliding with the frame.
+    - **Rear Corner Guard Rail**: In 90-degree corner turns (where no conveyor feeds into the back), the removed frame piece is seamlessly relocated to the tail/back side of the receiving conveyor, creating a protective rear bumper that prevents turning items from slipping off the back.
+    - **T-Intersection Support**: In T-junctions where a conveyor line continues from behind while a perpendicular conveyor merges into the side, the side rail is removed for the merge while the back remains completely open for uninterrupted passthrough.
+    - **Zero Z-Fighting**: The back rail connects flush to the remaining side rail without overlapping faces, and mounting foot pads on the open incoming side are omitted for a completely flat junction.
+    - **Backstop Item Retention (`ConveyorBeltBlockEntity`)**: Added physical backstop clamping at the rear rail to ensure turning items never glitch backwards during high-speed routing.
+
+---
+
 # Industrial Refinery v1.11.11
 
 ### What's New in v1.11.11:

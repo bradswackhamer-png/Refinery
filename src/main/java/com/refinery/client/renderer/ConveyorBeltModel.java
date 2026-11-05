@@ -59,13 +59,25 @@ public class ConveyorBeltModel {
     public static final UVRect UV_SLIDER_BED       = UVRect.of(128, 0, 64, 32);
     public static final UVRect UV_FOOT_PAD         = UVRect.of(128, 32, 32, 32);
 
-    private final List<Cuboid> staticRailParts = new ArrayList<>();
-    private final List<Cuboid> staticBedParts = new ArrayList<>();
-    private final List<Cuboid> staticFootParts = new ArrayList<>();
+    // Side Rails (Right: x: 0..1.6, Left: x: 14.4..16)
+    private Cuboid rightRail;
+    private Cuboid leftRail;
+
+    // Bed Parts
+    private Cuboid bedCenter;
+    private Cuboid bedStiffener;
+    private Cuboid bedRightExtension;
+    private Cuboid bedLeftExtension;
+
+    // Foot Pads
+    private final List<Cuboid> rightFeet = new ArrayList<>();
+    private final List<Cuboid> leftFeet = new ArrayList<>();
 
     // Terminal end caps
-    private final List<Cuboid> tailEndCaps = new ArrayList<>();
-    private final List<Cuboid> headEndCaps = new ArrayList<>();
+    private Cuboid tailCapRight;
+    private Cuboid tailCapLeft;
+    private Cuboid headCapRight;
+    private Cuboid headCapLeft;
 
     public ConveyorBeltModel() {
         buildStaticGeometry();
@@ -75,66 +87,84 @@ public class ConveyorBeltModel {
         // =====================================================================
         // 1. EXTRUDED ALUMINUM SIDE RAILS (Continuous X: 0..1.6 and 14.4..16)
         // =====================================================================
-        // Left Rail: outer face has T-slot channel, top face forms guide rail
-        staticRailParts.add(new Cuboid(
+        // Right Rail (low-X: 0.0 .. 1.6, facing's clock-wise side)
+        rightRail = new Cuboid(
                 0.0f, 0.5f, 0.0f,
                 1.6f, 5.0f, 16.0f,
                 UV_ALUMINUM_RAIL, UV_ALUMINUM_RAIL,
                 UV_ALUMINUM_RAIL, UV_ALUMINUM_RAIL,
                 UV_ALUMINUM_RAIL, UV_ALUMINUM_RAIL
-        ));
+        );
 
-        // Right Rail: outer face has T-slot channel, top face forms guide rail
-        staticRailParts.add(new Cuboid(
+        // Left Rail (high-X: 14.4 .. 16.0, facing's counter-clock-wise side)
+        leftRail = new Cuboid(
                 14.4f, 0.5f, 0.0f,
                 16.0f, 5.0f, 16.0f,
                 UV_ALUMINUM_RAIL, UV_ALUMINUM_RAIL,
                 UV_ALUMINUM_RAIL, UV_ALUMINUM_RAIL,
                 UV_ALUMINUM_RAIL, UV_ALUMINUM_RAIL
-        ));
+        );
 
         // =====================================================================
         // 2. GALVANIZED STEEL SLIDER DECK / BED
         // =====================================================================
-        staticBedParts.add(new Cuboid(
+        bedCenter = new Cuboid(
                 1.6f, 3.2f, 0.0f,
                 14.4f, 3.8f, 16.0f,
                 UV_SLIDER_BED, UV_SLIDER_BED,
                 UV_SLIDER_BED, UV_SLIDER_BED,
                 UV_SLIDER_BED, UV_SLIDER_BED
-        ));
+        );
 
         // Center stiffener beam underneath slider bed
-        staticBedParts.add(new Cuboid(
+        bedStiffener = new Cuboid(
                 7.0f, 2.0f, 0.0f,
                 9.0f, 3.2f, 16.0f,
                 UV_SLIDER_BED, UV_SLIDER_BED,
                 UV_SLIDER_BED, UV_SLIDER_BED,
                 UV_SLIDER_BED, UV_SLIDER_BED
-        ));
+        );
+
+        // Extensions to cover frame gap when side rail is opened for perpendicular conveyor
+        bedRightExtension = new Cuboid(
+                0.0f, 3.2f, 0.0f,
+                1.6f, 3.8f, 16.0f,
+                UV_SLIDER_BED, UV_SLIDER_BED,
+                UV_SLIDER_BED, UV_SLIDER_BED,
+                UV_SLIDER_BED, UV_SLIDER_BED
+        );
+
+        bedLeftExtension = new Cuboid(
+                14.4f, 3.2f, 0.0f,
+                16.0f, 3.8f, 16.0f,
+                UV_SLIDER_BED, UV_SLIDER_BED,
+                UV_SLIDER_BED, UV_SLIDER_BED,
+                UV_SLIDER_BED, UV_SLIDER_BED
+        );
 
         // =====================================================================
         // 3. HEAVY CAST STEEL MOUNTING FOOT PADS (4 Corners)
         // =====================================================================
-        staticFootParts.add(Cuboid.uniform(0.0f, 0.0f, 1.0f, 2.0f, 0.6f, 3.5f, UV_FOOT_PAD));
-        staticFootParts.add(Cuboid.uniform(14.0f, 0.0f, 1.0f, 16.0f, 0.6f, 3.5f, UV_FOOT_PAD));
-        staticFootParts.add(Cuboid.uniform(0.0f, 0.0f, 12.5f, 2.0f, 0.6f, 15.0f, UV_FOOT_PAD));
-        staticFootParts.add(Cuboid.uniform(14.0f, 0.0f, 12.5f, 16.0f, 0.6f, 15.0f, UV_FOOT_PAD));
+        rightFeet.add(Cuboid.uniform(0.0f, 0.0f, 1.0f, 2.0f, 0.6f, 3.5f, UV_FOOT_PAD));
+        rightFeet.add(Cuboid.uniform(0.0f, 0.0f, 12.5f, 2.0f, 0.6f, 15.0f, UV_FOOT_PAD));
+
+        leftFeet.add(Cuboid.uniform(14.0f, 0.0f, 1.0f, 16.0f, 0.6f, 3.5f, UV_FOOT_PAD));
+        leftFeet.add(Cuboid.uniform(14.0f, 0.0f, 12.5f, 16.0f, 0.6f, 15.0f, UV_FOOT_PAD));
 
         // =====================================================================
         // 4. TERMINAL END BEARING BRACKETS (Rendered only at exposed ends)
         // =====================================================================
         // Tail (Back) brackets (Z: 0.0 .. 3.0)
-        tailEndCaps.add(new Cuboid(-0.1f, 0.6f, 0.0f, 1.7f, 4.8f, 3.0f,
-                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET));
-        tailEndCaps.add(new Cuboid(14.3f, 0.6f, 0.0f, 16.1f, 4.8f, 3.0f,
-                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET));
+        tailCapRight = new Cuboid(-0.1f, 0.6f, 0.0f, 1.7f, 4.8f, 3.0f,
+                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET);
+        tailCapLeft = new Cuboid(14.3f, 0.6f, 0.0f, 16.1f, 4.8f, 3.0f,
+                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET);
 
         // Head (Front) brackets (Z: 13.0 .. 16.0)
-        headEndCaps.add(new Cuboid(-0.1f, 0.6f, 13.0f, 1.7f, 4.8f, 16.0f,
-                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET));
-        headEndCaps.add(new Cuboid(14.3f, 0.6f, 13.0f, 16.1f, 4.8f, 16.0f,
-                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET));
+        headCapRight = new Cuboid(-0.1f, 0.6f, 13.0f, 1.7f, 4.8f, 16.0f,
+                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET);
+        headCapLeft = new Cuboid(14.3f, 0.6f, 13.0f, 16.1f, 4.8f, 16.0f,
+                UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET, UV_BEARING_BRACKET);
     }
 
     public void render(
@@ -142,43 +172,79 @@ public class ConveyorBeltModel {
             VertexConsumer consumer,
             boolean connectedFront,
             boolean connectedBack,
+            boolean incomingRight,
+            boolean incomingLeft,
             boolean isRunning,
             float animTime,
             int light,
             int overlay
     ) {
-        // 1. Render Continuous Extruded Aluminum Rails & Bed Deck
-        for (Cuboid c : staticRailParts) {
-            renderCuboid(matrix, consumer, c, light, overlay);
+        // 1. Render Extruded Aluminum Rails:
+        // Omit side rail if a perpendicular conveyor meets at that side
+        if (!incomingRight) {
+            renderCuboid(matrix, consumer, rightRail, light, overlay);
         }
-        for (Cuboid c : staticBedParts) {
-            renderCuboid(matrix, consumer, c, light, overlay);
-        }
-        for (Cuboid c : staticFootParts) {
-            renderCuboid(matrix, consumer, c, light, overlay);
+        if (!incomingLeft) {
+            renderCuboid(matrix, consumer, leftRail, light, overlay);
         }
 
-        // 2. Render Tail Terminal (Back end: Z = 0) if NOT connected behind
+        // 2. Corner Outer Guard Rail:
+        // When meeting at a 90-degree corner (not a T-intersection with back connection),
+        // add the removed frame piece across the tail/back side to bound items onto the belt
+        boolean renderBackRail = !connectedBack && (incomingRight || incomingLeft);
+        if (renderBackRail) {
+            float x0 = incomingRight ? 0.0f : 1.6f;
+            float x1 = incomingLeft ? 16.0f : 14.4f;
+            renderCuboid(matrix, consumer, Cuboid.uniform(x0, 0.5f, 0.0f, x1, 5.0f, 1.6f, UV_ALUMINUM_RAIL), light, overlay);
+        }
+
+        // 3. Render Bed Deck and Transition Plates
+        renderCuboid(matrix, consumer, bedCenter, light, overlay);
+        renderCuboid(matrix, consumer, bedStiffener, light, overlay);
+        if (incomingRight) {
+            renderCuboid(matrix, consumer, bedRightExtension, light, overlay);
+        }
+        if (incomingLeft) {
+            renderCuboid(matrix, consumer, bedLeftExtension, light, overlay);
+        }
+
+        // 4. Heavy Mounting Foot Pads
+        if (!incomingRight) {
+            for (Cuboid foot : rightFeet) {
+                renderCuboid(matrix, consumer, foot, light, overlay);
+            }
+        }
+        if (!incomingLeft) {
+            for (Cuboid foot : leftFeet) {
+                renderCuboid(matrix, consumer, foot, light, overlay);
+            }
+        }
+
+        // 5. Render Tail Terminal (Back end: Z = 0) if NOT connected behind
         float rollerAngle = isRunning ? (animTime * 0.14f) : 0.0f;
         if (!connectedBack) {
-            for (Cuboid c : tailEndCaps) {
-                renderCuboid(matrix, consumer, c, light, overlay);
+            if (!incomingRight && !renderBackRail) {
+                renderCuboid(matrix, consumer, tailCapRight, light, overlay);
             }
-            // Tail Roller cylinder centered at Z = 1.6f, Y = 2.6f, radius = 1.7f
-            renderCylindricalRoller(matrix, consumer, 1.6f, 14.4f, 1.6f, 2.6f, 1.7f, rollerAngle, light, overlay);
+            if (!incomingLeft && !renderBackRail) {
+                renderCuboid(matrix, consumer, tailCapLeft, light, overlay);
+            }
+            // Tail Roller cylinder only if not enclosed by back rail
+            if (!renderBackRail) {
+                renderCylindricalRoller(matrix, consumer, 1.6f, 14.4f, 1.6f, 2.6f, 1.7f, rollerAngle, light, overlay);
+            }
         }
 
-        // 3. Render Head Terminal (Front end: Z = 16) if NOT connected in front
+        // 6. Render Head Terminal (Front end: Z = 16) if NOT connected in front
         if (!connectedFront) {
-            for (Cuboid c : headEndCaps) {
-                renderCuboid(matrix, consumer, c, light, overlay);
-            }
+            renderCuboid(matrix, consumer, headCapRight, light, overlay);
+            renderCuboid(matrix, consumer, headCapLeft, light, overlay);
             // Head Roller cylinder centered at Z = 14.4f, Y = 2.6f, radius = 1.7f
             renderCylindricalRoller(matrix, consumer, 1.6f, 14.4f, 14.4f, 2.6f, 1.7f, rollerAngle, light, overlay);
         }
 
-        // 4. Render Animated Top & Bottom Conveyor Belt Surfaces
-        renderAnimatedBeltTop(matrix, consumer, connectedFront, connectedBack, isRunning, animTime, light, overlay);
+        // 7. Render Animated Top & Bottom Conveyor Belt Surfaces
+        renderAnimatedBeltTop(matrix, consumer, connectedFront, connectedBack, incomingRight, incomingLeft, isRunning, animTime, light, overlay);
         renderAnimatedBeltBottom(matrix, consumer, connectedFront, connectedBack, isRunning, animTime, light, overlay);
     }
 
@@ -192,13 +258,15 @@ public class ConveyorBeltModel {
             VertexConsumer c,
             boolean connectedFront,
             boolean connectedBack,
+            boolean incomingRight,
+            boolean incomingLeft,
             boolean isRunning,
             float animTime,
             int light,
             int overlay
     ) {
-        float x0 = 1.6f / 16.0f;
-        float x1 = 14.4f / 16.0f;
+        float x0 = (incomingRight ? 0.0f : 1.6f) / 16.0f;
+        float x1 = (incomingLeft ? 16.0f : 14.4f) / 16.0f;
         float y = 4.6f / 16.0f;
 
         float z0Px = connectedBack ? 0.0f : 1.6f;

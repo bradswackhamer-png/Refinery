@@ -10,6 +10,8 @@ public class ConveyorBeltRenderState extends BlockEntityRenderState {
     public Direction facing = Direction.NORTH;
     public boolean connectedFront = false;
     public boolean connectedBack = false;
+    public boolean incomingRight = false;
+    public boolean incomingLeft = false;
     public boolean isRunning = true;
     public long gameTime = 0;
     public float partialTicks = 0.0f;

@@ -109,6 +109,44 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements Container {
                 centerVelZ = (targetZ - itemEntity.getZ()) * 0.15;
             }
 
+            // Physical backstop: if this conveyor has a back rail guarding the tail, prevent items from slipping behind the back frame
+            if (!state.hasProperty(ConveyorBeltBlock.CONNECTED_BACK) || !state.getValue(ConveyorBeltBlock.CONNECTED_BACK)) {
+                switch (facing) {
+                    case SOUTH -> {
+                        if (itemEntity.getZ() < pos.getZ() + 0.15) {
+                            itemEntity.setPos(itemEntity.getX(), itemEntity.getY(), pos.getZ() + 0.15);
+                            if (itemEntity.getDeltaMovement().z < 0) {
+                                itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().x, itemEntity.getDeltaMovement().y, 0.0);
+                            }
+                        }
+                    }
+                    case NORTH -> {
+                        if (itemEntity.getZ() > pos.getZ() + 0.85) {
+                            itemEntity.setPos(itemEntity.getX(), itemEntity.getY(), pos.getZ() + 0.85);
+                            if (itemEntity.getDeltaMovement().z > 0) {
+                                itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().x, itemEntity.getDeltaMovement().y, 0.0);
+                            }
+                        }
+                    }
+                    case EAST -> {
+                        if (itemEntity.getX() < pos.getX() + 0.15) {
+                            itemEntity.setPos(pos.getX() + 0.15, itemEntity.getY(), itemEntity.getZ());
+                            if (itemEntity.getDeltaMovement().x < 0) {
+                                itemEntity.setDeltaMovement(0.0, itemEntity.getDeltaMovement().y, itemEntity.getDeltaMovement().z);
+                            }
+                        }
+                    }
+                    case WEST -> {
+                        if (itemEntity.getX() > pos.getX() + 0.85) {
+                            itemEntity.setPos(pos.getX() + 0.85, itemEntity.getY(), itemEntity.getZ());
+                            if (itemEntity.getDeltaMovement().x > 0) {
+                                itemEntity.setDeltaMovement(0.0, itemEntity.getDeltaMovement().y, itemEntity.getDeltaMovement().z);
+                            }
+                        }
+                    }
+                }
+            }
+
             boolean isNearFront = switch (facing) {
                 case NORTH -> itemEntity.getZ() <= pos.getZ() + 0.18;
                 case SOUTH -> itemEntity.getZ() >= pos.getZ() + 0.82;

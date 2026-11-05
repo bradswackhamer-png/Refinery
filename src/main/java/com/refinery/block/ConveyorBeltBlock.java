@@ -203,6 +203,8 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
             BlockState updated = updateConnections(state, level, pos);
             if (powered != updated.getValue(POWERED) || updated != state) {
                 level.setBlock(pos, updated.setValue(POWERED, powered), 3);
+            } else {
+                level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
             }
         }
     }
@@ -225,12 +227,42 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         return id != null && id.getPath().contains("conveyor");
     }
 
+    public static boolean isIncomingBelt(LevelReader level, BlockPos pos, Direction sideDir) {
+        if (level == null) return false;
+        BlockPos sidePos = pos.relative(sideDir);
+        Direction requiredFacing = sideDir.getOpposite();
+
+        BlockState sideState = level.getBlockState(sidePos);
+        if (sideState.getBlock() instanceof ConveyorBeltBlock) {
+            return sideState.getValue(FACING) == requiredFacing;
+        }
+        if (sideState.getBlock() instanceof RightAngleConveyorBeltBlock) {
+            return RightAngleConveyorBeltBlock.getExitDirection(sideState) == requiredFacing;
+        }
+        if (sideState.getBlock() instanceof SlopedConveyorBeltBlock) {
+            return sideState.getValue(SlopedConveyorBeltBlock.FACING) == requiredFacing
+                    && sideState.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.DOWN;
+        }
+        BlockState sideBelowState = level.getBlockState(sidePos.below());
+        if (sideBelowState.getBlock() instanceof SlopedConveyorBeltBlock) {
+            return sideBelowState.getValue(SlopedConveyorBeltBlock.FACING) == requiredFacing
+                    && sideBelowState.getValue(SlopedConveyorBeltBlock.SLOPE) == SlopedConveyorBeltBlock.SlopeDirection.UP;
+        }
+        if (isAnyConveyorBlock(sideState)) {
+            if (sideState.hasProperty(FACING)) {
+                return sideState.getValue(FACING) == requiredFacing;
+            }
+            return false;
+        }
+        return false;
+    }
+
     private static boolean isBeltMatchingFront(LevelReader level, BlockPos pos, Direction facing) {
         if (level == null) return false;
         BlockPos frontPos = pos.relative(facing);
         BlockState neighbor = level.getBlockState(frontPos);
-        if (neighbor.getBlock() instanceof ConveyorBeltBlock && neighbor.getValue(FACING) == facing) {
-            return true;
+        if (neighbor.getBlock() instanceof ConveyorBeltBlock) {
+            return neighbor.getValue(FACING) != facing.getOpposite();
         }
         if (neighbor.getBlock() instanceof RightAngleConveyorBeltBlock && neighbor.getValue(RightAngleConveyorBeltBlock.FACING) == facing) {
             return true;
@@ -246,7 +278,7 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         }
         if (isAnyConveyorBlock(neighbor)) {
             if (neighbor.hasProperty(FACING)) {
-                return neighbor.getValue(FACING) == facing;
+                return neighbor.getValue(FACING) != facing.getOpposite();
             }
             return true;
         }

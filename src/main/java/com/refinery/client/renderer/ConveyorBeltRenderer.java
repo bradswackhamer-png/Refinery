@@ -70,6 +70,14 @@ public class ConveyorBeltRenderer implements BlockEntityRenderer<ConveyorBeltBlo
             state.connectedBack = false;
         }
 
+        if (be.getLevel() != null) {
+            state.incomingRight = ConveyorBeltBlock.isIncomingBelt(be.getLevel(), be.getBlockPos(), state.facing.getClockWise());
+            state.incomingLeft = ConveyorBeltBlock.isIncomingBelt(be.getLevel(), be.getBlockPos(), state.facing.getCounterClockWise());
+        } else {
+            state.incomingRight = false;
+            state.incomingLeft = false;
+        }
+
         boolean powered = blockState.hasProperty(ConveyorBeltBlock.POWERED) && blockState.getValue(ConveyorBeltBlock.POWERED);
         state.isRunning = !powered;
 
@@ -115,6 +123,8 @@ public class ConveyorBeltRenderer implements BlockEntityRenderer<ConveyorBeltBlo
                         consumer,
                         state.connectedFront,
                         state.connectedBack,
+                        state.incomingRight,
+                        state.incomingLeft,
                         state.isRunning,
                         animTicks,
                         state.lightCoords,
