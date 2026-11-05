@@ -4,17 +4,20 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.refinery.block.CastingPressControllerBlock;
 import com.refinery.block.entity.CastingPressControllerBlockEntity;
-import com.refinery.fluid.RefineryFluids;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -23,8 +26,10 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class CastingPressControllerRenderer implements BlockEntityRenderer<CastingPressControllerBlockEntity, CastingPressControllerRenderState> {
+    private final ItemModelResolver itemModelResolver;
 
     public CastingPressControllerRenderer(BlockEntityRendererProvider.Context context) {
+        this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
@@ -48,7 +53,7 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
 
         var blockState = be.getBlockState();
         state.isBlueprintActive = blockState.hasProperty(CastingPressControllerBlock.BLUEPRINT) && blockState.getValue(CastingPressControllerBlock.BLUEPRINT);
-        state.isAssembled = be.isAssembled();
+        state.isAssembled = (blockState.hasProperty(CastingPressControllerBlock.ASSEMBLED) && blockState.getValue(CastingPressControllerBlock.ASSEMBLED)) || be.isAssembled();
         state.isActive = blockState.hasProperty(CastingPressControllerBlock.ACTIVE) && blockState.getValue(CastingPressControllerBlock.ACTIVE);
         state.facing = blockState.getValue(CastingPressControllerBlock.FACING);
         state.controllerPos = be.getBlockPos();
@@ -59,7 +64,29 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
         state.moltenFluid = be.getMoltenFluid();
         state.missingComponents.clear();
 
-        if (state.isBlueprintActive && be.getLevel() != null) {
+        // Extract cast output item from slots 0..3 for run-out roller table rendering
+        state.hasOutputItem = false;
+        if (state.isAssembled && be.getLevel() != null) {
+            ItemStack outputItem = ItemStack.EMPTY;
+            for (int i = 0; i < 4; i++) {
+                ItemStack s = be.getItem(i);
+                if (!s.isEmpty()) {
+                    outputItem = s;
+                    break;
+                }
+            }
+            if (!outputItem.isEmpty()) {
+                this.itemModelResolver.updateForTopItem(state.outputItemState, outputItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+                state.hasOutputItem = true;
+            } else {
+                this.itemModelResolver.updateForTopItem(state.outputItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+            }
+        } else if (be.getLevel() != null) {
+            this.itemModelResolver.updateForTopItem(state.outputItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+        }
+
+        // Blueprint diagnostic hologram
+        if (state.isBlueprintActive && !state.isAssembled && be.getLevel() != null) {
             for (var req : be.getRequirements()) {
                 BlockPos targetPos = be.getRelativePos(req.x(), req.y(), req.z(), state.facing);
                 var targetState = be.getLevel().getBlockState(targetPos);
@@ -82,7 +109,7 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
         Direction right = state.facing.getClockWise();
         Direction back = state.facing.getOpposite();
 
-        // 1. Hologram Blueprint Rendering
+        // 1. Hologram Blueprint Wireframe Rendering
         if (state.isBlueprintActive && !state.isAssembled && !state.missingComponents.isEmpty()) {
             for (var comp : state.missingComponents) {
                 int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
@@ -113,82 +140,57 @@ public class CastingPressControllerRenderer implements BlockEntityRenderer<Casti
             }
         }
 
-        // 2. Animated Hydraulic Casting Press Ram & Mold Bed (Local X: 0, Y: 1, Z: 1)
+        // 2. Monolithic 3D Continuous Casting Press Model & Dynamic Animations
         if (state.isAssembled) {
-            int bedDx = back.getStepX();
-            int bedDy = 1;
-            int bedDz = back.getStepZ();
+            poseStack.pushPose();
 
-            // Calculate dynamic vertical stroke of stamping ram
-            float ramY;
-            float restingY = 0.85f;
-            float lowestY = 0.08f;
-
-            if (state.progress > 0) {
-                if (state.progress <= 120) {
-                    float t = Math.min(1.0f, (state.progress + state.partialTicks) / 120.0f);
-                    ramY = restingY - (t * t) * (restingY - lowestY);
-                } else {
-                    float t = Math.min(1.0f, (state.progress - 120 + state.partialTicks) / 120.0f);
-                    ramY = lowestY + t * (restingY - lowestY);
+            switch (state.facing) {
+                case NORTH -> {}
+                case SOUTH -> {
+                    poseStack.translate(1.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 180.0f);
                 }
-            } else {
-                ramY = restingY;
+                case EAST -> {
+                    poseStack.translate(1.0, 0.0, 0.0);
+                    poseStack.rotateDegrees(Axis.YP, 270.0f);
+                }
+                case WEST -> {
+                    poseStack.translate(0.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 90.0f);
+                }
             }
 
-            poseStack.pushPose();
-            poseStack.translate(bedDx + 0.5, bedDy + 0.5, bedDz + 0.5);
-            poseStack.rotateDegrees(Axis.YP, -state.facing.toYRot());
+            boolean pressingNow = state.isActive || state.progress > 0;
 
-            // A. Hydraulic Cylinder Shaft (from top down to die)
-            submitNodeCollector.submitShapeOutline(
+            CastingPressModel.render(
                     poseStack,
-                    Shapes.box(-0.1f, ramY + 0.15f - 0.5f, -0.1f, 0.1f, 0.5f, 0.1f),
-                    RenderTypes.lines(),
-                    0xFFD0D7DE,
-                    1.8f,
-                    false
+                    submitNodeCollector,
+                    state.lightCoords,
+                    pressingNow,
+                    state.progress,
+                    state.gameTime,
+                    state.partialTicks,
+                    state.moltenAmount,
+                    state.moltenFluid
             );
 
-            // B. Heavy Water-Cooled Stamping Die Head
-            submitNodeCollector.submitShapeOutline(
-                    poseStack,
-                    Shapes.box(-0.3f, ramY - 0.5f, -0.3f, 0.3f, ramY + 0.15f - 0.5f, 0.3f),
-                    RenderTypes.lines(),
-                    0xFF475569,
-                    2.5f,
-                    false
-            );
-
-            // C. Lower Mold Bed Molten Ingot Pool
-            if (state.moltenAmount > 0 || state.progress > 0) {
-                int poolColor = getFluidGlowColor(state);
-                // When quenched at tick 120+, transitions to solidified metallic color
-                if (state.progress >= 120) {
-                    poolColor = 0xFF94A3B8;
+            // Render finished cast ingots/blocks traveling on the right-hand motorized run-out roller table (1, 0, 0)
+            if (state.hasOutputItem) {
+                float animTicks = state.gameTime + state.partialTicks;
+                for (int i = 0; i < 2; i++) {
+                    poseStack.pushPose();
+                    float zPos = pressingNow
+                            ? (1.25f - (((animTicks * 0.025f) + (i * 0.55f)) % 1.05f))
+                            : (0.35f + i * 0.50f);
+                    poseStack.translate(1.53f, 0.62f, zPos);
+                    poseStack.rotateDegrees(Axis.XP, 90.0f);
+                    poseStack.scale(0.45f, 0.45f, 0.45f);
+                    state.outputItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                    poseStack.popPose();
                 }
-
-                submitNodeCollector.submitShapeOutline(
-                        poseStack,
-                        Shapes.box(-0.35f, -0.48f, -0.35f, 0.35f, -0.32f, 0.35f),
-                        RenderTypes.lines(),
-                        poolColor,
-                        2.5f,
-                        false
-                );
             }
 
             poseStack.popPose();
         }
-    }
-
-    private static int getFluidGlowColor(CastingPressControllerRenderState state) {
-        if (state.moltenFluid == RefineryFluids.MOLTEN_IRON_SOURCE.get()) return 0xFFEA580C;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_GOLD_SOURCE.get()) return 0xFFEAB308;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_COPPER_SOURCE.get()) return 0xFFD97706;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_TIN_SOURCE.get()) return 0xFFCBD5E1;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_BRONZE_SOURCE.get()) return 0xFFB45309;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_GLASS_SOURCE.get()) return 0xFFFDE047;
-        return 0xFFF97316;
     }
 }

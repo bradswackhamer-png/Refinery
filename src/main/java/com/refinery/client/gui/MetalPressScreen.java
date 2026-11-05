@@ -8,9 +8,11 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
@@ -25,8 +27,8 @@ public class MetalPressScreen extends AbstractContainerScreen<MetalPressMenu> {
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-        graphics.text(this.font, Component.literal("INGOTS").withStyle(ChatFormatting.DARK_GRAY), 44, 22, 0xFF444444, false);
-        graphics.text(this.font, Component.literal("PLATES").withStyle(ChatFormatting.DARK_GRAY), 116, 22, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("INPUT").withStyle(ChatFormatting.DARK_GRAY), 44, 22, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("OUTPUT").withStyle(ChatFormatting.DARK_GRAY), 116, 22, 0xFF444444, false);
     }
 
     @Override
@@ -73,15 +75,33 @@ public class MetalPressScreen extends AbstractContainerScreen<MetalPressMenu> {
             ), mouseX, mouseY);
         }
 
+        // Die Slot Hover (x: 88..106, y: 57..75) when empty
+        if (mouseX >= xo + 88 && mouseX <= xo + 106 && mouseY >= yo + 57 && mouseY <= yo + 75) {
+            ItemStack die = this.menu.getDie();
+            if (die.isEmpty()) {
+                graphics.setComponentTooltipForNextFrame(this.font, List.of(
+                        Component.literal("Stamping Die Slot").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                        Component.literal("Insert a Plate, Gear, Corrugated, or Rail Die").withStyle(ChatFormatting.GRAY),
+                        Component.literal("Stamping requires an installed die!").withStyle(ChatFormatting.RED)
+                ), mouseX, mouseY);
+            }
+        }
+
         // Press Ram Hover (x: 84..108, y: 26..56)
         if (mouseX >= xo + 84 && mouseX <= xo + 108 && mouseY >= yo + 26 && mouseY <= yo + 56) {
             int progress = this.menu.getProgress();
             int pct = progress * 100 / 40;
-            graphics.setComponentTooltipForNextFrame(this.font, List.of(
-                    Component.literal("Hydraulic Metal Press").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD),
-                    Component.literal("1 Steel Ingot -> 1 Heavy Steel Plate").withStyle(ChatFormatting.AQUA),
-                    Component.literal(this.menu.isPressing() ? ("Cycle Progress: " + pct + "%") : "Status: Idle").withStyle(ChatFormatting.YELLOW)
-            ), mouseX, mouseY);
+            ItemStack die = this.menu.getDie();
+            List<Component> lines = new ArrayList<>();
+            lines.add(Component.literal("Hydraulic Metal Press").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD));
+            if (die.isEmpty()) {
+                lines.add(Component.literal("Requires a Stamping Die!").withStyle(ChatFormatting.RED));
+            } else {
+                lines.add(Component.literal("Installed Die: ").withStyle(ChatFormatting.GRAY)
+                        .append(die.getHoverName().copy().withStyle(ChatFormatting.AQUA)));
+            }
+            lines.add(Component.literal(this.menu.isPressing() ? ("Cycle Progress: " + pct + "%") : "Status: Idle").withStyle(ChatFormatting.YELLOW));
+            graphics.setComponentTooltipForNextFrame(this.font, lines, mouseX, mouseY);
         }
     }
 }

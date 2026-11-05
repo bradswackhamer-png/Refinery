@@ -45,6 +45,12 @@ public class PipeBlockItem extends BlockItem {
                 builder.accept(Component.literal("§bRate: §fInstant Void §7(Unlimited)"));
                 builder.accept(Component.literal("§7Instantly deletes and destroys all incoming items"));
                 builder.accept(Component.literal("§7and fluids to prevent pipe blockages and overflow."));
+            } else if (type == IndustrialPipeType.VALVE || material == IndustrialPipeMaterial.VALVE) {
+                builder.accept(Component.literal("§6Type: §fRedstone Valve Pipe"));
+                builder.accept(Component.literal("§bCapacity: §f500 mB §8| §eItems: §f16/t"));
+                builder.accept(Component.literal("§7Controls item & fluid transit using Redstone or Pipe Gates."));
+                builder.accept(Component.literal("§7Right-click with Wrench to invert mode"));
+                builder.accept(Component.literal("§8(Normal: Closes on signal | Inverted: Opens on signal)"));
             } else if (material == IndustrialPipeMaterial.WOOD) {
                 if (type.handlesItems()) {
                     builder.accept(Component.literal("§6Type: §fFiltered Extraction Pipe"));

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " # ",
+    "# #",
+    " # "
+  ],
+  "key": {
+    "#": "#c:ingots/iron"
+  },
+  "result": {
+    "count": 1,
+    "id": "refinery:iron_gear"
+  }
+}

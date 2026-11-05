@@ -30,28 +30,47 @@ public class MetalPressMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
 
-        // Input slots (x: 44, 62; y: 34)
-        this.addSlot(new Slot(container, 0, 44, 34) {
+        // Slot 0: Die slot (x: 89, y: 58)
+        this.addSlot(new Slot(container, MetalPressControllerBlockEntity.DIE_SLOT, 89, 58) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return !com.refinery.block.entity.MetalPressControllerBlockEntity.getPressResult(stack).isEmpty();
+                return MetalPressControllerBlockEntity.isDie(stack);
+            }
+
+            @Override
+            public int getMaxStackSize() {
+                return 1;
             }
         });
-        this.addSlot(new Slot(container, 1, 62, 34) {
+
+        // Input slots (x: 44, 62; y: 34)
+        this.addSlot(new Slot(container, MetalPressControllerBlockEntity.INPUT_SLOT_1, 44, 34) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return !com.refinery.block.entity.MetalPressControllerBlockEntity.getPressResult(stack).isEmpty();
+                ItemStack die = container.getItem(MetalPressControllerBlockEntity.DIE_SLOT);
+                return !die.isEmpty()
+                        ? !MetalPressControllerBlockEntity.getPressResult(die, stack).isEmpty()
+                        : MetalPressControllerBlockEntity.isValidInput(stack);
+            }
+        });
+        this.addSlot(new Slot(container, MetalPressControllerBlockEntity.INPUT_SLOT_2, 62, 34) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                ItemStack die = container.getItem(MetalPressControllerBlockEntity.DIE_SLOT);
+                return !die.isEmpty()
+                        ? !MetalPressControllerBlockEntity.getPressResult(die, stack).isEmpty()
+                        : MetalPressControllerBlockEntity.isValidInput(stack);
             }
         });
 
         // Output slots (x: 116, 134; y: 34)
-        this.addSlot(new Slot(container, 2, 116, 34) {
+        this.addSlot(new Slot(container, MetalPressControllerBlockEntity.OUTPUT_SLOT_1, 116, 34) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new Slot(container, 3, 134, 34) {
+        this.addSlot(new Slot(container, MetalPressControllerBlockEntity.OUTPUT_SLOT_2, 134, 34) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -71,6 +90,10 @@ public class MetalPressMenu extends AbstractContainerMenu {
         }
 
         this.addDataSlots(data);
+    }
+
+    public ItemStack getDie() {
+        return this.container.getItem(MetalPressControllerBlockEntity.DIE_SLOT);
     }
 
     public int getProgress() {
@@ -107,9 +130,13 @@ public class MetalPressMenu extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             } else {
-                // From player to input slots
-                if (!com.refinery.block.entity.MetalPressControllerBlockEntity.getPressResult(slotStack).isEmpty()) {
-                    if (!this.moveItemStackTo(slotStack, 0, 2, false)) {
+                // From player to press
+                if (MetalPressControllerBlockEntity.isDie(slotStack)) {
+                    if (!this.moveItemStackTo(slotStack, MetalPressControllerBlockEntity.DIE_SLOT, MetalPressControllerBlockEntity.DIE_SLOT + 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (MetalPressControllerBlockEntity.isValidInput(slotStack)) {
+                    if (!this.moveItemStackTo(slotStack, MetalPressControllerBlockEntity.INPUT_SLOT_1, MetalPressControllerBlockEntity.OUTPUT_SLOT_1, false)) {
                         return ItemStack.EMPTY;
                     }
                 } else {

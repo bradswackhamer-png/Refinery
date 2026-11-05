@@ -4,17 +4,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.refinery.block.ArcMelterControllerBlock;
 import com.refinery.block.entity.ArcMelterControllerBlockEntity;
-import com.refinery.fluid.RefineryFluids;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -23,8 +27,10 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelterControllerBlockEntity, ArcMelterControllerRenderState> {
+    private final ItemModelResolver itemModelResolver;
 
     public ArcMelterControllerRenderer(BlockEntityRendererProvider.Context context) {
+        this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
@@ -48,7 +54,7 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
 
         var blockState = be.getBlockState();
         state.isBlueprintActive = blockState.hasProperty(ArcMelterControllerBlock.BLUEPRINT) && blockState.getValue(ArcMelterControllerBlock.BLUEPRINT);
-        state.isAssembled = be.isAssembled();
+        state.isAssembled = (blockState.hasProperty(ArcMelterControllerBlock.ASSEMBLED) && blockState.getValue(ArcMelterControllerBlock.ASSEMBLED)) || be.isAssembled();
         state.isActive = blockState.hasProperty(ArcMelterControllerBlock.ACTIVE) && blockState.getValue(ArcMelterControllerBlock.ACTIVE);
         state.facing = blockState.getValue(ArcMelterControllerBlock.FACING);
         state.controllerPos = be.getBlockPos();
@@ -59,7 +65,29 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
         state.moltenFluid = be.getMoltenFluid();
         state.missingComponents.clear();
 
-        if (state.isBlueprintActive && be.getLevel() != null) {
+        // Extract input item loaded in top charge hopper (slots 0..3)
+        state.hasActiveItem = false;
+        if (state.isAssembled && be.getLevel() != null) {
+            ItemStack inputItem = ItemStack.EMPTY;
+            for (int i = 0; i < 4; i++) {
+                ItemStack s = be.getItem(i);
+                if (!s.isEmpty()) {
+                    inputItem = s;
+                    break;
+                }
+            }
+            if (!inputItem.isEmpty()) {
+                this.itemModelResolver.updateForTopItem(state.activeItemState, inputItem, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+                state.hasActiveItem = true;
+            } else {
+                this.itemModelResolver.updateForTopItem(state.activeItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+            }
+        } else if (be.getLevel() != null) {
+            this.itemModelResolver.updateForTopItem(state.activeItemState, ItemStack.EMPTY, ItemDisplayContext.FIXED, be.getLevel(), null, 0);
+        }
+
+        // Blueprint diagnostic hologram
+        if (state.isBlueprintActive && !state.isAssembled && be.getLevel() != null) {
             for (var req : be.getRequirements()) {
                 BlockPos targetPos = be.getRelativePos(req.x(), req.y(), req.z(), state.facing);
                 var targetState = be.getLevel().getBlockState(targetPos);
@@ -82,7 +110,7 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
         Direction right = state.facing.getClockWise();
         Direction back = state.facing.getOpposite();
 
-        // 1. Hologram Blueprint Rendering
+        // 1. Hologram Blueprint Wireframe Rendering
         if (state.isBlueprintActive && !state.isAssembled && !state.missingComponents.isEmpty()) {
             for (var comp : state.missingComponents) {
                 int dx = right.getStepX() * comp.relX() + back.getStepX() * comp.relZ();
@@ -113,77 +141,59 @@ public class ArcMelterControllerRenderer implements BlockEntityRenderer<ArcMelte
             }
         }
 
-        // 2. Animated Arc Melter Interior (Electrodes & Molten Bath at local X: 0, Y: 1, Z: 1)
+        // 2. Monolithic 3D Electric Arc Furnace Model & Dynamic Animations
         if (state.isAssembled) {
-            int chamberDx = back.getStepX();
-            int chamberDy = 1;
-            int chamberDz = back.getStepZ();
-
             poseStack.pushPose();
-            poseStack.translate(chamberDx + 0.5, chamberDy + 0.5, chamberDz + 0.5);
-            poseStack.rotateDegrees(Axis.YP, -state.facing.toYRot());
 
-            // A. Dual Graphite Carbon Electrodes descending from roof
-            submitNodeCollector.submitShapeOutline(
-                    poseStack,
-                    Shapes.box(-0.25f, 0.12f, -0.1f, -0.05f, 0.5f, 0.1f),
-                    RenderTypes.lines(),
-                    0xFF1E293B,
-                    2.0f,
-                    false
-            );
-
-            submitNodeCollector.submitShapeOutline(
-                    poseStack,
-                    Shapes.box(0.05f, 0.12f, -0.1f, 0.25f, 0.5f, 0.1f),
-                    RenderTypes.lines(),
-                    0xFF1E293B,
-                    2.0f,
-                    false
-            );
-
-            // B. Molten Metal / Glass Bath Pool
-            if (state.moltenAmount > 0 || state.isActive) {
-                float fillRatio = Math.min(1.0f, (float) state.moltenAmount / 8000.0f);
-                float bathHeight = -0.48f + (fillRatio * 0.45f);
-
-                int color = getFluidGlowColor(state);
-                submitNodeCollector.submitShapeOutline(
-                        poseStack,
-                        Shapes.box(-0.45f, -0.49f, -0.45f, 0.45f, bathHeight, 0.45f),
-                        RenderTypes.lines(),
-                        color,
-                        2.5f,
-                        false
-                );
+            switch (state.facing) {
+                case NORTH -> {}
+                case SOUTH -> {
+                    poseStack.translate(1.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 180.0f);
+                }
+                case EAST -> {
+                    poseStack.translate(1.0, 0.0, 0.0);
+                    poseStack.rotateDegrees(Axis.YP, 270.0f);
+                }
+                case WEST -> {
+                    poseStack.translate(0.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 90.0f);
+                }
             }
 
-            // C. Electric Arc Flashes leaping between electrodes
-            if (state.isActive) {
-                float flickerX = (float) Math.sin((state.gameTime + state.partialTicks) * 6.0f) * 0.08f;
-                float flickerZ = (float) Math.cos((state.gameTime + state.partialTicks) * 7.5f) * 0.08f;
+            boolean smeltingNow = state.isActive || state.progress > 0;
 
-                submitNodeCollector.submitShapeOutline(
-                        poseStack,
-                        Shapes.box(-0.15f + flickerX, 0.05f, -0.05f + flickerZ, 0.15f + flickerX, 0.14f, 0.05f + flickerZ),
-                        RenderTypes.lines(),
-                        0xFF67E8F9, // Brilliant electric cyan-white
-                        3.0f,
-                        false
-                );
+            ArcMelterModel.render(
+                    poseStack,
+                    submitNodeCollector,
+                    state.lightCoords,
+                    smeltingNow,
+                    state.progress,
+                    state.gameTime,
+                    state.partialTicks,
+                    state.moltenAmount,
+                    state.moltenFluid
+            );
+
+            // Render input ore/dust/ingot inside top charge hopper (0, 2, 1) sinking into the crucible as it melts
+            if (state.hasActiveItem) {
+                poseStack.pushPose();
+                float sinkOffset = 0.0f;
+                if (smeltingNow) {
+                    float p = Mth.clamp((state.progress + state.partialTicks) / (float) ArcMelterControllerBlockEntity.PROCESS_TIME, 0.0f, 1.0f);
+                    sinkOffset = p * 0.38f;
+                }
+                poseStack.translate(0.5f, 2.72f - sinkOffset, 1.5f);
+                if (smeltingNow) {
+                    float animTicks = state.gameTime + state.partialTicks;
+                    poseStack.rotateDegrees(Axis.YP, (animTicks * 3.0f) % 360.0f);
+                }
+                poseStack.scale(0.50f, 0.50f, 0.50f);
+                state.activeItemState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                poseStack.popPose();
             }
 
             poseStack.popPose();
         }
-    }
-
-    private static int getFluidGlowColor(ArcMelterControllerRenderState state) {
-        if (state.moltenFluid == RefineryFluids.MOLTEN_IRON_SOURCE.get()) return 0xFFEA580C;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_GOLD_SOURCE.get()) return 0xFFEAB308;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_COPPER_SOURCE.get()) return 0xFFD97706;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_TIN_SOURCE.get()) return 0xFFCBD5E1;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_BRONZE_SOURCE.get()) return 0xFFB45309;
-        if (state.moltenFluid == RefineryFluids.MOLTEN_GLASS_SOURCE.get()) return 0xFFFDE047;
-        return 0xFFF97316;
     }
 }

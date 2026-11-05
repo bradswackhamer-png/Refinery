@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "refinery:block/melter_casing" }
+    "assembled=false": { "model": "refinery:block/melter_casing" },
+    "assembled=true": { "model": "refinery:block/invisible" }
   }
 }

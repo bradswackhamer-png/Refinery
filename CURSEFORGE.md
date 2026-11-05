@@ -57,12 +57,12 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 
 ### ?? 3. Heavy Metallurgy & Grinding
 - **Industrial Blast Smelter (5x5x5 Multiblock)**: Massive foundry with a continuous 3x3 industrial glass viewing window. Smelts iron ingots / blocks and coal / coal blocks into structural **Steel Ingots**.
-- **Industrial Metal Press (2x2x2 Multiblock)**: Mechanical stamping press that stamps ingots into heavy **Steel Plates**, rods, and components.
+- **Industrial Metal Press (3x2x2 Multiblock)**: Mechanical stamping press with a 3-block-wide conveyor bed and overhead hydraulic ram. Requires swappable Stamping Dies (Plate Die, Gear Die, Corrugated Steel Die, Rail Die) to cold-form ingots and plates into industrial plates, gears (4x efficiency), corrugated steel panels (1 Steel Ingot -> 4 Sheets), and railway tracks.
 - **Industrial Grinder & Pulverizer (3x3x3 Multiblock)**: Dual-motor mineral crusher with twin counter-rotating spiked drums and animated block pulverization. Provides **2x Ore Doubling**, crushes stone into gravel and sand, and pulverizes oil sand into **3x Bitumen** with a 50% chance for **Tar**.
 - **Industrial Multi-Smelter (5x4x3 Multiblock)**: 8-in-1 high-throughput smelting array with dual-fuel operation (Solid Fuel or 30 FE/t RF). Features a 6-block hollow combustion chamber with dynamic 3D floating cooking items and pulsing ember/induction animations.
-- **Electric Arc Melter (3x3x3 Multiblock)**: High-temperature metallurgical induction furnace that melts metal dusts and sand into glowing Molten Iron, Gold, Copper, Tin, Bronze, and Glass.
-- **Continuous Casting Press (3x3x3 Multiblock)**: Automated hydraulic quenching press that casts molten liquid from Arc Melters into solid ingots and glass blocks.
-- **Refractory Casting Channel**: Open 3D trough geometry for seamless in-world fluid transfer between melters and presses.
+- **Electric Arc Melter (3x3x3 Multiblock)**: Monolithic 3D Industrial Electric Arc Furnace (EAF) with water-cooled ribbed shell, high-voltage transformer vault, copper busbars, top charge hopper, and eccentric bottom-tapping launder spout. Features 3 reciprocating graphite electrodes discharging 3D electric arc plasma bolts into a dynamically rising/falling glowing molten metal bath (Molten Iron, Gold, Copper, Tin, Bronze, and Glass) with 2x ore doubling!
+- **Continuous Casting Press (3x3x3 Multiblock)**: Monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press with 4 chrome tie-rod columns, overhead crimson-amber hydraulic cylinder, reciprocating hazard-striped ram crosshead, water-cooled copper crystallizer mold, refractory tundish & lower `Y=0` channel receiver troughs, and motorized run-out roller table that stamps and quenches molten metal into solid ingots and glass blocks.
+- **Refractory Casting Channel**: Open 3D trough geometry for seamless in-world glowing molten metal transfer between Arc Melters, Casting Presses, and fluid pipes.
 - **Industrial Fermenter (Agricultural Biofuel)**: Standalone bioreactor that converts crops (Wheat, Potatoes, etc.) into high-yield **Ethanol** fuel.
 
 ### ?? 4. Standalone Agricultural Automation
@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.10.14.jar`
+`refinery-1.10.23.jar`
 
 ### Display Name
-`Industrial Refinery 1.10.14 (NeoForge 26.3)`
+`Industrial Refinery 1.10.23 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,73 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.10.23
+
+### What's New in v1.10.23:
+- **Electric Arc Melter Monolithic 3D Model & 256×256 Texture Atlas (`ArcMelterModel` & `arc_melter.png`)**:
+  - Redesigned the assembled 3×3×3 Electric Arc Melter (`refinery:arc_melter_controller`) into a monolithic 3D Industrial Electric Arc Furnace (EAF) featuring a rocker trunnion foundation skid, cylindrical water-cooled ribbed steel shell with vertical buckstay stiffeners, interior magnesia-carbon refractory hearth, front armored quartz slag/observation door at `(0, 1, 0)` with emissive arc glare, eccentric bottom-tapping (EBT) refractory launder spout at `(1, 0, 0)` aligning seamlessly with Open Casting Channels, rear-left high-voltage EAF transformer vault with oil-cooling radiator fins and 3 copper busbar tubes, twin hydraulic gantry mast columns, domed water-cooled roof with delta refractory insert, top flared charge hopper at `(0, 2, 1)`, and front-left operator console.
+  - **Dynamic Animations**: 3 reciprocating graphite carbon electrodes in a delta triad held by copper clamp arms, incandescent glowing electrode tips, 3D jagged full-bright electric arc plasma bolts leaping into the crucible bath, dynamically rising/falling molten metal bath surface and flowing launder stream tinted to match the active molten fluid (`molten_iron`, `molten_gold`, `molten_copper`, `molten_tin`, `molten_bronze`, `molten_glass`), and input items sinking in the top charge hopper (with in-world dropped item absorption at `(0, 2, 1)`).
+- **Continuous Casting Press Monolithic 3D Model & 256×256 Texture Atlas (`CastingPressModel` & `casting_press.png`)**:
+  - Redesigned the assembled 3×3×3 Continuous Casting Press (`refinery:casting_press_controller`) into a monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press featuring a reinforced steel foundation bed, central water-cooled copper & refractory crystallizer mold basin at `(0, 0, 1)`, 4 precision-ground chrome tie-rod columns with castle locknuts, overhead cast-steel crown platen with crimson-amber main hydraulic cylinder and twin return boosters, front safety grille observation window at `(0, 1, 0)`, upper refractory tundish & sloped launder chute at `(0, 1, 2)`, lower `Y=0` refractory channel receiver troughs at `(0, 0, 2)` and `(-1, 0, 1)` with animated glowing molten inflow streams, right-side water-cooling manifold cabinet, motorized steel run-out roller table at `(1, 0, 0)`, and front-left PLC operator control cabinet.
+  - **Dynamic Animations**: Reciprocating hydraulic ram crosshead (with diagonal hazard stripes, bronze guide bushings sliding on the 4 chrome tie-rods, chrome piston rods, and water-cooled copper upper stamping die) that accelerates downward (`0..90` ticks), holds high-pressure quench compression (`90..150` ticks), and retracts smoothly (`150..240` ticks), plus dynamic molten-to-solidified billet transition and finished cast items traveling along the right-hand run-out roller table (`(1, 0, 0)`).
+- **Seamless Member Invisibility, Channel Flow & Pipe/Conveyor Connectivity**:
+  - All 9 Arc Melter and Casting Press controller and member blocks transition to `RenderShape.INVISIBLE` with `Shapes.empty()` occlusion when `ASSEMBLED = true`, forwarding right-click GUI/wrench interactions to the controller and disassembling cleanly if broken.
+  - Registered Energy, Item (`WorldlyContainerWrapper`), and Fluid capabilities across all assembled member blocks of both machines so Open Casting Channels, fluid/item pipes, conveyors, hoppers, and energy cables connect seamlessly at both port locations and `Y=0` casing/basin faces.
+  - Added automatic finished-item export (`tryExportOutput`) on `CastingPressControllerBlockEntity` to eject cast ingots and blocks onto adjacent conveyor belts, item pipes, and containers at `(1, 0, 0)`.
+
+---
+
+# Industrial Refinery v1.10.21
+
+### What's New in v1.10.21:
+- **Plate Stamping Die Progression Fix (`refinery:plate_die`)**:
+  - Updated `data/refinery/recipe/plate_die.json` to use 4 Steel Ingots (`#c:ingots/steel`) instead of Steel Plates (`#c:plates/steel`), resolving the circular crafting dependency where making the Plate Die required plates that could only be stamped with a Plate Die.
+
+---
+
+# Industrial Refinery v1.10.19
+
+### What's New in v1.10.19:
+- **Steel Gear Tag & Valve Pipe Upgrade Recipe Fix**:
+  - Added `#c:ingots/steel` (`data/c/tags/item/ingots/steel.json`) and included it in `#c:ingots` so `refinery:steel_gear` resolves its ingredient tag cleanly during datapack registry loading.
+  - Migrated `refinery:valve_pipe_upgrade` (`data/refinery/recipe/valve_pipe_upgrade.json`) to Minecraft 26.3 flat string shapeless ingredients, fixing datapack startup errors.
+
+---
+
+# Industrial Refinery v1.10.17
+
+### What's New in v1.10.17:
+- **Redstone Valve Pipe (`refinery:valve_pipe`)**:
+  - Added the Redstone Valve Pipe capable of opening and closing transit for both fluids and items based on redstone signals and attached Pipe Gates.
+  - Supports Normal Mode (valve closes when redstone signal is applied) and Inverted Mode (valve opens when redstone signal is applied).
+  - Mode toggled seamlessly in-world by right-clicking the valve pipe with the Refinery Wrench, displaying action bar feedback and playing mechanical switch sounds.
+  - Directly compatible with BuildCraft-style Pipe Gates (e.g. Tank Full, Space in Inventory, Redstone Signal) mounted on the pipe or adjacent blocks.
+  - When closed, fluid pushing and item dispatch into the valve pipe are blocked, holding traveling items in place until the valve re-opens.
+  - Added shaped crafting recipe (Steel Ingot + Redstone) yielding 8 valve pipes, plus a shapeless upgrade recipe converting steel pipes with redstone.
+- **Classic Spool Pipe Wire Icons**:
+  - Redesigned Red, Blue, Green, and Yellow Pipe Wire icons (`pipe_wire_red`, `pipe_wire_blue`, `pipe_wire_green`, `pipe_wire_yellow`) with warm golden-amber wooden spool flanges, wrapped colored wire coils, and an unspooling wire tail extending downward.
+
+---
+
+# Industrial Refinery v1.10.15
+
+### What's New in v1.10.15:
+- **Metal Press Tooling Dies**:
+  - Added 4 dedicated tooling dies: Plate Die (`refinery:plate_die`), Gear Die (`refinery:gear_die`), Corrugated Steel Die (`refinery:corrugated_die`), and Rail Die (`refinery:rail_die`).
+  - Stamping in the Hydraulic Metal Press strictly requires an installed Die inserted into the dedicated tooling slot.
+  - Upgraded the Metal Press GUI with a beveled Die slot beneath the ram, an empty-slot guide tooltip, and ram hover tooltips showing the installed tooling.
+- **Machinery Gears & Stamping**:
+  - Registered 6 industrial gears: Steel Gear (`refinery:steel_gear`), Iron Gear (`refinery:iron_gear`), Copper Gear (`refinery:copper_gear`), Bronze Gear (`refinery:bronze_gear`), Gold Gear (`refinery:gold_gear`), and Tin Gear (`refinery:tin_gear`).
+  - Added shaped crafting recipes (4 ingots in a cross) and common tags (`#c:gears` and `#c:gears/<metal>`).
+  - Stamping with the Gear Die produces gears at 4x material efficiency (1 ingot or plate -> 1 gear).
+- **Corrugated Steel Block & Rail Stamping**:
+  - Stamping with the Corrugated Steel Die yields 4 Corrugated Steel Panels per Steel Ingot/Plate (and 2 per Iron Ingot/Plate).
+  - Stamping with the Rail Die yields 4 Rails per Steel Ingot/Plate, 2 Rails per Iron Ingot/Plate, 2 Powered Rails per Gold Ingot/Plate, and 2 Activator Rails per Copper Ingot/Plate.
+- **In-Game Guide Book Documentation**:
+  - Updated the Hydraulic Metal Press chapter with full die tooling instructions and all 4 stamping recipe types.
+
+---
+
 # Industrial Refinery v1.10.14
 
 ### What's New in v1.10.14:

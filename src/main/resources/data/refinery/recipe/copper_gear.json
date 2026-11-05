@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " # ",
+    "# #",
+    " # "
+  ],
+  "key": {
+    "#": "#c:ingots/copper"
+  },
+  "result": {
+    "count": 1,
+    "id": "refinery:copper_gear"
+  }
+}

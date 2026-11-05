@@ -79,9 +79,7 @@ public class MetalPressControllerRenderer implements BlockEntityRenderer<MetalPr
         // Extract active workpiece on the conveyor belt if present
         state.hasActiveItem = false;
         if (state.isAssembled && be.getLevel() != null) {
-            ItemStack inputStack = be.getItem(0);
-            ItemStack outputStack = be.getItem(1);
-            ItemStack displayStack = !inputStack.isEmpty() ? inputStack : outputStack;
+            ItemStack displayStack = be.getActiveInputItem();
             if (!displayStack.isEmpty()) {
                 this.itemModelResolver.updateForTopItem(
                         state.activeItemState,

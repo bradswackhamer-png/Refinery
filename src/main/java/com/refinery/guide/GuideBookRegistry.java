@@ -395,23 +395,31 @@ public class GuideBookRegistry {
             );
 
             List<GuideRecipe> recipes = List.of(
-                    new GuideRecipe("Metal Plate Stamping",
-                            List.of(() -> new ItemStack(RefineryMod.STEEL_INGOT.get())),
+                    new GuideRecipe("Plate Die Stamping",
+                            List.of(() -> new ItemStack(RefineryMod.PLATE_DIE.get()), () -> new ItemStack(RefineryMod.STEEL_INGOT.get())),
                             List.of(() -> new ItemStack(RefineryMod.STEEL_PLATE.get())),
-                            "Stamps 1 Ingot into 1 Industrial Plate under heavy hydraulic pressure."),
-                    new GuideRecipe("Copper & Bronze Plate Rolling",
-                            List.of(() -> new ItemStack(Items.COPPER_INGOT)),
-                            List.of(() -> new ItemStack(RefineryMod.COPPER_PLATE.get())),
-                            "Forms conductive plates for boiler pipes and high-voltage circuitry.")
+                            "With a Plate Die installed, stamps 1 metal ingot into 1 industrial plate."),
+                    new GuideRecipe("Gear Die Stamping",
+                            List.of(() -> new ItemStack(RefineryMod.GEAR_DIE.get()), () -> new ItemStack(RefineryMod.STEEL_INGOT.get())),
+                            List.of(() -> new ItemStack(RefineryMod.STEEL_GEAR.get())),
+                            "With a Gear Die installed, cold-forms 1 metal ingot or plate directly into a high-strength gear."),
+                    new GuideRecipe("Corrugated Steel Stamping",
+                            List.of(() -> new ItemStack(RefineryMod.CORRUGATED_DIE.get()), () -> new ItemStack(RefineryMod.STEEL_INGOT.get())),
+                            List.of(() -> new ItemStack(RefineryMod.CORRUGATED_STEEL_PANEL.get(), 4)),
+                            "With a Corrugated Die installed, rolls 1 Steel Ingot into 4 Corrugated Steel Panels (or 1 Iron Ingot into 2 panels)."),
+                    new GuideRecipe("Rail Die Stamping",
+                            List.of(() -> new ItemStack(RefineryMod.RAIL_DIE.get()), () -> new ItemStack(RefineryMod.STEEL_INGOT.get())),
+                            List.of(() -> new ItemStack(Items.RAIL, 4)),
+                            "With a Rail Die installed, stamps 1 Steel Ingot into 4 Rails (or 1 Iron Ingot into 2 Rails; Gold Ingot into 2 Powered Rails).")
             );
 
             register(new GuideEntry(
                     "metal_press",
                     "Hydraulic Metal Press",
-                    "3x2x2 Multiblock • Sheet Metal Stamping",
+                    "3x2x2 Multiblock • Cold-Forming Press",
                     GuideCategory.MACHINERY,
                     () -> new ItemStack(RefineryMod.METAL_PRESS_CONTROLLER.get()),
-                    "The Hydraulic Metal Press is a compact cold-forming machine that compresses ingots and metal billets into dense structural plates.\n\nEssential for boiler casings, turbine rotors, and reinforced pipes.",
+                    "The Hydraulic Metal Press is a cold-forming machine that compresses ingots and plates into industrial components.\n\nStamping strictly requires an installed Die (Plate Die, Gear Die, Corrugated Steel Die, or Rail Die) locked into the tooling slot below the ram.",
                     "Place conveyor belts directly aligned with the Anvil Bed for seamless automated pass-through stamping!",
                     reqs,
                     layers,
@@ -682,7 +690,7 @@ public class GuideBookRegistry {
                 "Fluid, Item, & Logic Piping",
                 GuideCategory.PIPES_GATES,
                 () -> new ItemStack(RefineryMod.WOOD_ITEM_PIPE.get()),
-                "Refinery provides specialized industrial pipes for fluids and items:\n\n• Wood: Filtered Extraction (right-click to open 9-slot filter GUI; pulses strictly with Autarchic Gates!)\n• Iron: Directional one-way valve\n• Gold: High-speed acceleration & priority insertion\n• Diamond: 9-slot directional sorting filter\n• Quartz: Merge pipe (5 inputs -> 1 selected output)\n• Emerald: Round-robin load balancer\n• Obsidian: In-world item suction vacuum\n• Void: Incineration of unwanted byproducts\n• Buffer: 1-slot inline chest pipe",
+                "Refinery provides specialized industrial pipes for fluids and items:\n\n• Wood: Filtered Extraction (right-click to open 9-slot filter GUI; pulses strictly with Autarchic Gates!)\n• Iron: Directional one-way valve\n• Gold: High-speed acceleration & priority insertion\n• Diamond: 9-slot directional sorting filter\n• Quartz: Merge pipe (5 inputs -> 1 selected output)\n• Emerald: Round-robin load balancer\n• Valve: Redstone/Gate actuated flow control (Normal: closes on redstone, Inverted: opens on redstone)\n• Obsidian: In-world item suction vacuum\n• Void: Incineration of unwanted byproducts\n• Buffer: 1-slot inline chest pipe",
                 "Right-click pipes with a Refinery Wrench to toggle connections or change merger output directions!",
                 null,
                 null,

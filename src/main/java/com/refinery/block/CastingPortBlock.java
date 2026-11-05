@@ -1,22 +1,36 @@
 package com.refinery.block;
 
+import com.refinery.RefineryMod;
 import com.refinery.block.entity.CastingPortBlockEntity;
+import com.refinery.block.entity.CastingPressControllerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 public class CastingPortBlock extends Block implements EntityBlock {
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
+    public static final BooleanProperty ASSEMBLED = CastingPressControllerBlock.ASSEMBLED;
 
     public enum PortType implements StringRepresentable {
         INPUT("input"),
@@ -38,9 +52,12 @@ public class CastingPortBlock extends Block implements EntityBlock {
 
     public CastingPortBlock(PortType portType, Properties properties) {
         super(properties.strength(3.0f, 9.0f)
-                .sound(SoundType.NETHERITE_BLOCK));
+                .sound(SoundType.NETHERITE_BLOCK)
+                .noOcclusion());
         this.portType = portType;
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(ASSEMBLED, false));
     }
 
     public PortType getPortType() {
@@ -48,8 +65,28 @@ public class CastingPortBlock extends Block implements EntityBlock {
     }
 
     @Override
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? Shapes.empty() : Shapes.block();
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.getValue(ASSEMBLED) ? 1.0f : super.getShadeBrightness(state, level, pos);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return state.getValue(ASSEMBLED);
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+    }
+
+    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, ASSEMBLED);
     }
 
     @Override
@@ -64,44 +101,47 @@ public class CastingPortBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected net.minecraft.world.InteractionResult useItemOn(
-            net.minecraft.world.item.ItemStack stack,
-            BlockState state,
-            net.minecraft.world.level.Level level,
-            BlockPos pos,
-            net.minecraft.world.entity.player.Player player,
-            net.minecraft.world.InteractionHand hand,
-            net.minecraft.world.phys.BlockHitResult hitResult
-    ) {
-        if (level.getBlockEntity(pos) instanceof CastingPortBlockEntity portBE) {
-            var controller = portBE.getController();
-            if (controller != null && this.portType == PortType.INPUT && stack.getItem() instanceof net.minecraft.world.item.BucketItem bucketItem) {
-                net.minecraft.world.level.material.Fluid fluid = bucketItem.content;
-                if (!com.refinery.block.entity.CastingPressControllerBlockEntity.getCastingProduct(fluid).isEmpty()) {
-                    if (controller.getMoltenAmount() + 1000 <= com.refinery.block.entity.CastingPressControllerBlockEntity.TANK_CAPACITY) {
-                        if (controller.getMoltenFluid() == net.minecraft.world.level.material.Fluids.EMPTY || controller.getMoltenFluid() == fluid) {
-                            if (!level.isClientSide()) {
-                                controller.setMoltenFluid(fluid);
-                                controller.setMoltenAmount(controller.getMoltenAmount() + 1000);
-                                controller.setChanged();
-                                if (!player.isCreative()) {
-                                    player.setItemInHand(hand, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
-                                }
-                                level.playSound(null, pos, net.minecraft.sounds.SoundEvents.BUCKET_EMPTY_LAVA, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
-                            }
-                            return net.minecraft.world.InteractionResult.SUCCESS;
-                        }
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (state.getValue(ASSEMBLED)) {
+            CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
+            if (controller != null) {
+                if (stack.is(RefineryMod.REFINERY_WRENCH.get())) {
+                    if (!level.isClientSide()) {
+                        controller.toggleBlueprintProjection(player);
                     }
+                    return InteractionResult.SUCCESS;
                 }
-            }
-
-            if (controller != null && controller.isAssembled()) {
-                if (!level.isClientSide()) {
-                    player.openMenu(controller, controller.getBlockPos());
+                if (!player.isShiftKeyDown() && !level.isClientSide()) {
+                    controller.syncAssembly();
+                    player.openMenu(controller);
                 }
-                return net.minecraft.world.InteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (state.getValue(ASSEMBLED)) {
+            CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
+            if (controller != null && !level.isClientSide()) {
+                controller.syncAssembly();
+                player.openMenu(controller);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return super.useWithoutItem(state, level, pos, player, hitResult);
+    }
+
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (state.getValue(ASSEMBLED)) {
+            CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
+            if (controller != null) {
+                controller.disassemble();
+            }
+        }
+        return super.playerWillDestroy(level, pos, state, player);
     }
 }

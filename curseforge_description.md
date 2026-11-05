@@ -196,10 +196,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.10.14.jar`
+`refinery-1.10.23.jar`
 
 ### Display Name
-`Industrial Refinery 1.10.14 (NeoForge 26.3)`
+`Industrial Refinery 1.10.17 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -215,6 +215,40 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.10.17
+
+### What's New in v1.10.17:
+- **Redstone Valve Pipe (`refinery:valve_pipe`)**:
+  - Added the Redstone Valve Pipe capable of opening and closing transit for both fluids and items based on redstone signals and attached Pipe Gates.
+  - Supports Normal Mode (valve closes when redstone signal is applied) and Inverted Mode (valve opens when redstone signal is applied).
+  - Mode toggled seamlessly in-world by right-clicking the valve pipe with the Refinery Wrench, displaying action bar feedback and playing mechanical switch sounds.
+  - Directly compatible with BuildCraft-style Pipe Gates (e.g. Tank Full, Space in Inventory, Redstone Signal) mounted on the pipe or adjacent blocks.
+  - When closed, fluid pushing and item dispatch into the valve pipe are blocked, holding traveling items in place until the valve re-opens.
+  - Added shaped crafting recipe (Steel Ingot + Redstone) yielding 8 valve pipes, plus a shapeless upgrade recipe converting steel pipes with redstone.
+- **Classic Spool Pipe Wire Icons**:
+  - Redesigned Red, Blue, Green, and Yellow Pipe Wire icons (`pipe_wire_red`, `pipe_wire_blue`, `pipe_wire_green`, `pipe_wire_yellow`) with warm golden-amber wooden spool flanges, wrapped colored wire coils, and an unspooling wire tail extending downward.
+
+---
+
+# Industrial Refinery v1.10.15
+
+### What's New in v1.10.15:
+- **Metal Press Tooling Dies**:
+  - Added 4 dedicated tooling dies: Plate Die (`refinery:plate_die`), Gear Die (`refinery:gear_die`), Corrugated Steel Die (`refinery:corrugated_die`), and Rail Die (`refinery:rail_die`).
+  - Stamping in the Hydraulic Metal Press strictly requires an installed Die inserted into the dedicated tooling slot.
+  - Upgraded the Metal Press GUI with a beveled Die slot beneath the ram, an empty-slot guide tooltip, and ram hover tooltips showing the installed tooling.
+- **Machinery Gears & Stamping**:
+  - Registered 6 industrial gears: Steel Gear (`refinery:steel_gear`), Iron Gear (`refinery:iron_gear`), Copper Gear (`refinery:copper_gear`), Bronze Gear (`refinery:bronze_gear`), Gold Gear (`refinery:gold_gear`), and Tin Gear (`refinery:tin_gear`).
+  - Added shaped crafting recipes (4 ingots in a cross) and common tags (`#c:gears` and `#c:gears/<metal>`).
+  - Stamping with the Gear Die produces gears at 4x material efficiency (1 ingot or plate -> 1 gear).
+- **Corrugated Steel Block & Rail Stamping**:
+  - Stamping with the Corrugated Steel Die yields 4 Corrugated Steel Panels per Steel Ingot/Plate (and 2 per Iron Ingot/Plate).
+  - Stamping with the Rail Die yields 4 Rails per Steel Ingot/Plate, 2 Rails per Iron Ingot/Plate, 2 Powered Rails per Gold Ingot/Plate, and 2 Activator Rails per Copper Ingot/Plate.
+- **In-Game Guide Book Documentation**:
+  - Updated the Hydraulic Metal Press chapter with full die tooling instructions and all 4 stamping recipe types.
+
+---
+
 # Industrial Refinery v1.8.40
 
 ### What's New in v1.8.40:

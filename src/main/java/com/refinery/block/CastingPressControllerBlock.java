@@ -10,10 +10,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -23,6 +25,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 public class CastingPressControllerBlock extends Block implements EntityBlock {
@@ -33,12 +37,33 @@ public class CastingPressControllerBlock extends Block implements EntityBlock {
 
     public CastingPressControllerBlock(Properties properties) {
         super(properties.strength(3.0f, 9.0f)
-                .sound(SoundType.NETHERITE_BLOCK));
+                .sound(SoundType.NETHERITE_BLOCK)
+                .noOcclusion());
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(ASSEMBLED, false)
                 .setValue(ACTIVE, false)
                 .setValue(BLUEPRINT, false));
+    }
+
+    @Override
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? Shapes.empty() : Shapes.block();
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.getValue(ASSEMBLED) ? 1.0f : super.getShadeBrightness(state, level, pos);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return state.getValue(ASSEMBLED);
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override
@@ -73,14 +98,22 @@ public class CastingPressControllerBlock extends Block implements EntityBlock {
             if (level.getBlockEntity(pos) instanceof CastingPressControllerBlockEntity controllerBE) {
                 if (player.isShiftKeyDown()) {
                     controllerBE.toggleBlueprintProjection(player);
-                } else if (controllerBE.isAssembled()) {
-                    player.openMenu(controllerBE, pos);
                 } else {
-                    controllerBE.toggleBlueprintProjection(player);
+                    controllerBE.syncAssembly();
+                    player.openMenu(controllerBE);
                 }
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (level.getBlockEntity(pos) instanceof CastingPressControllerBlockEntity controllerBE) {
+            Containers.dropContents(level, pos, controllerBE.getDrops());
+            controllerBE.disassemble();
+        }
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Nullable
@@ -92,20 +125,9 @@ public class CastingPressControllerBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        if (level.isClientSide()) return null;
-        return (lvl, pos, st, be) -> {
-            if (be instanceof CastingPressControllerBlockEntity controllerBE) {
-                controllerBE.serverTick();
-            }
-        };
-    }
-
-    @Override
-    public void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean isMoving) {
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof CastingPressControllerBlockEntity controllerBE) {
-            Containers.dropContents(level, pos, controllerBE.getDrops());
+        if (blockEntityType == RefineryMod.CASTING_PRESS_CONTROLLER_BE.get()) {
+            return (lvl, p, st, be) -> ((CastingPressControllerBlockEntity) be).serverTick();
         }
-        super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
+        return null;
     }
 }

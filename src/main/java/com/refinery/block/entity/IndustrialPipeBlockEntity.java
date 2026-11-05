@@ -267,6 +267,14 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         return manualDisconnections.getOrDefault(dir, false);
     }
 
+    public boolean isValveOpen() {
+        BlockState state = getBlockState();
+        if (state.getBlock() instanceof com.refinery.block.pipe.ValvePipeBlock) {
+            return state.getValue(com.refinery.block.pipe.ValvePipeBlock.OPEN);
+        }
+        return true;
+    }
+
     public GenericFluidTank getFluidTank() {
         return fluidTank;
     }
@@ -349,6 +357,10 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         if (be instanceof Container) return true;
 
         return state.getBlock() instanceof com.refinery.block.GrinderPortBlock ||
+               state.getBlock() instanceof com.refinery.block.MelterPortBlock ||
+               state.getBlock() instanceof com.refinery.block.CastingPortBlock ||
+               state.getBlock() instanceof com.refinery.block.ArcMelterControllerBlock ||
+               state.getBlock() instanceof com.refinery.block.CastingPressControllerBlock ||
                state.getBlock() instanceof com.refinery.block.RefineryPortBlock ||
                state.getBlock() instanceof com.refinery.block.FoundryPortBlock ||
                state.getBlock() instanceof com.refinery.block.BoilerPortBlock ||
@@ -375,6 +387,11 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
         }
 
         return state.getBlock() instanceof com.refinery.block.BoilerPortBlock ||
+               state.getBlock() instanceof com.refinery.block.MelterPortBlock ||
+               state.getBlock() instanceof com.refinery.block.CastingPortBlock ||
+               state.getBlock() instanceof com.refinery.block.CastingChannelBlock ||
+               state.getBlock() instanceof com.refinery.block.ArcMelterControllerBlock ||
+               state.getBlock() instanceof com.refinery.block.CastingPressControllerBlock ||
                state.getBlock() instanceof com.refinery.block.RefineryPortBlock;
     }
 
@@ -469,6 +486,12 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             be.updateConnections();
         }
 
+        // Valve Pipe active state check (ensures gate signals take immediate effect)
+        if (state.getBlock() instanceof com.refinery.block.pipe.ValvePipeBlock) {
+            com.refinery.block.pipe.ValvePipeBlock.updateValveState(state, level, pos);
+            state = be.getBlockState();
+        }
+
         // 1. VOID & STRUCTURE PIPE BEHAVIOR
         if (be.pipeType == IndustrialPipeType.VOID) {
             be.fluidTank.dump();
@@ -492,6 +515,8 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     }
 
     private void tickFluid(Level level, BlockPos pos) {
+        if (!isValveOpen()) return;
+
         // Active extraction
         if (isExtractor()) {
             int extractRate = material.getTransferRate();
@@ -549,7 +574,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                     }
                 } else if (connections.get(out) == PipeConnectionType.PIPE) {
                     BlockEntity targetBe = level.getBlockEntity(targetPos);
-                    if (targetBe instanceof IndustrialPipeBlockEntity otherPipe && otherPipe.pipeType.handlesFluid()) {
+                    if (targetBe instanceof IndustrialPipeBlockEntity otherPipe && otherPipe.pipeType.handlesFluid() && otherPipe.isValveOpen()) {
                         if (otherPipe.pipeType == IndustrialPipeType.VOID) {
                             try (Transaction tx = Transaction.openRoot()) {
                                 fluidTank.extract(0, fluidRes, toTransfer, tx);
@@ -608,7 +633,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                     Direction dir = entry.getKey();
                     BlockPos targetPos = pos.relative(dir);
                     BlockEntity targetBe = level.getBlockEntity(targetPos);
-                    if (targetBe instanceof IndustrialPipeBlockEntity otherPipe && otherPipe.pipeType.handlesFluid()) {
+                    if (targetBe instanceof IndustrialPipeBlockEntity otherPipe && otherPipe.pipeType.handlesFluid() && otherPipe.isValveOpen()) {
                         if (otherPipe.pipeType == IndustrialPipeType.VOID) {
                             try (Transaction tx = Transaction.openRoot()) {
                                 fluidTank.extract(0, fluidRes, toTransfer, tx);
@@ -635,6 +660,10 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     }
 
     private void tickItems(Level level, BlockPos pos) {
+        if (!isValveOpen()) {
+            return; // Item movement paused while valve is closed
+        }
+
         float speed = 0.08f * material.getSpeedMultiplier();
 
         // 1. Move existing traveling items
@@ -650,6 +679,11 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
 
                 boolean dispatched = false;
                 if (nextBe instanceof IndustrialPipeBlockEntity nextPipe && nextPipe.pipeType.handlesItems()) {
+                    if (!nextPipe.isValveOpen()) {
+                        // Target valve is closed: hold item at boundary until valve opens
+                        item.progress = 0.95f;
+                        continue;
+                    }
                     if (nextPipe.pipeType == IndustrialPipeType.VOID) {
                         dispatched = true;
                     } else {
@@ -792,8 +826,19 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             return pipe.getEmeraldRoundRobinDirection(fromSide);
         }
 
-        // 4. Default: Forward priority if straight path is connected, else first available
+        // 4. Default: Forward priority if straight path is connected and passable, else first available passable
         Direction straight = fromSide.getOpposite();
+        if (pipe.getConnection(straight).isConnected() && isDirectionPassable(pipe, straight)) {
+            return straight;
+        }
+
+        for (Direction d : Direction.values()) {
+            if (d != fromSide && pipe.getConnection(d).isConnected() && isDirectionPassable(pipe, d)) {
+                return d;
+            }
+        }
+
+        // Fallback: If all available connected paths lead to a closed valve, select straight or first connected
         if (pipe.getConnection(straight).isConnected()) {
             return straight;
         }
@@ -804,6 +849,15 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             }
         }
         return fromSide.getOpposite();
+    }
+
+    private static boolean isDirectionPassable(IndustrialPipeBlockEntity pipe, Direction dir) {
+        if (pipe.getLevel() == null) return true;
+        BlockEntity targetBe = pipe.getLevel().getBlockEntity(pipe.getBlockPos().relative(dir));
+        if (targetBe instanceof IndustrialPipeBlockEntity neighborPipe) {
+            return neighborPipe.isValveOpen();
+        }
+        return true;
     }
 
     private void ejectItem(Level level, BlockPos pos, Direction targetDir, ItemStack stack) {
@@ -979,9 +1033,19 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     }
 
     @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (!isValveOpen()) return false;
+        return pipeType.handlesItems();
+    }
+
+    @Override
     public void setItem(int slot, ItemStack stack) {
         if (pipeType == IndustrialPipeType.VOID) {
             internalItem = ItemStack.EMPTY;
+            return;
+        }
+
+        if (!isValveOpen()) {
             return;
         }
 

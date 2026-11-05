@@ -2,6 +2,10 @@ package com.refinery.block.entity;
 
 import com.refinery.RefineryMod;
 import com.refinery.block.CastingPressControllerBlock;
+import com.refinery.block.ConveyorBeltBlock;
+import com.refinery.block.RightAngleConveyorBeltBlock;
+import com.refinery.block.SlopedConveyorBeltBlock;
+import com.refinery.block.pipe.IndustrialPipeType;
 import com.refinery.fluid.RefineryFluids;
 import com.refinery.menu.CastingPressMenu;
 import net.minecraft.core.BlockPos;
@@ -29,17 +33,23 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CastingPressControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INVENTORY_SIZE = 4; // 4 output slots
@@ -52,6 +62,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     private int energy = 0;
     private int progress = 0;
     private int blueprintTicks = 0;
+    private int exportCooldown = 0;
 
     private Fluid moltenFluid = Fluids.EMPTY;
     private int moltenAmount = 0;
@@ -130,6 +141,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     public void setMoltenFluid(Fluid fluid) {
         this.moltenFluid = fluid;
         setChanged();
+        syncToClient();
     }
 
     public int getMoltenAmount() {
@@ -142,6 +154,47 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
             this.moltenFluid = Fluids.EMPTY;
         }
         setChanged();
+        syncToClient();
+    }
+
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    public void disassemble() {
+        this.assembled = false;
+        updateMemberBlockStates(false);
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            if (state.getBlock() instanceof CastingPressControllerBlock) {
+                this.level.setBlock(this.worldPosition, state.setValue(CastingPressControllerBlock.ASSEMBLED, false)
+                        .setValue(CastingPressControllerBlock.ACTIVE, false)
+                        .setValue(CastingPressControllerBlock.BLUEPRINT, false), 3);
+            }
+        }
+        setChanged();
+        syncToClient();
+    }
+
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        Direction facing = (getBlockState().getBlock() instanceof CastingPressControllerBlock && getBlockState().hasProperty(CastingPressControllerBlock.FACING))
+                ? getBlockState().getValue(CastingPressControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x == 0 && req.y == 0 && req.z == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(CastingPressControllerBlock.ASSEMBLED)) {
+                if (targetState.getValue(CastingPressControllerBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(CastingPressControllerBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
+        }
     }
 
     public NonNullList<ItemStack> getDrops() {
@@ -179,6 +232,12 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
 
         boolean wasActive = state.getValue(CastingPressControllerBlock.ACTIVE);
         boolean isActive = false;
+
+        // Auto-export finished cast ingots/blocks from Output Port to adjacent conveyor, pipe, or container
+        if (--this.exportCooldown <= 0) {
+            this.exportCooldown = 5;
+            tryExportOutput(serverLevel);
+        }
 
         // Check if we have at least 1000 mB of molten fluid and room in output
         ItemStack resultStack = getCastingProduct(this.moltenFluid);
@@ -221,11 +280,15 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
                     this.progress = 0;
                 }
                 setChanged();
+                if (this.progress == 1 || this.progress % 6 == 0 || this.progress == 120 || this.progress == 0) {
+                    syncToClient();
+                }
             }
         } else {
             if (this.progress > 0 && this.progress <= 120) {
                 this.progress = 0;
                 setChanged();
+                syncToClient();
             }
         }
 
@@ -234,7 +297,163 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
             if (latest.hasProperty(CastingPressControllerBlock.ACTIVE)) {
                 level.setBlock(pos, latest.setValue(CastingPressControllerBlock.ACTIVE, isActive), 3);
             }
+            syncToClient();
         }
+    }
+
+    private void tryExportOutput(ServerLevel level) {
+        Direction facing = getBlockState().getValue(CastingPressControllerBlock.FACING);
+        Direction right = facing.getClockWise();
+
+        boolean hasOutput = false;
+        for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+            if (!this.items.get(slot).isEmpty()) {
+                hasOutput = true;
+                break;
+            }
+        }
+        if (!hasOutput) return;
+
+        Set<BlockPos> targetPositions = new LinkedHashSet<>();
+
+        // 1. All 6 sides around any CASTING_OUTPUT_PORT in the structure
+        for (BlueprintRequirement req : getRequirements()) {
+            BlockPos partPos = getRelativePos(req.x, req.y, req.z, facing);
+            BlockState partState = level.getBlockState(partPos);
+            if (partState.is(RefineryMod.CASTING_OUTPUT_PORT.get())) {
+                for (Direction dir : Direction.values()) {
+                    targetPositions.add(partPos.relative(dir));
+                }
+            }
+        }
+
+        // 2. Default output port (1, 0, 0) adjacent positions
+        BlockPos portPos = getRelativePos(1, 0, 0, facing);
+        targetPositions.add(portPos.relative(facing));
+        targetPositions.add(portPos.relative(right));
+        targetPositions.add(portPos.below());
+
+        for (BlockPos targetPos : targetPositions) {
+            if (isMultiblockPart(targetPos)) continue;
+
+            BlockState targetState = level.getBlockState(targetPos);
+            BlockEntity targetBE = level.getBlockEntity(targetPos);
+
+            boolean isConveyor = ConveyorBeltBlock.isAnyConveyorBlock(targetState)
+                    || targetBE instanceof ConveyorBeltBlockEntity
+                    || targetBE instanceof RightAngleConveyorBeltBlockEntity
+                    || targetBE instanceof SlopedConveyorBeltBlockEntity;
+
+            if (isConveyor) {
+                Direction conveyorForward = null;
+                if (targetState.getBlock() instanceof ConveyorBeltBlock) {
+                    conveyorForward = targetState.getValue(ConveyorBeltBlock.FACING);
+                } else if (targetState.getBlock() instanceof RightAngleConveyorBeltBlock) {
+                    conveyorForward = RightAngleConveyorBeltBlock.getExitDirection(targetState);
+                } else if (targetState.getBlock() instanceof SlopedConveyorBeltBlock) {
+                    conveyorForward = targetState.getValue(SlopedConveyorBeltBlock.FACING);
+                } else if (targetState.hasProperty(HorizontalDirectionalBlock.FACING)) {
+                    conveyorForward = targetState.getValue(HorizontalDirectionalBlock.FACING);
+                }
+                if (conveyorForward != null && isMultiblockPart(targetPos.relative(conveyorForward))) {
+                    continue;
+                }
+
+                net.minecraft.world.phys.AABB beltBox = new net.minecraft.world.phys.AABB(
+                        targetPos.getX(), targetPos.getY() + 0.10, targetPos.getZ(),
+                        targetPos.getX() + 1.0, targetPos.getY() + 0.70, targetPos.getZ() + 1.0
+                );
+                if (!level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, beltBox).isEmpty()) {
+                    continue;
+                }
+
+                for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+                    ItemStack sourceStack = this.items.get(slot);
+                    if (sourceStack.isEmpty()) continue;
+
+                    ItemStack single = sourceStack.copyWithCount(1);
+                    if (targetBE instanceof Container container) {
+                        container.setItem(0, single);
+                        sourceStack.shrink(1);
+                        if (sourceStack.isEmpty()) {
+                            this.items.set(slot, ItemStack.EMPTY);
+                        }
+                        setChanged();
+                        syncToClient();
+                        return;
+                    }
+                }
+                continue;
+            }
+
+            if (targetBE instanceof IndustrialPipeBlockEntity pipeBE && pipeBE.getPipeType() == IndustrialPipeType.ITEM) {
+                for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+                    ItemStack sourceStack = this.items.get(slot);
+                    if (sourceStack.isEmpty()) continue;
+
+                    ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(pipeBE, sourceStack.copy());
+                    if (remainder.getCount() != sourceStack.getCount()) {
+                        this.items.set(slot, remainder);
+                        setChanged();
+                        pipeBE.setChanged();
+                        syncToClient();
+                        return;
+                    }
+                }
+                continue;
+            }
+
+            if (targetBE instanceof Container targetContainer) {
+                for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+                    ItemStack sourceStack = this.items.get(slot);
+                    if (sourceStack.isEmpty()) continue;
+
+                    ItemStack remainder = AutoHarvesterBlockEntity.addItemToContainer(targetContainer, sourceStack.copy());
+                    if (remainder.getCount() != sourceStack.getCount()) {
+                        this.items.set(slot, remainder);
+                        setChanged();
+                        targetContainer.setChanged();
+                        syncToClient();
+                        return;
+                    }
+                }
+            } else {
+                var handler = level.getCapability(Capabilities.Item.BLOCK, targetPos, Direction.UP);
+                if (handler != null) {
+                    for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+                        ItemStack sourceStack = this.items.get(slot);
+                        if (sourceStack.isEmpty()) continue;
+
+                        try (Transaction tx = Transaction.openRoot()) {
+                            int inserted = handler.insert(ItemResource.of(sourceStack), sourceStack.getCount(), tx);
+                            if (inserted > 0) {
+                                tx.commit();
+                                sourceStack.shrink(inserted);
+                                if (sourceStack.isEmpty()) {
+                                    this.items.set(slot, ItemStack.EMPTY);
+                                }
+                                setChanged();
+                                syncToClient();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isMultiblockPart(BlockPos pos) {
+        BlockState state = getBlockState();
+        Direction facing = (state.getBlock() instanceof CastingPressControllerBlock && state.hasProperty(CastingPressControllerBlock.FACING))
+                ? state.getValue(CastingPressControllerBlock.FACING)
+                : Direction.NORTH;
+        for (BlueprintRequirement req : getRequirements()) {
+            if (getRelativePos(req.x, req.y, req.z, facing).equals(pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static ItemStack getCastingProduct(Fluid fluid) {
@@ -274,19 +493,39 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
 
     public void toggleBlueprintProjection(@Nullable Player player) {
         if (this.level == null) return;
-        BlockState state = getBlockState();
-        boolean current = state.hasProperty(CastingPressControllerBlock.BLUEPRINT) && state.getValue(CastingPressControllerBlock.BLUEPRINT);
-        boolean next = !current;
-        this.blueprintTicks = next ? 600 : 0;
-        level.setBlock(getBlockPos(), state.setValue(CastingPressControllerBlock.BLUEPRINT, next), 3);
-
-        if (next) {
-            checkStructure(true, player);
+        boolean formed = checkStructure(true, player);
+        if (formed) {
+            this.assembled = true;
+            updateMemberBlockStates(true);
+            this.blueprintTicks = 0;
+            if (!this.level.isClientSide()) {
+                BlockState current = getBlockState();
+                if (current.getBlock() instanceof CastingPressControllerBlock) {
+                    this.level.setBlock(this.worldPosition, current.setValue(CastingPressControllerBlock.ASSEMBLED, true)
+                            .setValue(CastingPressControllerBlock.BLUEPRINT, false), 3);
+                }
+                linkPorts();
+            }
+            if (player != null) {
+                player.sendSystemMessage(Component.literal("§a[Continuous Casting Press]§r 3x3x3 Machine is §2VALID & OPERATIONAL§r!"));
+            }
+        } else {
+            this.assembled = false;
+            updateMemberBlockStates(false);
+            this.blueprintTicks = 600;
+            if (!this.level.isClientSide()) {
+                BlockState current = getBlockState();
+                if (current.getBlock() instanceof CastingPressControllerBlock) {
+                    this.level.setBlock(this.worldPosition, current.setValue(CastingPressControllerBlock.ASSEMBLED, false)
+                            .setValue(CastingPressControllerBlock.BLUEPRINT, true), 3);
+                }
+            }
             if (player != null) {
                 player.sendSystemMessage(Component.literal("§6[Continuous Casting Press]§r 3x3x3 Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
@@ -439,16 +678,29 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     public void syncAssembly() {
         if (this.level == null || this.level.isClientSide()) return;
         boolean matches = checkStructure(false, null);
-        if (matches != this.assembled) {
+        BlockState current = getBlockState();
+        if (!(current.getBlock() instanceof CastingPressControllerBlock)) return;
+
+        updateMemberBlockStates(matches);
+
+        boolean blockAssembled = current.getValue(CastingPressControllerBlock.ASSEMBLED);
+        if (matches != this.assembled || blockAssembled != matches) {
             this.assembled = matches;
-            if (this.assembled) {
+            BlockState newState = current.setValue(CastingPressControllerBlock.ASSEMBLED, matches);
+            if (matches) {
+                newState = newState.setValue(CastingPressControllerBlock.BLUEPRINT, false);
+                this.blueprintTicks = 0;
                 linkPorts();
+                if (this.level instanceof ServerLevel serverLevel) {
+                    serverLevel.playSound(null, this.worldPosition, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 1.1f);
+                    serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                            this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 1.5, this.worldPosition.getZ() + 1.0,
+                            6, 0.4, 0.4, 0.4, 0.05);
+                }
             }
-            BlockState current = getBlockState();
-            if (current.hasProperty(CastingPressControllerBlock.ASSEMBLED)) {
-                level.setBlock(getBlockPos(), current.setValue(CastingPressControllerBlock.ASSEMBLED, this.assembled), 3);
-            }
+            level.setBlock(getBlockPos(), newState, 3);
             setChanged();
+            syncToClient();
         }
     }
 
@@ -549,7 +801,10 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     @Override
     public ItemStack removeItem(int slot, int amount) {
         ItemStack result = ContainerHelper.removeItem(this.items, slot, amount);
-        if (!result.isEmpty()) setChanged();
+        if (!result.isEmpty()) {
+            setChanged();
+            syncToClient();
+        }
         return result;
     }
 
@@ -563,6 +818,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         this.items.set(slot, stack);
         stack.limitSize(this.getMaxStackSize(stack));
         setChanged();
+        syncToClient();
     }
 
     @Override

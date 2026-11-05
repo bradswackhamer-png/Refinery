@@ -49,7 +49,12 @@ import java.util.List;
 import java.util.Set;
 
 public class MetalPressControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
-    public static final int INVENTORY_SIZE = 4;
+    public static final int INVENTORY_SIZE = 5;
+    public static final int DIE_SLOT = 0;
+    public static final int INPUT_SLOT_1 = 1;
+    public static final int INPUT_SLOT_2 = 2;
+    public static final int OUTPUT_SLOT_1 = 3;
+    public static final int OUTPUT_SLOT_2 = 4;
     public static final int ENERGY_CAPACITY = 50_000;
     public static final int ENERGY_PER_TICK = 20;
     public static final int TOTAL_PROCESS_TIME = 40; // 2 seconds per press cycle
@@ -135,14 +140,19 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         return this.items;
     }
 
+    public ItemStack getDie() {
+        return this.items.get(DIE_SLOT);
+    }
+
     public ItemStack getActiveInputItem() {
-        for (int i = 0; i < 2; i++) {
+        ItemStack die = getDie();
+        for (int i = INPUT_SLOT_1; i <= INPUT_SLOT_2; i++) {
             ItemStack stack = this.items.get(i);
-            if (!stack.isEmpty() && !getPressResult(stack).isEmpty()) {
+            if (!stack.isEmpty() && (!die.isEmpty() ? !getPressResult(die, stack).isEmpty() : isValidInput(stack))) {
                 return stack;
             }
         }
-        for (int i = 2; i < 4; i++) {
+        for (int i = OUTPUT_SLOT_1; i <= OUTPUT_SLOT_2; i++) {
             ItemStack stack = this.items.get(i);
             if (!stack.isEmpty()) {
                 return stack;
@@ -209,7 +219,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             return;
         }
 
-        // Auto-export finished stamped items (plates, gears, rods) from Output Slots 2..3 to adjacent conveyor, pipe, or container
+        // Auto-export finished stamped items (plates, gears, panels, rails) from Output Slots 3..4 to adjacent conveyor, pipe, or container
         if (--this.exportCooldown <= 0) {
             this.exportCooldown = 5;
             tryExportOutput(serverLevel);
@@ -220,7 +230,8 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
         // Check if we can stamp
         int inputSlot = getValidInputSlot();
-        ItemStack resultStack = inputSlot != -1 ? getPressResult(this.items.get(inputSlot)) : ItemStack.EMPTY;
+        ItemStack die = getDie();
+        ItemStack resultStack = (inputSlot != -1 && !die.isEmpty()) ? getPressResult(die, this.items.get(inputSlot)) : ItemStack.EMPTY;
         boolean canStamp = (this.progress > 20) || (!resultStack.isEmpty() && canFitOutput(resultStack));
 
         if (canStamp) {
@@ -238,10 +249,10 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
                 // Stamping Impact at tick 20 (bottom of ram stroke)
                 if (this.progress == 20) {
-                    // Consume 1 ingot & produce 1 plate
-                    if (inputSlot != -1) {
+                    // Consume 1 item & produce stamped output
+                    if (inputSlot != -1 && !die.isEmpty()) {
                         ItemStack inputStack = this.items.get(inputSlot);
-                        ItemStack result = getPressResult(inputStack);
+                        ItemStack result = getPressResult(die, inputStack);
                         if (!result.isEmpty()) {
                             inputStack.shrink(1);
                             addOutput(result.copy());
@@ -291,6 +302,9 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         }
     }
 
+    public static final TagKey<Item> PRESS_DIES = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("refinery", "press_dies"));
+    public static final TagKey<Item> GEARS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "gears"));
+
     public static final TagKey<Item> INGOTS_STEEL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/steel"));
     public static final TagKey<Item> INGOTS_IRON = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/iron"));
     public static final TagKey<Item> INGOTS_COPPER = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/copper"));
@@ -298,44 +312,123 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     public static final TagKey<Item> INGOTS_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/tin"));
     public static final TagKey<Item> INGOTS_BRONZE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/bronze"));
 
+    public static final TagKey<Item> PLATES_STEEL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "plates/steel"));
+    public static final TagKey<Item> PLATES_IRON = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "plates/iron"));
+    public static final TagKey<Item> PLATES_COPPER = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "plates/copper"));
+    public static final TagKey<Item> PLATES_GOLD = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "plates/gold"));
+    public static final TagKey<Item> PLATES_TIN = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "plates/tin"));
+    public static final TagKey<Item> PLATES_BRONZE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "plates/bronze"));
+
+    public static boolean isDie(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        return stack.is(PRESS_DIES)
+                || stack.is(RefineryMod.PLATE_DIE.get())
+                || stack.is(RefineryMod.GEAR_DIE.get())
+                || stack.is(RefineryMod.CORRUGATED_DIE.get())
+                || stack.is(RefineryMod.RAIL_DIE.get());
+    }
+
+    public static boolean isValidInput(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        return !getPressResult(new ItemStack(RefineryMod.PLATE_DIE.get()), stack).isEmpty()
+                || !getPressResult(new ItemStack(RefineryMod.GEAR_DIE.get()), stack).isEmpty()
+                || !getPressResult(new ItemStack(RefineryMod.CORRUGATED_DIE.get()), stack).isEmpty()
+                || !getPressResult(new ItemStack(RefineryMod.RAIL_DIE.get()), stack).isEmpty();
+    }
+
     public static ItemStack getPressResult(ItemStack input) {
-        if (input.isEmpty()) return ItemStack.EMPTY;
+        return getPressResult(new ItemStack(RefineryMod.PLATE_DIE.get()), input);
+    }
+
+    public static ItemStack getPressResult(ItemStack die, ItemStack input) {
+        if (die.isEmpty() || input.isEmpty()) return ItemStack.EMPTY;
 
         Identifier id = BuiltInRegistries.ITEM.getKey(input.getItem());
         String path = id != null ? id.getPath() : "";
 
-        // Steel Ingot -> Steel Plate
-        if (input.is(RefineryMod.STEEL_INGOT.get()) || input.is(INGOTS_STEEL) || path.equals("steel_ingot")) {
-            return new ItemStack(RefineryMod.STEEL_PLATE.get(), 1);
+        // === 1. PLATE DIE: Ingots -> Plates ===
+        if (die.is(RefineryMod.PLATE_DIE.get())) {
+            if (input.is(RefineryMod.STEEL_INGOT.get()) || input.is(INGOTS_STEEL) || path.equals("steel_ingot")) {
+                return new ItemStack(RefineryMod.STEEL_PLATE.get(), 1);
+            }
+            if (input.is(Items.IRON_INGOT) || input.is(INGOTS_IRON) || path.equals("iron_ingot")) {
+                return new ItemStack(RefineryMod.IRON_PLATE.get(), 1);
+            }
+            if (input.is(Items.COPPER_INGOT) || input.is(INGOTS_COPPER) || path.equals("copper_ingot")) {
+                return new ItemStack(RefineryMod.COPPER_PLATE.get(), 1);
+            }
+            if (input.is(Items.GOLD_INGOT) || input.is(INGOTS_GOLD) || path.equals("gold_ingot")) {
+                return new ItemStack(RefineryMod.GOLD_PLATE.get(), 1);
+            }
+            if (input.is(RefineryMod.TIN_INGOT.get()) || input.is(INGOTS_TIN) || path.equals("tin_ingot")) {
+                return new ItemStack(RefineryMod.TIN_PLATE.get(), 1);
+            }
+            if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(INGOTS_BRONZE) || path.equals("bronze_ingot")) {
+                return new ItemStack(RefineryMod.BRONZE_PLATE.get(), 1);
+            }
+            return ItemStack.EMPTY;
         }
-        // Iron Ingot -> Iron Plate
-        if (input.is(Items.IRON_INGOT) || input.is(INGOTS_IRON) || path.equals("iron_ingot")) {
-            return new ItemStack(RefineryMod.IRON_PLATE.get(), 1);
+
+        // === 2. GEAR DIE: Ingots or Plates -> Gears ===
+        if (die.is(RefineryMod.GEAR_DIE.get())) {
+            if (input.is(RefineryMod.STEEL_INGOT.get()) || input.is(INGOTS_STEEL) || input.is(RefineryMod.STEEL_PLATE.get()) || input.is(PLATES_STEEL) || path.contains("steel")) {
+                return new ItemStack(RefineryMod.STEEL_GEAR.get(), 1);
+            }
+            if (input.is(Items.IRON_INGOT) || input.is(INGOTS_IRON) || input.is(RefineryMod.IRON_PLATE.get()) || input.is(PLATES_IRON) || path.contains("iron")) {
+                return new ItemStack(RefineryMod.IRON_GEAR.get(), 1);
+            }
+            if (input.is(Items.COPPER_INGOT) || input.is(INGOTS_COPPER) || input.is(RefineryMod.COPPER_PLATE.get()) || input.is(PLATES_COPPER) || path.contains("copper")) {
+                return new ItemStack(RefineryMod.COPPER_GEAR.get(), 1);
+            }
+            if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(INGOTS_BRONZE) || input.is(RefineryMod.BRONZE_PLATE.get()) || input.is(PLATES_BRONZE) || path.contains("bronze")) {
+                return new ItemStack(RefineryMod.BRONZE_GEAR.get(), 1);
+            }
+            if (input.is(Items.GOLD_INGOT) || input.is(INGOTS_GOLD) || input.is(RefineryMod.GOLD_PLATE.get()) || input.is(PLATES_GOLD) || path.contains("gold")) {
+                return new ItemStack(RefineryMod.GOLD_GEAR.get(), 1);
+            }
+            if (input.is(RefineryMod.TIN_INGOT.get()) || input.is(INGOTS_TIN) || input.is(RefineryMod.TIN_PLATE.get()) || input.is(PLATES_TIN) || path.contains("tin")) {
+                return new ItemStack(RefineryMod.TIN_GEAR.get(), 1);
+            }
+            return ItemStack.EMPTY;
         }
-        // Copper Ingot -> Copper Plate
-        if (input.is(Items.COPPER_INGOT) || input.is(INGOTS_COPPER) || path.equals("copper_ingot")) {
-            return new ItemStack(RefineryMod.COPPER_PLATE.get(), 1);
+
+        // === 3. CORRUGATED DIE: 1 Steel Ingot/Plate -> 4 Corrugated Sheets ===
+        if (die.is(RefineryMod.CORRUGATED_DIE.get())) {
+            if (input.is(RefineryMod.STEEL_INGOT.get()) || input.is(INGOTS_STEEL) || input.is(RefineryMod.STEEL_PLATE.get()) || input.is(PLATES_STEEL) || path.contains("steel")) {
+                return new ItemStack(RefineryMod.CORRUGATED_STEEL_PANEL.get(), 4);
+            }
+            if (input.is(Items.IRON_INGOT) || input.is(INGOTS_IRON) || input.is(RefineryMod.IRON_PLATE.get()) || input.is(PLATES_IRON) || path.contains("iron")) {
+                return new ItemStack(RefineryMod.CORRUGATED_STEEL_PANEL.get(), 2);
+            }
+            return ItemStack.EMPTY;
         }
-        // Gold Ingot -> Gold Plate
-        if (input.is(Items.GOLD_INGOT) || input.is(INGOTS_GOLD) || path.equals("gold_ingot")) {
-            return new ItemStack(RefineryMod.GOLD_PLATE.get(), 1);
-        }
-        // Tin Ingot -> Tin Plate
-        if (input.is(RefineryMod.TIN_INGOT.get()) || input.is(INGOTS_TIN) || path.equals("tin_ingot")) {
-            return new ItemStack(RefineryMod.TIN_PLATE.get(), 1);
-        }
-        // Bronze Ingot -> Bronze Plate
-        if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(INGOTS_BRONZE) || path.equals("bronze_ingot")) {
-            return new ItemStack(RefineryMod.BRONZE_PLATE.get(), 1);
+
+        // === 4. RAIL DIE: Ingots or Plates -> Rails ===
+        if (die.is(RefineryMod.RAIL_DIE.get())) {
+            if (input.is(RefineryMod.STEEL_INGOT.get()) || input.is(INGOTS_STEEL) || input.is(RefineryMod.STEEL_PLATE.get()) || input.is(PLATES_STEEL) || path.contains("steel")) {
+                return new ItemStack(Items.RAIL, 4);
+            }
+            if (input.is(Items.IRON_INGOT) || input.is(INGOTS_IRON) || input.is(RefineryMod.IRON_PLATE.get()) || input.is(PLATES_IRON) || path.contains("iron")) {
+                return new ItemStack(Items.RAIL, 2);
+            }
+            if (input.is(Items.GOLD_INGOT) || input.is(INGOTS_GOLD) || input.is(RefineryMod.GOLD_PLATE.get()) || input.is(PLATES_GOLD) || path.contains("gold")) {
+                return new ItemStack(Items.POWERED_RAIL, 2);
+            }
+            if (input.is(Items.COPPER_INGOT) || input.is(INGOTS_COPPER) || input.is(RefineryMod.COPPER_PLATE.get()) || input.is(PLATES_COPPER) || path.contains("copper")) {
+                return new ItemStack(Items.ACTIVATOR_RAIL, 2);
+            }
+            return ItemStack.EMPTY;
         }
 
         return ItemStack.EMPTY;
     }
 
     private int getValidInputSlot() {
-        for (int i = 0; i < 2; i++) {
+        ItemStack die = getDie();
+        if (die.isEmpty()) return -1;
+        for (int i = INPUT_SLOT_1; i <= INPUT_SLOT_2; i++) {
             ItemStack stack = this.items.get(i);
-            if (!stack.isEmpty() && !getPressResult(stack).isEmpty()) {
+            if (!stack.isEmpty() && !getPressResult(die, stack).isEmpty()) {
                 return i;
             }
         }
@@ -344,7 +437,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
     private boolean canFitOutput(ItemStack result) {
         if (result.isEmpty()) return false;
-        for (int i = 2; i < 4; i++) {
+        for (int i = OUTPUT_SLOT_1; i <= OUTPUT_SLOT_2; i++) {
             ItemStack stack = this.items.get(i);
             if (stack.isEmpty()) return true;
             if (ItemStack.isSameItemSameComponents(stack, result) && stack.getCount() + result.getCount() <= stack.getMaxStackSize()) {
@@ -355,7 +448,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     }
 
     private void addOutput(ItemStack result) {
-        for (int i = 2; i < 4; i++) {
+        for (int i = OUTPUT_SLOT_1; i <= OUTPUT_SLOT_2; i++) {
             ItemStack stack = this.items.get(i);
             if (stack.isEmpty()) {
                 this.items.set(i, result);
@@ -631,8 +724,8 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     }
 
     // === WorldlyContainer Implementation ===
-    private static final int[] SLOTS_INPUT = new int[]{0, 1};
-    private static final int[] SLOTS_OUTPUT = new int[]{2, 3};
+    private static final int[] SLOTS_INPUT = new int[]{INPUT_SLOT_1, INPUT_SLOT_2};
+    private static final int[] SLOTS_OUTPUT = new int[]{OUTPUT_SLOT_1, OUTPUT_SLOT_2};
 
     @Override
     public int[] getSlotsForFace(Direction side) {
@@ -644,12 +737,16 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
     @Override
     public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
-        return slot < 2 && !getPressResult(stack).isEmpty();
+        if (slot == INPUT_SLOT_1 || slot == INPUT_SLOT_2) {
+            ItemStack die = getDie();
+            return !die.isEmpty() ? !getPressResult(die, stack).isEmpty() : isValidInput(stack);
+        }
+        return false;
     }
 
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
-        return slot >= 2;
+        return slot == OUTPUT_SLOT_1 || slot == OUTPUT_SLOT_2;
     }
 
     @Override
@@ -695,7 +792,14 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot < 2 && !getPressResult(stack).isEmpty();
+        if (slot == DIE_SLOT) {
+            return isDie(stack);
+        }
+        if (slot == INPUT_SLOT_1 || slot == INPUT_SLOT_2) {
+            ItemStack die = getDie();
+            return !die.isEmpty() ? !getPressResult(die, stack).isEmpty() : isValidInput(stack);
+        }
+        return false;
     }
 
     @Override
@@ -738,8 +842,8 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         Direction facing = getBlockState().getValue(MetalPressControllerBlock.FACING);
         Direction right = facing.getClockWise();
 
-        // Check if there are any finished items to export from output buffer slots 2..3
-        boolean hasOutput = !this.items.get(2).isEmpty() || !this.items.get(3).isEmpty();
+        // Check if there are any finished items to export from output buffer slots 3..4
+        boolean hasOutput = !this.items.get(OUTPUT_SLOT_1).isEmpty() || !this.items.get(OUTPUT_SLOT_2).isEmpty();
         if (!hasOutput) return;
 
         // Collect all potential export target positions in priority order:
@@ -806,7 +910,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
                     continue;
                 }
 
-                for (int slot = 2; slot <= 3; slot++) {
+                for (int slot = OUTPUT_SLOT_1; slot <= OUTPUT_SLOT_2; slot++) {
                     ItemStack sourceStack = this.items.get(slot);
                     if (sourceStack.isEmpty()) continue;
 
@@ -837,7 +941,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
             // Direct pipe insertion
             if (targetBE instanceof IndustrialPipeBlockEntity pipeBE && pipeBE.getPipeType().handlesItems()) {
-                for (int slot = 2; slot <= 3; slot++) {
+                for (int slot = OUTPUT_SLOT_1; slot <= OUTPUT_SLOT_2; slot++) {
                     ItemStack sourceStack = this.items.get(slot);
                     if (sourceStack.isEmpty()) continue;
 
@@ -853,7 +957,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
             // Target is a standard Container (chests, barrels, hoppers, crates)
             if (targetBE instanceof Container targetContainer) {
-                for (int slot = 2; slot <= 3; slot++) {
+                for (int slot = OUTPUT_SLOT_1; slot <= OUTPUT_SLOT_2; slot++) {
                     ItemStack sourceStack = this.items.get(slot);
                     if (sourceStack.isEmpty()) continue;
 
@@ -868,7 +972,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             } else {
                 var handler = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK, targetPos, Direction.UP);
                 if (handler != null) {
-                    for (int slot = 2; slot <= 3; slot++) {
+                    for (int slot = OUTPUT_SLOT_1; slot <= OUTPUT_SLOT_2; slot++) {
                         ItemStack sourceStack = this.items.get(slot);
                         if (sourceStack.isEmpty()) continue;
 

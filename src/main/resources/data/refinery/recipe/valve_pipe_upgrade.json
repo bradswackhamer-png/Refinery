@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "refinery:steel_item_pipe",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "refinery:valve_pipe",
+    "count": 1
+  }
+}

@@ -221,6 +221,8 @@
   "item.refinery.item_extractor_pipe": "Industrial Item Extractor Pipe",
   "block.refinery.void_pipe": "Industrial Void Pipe",
   "item.refinery.void_pipe": "Industrial Void Pipe",
+  "block.refinery.valve_pipe": "Industrial Valve Pipe",
+  "item.refinery.valve_pipe": "Industrial Valve Pipe",
   "block.refinery.merge_pipe": "Quartz Merger Item Pipe",
   "block.refinery.merge_item_pipe": "Quartz Merger Item Pipe",
   "block.refinery.merge_fluid_pipe": "Quartz Merger Fluid Pipe",
@@ -381,5 +383,28 @@
   "block.refinery.structure_pipe": "Structure Pipe",
   "item.refinery.structure_pipe": "Structure Pipe",
   "item.refinery.pipe_facade": "Pipe Facade",
-  "item.refinery.pipe_facade_hole": "Hollow Pipe Facade"
+  "item.refinery.pipe_facade_hole": "Hollow Pipe Facade",
+
+  "item.refinery.plate_die": "Plate Stamping Die",
+  "item.refinery.gear_die": "Gear Stamping Die",
+  "item.refinery.corrugated_die": "Corrugated Steel Die",
+  "item.refinery.rail_die": "Rail Stamping Die",
+  "tooltip.refinery.plate_die.desc": "§7Metal Press Tooling: Stamps ingots into industrial metal plates.",
+  "tooltip.refinery.gear_die.desc": "§7Metal Press Tooling: Stamps ingots or plates into machinery gears.",
+  "tooltip.refinery.corrugated_die.desc": "§7Metal Press Tooling: Stamps steel ingots into corrugated steel sheets (1 Ingot -> 4 Sheets).",
+  "tooltip.refinery.rail_die.desc": "§7Metal Press Tooling: Stamps ingots or plates into railway tracks.",
+
+  "item.refinery.steel_gear": "Steel Gear",
+  "item.refinery.iron_gear": "Iron Gear",
+  "item.refinery.copper_gear": "Copper Gear",
+  "item.refinery.bronze_gear": "Bronze Gear",
+  "item.refinery.gold_gear": "Gold Gear",
+  "item.refinery.tin_gear": "Tin Gear",
+  "tooltip.refinery.steel_gear.desc": "§7Heavy-duty steel gear for industrial power transmission.",
+  "tooltip.refinery.iron_gear.desc": "§7Standard iron machinery gear.",
+  "tooltip.refinery.copper_gear.desc": "§7Conductive copper gear for motorized machinery.",
+  "tooltip.refinery.bronze_gear.desc": "§7Wear-resistant bronze gear.",
+  "tooltip.refinery.gold_gear.desc": "§7Low-friction gold gear for precision mechanisms.",
+  "tooltip.refinery.tin_gear.desc": "§7Lightweight tin gear for small machinery.",
+  "tag.item.refinery.press_dies": "Metal Press Stamping Dies"
 }

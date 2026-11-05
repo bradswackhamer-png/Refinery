@@ -53,6 +53,11 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.10.23 (Monolithic 3D Electric Arc Melter & Continuous Casting Press Overhaul)](#version-11023-monolithic-3d-electric-arc-melter--continuous-casting-press-overhaul)
+   - [Version 1.10.21 (Plate Stamping Die Progression Fix)](#version-11021-plate-stamping-die-progression-fix)
+   - [Version 1.10.19 (Steel Gear Tag & Valve Pipe Upgrade Recipe Fix)](#version-11019-steel-gear-tag--valve-pipe-upgrade-recipe-fix)
+   - [Version 1.10.17 (Redstone Valve Pipe, Pipe Gate Flow Control, Spool Wire Icons)](#version-11017-redstone-valve-pipe-pipe-gate-flow-control-spool-wire-icons)
+   - [Version 1.10.15 (Metal Press Tooling Dies, Machinery Gears, Corrugated Steel & Rail Stamping)](#version-11015-metal-press-tooling-dies-machinery-gears-corrugated-steel--rail-stamping)
    - [Version 1.10.14 (Slender 3D 8-Bit Pipes, Dedicated Facades Tab, Dynamic Block Textures)](#version-11014-slender-3d-8-bit-pipes-dedicated-facades-tab-dynamic-block-textures)
    - [Version 1.10.12 (Pipe Facade Network Codec Fix & Tin Ore Silk Touch Loot Table Fix)](#version-11012-pipe-facade-network-codec-fix--tin-ore-silk-touch-loot-table-fix)
    - [Version 1.10.11 (3D 8-Bit Pixel Art Pipe Item Icons & Fluid Markings)](#version-11011-3d-8-bit-pixel-art-pipe-item-icons--fluid-markings)
@@ -320,22 +325,29 @@ A massive foundry furnace that transforms iron sources and carbon fuels into hig
 
 ---
 
-### Industrial Metal Press (3Ã—2Ã—2)
-A universal hydraulic mechanical press with a 3-block-wide conveyor bed and an overhead AIDA NC1-1500 stamping head for stamping metal ingots into structural plates.
+### Industrial Metal Press (3×2×2)
+A universal hydraulic mechanical press with a 3-block-wide conveyor bed and an overhead AIDA NC1-1500 stamping head for cold-forming ingots and plates into industrial plates, gears, corrugated siding, and rails.
 
-- **Dimensions**: 3 wide Ã— 2 tall Ã— 2 deep (12 blocks total; also supports 3Ã—2Ã—1 layout).
+- **Tooling Die Requirement**: The press **strictly requires a Stamping Die** inserted into the dedicated tooling slot below the ram. Different dies configure the press for different product lines:
+  - **Plate Die** (`refinery:plate_die` — crafted from 4 Steel Ingots):
+    - Stamps 1 Ingot (Steel, Iron, Copper, Gold, Tin, Bronze) $\rightarrow$ **1x Respective Plate**.
+  - **Gear Die** (`refinery:gear_die` — crafted from 4 Steel Plates):
+    - Cold-forms 1 Ingot or Plate $\rightarrow$ **1x Respective Gear** (**Steel Gear**, **Iron Gear**, **Copper Gear**, **Bronze Gear**, **Gold Gear**, **Tin Gear**) with 4x material efficiency over hand crafting.
+  - **Corrugated Steel Die** (`refinery:corrugated_die`):
+    - **1 Steel Ingot (or Plate)** $\rightarrow$ **4x Corrugated Steel Panels** (`refinery:corrugated_steel_panel`).
+    - **1 Iron Ingot (or Plate)** $\rightarrow$ **2x Corrugated Steel Panels**.
+  - **Rail Die** (`refinery:rail_die`):
+    - **1 Steel Ingot (or Plate)** $\rightarrow$ **4x Rails** (`minecraft:rail`).
+    - **1 Iron Ingot (or Plate)** $\rightarrow$ **2x Rails**.
+    - **1 Gold Ingot (or Plate)** $\rightarrow$ **2x Powered Rails** (`minecraft:powered_rail`).
+    - **1 Copper Ingot (or Plate)** $\rightarrow$ **2x Activator Rails** (`minecraft:activator_rail`).
+- **Dimensions**: 3 wide × 2 tall × 2 deep (12 blocks total; also supports 3×2×1 layout).
 - **Physical 3D Stamping Animation**: Features an in-world animated hydraulic piston ram with a power stroke, heavy anvil impact (`SoundEvents.ANVIL_LAND`), and spark ejection!
-- **Supported Stamping Stamping Recipes** (40 ticks = 2.0s per plate):
-  - **Steel Ingot** -> **Heavy Steel Plate**
-  - **Iron Ingot** -> **Iron Plate**
-  - **Copper Ingot** -> **Copper Plate**
-  - **Gold Ingot** -> **Gold Plate**
-  - **Tin Ingot** -> **Tin Plate**
-  - **Bronze Ingot** -> **Bronze Plate**
-- **Energy**: 50,000 FE buffer; consumes 20 FE/t (800 FE per plate).
+- **Energy**: 50,000 FE buffer; consumes 20 FE/t (800 FE per cycle).
 - **Logistics**:
-  - **Top & Sides**: Inserts Ingots into the 2-slot input queue.
-  - **Bottom**: Extracts Finished Plates from the 2-slot output buffer.
+  - **Slot 0 (Die)**: Tooling slot (stacks to 1); protected from hopper extraction.
+  - **Top & Sides**: Inserts raw materials into the 2-slot input queue (Slots 1..2).
+  - **Bottom / Auto-Export**: Extracts finished goods from the 2-slot output buffer (Slots 3..4). Automatically ejects onto connected conveyor belts, pipes, or chests.
 
 #### Layer-by-Layer Assembly (3Ã—2Ã—2)
 ```
@@ -1101,12 +1113,17 @@ The **Electric Arc Melter** superheats mineral dusts and raw ores into liquid mo
   - 1x **Arc Melter Output Port** (`refinery:melter_output_port`) â€” bottom or side molten spout. Automatically pushes molten liquid to adjacent Casting Channels, fluid pipes, or tanks!
 - **Hologram Support**: Right-click the Controller with a **Refinery Wrench** to project the full color-coded 3D holographic blueprint.
 
-#### Operation & Animated Renderer:
+#### Operation & Monolithic 3D Animated Model (`ArcMelterModel`):
 - **Power Consumption**: 40 FE/t while melting.
-- **Process Speed**: 40 ticks (2 seconds) per item.
-- **Fluid Yield**: 1 Dust / Raw Ore / Sand $\rightarrow$ 1,000 mB of Molten Fluid.
-- **Internal Tank**: 8,000 mB capacity with auto-drain through the Output Port.
-- **3D Animation**: While active, dual carbon electrodes descend inside the central chamber and discharge energetic electric arcs with dynamic sparks and particle bursts.
+- **Process Speed**: 160 ticks (8 seconds) per item.
+- **Fluid Yield**: 1 Ore / Raw Ore $\rightarrow$ 2,000 mB (2x doubling); 1 Ingot / Dust / Sand $\rightarrow$ 1,000 mB of Molten Fluid.
+- **Internal Tank**: 8,000 mB capacity with automatic molten fluid push into adjacent Open Casting Channels, fluid pipes, or tanks.
+- **Monolithic 3D EAF Architecture (`arc_melter.png` 256×256 Atlas)**:
+  - Heavy steel rocker trunnion foundation skid, cylindrical water-cooled ribbed furnace shell with vertical buckstay stiffeners, interior magnesia-carbon refractory hearth, front armored quartz slag/observation door at `(0, 1, 0)`, eccentric bottom-tapping (EBT) refractory launder spout at `(1, 0, 0)` aligning with Open Casting Channels, rear-left high-voltage EAF transformer vault with oil radiator fins and 3 copper busbar tubes, twin hydraulic electrode mast columns, domed water-cooled roof with delta refractory insert, top charge hopper at `(0, 2, 1)`, and front-left operator console.
+- **Dynamic Animations**:
+  - 3 reciprocating graphite carbon electrodes in a delta triad held by water-cooled copper clamp arms that oscillate vertically and discharge 3D jagged full-bright electric arc plasma bolts (`15728880` light) into the crucible bath.
+  - Rising and falling full-bright molten bath surface and flowing launder tapping stream dynamically tinted to match the active molten fluid (`molten_iron`, `molten_gold`, `molten_copper`, `molten_tin`, `molten_bronze`, `molten_glass`).
+  - Loaded input ore/dust/ingot visibly sinks into the top charge hopper (`(0, 2, 1)`), and items dropped into the top funnel from conveyors or droppers are automatically absorbed into the input slots.
 
 ---
 
@@ -1135,12 +1152,16 @@ The **Continuous Casting Press** receives molten liquids and uses a heavy overhe
   - 1x **Casting Press Input Port** (`refinery:casting_input_port`) â€” top or side intake. Connects directly to Casting Channels or fluid pipes.
   - 1x **Casting Press Output Port** (`refinery:casting_output_port`) â€” bottom or side exit conveyor chute. Automatically ejects finished ingots and blocks into hoppers, chests, or transport pipes!
 
-#### Operation & Animated Renderer:
+#### Operation & Monolithic 3D Animated Model (`CastingPressModel`):
 - **Power Consumption**: 40 FE/t while stamping.
-- **Process Speed**: 40 ticks (2 seconds) per stroke.
+- **Process Speed**: 240 ticks (12 seconds) per casting & quenching cycle.
 - **Input Requirement**: 1,000 mB of Molten Fluid per ingot/block.
-- **Hydraulic Stamping Animation**: When a 1,000 mB charge fills the mold bed, the heavy overhead stamping die descends under high pressure, accompanied by hydraulic piston sounds, steam hisses, and quenching effects!
-- **Auto-Ejection**: Ejects finished ingots and blocks through the Output Port immediately upon solidification.
+- **Monolithic 3D Hydraulic Caster Architecture (`casting_press.png` 256×256 Atlas)**:
+  - Reinforced steel foundation bed, central water-cooled copper & refractory crystallizer mold basin at `(0, 0, 1)`, 4 precision-ground chrome tie-rod columns with castle locknuts, overhead cast-steel crown platen with crimson-amber main hydraulic cylinder and twin return boosters, front safety grille observation window at `(0, 1, 0)`, upper refractory tundish & sloped launder chute at `(0, 1, 2)` plus lower `Y=0` refractory channel receiver troughs at `(0, 0, 2)` and `(-1, 0, 1)`, right-side water-cooling manifold cabinet, motorized steel run-out roller table at `(1, 0, 0)`, and front-left PLC operator cabinet.
+- **Dynamic Animations**:
+  - Reciprocating hydraulic ram crosshead (with diagonal hazard stripes, bronze guide bushings sliding on the 4 chrome tie-rods, chrome piston rods, and water-cooled copper upper stamping die) that accelerates downward (`0..90` ticks), holds high-pressure quench compression (`90..150` ticks), and retracts smoothly (`150..240` ticks).
+  - Dynamic molten pool to incandescent solidified billet transition inside the mold cavity and animated finished ingots/blocks traveling out along the right-hand motorized run-out roller table (`(1, 0, 0)`).
+- **Auto-Ejection & Full Member Capability Forwarding**: Automatically exports finished ingots and glass blocks onto adjacent conveyors, item pipes, or containers at `(1, 0, 0)`, and accepts molten fluid from Open Casting Channels or fluid pipes connected to the Input Port or any assembled casing/basin block.
 
 ---
 
@@ -1708,6 +1729,63 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.10.23 (Monolithic 3D Electric Arc Melter & Continuous Casting Press Overhaul)
+- **Electric Arc Melter Monolithic 3D Model & 256×256 Texture Atlas (`ArcMelterModel` & `arc_melter.png`)**:
+  - Redesigned the assembled 3×3×3 Electric Arc Melter (`refinery:arc_melter_controller`) into a monolithic 3D Industrial Electric Arc Furnace (EAF) featuring a rocker trunnion foundation skid, cylindrical water-cooled ribbed steel shell with vertical buckstay stiffeners, interior magnesia-carbon refractory hearth, front armored quartz slag/observation door at `(0, 1, 0)`, eccentric bottom-tapping (EBT) refractory launder spout at `(1, 0, 0)` aligning with Open Casting Channels, rear-left high-voltage EAF transformer vault with oil-cooling radiator fins and 3 copper busbar tubes, twin hydraulic gantry mast columns, domed water-cooled roof with delta refractory insert, top flared charge hopper at `(0, 2, 1)`, and front-left operator console.
+  - **Dynamic Operational Animations**: 3 reciprocating graphite carbon electrodes in a delta triad with copper clamp arms, incandescent glowing tips, 3D jagged full-bright electric arc plasma bolts leaping into the bath, rising/falling molten metal bath and launder stream dynamically tinted to match the active molten fluid (`molten_iron`, `molten_gold`, `molten_copper`, `molten_tin`, `molten_bronze`, `molten_glass`), and input items sinking in the top charge hopper (with in-world dropped item absorption at `(0, 2, 1)`).
+- **Continuous Casting Press Monolithic 3D Model & 256×256 Texture Atlas (`CastingPressModel` & `casting_press.png`)**:
+  - Redesigned the assembled 3×3×3 Continuous Casting Press (`refinery:casting_press_controller`) into a monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press featuring a reinforced steel foundation bed, central water-cooled copper & refractory crystallizer mold basin at `(0, 0, 1)`, 4 precision-ground chrome tie-rod columns with castle locknuts, overhead cast-steel crown platen with crimson-amber main hydraulic cylinder and twin return boosters, front safety grille observation window at `(0, 1, 0)`, upper refractory tundish & sloped launder chute at `(0, 1, 2)`, lower `Y=0` refractory channel receiver troughs at `(0, 0, 2)` and `(-1, 0, 1)` with animated glowing molten inflow streams, right-side water-cooling manifold cabinet, motorized steel run-out roller table at `(1, 0, 0)`, and front-left PLC operator control cabinet.
+  - **Dynamic Operational Animations**: Reciprocating hydraulic ram crosshead (with diagonal hazard stripes, bronze guide bushings sliding on the 4 chrome tie-rods, chrome piston rods, and water-cooled copper upper stamping die) that accelerates downward (`0..90` ticks), holds high-pressure quench compression (`90..150` ticks), and retracts smoothly (`150..240` ticks), plus dynamic molten-to-solidified billet transition and finished cast items traveling along the right-hand run-out roller table (`(1, 0, 0)`).
+- **Seamless Member Invisibility, Channel Flow & Automation Connectivity**:
+  - All 9 Arc Melter and Casting Press controller and member blocks hide their individual block models (`RenderShape.INVISIBLE`, `Shapes.empty()` occlusion) when `ASSEMBLED = true`, forwarding right-click GUI/wrench interactions to the controller and disassembling cleanly if broken.
+  - Registered Energy, Item (`WorldlyContainerWrapper`), and Fluid capabilities across all assembled member blocks of both machines and added automatic output export (`tryExportOutput`) on the Casting Press to adjacent conveyors, item pipes, and containers.
+
+---
+
+### Version 1.10.21 (Plate Stamping Die Progression Fix)
+- **Plate Stamping Die Recipe (`refinery:plate_die`)**:
+  - Changed the Plate Stamping Die crafting recipe (`data/refinery/recipe/plate_die.json`) from Steel Plates (`#c:plates/steel`) to 4 Steel Ingots (`#c:ingots/steel`), eliminating the circular progression dependency where crafting the Plate Die required Steel Plates that could only be stamped with a Plate Die.
+
+---
+
+### Version 1.10.19 (Steel Gear Tag & Valve Pipe Upgrade Recipe Fix)
+- **Steel Gear Recipe Tag Resolution (`refinery:steel_gear`)**:
+  - Added the `#c:ingots/steel` common item tag (`data/c/tags/item/ingots/steel.json`) and registered it in `#c:ingots`, resolving the missing tag registry error during server/world datapack loading.
+- **Valve Pipe Upgrade Recipe Syntax Migration (`refinery:valve_pipe_upgrade`)**:
+  - Updated `data/refinery/recipe/valve_pipe_upgrade.json` to use Minecraft 26.3 flat string ingredients in its shapeless recipe definition.
+
+---
+
+### Version 1.10.17 (Redstone Valve Pipe, Pipe Gate Flow Control, Spool Wire Icons)
+- **Industrial Valve Pipe (`refinery:valve_pipe`)**:
+  - Added the Redstone Valve Pipe capable of opening and closing flow for both fluids and items using redstone signals or Pipe Gates.
+  - Features Normal Mode (closes on redstone power) and Inverted Mode (opens on redstone power).
+  - Modes can be toggled by right-clicking the valve pipe with the Refinery Wrench, displaying action bar feedback.
+  - Fully compatible with BuildCraft-style Pipe Gates attached to the pipe or adjacent pipes.
+  - Items pausing before a closed valve pipe remain held in the pipe until the valve is signaled to open.
+  - Crafting recipe: 2 Steel Ingots + 1 Redstone Dust $\rightarrow$ 8 Valve Pipes (plus a 1-to-1 conversion recipe from steel pipes).
+- **Classic Spool Pipe Wire Icons**:
+  - Redesigned Red, Blue, Green, and Yellow pipe wire icons (`pipe_wire_red`, `pipe_wire_blue`, `pipe_wire_green`, `pipe_wire_yellow`) to match classic wooden thread/wire spools with wrapped coils and an unspooling wire tail.
+
+---
+
+### Version 1.10.15 (Metal Press Tooling Dies, Machinery Gears, Corrugated Steel & Rail Stamping)
+- **Metal Press Tooling Dies**:
+  - Added 4 dedicated tooling dies: Plate Die (`refinery:plate_die`), Gear Die (`refinery:gear_die`), Corrugated Steel Die (`refinery:corrugated_die`), and Rail Die (`refinery:rail_die`).
+  - Stamping in the Hydraulic Metal Press strictly requires an installed Die inserted into the dedicated tooling slot.
+  - Upgraded the Metal Press GUI with a beveled Die slot beneath the ram, an empty-slot guide tooltip, and ram hover tooltips showing the installed tooling.
+- **Machinery Gears & Stamping**:
+  - Registered 6 industrial gears: Steel Gear (`refinery:steel_gear`), Iron Gear (`refinery:iron_gear`), Copper Gear (`refinery:copper_gear`), Bronze Gear (`refinery:bronze_gear`), Gold Gear (`refinery:gold_gear`), and Tin Gear (`refinery:tin_gear`).
+  - Added shaped crafting recipes (4 ingots in a cross) and common tags (`#c:gears` and `#c:gears/<metal>`).
+  - Stamping with the Gear Die produces gears at 4x material efficiency (1 ingot or plate $\rightarrow$ 1 gear).
+- **Corrugated Steel Block & Rail Stamping**:
+  - Stamping with the Corrugated Steel Die yields 4 Corrugated Steel Panels per Steel Ingot/Plate (and 2 per Iron Ingot/Plate).
+  - Stamping with the Rail Die yields 4 Rails per Steel Ingot/Plate, 2 Rails per Iron Ingot/Plate, 2 Powered Rails per Gold Ingot/Plate, and 2 Activator Rails per Copper Ingot/Plate.
+- **In-Game Guide Book Documentation**:
+  - Updated the Hydraulic Metal Press chapter with full die tooling instructions and all 4 stamping recipe types.
 
 ---
 

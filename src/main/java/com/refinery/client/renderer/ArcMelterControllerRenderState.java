@@ -1,6 +1,7 @@
 package com.refinery.client.renderer;
 
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.material.Fluid;
@@ -21,6 +22,9 @@ public class ArcMelterControllerRenderState extends BlockEntityRenderState {
 
     public int moltenAmount = 0;
     public Fluid moltenFluid = Fluids.EMPTY;
+
+    public final ItemStackRenderState activeItemState = new ItemStackRenderState();
+    public boolean hasActiveItem = false;
 
     public record MissingComponent(
             int relX, int relY, int relZ,

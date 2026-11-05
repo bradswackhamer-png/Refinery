@@ -671,6 +671,11 @@ public class RefineryMod {
     public static final DeferredItem<com.refinery.item.PipeBlockItem> VOID_PIPE_ITEM = ITEMS.registerItem("void_pipe",
             p -> new com.refinery.item.PipeBlockItem(VOID_PIPE.get(), p));
 
+    public static final DeferredBlock<com.refinery.block.pipe.ValvePipeBlock> VALVE_PIPE = BLOCKS.registerBlock("valve_pipe",
+            com.refinery.block.pipe.ValvePipeBlock::new);
+    public static final DeferredItem<com.refinery.item.PipeBlockItem> VALVE_PIPE_ITEM = ITEMS.registerItem("valve_pipe",
+            p -> new com.refinery.item.PipeBlockItem(VALVE_PIPE.get(), p));
+
     // Quartz / Merge Pipes (Selectable Output, all other connections become inputs)
     public static final DeferredBlock<com.refinery.block.pipe.IndustrialPipeBlock> MERGE_PIPE = BLOCKS.registerBlock("merge_pipe",
             p -> new com.refinery.block.pipe.IndustrialPipeBlock(p, com.refinery.block.pipe.IndustrialPipeType.ITEM, com.refinery.block.pipe.IndustrialPipeMaterial.QUARTZ));
@@ -759,6 +764,30 @@ public class RefineryMod {
             p -> new MaterialItem(p, "tooltip.refinery.copper_plate.desc"), Item.Properties::new);
     public static final DeferredItem<MaterialItem> GOLD_PLATE = ITEMS.registerItem("gold_plate",
             p -> new MaterialItem(p, "tooltip.refinery.gold_plate.desc"), Item.Properties::new);
+
+    // === Stamping Dies ===
+    public static final DeferredItem<MaterialItem> PLATE_DIE = ITEMS.registerItem("plate_die",
+            p -> new MaterialItem(p.stacksTo(1), "tooltip.refinery.plate_die.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> GEAR_DIE = ITEMS.registerItem("gear_die",
+            p -> new MaterialItem(p.stacksTo(1), "tooltip.refinery.gear_die.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> CORRUGATED_DIE = ITEMS.registerItem("corrugated_die",
+            p -> new MaterialItem(p.stacksTo(1), "tooltip.refinery.corrugated_die.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> RAIL_DIE = ITEMS.registerItem("rail_die",
+            p -> new MaterialItem(p.stacksTo(1), "tooltip.refinery.rail_die.desc"), Item.Properties::new);
+
+    // === Industrial Gears ===
+    public static final DeferredItem<MaterialItem> STEEL_GEAR = ITEMS.registerItem("steel_gear",
+            p -> new MaterialItem(p, "tooltip.refinery.steel_gear.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> IRON_GEAR = ITEMS.registerItem("iron_gear",
+            p -> new MaterialItem(p, "tooltip.refinery.iron_gear.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> COPPER_GEAR = ITEMS.registerItem("copper_gear",
+            p -> new MaterialItem(p, "tooltip.refinery.copper_gear.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> BRONZE_GEAR = ITEMS.registerItem("bronze_gear",
+            p -> new MaterialItem(p, "tooltip.refinery.bronze_gear.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> GOLD_GEAR = ITEMS.registerItem("gold_gear",
+            p -> new MaterialItem(p, "tooltip.refinery.gold_gear.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> TIN_GEAR = ITEMS.registerItem("tin_gear",
+            p -> new MaterialItem(p, "tooltip.refinery.tin_gear.desc"), Item.Properties::new);
 
     // === Block Entity Types ===
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RefineryControllerBlockEntity>> REFINERY_CONTROLLER_BE =
@@ -1162,6 +1191,7 @@ public class RefineryMod {
                         output.accept(ITEM_EXTRACTOR_PIPE_ITEM.get());
                         output.accept(BUFFER_PIPE_ITEM.get());
                         output.accept(VOID_PIPE_ITEM.get());
+                        output.accept(VALVE_PIPE_ITEM.get());
                         output.accept(MERGE_PIPE_ITEM.get());
                         output.accept(MERGE_FLUID_PIPE_ITEM.get());
                         output.accept(STRUCTURE_PIPE_ITEM.get());
@@ -1189,6 +1219,16 @@ public class RefineryMod {
                         output.accept(IRON_PLATE.get());
                         output.accept(COPPER_PLATE.get());
                         output.accept(GOLD_PLATE.get());
+                        output.accept(PLATE_DIE.get());
+                        output.accept(GEAR_DIE.get());
+                        output.accept(CORRUGATED_DIE.get());
+                        output.accept(RAIL_DIE.get());
+                        output.accept(STEEL_GEAR.get());
+                        output.accept(IRON_GEAR.get());
+                        output.accept(COPPER_GEAR.get());
+                        output.accept(BRONZE_GEAR.get());
+                        output.accept(GOLD_GEAR.get());
+                        output.accept(TIN_GEAR.get());
                         output.accept(RefineryFluids.CRUDE_OIL_BUCKET.get());
                         output.accept(RefineryFluids.DIESEL_BUCKET.get());
                         output.accept(RefineryFluids.GASOLINE_BUCKET.get());
@@ -1513,8 +1553,36 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Energy.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),
                 (be, side) -> be.energyStorage);
 
+        event.registerBlock(Capabilities.Energy.BLOCK,
+                (level, pos, state, be, side) -> {
+                    ArcMelterControllerBlockEntity controller = MelterCasingBlock.findNearbyController(level, pos);
+                    return controller != null && controller.isAssembled() ? controller.energyStorage : null;
+                },
+                MELTER_CASING.get(), MELTER_CHAMBER.get(), MELTER_INPUT_PORT.get(), MELTER_OUTPUT_PORT.get());
+
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> {
+                    ArcMelterControllerBlockEntity controller = MelterCasingBlock.findNearbyController(level, pos);
+                    if (controller == null || !controller.isAssembled()) return null;
+                    return side != null ? new WorldlyContainerWrapper(controller, side) : VanillaContainerWrapper.of(controller);
+                },
+                MELTER_CASING.get(), MELTER_CHAMBER.get());
+
+        event.registerBlock(Capabilities.Fluid.BLOCK,
+                (level, pos, state, be, side) -> {
+                    ArcMelterControllerBlockEntity controller = MelterCasingBlock.findNearbyController(level, pos);
+                    if (controller == null || !controller.isAssembled()) return null;
+                    return new SingleFluidHandler(
+                            controller::getMoltenFluid,
+                            controller::getMoltenAmount,
+                            controller::setMoltenAmount,
+                            ArcMelterControllerBlockEntity.TANK_CAPACITY,
+                            false, true, controller::setChanged);
+                },
+                MELTER_CASING.get(), MELTER_CHAMBER.get());
+
         event.registerBlockEntity(Capabilities.Item.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
+                (be, side) -> side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be));
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),
                 (be, side) -> {
@@ -1531,7 +1599,7 @@ public class RefineryMod {
                 (be, side) -> {
                     var controller = be.getController();
                     if (controller == null || be.getPortType() != MelterPortBlock.PortType.INPUT) return null;
-                    return VanillaContainerWrapper.of(be);
+                    return side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be);
                 });
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, MELTER_PORT_BE.get(),
@@ -1554,8 +1622,38 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Energy.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> be.energyStorage);
 
+        event.registerBlock(Capabilities.Energy.BLOCK,
+                (level, pos, state, be, side) -> {
+                    CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
+                    return controller != null && controller.isAssembled() ? controller.energyStorage : null;
+                },
+                CASTING_CASING.get(), CASTING_BASIN.get(), CASTING_CHAMBER.get(), CASTING_INPUT_PORT.get(), CASTING_OUTPUT_PORT.get());
+
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> {
+                    CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
+                    if (controller == null || !controller.isAssembled()) return null;
+                    return side != null ? new WorldlyContainerWrapper(controller, side) : VanillaContainerWrapper.of(controller);
+                },
+                CASTING_CASING.get(), CASTING_BASIN.get(), CASTING_CHAMBER.get());
+
+        event.registerBlock(Capabilities.Fluid.BLOCK,
+                (level, pos, state, be, side) -> {
+                    CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
+                    if (controller == null || !controller.isAssembled()) return null;
+                    return new SingleFluidHandler(
+                            controller::getMoltenFluid,
+                            controller::setMoltenFluid,
+                            controller::getMoltenAmount,
+                            controller::setMoltenAmount,
+                            CastingPressControllerBlockEntity.TANK_CAPACITY,
+                            true, false, controller::setChanged,
+                            f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty());
+                },
+                CASTING_CASING.get(), CASTING_BASIN.get(), CASTING_CHAMBER.get());
+
         event.registerBlockEntity(Capabilities.Item.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
+                (be, side) -> side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be));
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> {
@@ -1574,7 +1672,7 @@ public class RefineryMod {
                 (be, side) -> {
                     var controller = be.getController();
                     if (controller == null || be.getPortType() != CastingPortBlock.PortType.OUTPUT) return null;
-                    return VanillaContainerWrapper.of(be);
+                    return side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be);
                 });
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_PORT_BE.get(),
@@ -1663,10 +1761,10 @@ public class RefineryMod {
 
         // Capabilities on Native Industrial Pipes (Fluid and Item handling)
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, INDUSTRIAL_PIPE_BE.get(),
-                (be, side) -> be.getPipeType().handlesFluid() ? be.getFluidTank() : null);
+                (be, side) -> (be.getPipeType().handlesFluid() && be.isValveOpen()) ? be.getFluidTank() : null);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, INDUSTRIAL_PIPE_BE.get(),
-                (be, side) -> be.getPipeType().handlesItems() ? VanillaContainerWrapper.of(be) : null);
+                (be, side) -> (be.getPipeType().handlesItems() && be.isValveOpen()) ? VanillaContainerWrapper.of(be) : null);
 
         // Capabilities on Buffer Pipe (1-Slot Item Container)
         event.registerBlockEntity(Capabilities.Item.BLOCK, BUFFER_PIPE_BE.get(),

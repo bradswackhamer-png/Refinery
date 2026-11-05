@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SRS"
+  ],
+  "key": {
+    "S": "refinery:steel_ingot",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "refinery:valve_pipe",
+    "count": 8
+  }
+}

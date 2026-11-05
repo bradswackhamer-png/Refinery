@@ -94,9 +94,16 @@ public class CastingChannelBlock extends Block implements EntityBlock {
 
     private boolean canConnectTo(net.minecraft.world.level.LevelReader level, BlockPos targetPos, Direction dir) {
         BlockState targetState = level.getBlockState(targetPos);
-        if (targetState.getBlock() instanceof CastingChannelBlock) return true;
-        if (targetState.getBlock() instanceof MelterPortBlock) return true;
-        if (targetState.getBlock() instanceof CastingPortBlock) return true;
+        Block block = targetState.getBlock();
+        if (block instanceof CastingChannelBlock) return true;
+        if (block instanceof MelterPortBlock) return true;
+        if (block instanceof CastingPortBlock) return true;
+        if (block instanceof ArcMelterControllerBlock) return true;
+        if (block instanceof MelterCasingBlock) return true;
+        if (block instanceof CastingPressControllerBlock) return true;
+        if (block instanceof CastingCasingBlock) return true;
+        if (block instanceof CastingBasinBlock) return true;
+        if (block instanceof com.refinery.block.pipe.IndustrialPipeBlock ipb && ipb.getPipeType().handlesFluid()) return true;
         return false;
     }
 

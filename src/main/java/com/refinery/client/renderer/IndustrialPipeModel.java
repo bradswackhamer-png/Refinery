@@ -46,6 +46,8 @@ public class IndustrialPipeModel {
             RefineryMod.MODID, "textures/block/pipe/quartz_pipe.png");
     public static final Identifier TEXTURE_STRUCTURE = Identifier.fromNamespaceAndPath(
             RefineryMod.MODID, "textures/block/pipe/structure_pipe.png");
+    public static final Identifier TEXTURE_VALVE = Identifier.fromNamespaceAndPath(
+            RefineryMod.MODID, "textures/block/pipe/valve_pipe.png");
     public static final Identifier TEXTURE_WINDOW = Identifier.fromNamespaceAndPath(
             RefineryMod.MODID, "textures/block/pipe/pipe_window.png");
 
@@ -152,6 +154,7 @@ public class IndustrialPipeModel {
             case VOID -> TEXTURE_VOID;
             case QUARTZ -> TEXTURE_QUARTZ;
             case STRUCTURE -> TEXTURE_STRUCTURE;
+            case VALVE -> TEXTURE_VALVE;
             default -> TEXTURE_STEEL;
         };
     }

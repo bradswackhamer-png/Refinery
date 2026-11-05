@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "refinery:steel_ingot",
+    {"id": "energizedpower:steel_ingot", "required": false},
+    {"id": "logistics:core/steel_ingot", "required": false}
+  ]
+}

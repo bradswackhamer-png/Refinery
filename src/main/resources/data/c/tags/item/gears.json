@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "refinery:steel_gear",
+    "refinery:iron_gear",
+    "refinery:copper_gear",
+    "refinery:bronze_gear",
+    "refinery:gold_gear",
+    "refinery:tin_gear"
+  ]
+}

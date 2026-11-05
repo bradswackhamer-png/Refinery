@@ -140,6 +140,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public void setMoltenFluid(Fluid fluid) {
         this.moltenFluid = fluid;
         setChanged();
+        syncToClient();
     }
 
     public int getMoltenAmount() {
@@ -152,6 +153,47 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
             this.moltenFluid = Fluids.EMPTY;
         }
         setChanged();
+        syncToClient();
+    }
+
+    public void syncToClient() {
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    public void disassemble() {
+        this.assembled = false;
+        updateMemberBlockStates(false);
+        if (this.level != null && !this.level.isClientSide()) {
+            BlockState state = getBlockState();
+            if (state.getBlock() instanceof ArcMelterControllerBlock) {
+                this.level.setBlock(this.worldPosition, state.setValue(ArcMelterControllerBlock.ASSEMBLED, false)
+                        .setValue(ArcMelterControllerBlock.ACTIVE, false)
+                        .setValue(ArcMelterControllerBlock.BLUEPRINT, false), 3);
+            }
+        }
+        setChanged();
+        syncToClient();
+    }
+
+    public void updateMemberBlockStates(boolean isAssembled) {
+        if (this.level == null || this.level.isClientSide()) return;
+        Direction facing = (getBlockState().getBlock() instanceof ArcMelterControllerBlock && getBlockState().hasProperty(ArcMelterControllerBlock.FACING))
+                ? getBlockState().getValue(ArcMelterControllerBlock.FACING)
+                : Direction.NORTH;
+
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.x == 0 && req.y == 0 && req.z == 0) continue;
+            BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
+            BlockState targetState = this.level.getBlockState(targetPos);
+            if (targetState.hasProperty(ArcMelterControllerBlock.ASSEMBLED)) {
+                if (targetState.getValue(ArcMelterControllerBlock.ASSEMBLED) != isAssembled) {
+                    this.level.setBlock(targetPos, targetState.setValue(ArcMelterControllerBlock.ASSEMBLED, isAssembled), 3);
+                }
+            }
+        }
     }
 
     public NonNullList<ItemStack> getDrops() {
@@ -195,6 +237,46 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
             pushFluidOut();
         }
 
+        // Absorb any dropped ItemEntities that fell directly into the top charge hopper opening at (0, 2, 1)
+        Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
+        BlockPos hopperCenter = getRelativePos(0, 2, 1, facing);
+        net.minecraft.world.phys.AABB hopperBox = new net.minecraft.world.phys.AABB(
+                hopperCenter.getX() + 0.10, hopperCenter.getY() + 0.20, hopperCenter.getZ() + 0.10,
+                hopperCenter.getX() + 0.90, hopperCenter.getY() + 1.60, hopperCenter.getZ() + 0.90
+        );
+        List<net.minecraft.world.entity.item.ItemEntity> droppedItems = level.getEntitiesOfClass(
+                net.minecraft.world.entity.item.ItemEntity.class, hopperBox,
+                ie -> ie.isAlive() && !ie.getItem().isEmpty() && getMeltingResult(ie.getItem()) != Fluids.EMPTY);
+        if (!droppedItems.isEmpty()) {
+            boolean absorbedAny = false;
+            for (net.minecraft.world.entity.item.ItemEntity itemEntity : droppedItems) {
+                ItemStack entityStack = itemEntity.getItem();
+                for (int i = 0; i < INVENTORY_SIZE && !entityStack.isEmpty(); i++) {
+                    ItemStack slotStack = this.items.get(i);
+                    if (slotStack.isEmpty()) {
+                        this.items.set(i, entityStack.copy());
+                        entityStack.setCount(0);
+                        absorbedAny = true;
+                    } else if (ItemStack.isSameItemSameComponents(slotStack, entityStack) && slotStack.getCount() < slotStack.getMaxStackSize()) {
+                        int space = slotStack.getMaxStackSize() - slotStack.getCount();
+                        int transfer = Math.min(space, entityStack.getCount());
+                        slotStack.grow(transfer);
+                        entityStack.shrink(transfer);
+                        absorbedAny = true;
+                    }
+                }
+                if (entityStack.isEmpty()) {
+                    itemEntity.discard();
+                } else {
+                    itemEntity.setItem(entityStack);
+                }
+            }
+            if (absorbedAny) {
+                setChanged();
+                syncToClient();
+            }
+        }
+
         // Process item melting
         int inputSlot = getValidInputSlot();
         if (inputSlot != -1) {
@@ -213,7 +295,6 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
 
                     // Electric arc sizzle and flashes
                     if (this.progress % 8 == 1) {
-                        Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
                         BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
                         serverLevel.playSound(null, chamberPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.2f, 1.8f);
                         serverLevel.playSound(null, chamberPos, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 0.8f, 1.2f);
@@ -228,25 +309,32 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                     if (this.progress >= PROCESS_TIME) {
                         this.progress = 0;
                         input.shrink(1);
+                        if (input.isEmpty()) {
+                            this.items.set(inputSlot, ItemStack.EMPTY);
+                        }
                         this.moltenFluid = resultFluid;
                         this.moltenAmount += fluidProduced;
 
-                        Direction facing = state.getValue(ArcMelterControllerBlock.FACING);
                         BlockPos chamberPos = getRelativePos(0, 1, 1, facing);
                         serverLevel.playSound(null, chamberPos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 0.7f, 1.1f);
                     }
                     setChanged();
+                    if (this.progress == 1 || this.progress % 8 == 0 || this.progress == 0) {
+                        syncToClient();
+                    }
                 }
             } else {
                 if (this.progress > 0) {
                     this.progress = 0;
                     setChanged();
+                    syncToClient();
                 }
             }
         } else {
             if (this.progress > 0) {
                 this.progress = 0;
                 setChanged();
+                syncToClient();
             }
         }
 
@@ -255,6 +343,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
             if (latest.hasProperty(ArcMelterControllerBlock.ACTIVE)) {
                 level.setBlock(pos, latest.setValue(ArcMelterControllerBlock.ACTIVE, isActive), 3);
             }
+            syncToClient();
         }
     }
 
@@ -263,39 +352,97 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         if (this.level.getGameTime() % 4 != 0) return;
         Direction facing = getBlockState().getValue(ArcMelterControllerBlock.FACING);
 
-        // Find output port
+        // 1. Primary: push from any MelterPortBlock(OUTPUT) in the 3x3x3 multiblock to any adjacent fluid handler (channels, pipes, tanks)
         for (BlueprintRequirement req : getRequirements()) {
             BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
             if (this.level.getBlockEntity(targetPos) instanceof MelterPortBlockEntity portBE) {
                 if (portBE.getPortType() == MelterPortBlock.PortType.OUTPUT) {
-                    for (Direction dir : Direction.values()) {
-                        BlockPos neighborPos = targetPos.relative(dir);
-                        var neighborHandler = this.level.getCapability(Capabilities.Fluid.BLOCK, neighborPos, dir.getOpposite());
-                        if (neighborHandler != null) {
-                            int toPush = Math.min(25, this.moltenAmount);
-                            FluidResource res = FluidResource.of(this.moltenFluid);
-                            try (Transaction tx = Transaction.openRoot()) {
-                                int inserted = 0;
-                                for (int i = 0; i < neighborHandler.size(); i++) {
-                                    int ins = neighborHandler.insert(i, res, toPush - inserted, tx);
-                                    inserted += ins;
-                                    if (inserted >= toPush) break;
+                    if (tryPushFluidFromBlock(targetPos)) {
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 2. Fallback: also allow CastingChannels connected anywhere along Layer 0 (Y=0) of the assembled melter to receive molten fluid
+        for (BlueprintRequirement req : getRequirements()) {
+            if (req.y != 0) continue;
+            BlockPos targetPos = getRelativePos(req.x, req.y, req.z, facing);
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                BlockPos neighborPos = targetPos.relative(dir);
+                if (this.level.getBlockEntity(neighborPos) instanceof CastingChannelBlockEntity channelBE) {
+                    var neighborHandler = this.level.getCapability(Capabilities.Fluid.BLOCK, neighborPos, dir.getOpposite());
+                    if (neighborHandler != null) {
+                        int toPush = Math.min(25, this.moltenAmount);
+                        FluidResource res = FluidResource.of(this.moltenFluid);
+                        try (Transaction tx = Transaction.openRoot()) {
+                            int inserted = 0;
+                            for (int i = 0; i < neighborHandler.size(); i++) {
+                                int ins = neighborHandler.insert(i, res, toPush - inserted, tx);
+                                inserted += ins;
+                                if (inserted >= toPush) break;
+                            }
+                            if (inserted > 0) {
+                                tx.commit();
+                                channelBE.recordInputSide(dir.getOpposite());
+                                this.moltenAmount -= inserted;
+                                if (this.moltenAmount <= 0) {
+                                    this.moltenFluid = Fluids.EMPTY;
                                 }
-                                if (inserted > 0) {
-                                    tx.commit();
-                                    this.moltenAmount -= inserted;
-                                    if (this.moltenAmount <= 0) {
-                                        this.moltenFluid = Fluids.EMPTY;
-                                    }
-                                    setChanged();
-                                    return;
-                                }
+                                setChanged();
+                                syncToClient();
+                                return;
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    private boolean tryPushFluidFromBlock(BlockPos sourcePos) {
+        if (this.level == null) return false;
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = sourcePos.relative(dir);
+            if (isMultiblockMember(neighborPos)) continue;
+            var neighborHandler = this.level.getCapability(Capabilities.Fluid.BLOCK, neighborPos, dir.getOpposite());
+            if (neighborHandler != null) {
+                int toPush = Math.min(25, this.moltenAmount);
+                FluidResource res = FluidResource.of(this.moltenFluid);
+                try (Transaction tx = Transaction.openRoot()) {
+                    int inserted = 0;
+                    for (int i = 0; i < neighborHandler.size(); i++) {
+                        int ins = neighborHandler.insert(i, res, toPush - inserted, tx);
+                        inserted += ins;
+                        if (inserted >= toPush) break;
+                    }
+                    if (inserted > 0) {
+                        tx.commit();
+                        if (this.level.getBlockEntity(neighborPos) instanceof CastingChannelBlockEntity channelBE && dir.getAxis().isHorizontal()) {
+                            channelBE.recordInputSide(dir.getOpposite());
+                        }
+                        this.moltenAmount -= inserted;
+                        if (this.moltenAmount <= 0) {
+                            this.moltenFluid = Fluids.EMPTY;
+                        }
+                        setChanged();
+                        syncToClient();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isMultiblockMember(BlockPos pos) {
+        Direction facing = getBlockState().getValue(ArcMelterControllerBlock.FACING);
+        for (BlueprintRequirement req : getRequirements()) {
+            if (getRelativePos(req.x, req.y, req.z, facing).equals(pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int getValidInputSlot() {
@@ -356,18 +503,39 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
 
     public void toggleBlueprintProjection(@Nullable Player player) {
         if (this.level == null) return;
-        BlockState state = getBlockState();
-        boolean current = state.hasProperty(ArcMelterControllerBlock.BLUEPRINT) && state.getValue(ArcMelterControllerBlock.BLUEPRINT);
-        boolean next = !current;
-        this.blueprintTicks = next ? 600 : 0;
-        level.setBlock(getBlockPos(), state.setValue(ArcMelterControllerBlock.BLUEPRINT, next), 3);
-        if (next) {
-            checkStructure(true, player);
+        boolean formed = checkStructure(true, player);
+        if (formed) {
+            this.assembled = true;
+            updateMemberBlockStates(true);
+            this.blueprintTicks = 0;
+            if (!this.level.isClientSide()) {
+                BlockState current = getBlockState();
+                if (current.getBlock() instanceof ArcMelterControllerBlock) {
+                    this.level.setBlock(this.worldPosition, current.setValue(ArcMelterControllerBlock.ASSEMBLED, true)
+                            .setValue(ArcMelterControllerBlock.BLUEPRINT, false), 3);
+                }
+                linkPorts();
+            }
+            if (player != null) {
+                player.sendSystemMessage(Component.literal("§a[Electric Arc Melter]§r 3x3x3 Machine is §2VALID & OPERATIONAL§r!"));
+            }
+        } else {
+            this.assembled = false;
+            updateMemberBlockStates(false);
+            this.blueprintTicks = 600;
+            if (!this.level.isClientSide()) {
+                BlockState current = getBlockState();
+                if (current.getBlock() instanceof ArcMelterControllerBlock) {
+                    this.level.setBlock(this.worldPosition, current.setValue(ArcMelterControllerBlock.ASSEMBLED, false)
+                            .setValue(ArcMelterControllerBlock.BLUEPRINT, true), 3);
+                }
+            }
             if (player != null) {
                 player.sendSystemMessage(Component.literal("§6[Electric Arc Melter]§r 3x3x3 Blueprint Hologram §bPROJECTED§r for 30 seconds!"));
             }
         }
         setChanged();
+        syncToClient();
     }
 
     public record BlueprintRequirement(int x, int y, int z, Block expectedBlock, String name, int outlineColor) {}
@@ -517,16 +685,29 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public void syncAssembly() {
         if (this.level == null || this.level.isClientSide()) return;
         boolean matches = checkStructure(false, null);
-        if (matches != this.assembled) {
+        BlockState current = getBlockState();
+        if (!(current.getBlock() instanceof ArcMelterControllerBlock)) return;
+
+        updateMemberBlockStates(matches);
+
+        boolean blockAssembled = current.getValue(ArcMelterControllerBlock.ASSEMBLED);
+        if (matches != this.assembled || blockAssembled != matches) {
             this.assembled = matches;
-            if (this.assembled) {
+            BlockState newState = current.setValue(ArcMelterControllerBlock.ASSEMBLED, matches);
+            if (matches) {
+                newState = newState.setValue(ArcMelterControllerBlock.BLUEPRINT, false);
+                this.blueprintTicks = 0;
                 linkPorts();
+                if (this.level instanceof ServerLevel serverLevel) {
+                    serverLevel.playSound(null, this.worldPosition, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 1.1f);
+                    serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                            this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 1.5, this.worldPosition.getZ() + 1.0,
+                            6, 0.4, 0.4, 0.4, 0.05);
+                }
             }
-            BlockState current = getBlockState();
-            if (current.hasProperty(ArcMelterControllerBlock.ASSEMBLED)) {
-                level.setBlock(getBlockPos(), current.setValue(ArcMelterControllerBlock.ASSEMBLED, this.assembled), 3);
-            }
+            level.setBlock(getBlockPos(), newState, 3);
             setChanged();
+            syncToClient();
         }
     }
 
@@ -630,7 +811,10 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     @Override
     public ItemStack removeItem(int slot, int amount) {
         ItemStack result = ContainerHelper.removeItem(this.items, slot, amount);
-        if (!result.isEmpty()) setChanged();
+        if (!result.isEmpty()) {
+            setChanged();
+            syncToClient();
+        }
         return result;
     }
 
@@ -644,6 +828,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         this.items.set(slot, stack);
         stack.limitSize(this.getMaxStackSize(stack));
         setChanged();
+        syncToClient();
     }
 
     @Override

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "refinery:plate_die",
+    "refinery:gear_die",
+    "refinery:corrugated_die",
+    "refinery:rail_die"
+  ]
+}
