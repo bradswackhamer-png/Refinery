@@ -7,6 +7,7 @@ import com.refinery.block.StorageTankFillValveBlock;
 import com.refinery.fluid.GenericFluidTank;
 import com.refinery.fluid.RefineryFluids;
 import com.refinery.menu.StorageTankMenu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -708,10 +709,25 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
         return Component.translatable("container.refinery.storage_tank");
     }
 
+    public void flushTank(@Nullable Player player) {
+        int amt = this.fluidTank.getAmount();
+        this.fluidTank.dump();
+        setChanged();
+        syncToClient();
+        if (this.level != null && !this.level.isClientSide()) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 0.8f);
+            if (player != null && amt > 0) {
+                player.sendSystemMessage(
+                        Component.literal("§c[Storage Tank]§r Flushed " + String.format("%,d", amt) + " mB of stored fluid.").withStyle(ChatFormatting.RED)
+                );
+            }
+        }
+    }
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return new StorageTankMenu(containerId, playerInventory, this, this.dataAccess);
+        return new StorageTankMenu(containerId, playerInventory, this, this.dataAccess, this);
     }
 
     // === WorldlyContainer Implementation (Item Slots) ===

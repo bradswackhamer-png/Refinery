@@ -1,0 +1,7 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "refinery:block/crude_pump_jack" }
+    }
+  ]
+}

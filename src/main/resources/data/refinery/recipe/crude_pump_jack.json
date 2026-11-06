@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "refinery:electric_fluid_pump",
+    "G": "refinery:steel_gear",
+    "S": "refinery:steel_plate",
+    "C": "refinery:reinforced_casing"
+  },
+  "pattern": [
+    " P ",
+    "SGS",
+    "SCS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:crude_pump_jack"
+  }
+}

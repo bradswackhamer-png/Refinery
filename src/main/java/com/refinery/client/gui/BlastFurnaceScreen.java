@@ -19,17 +19,14 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
 
     public BlastFurnaceScreen(BlastFurnaceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);
-        this.inventoryLabelY = 74;
+        this.titleLabelX = 8;
+        this.titleLabelY = 6;
+        this.inventoryLabelY = 72;
     }
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-
-        // Section Headers
-        graphics.text(this.font, Component.literal("IRON").withStyle(ChatFormatting.DARK_GRAY), 20, 11, 0xFF444444, false);
-        graphics.text(this.font, Component.literal("FUEL").withStyle(ChatFormatting.DARK_GRAY), 64, 11, 0xFF444444, false);
-        graphics.text(this.font, Component.literal("STEEL").withStyle(ChatFormatting.DARK_GRAY), 128, 11, 0xFF444444, false);
     }
 
     @Override

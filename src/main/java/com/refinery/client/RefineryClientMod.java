@@ -98,6 +98,8 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.SLOPED_CONVEYOR_BELT_BE.get(), SlopedConveyorBeltRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.RIGHT_ANGLE_CONVEYOR_BELT_BE.get(), RightAngleConveyorBeltRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.FEEDING_TROUGH_BE.get(), FeedingTroughRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.BITUMEN_PILE_BE.get(), BitumenPileRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.CRUDE_PUMP_JACK_BE.get(), CrudePumpJackRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.STORAGE_TANK_DRAIN_VALVE_BE.get(), StorageTankRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_PIPE_BE.get(), IndustrialPipeRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.BUFFER_PIPE_BE.get(), BufferPipeRenderer::new);

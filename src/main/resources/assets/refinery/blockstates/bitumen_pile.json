@@ -1,0 +1,7 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "refinery:block/bitumen_pile" }
+    }
+  ]
+}

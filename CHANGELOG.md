@@ -4,6 +4,113 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.20] - 2026-11-06
+
+### Fixed
+- **Refinery Heaters / Furnaces Single-Item Drop Fix (`BurnerRefineryFurnaceBlock`, `ElectricRefineryFurnaceBlock`)**:
+  - Fixed an issue where destroying the 2-block-tall Burner Refinery Furnace or Electric Refinery Furnace dropped multiple items (one for each block it occupies).
+  - Overrode `getDrops` in Java so only the master `LOWER` part returns `List.of(new ItemStack(this))` while the `UPPER` part returns empty drops.
+  - Updated `playerWillDestroy` to silently remove partner blocks with flag 35 and only trigger a single item pop if a player in survival mines the non-master upper half, guaranteeing strictly 1 furnace item is returned in survival and 0 in creative.
+- **Steam Turbine GUI Dark Gunmetal Redesign & Header Alignment (`SteamTurbineScreen`, `steam_turbine.png`)**:
+  - Overhauled the Steam Turbine GUI to match the dark industrial gunmetal theme (#2B3036 base, #353B43 riveted sub-panels, #14171A recessed wells) of the other machinery (Refinery, Blast Furnace, Metal Press, Boilers).
+  - Resolved header text collision where sub-headers ("STEAM", "WATER", "POWER") were drawn directly on top of the container title ("Steam Turbine Generator").
+  - Placed sub-headers at `y: 18` inside distinct sub-panel housings, giving the top title bar at `y: 6` full clearance with zero text overlap.
+  - Added a live digital telemetry monitor (Status: Online / Standby / Unformed, RPM readout, power generation rate), dynamic rotating blade activity indicator, and high-pressure fluid/energy tank fill gauges with custom tooltips.
+  - Added multiblock structure assembly LED status indicator in the top-right header with diagnostic assembly tooltip.
+- **Blast Furnace GUI Header Alignment (`BlastFurnaceScreen`)**:
+  - Removed redundant section labels ("IRON", "FUEL", "STEEL") from `extractLabels` that were overlapping the "Industrial Blast Furnace" title at `y: 6`, keeping the title bar clean and unobstructed.
+
+---
+
+## [1.11.19] - 2026-11-05
+
+### Added
+- **Crude Pump Jack Multiblock (`CrudePumpJackBlock`, `CrudePumpJackPart`, `CrudePumpJackBlockEntity`, `CrudePumpJackModel`, `CrudePumpJackRenderer`)**:
+  - Added the industrial **Crude Pump Jack (Beam Pumping Unit)**: a 2-wide x 3-long x 3-high (18-part) heavy multiblock oil extraction machine.
+  - **Single-Item Placement & Break Safety**: Places the entire 2x3x3 assembly from a single inventory item after verifying clear placement clearance. Guarantees strictly 1 Crude Pump Jack item is dropped when any block in the multiblock is broken in survival, with zero duplicate drops.
+  - **Kinematic Monolithic 3D Model**: Monolithic animated renderer featuring a structural H-beam skid base, Samson post A-frame, center saddle bearing, rocking walking beam ($\pm 12^\circ$), arc horsehead, wireline bridle, vertically reciprocating polished rod entering the wellhead stuffing box, dual counterweighted rotating crank wheels ($360^\circ$), and dynamic pitman connecting arms.
+  - **Downhole Crude Oil Extraction**:
+    - Automatically prospects a 10-block horizontal radius and up to 50 blocks vertically downward beneath the front wellhead for crude oil source blocks (`refinery:crude_oil`).
+    - Prioritizes downhole vertical columns beneath the wellhead first before radially searching outward concentric rings.
+  - **Power-Scalable Extraction Rates**:
+    - 1 FE/t $\rightarrow$ 100 mB/min
+    - 2 FE/t $\rightarrow$ 500 mB/min
+    - 4 FE/t $\rightarrow$ 1,000 mB/min (full operational speed)
+  - **Automated Pipe & Power Interfacing**:
+    - Front wellhead acts as a fluid export port, automatically pushing extracted crude oil into connected pipes and tanks.
+    - Rear motor and electrical control panel accepts energy cables (10,000 FE internal buffer).
+    - Supports right-click empty bucket filling to directly extract crude oil buckets.
+    - Right-click inspection displays current crude storage, energy stored, and active pumping speed in the chat bar.
+
+### Fixed
+- **Bitumen Storage Pile Alignment & Drop Fixes (`BitumenPileRenderer`, `BitumenPileBlock`, `loot_table/blocks/bitumen_pile.json`)**:
+  - Fixed 3D model rotation and origin offsets across all 4 horizontal facings (North, South, West, East) so the 3x3 footprint aligns with placed blocks.
+  - Enforced single-item drop safety via Java `getDrops` override and `minecraft:block_state_property` loot table conditions, preventing duplicate item drops when broken.
+- **Refinery Controller GUI Label Scaling (`RefineryScreen`)**:
+  - Rescaled the amber "BITUMEN" monitor text label down by 20% (0.8x) using JOML `Matrix3x2fStack` transformations for GUI alignment.
+
+---
+
+## [1.11.18] - 2026-11-05
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.18] - 2026-11-05
+
+### Changed
+- **Bitumen Storage Pile 3x3 Footprint Expansion (`BitumenPileBlock`, `BitumenPilePart`, `BitumenPileModel`, `BitumenPileRenderer`, `BitumenPileBlockEntity`)**:
+  - Expanded the Bitumen Storage Pile footprint to an industrial **3x3 horizontal base** (18-part multiblock: 3x3x2) with extended retaining walls, corner pillars, and modular upright structural girders at 16px and 32px joints.
+  - Generates continuous organic 24x24 heightfield mesh stages across the 48px x 48px ground area, mounding up smoothly to a towering peak under the 2-block height.
+  - Expanded the hopper-style vacuum absorption bounding box to encompass the full 3x3x2.6 volume.
+- **Refinery Controller GUI Monitor Label Rescaling (`RefineryScreen`)**:
+  - Scaled down the amber "BITUMEN" monitor label by 20% (0.8x) using JOML `Matrix3x2fStack` (`pushMatrix`, `translate`, `scale`, `popMatrix`), nesting it cleanly inside the 35px byproduct panel monitor.
+
+### Fixed
+- **Bitumen Storage Pile Single-Item Drop Fix (`BitumenPileBlock`, `loot_table/blocks/bitumen_pile.json`)**:
+  - Fixed an issue where destroying the Bitumen Pile in survival dropped multiple block items (one per sibling block).
+  - Configured the loot table with `minecraft:block_state_property` constrained strictly to `part = bottom_front_left`.
+  - Updated `playerWillDestroy` to remove all non-mined sibling blocks with silent flag 35 and route survival drops through a single destruction event, ensuring exactly 1 Bitumen Storage Pile item drops regardless of which block in the 3x3 is mined.
+
+---
+
+## [1.11.17] - 2026-11-05
+
+### Added
+- **Bitumen Storage Pile (`BitumenPileBlock`, `BitumenPilePart`, `BitumenPileBlockEntity`, `BitumenPileModel`, `BitumenPileRenderer`)**:
+  - Implemented the 2x2x2 multiblock Bitumen Storage Pile with dynamic loose material heap physics and visual scaling:
+    - **Dynamic Visual Growth**: Renders 9 continuous organic heightfield mesh stages (0 to 8) that dynamically mound up in real time from a floor dusting inside a reinforced steel retaining bunker to a towering 2-block-tall asphalt mountain as inventory fills (up to 3,456 items across 54 double-chest slots).
+    - **Hopper-Style Vacuum Absorption**: Automatically sucks in bitumen items (`refinery:bitumen` and any tagged bitumen/asphalt items) dropped or falling onto or into the 2x2x2 pile bounds, accompanied by aggregate impact sounds and item particle splashes.
+    - **Industrial Logistics Capabilities**: Exposes `WorldlyContainer` and NeoForge `ItemHandler` across all 8 multiblock blocks, allowing hoppers, pipes, conveyors, and direct player interactions to insert bitumen or open the double chest inventory interface.
+    - **Photorealistic High-Resolution Textures**: Ultra-realistic 2048x2048 texture atlas with granular asphalt pebble aggregate, dark industrial riveted steel retaining plates, cast steel angle brackets, and compacted tar floor sheen, paired with a custom 32x32 inventory sprite.
+
+---
+
+## [1.11.16] - 2026-11-05
+
+### Fixed
+- **Multiblock Glass-Fused-to-Steel Storage Tank Flush Button (`StorageTankBlockEntity`, `StorageTankMenu`, `StorageTankScreen`)**:
+  - Resolved an issue where clicking the "FLUSH" button in the multiblock storage tank GUI had no effect.
+  - Linked the master `StorageTankBlockEntity` reference across both 4-argument and 5-argument `StorageTankMenu` constructors and `createMenu`, allowing server-side button click packets (`clickMenuButton(player, 0)`) to resolve the block entity.
+  - Added `flushTank(@Nullable Player player)` on `StorageTankBlockEntity`: dumps all stored liquid, clears fluid locks, plays the emptying sound (`SoundEvents.BUCKET_EMPTY`), triggers a block update sync to all tracking clients, and sends a system notification displaying the exact volume of fluid flushed.
+  - Updated `StorageTankScreen` hover, render, and click hitboxes to remain active whenever the tank holds liquid or has an active fluid type registered, and added client-side container data zeroing for immediate UI response.
+
+---
+
+## [1.11.15] - 2026-11-05
+
+### Fixed
+- **Blast Furnace GUI Bottom-Half Player Inventory Alignment (`BlastFurnaceMenu`, `BlastFurnaceScreen`)**:
+  - Corrected player inventory slots in `BlastFurnaceMenu` from `y = 74` to `y = 84` and player hotbar from `y = 132` to `y = 142`, perfectly snapping the slot wells onto the dark gunmetal background texture.
+  - Adjusted `inventoryLabelY` from `74` to `72` in `BlastFurnaceScreen`, resolving the text overlap where the "Inventory" header previously collided with the top row of items.
+- **Metal Press RF Energy Meter Well Alignment (`MetalPressScreen`)**:
+  - Corrected the horizontal rendering coordinate of the RF energy bar in `MetalPressScreen` from `xo + 18` to `xo + 14` (`width = 14`), perfectly nesting the yellow energy meter inside the recessed gauge well (`x: 13..28`).
+  - Synchronized the energy meter tooltip hover detection bounds from `x: 18..32` to `x: 13..28`, eliminating the 4-pixel rightward shift and texture overflow.
+
+---
+
 ## [1.11.13] - 2026-11-05
 
 ### Changed

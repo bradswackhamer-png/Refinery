@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "refinery:bitumen_pile",
+          "properties": {
+            "part": "bottom_front_left"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "refinery:bitumen_pile"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "refinery:blocks/bitumen_pile"
+}

@@ -49,7 +49,7 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         }
 
         // Flush button label
-        if (amount > 0) {
+        if (amount > 0 || fluid != Fluids.EMPTY) {
             graphics.text(this.font, Component.literal("FLUSH").withStyle(ChatFormatting.RED), 84, 56, 0xFFFFFFFF, false);
         }
     }
@@ -92,7 +92,7 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         graphics.fill(RenderPipelines.GUI, xo + 63, yo + 57, xo + 68, yo + 58, 0x77FFFFFF); // 25%
 
         // Flush Button (xo + 76, yo + 52, w: 46, h: 16)
-        if (amount > 0) {
+        if (amount > 0 || fluid != Fluids.EMPTY) {
             boolean flushHover = mouseX >= xo + 76 && mouseX <= xo + 122 && mouseY >= yo + 52 && mouseY <= yo + 68;
             drawFlushButton(graphics, xo + 76, yo + 52, 46, 16, flushHover);
         }
@@ -118,7 +118,7 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         int yo = this.topPos;
 
         // Flush Button click (x: 76..122, y: 52..68)
-        if ((event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == 0) && this.menu.getFluidAmount() > 0) {
+        if ((event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == 0) && (this.menu.getFluidAmount() > 0 || this.menu.getStoredFluid() != Fluids.EMPTY)) {
             if (event.x() >= xo + 76 && event.x() <= xo + 122 && event.y() >= yo + 52 && event.y() <= yo + 68) {
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
                     this.menu.clickMenuButton(this.minecraft.player, 0);
@@ -157,7 +157,7 @@ public class StorageTankScreen extends AbstractContainerScreen<StorageTankMenu> 
         }
 
         // Flush button tooltip
-        if (this.menu.getFluidAmount() > 0 && mouseX >= xo + 76 && mouseX <= xo + 122 && mouseY >= yo + 52 && mouseY <= yo + 68) {
+        if ((this.menu.getFluidAmount() > 0 || this.menu.getStoredFluid() != Fluids.EMPTY) && mouseX >= xo + 76 && mouseX <= xo + 122 && mouseY >= yo + 52 && mouseY <= yo + 68) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Flush Reservoir").withStyle(ChatFormatting.RED, ChatFormatting.BOLD),
                     Component.literal("Click to dump and clear all stored liquid.").withStyle(ChatFormatting.GRAY)

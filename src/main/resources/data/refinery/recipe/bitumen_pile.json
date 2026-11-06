@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "refinery:steel_plate",
+    "B": "refinery:bitumen",
+    "H": "minecraft:hopper"
+  },
+  "pattern": [
+    "S S",
+    "SBS",
+    "SHS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "refinery:bitumen_pile"
+  }
+}

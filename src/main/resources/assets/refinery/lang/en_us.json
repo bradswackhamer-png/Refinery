@@ -417,5 +417,12 @@
   "container.refinery.burner_refinery_furnace": "Burner Refinery Furnace",
   "block.refinery.electric_refinery_furnace": "Electric Refinery Furnace",
   "item.refinery.electric_refinery_furnace": "Electric Refinery Furnace",
-  "container.refinery.electric_refinery_furnace": "Electric Refinery Furnace"
+  "container.refinery.electric_refinery_furnace": "Electric Refinery Furnace",
+  "block.refinery.bitumen_pile": "Bitumen Storage Pile",
+  "item.refinery.bitumen_pile": "Bitumen Storage Pile",
+  "container.refinery.bitumen_pile": "Bitumen Storage Pile",
+  "tooltip.refinery.bitumen_pile.desc": "Large 3x3 multi-block containment bunker storing up to 3,456 Bitumen. Dynamically heaps up as items accumulate and vacuum-absorbs bitumen dropped or falling onto it.",
+  "block.refinery.crude_pump_jack": "Crude Pump Jack",
+  "item.refinery.crude_pump_jack": "Crude Pump Jack",
+  "tooltip.refinery.crude_pump_jack.desc": "Large 2x3x3 beam pump that extracts crude oil from underground reservoirs within a 10-block horizontal radius down to 50 blocks depth. Extracts at 100 mB/min (1 FE/t), 500 mB/min (2 FE/t), and 1,000 mB/min (4 FE/t). Connect liquid pipes to the front wellhead and power cables to the rear motor console."
 }

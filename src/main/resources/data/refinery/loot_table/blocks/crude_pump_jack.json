@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "refinery:crude_pump_jack",
+          "properties": {
+            "part": "bottom_front_left"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "refinery:crude_pump_jack"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "refinery:blocks/crude_pump_jack"
+}

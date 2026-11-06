@@ -49,7 +49,12 @@ public class RefineryScreen extends AbstractContainerScreen<RefineryMenu> {
         graphics.text(this.font, "S1", STAGE_BTN_X + 8, STAGE1_BTN_Y + 4, this.menu.isStage1Enabled() ? 0xFFFFFFFF : 0xFF71717A, false);
 
         // Bitumen Byproduct Header Label inside right panel monitor (x: 132, y: 19, w: 35, h: 14)
-        graphics.text(this.font, "BITUMEN", 134, 22, 0xFFF59E0B, false);
+        // Scaled down by 20% (0.8f) to fit the monitor frame perfectly
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(134.0f, 23.0f);
+        graphics.pose().scale(0.8f, 0.8f);
+        graphics.text(this.font, "BITUMEN", 0, 0, 0xFFF59E0B, false);
+        graphics.pose().popMatrix();
     }
 
     @Override

@@ -27,7 +27,7 @@ public class StorageTankMenu extends AbstractContainerMenu {
     }
 
     public StorageTankMenu(int containerId, Inventory playerInventory, Container container, ContainerData data) {
-        this(containerId, playerInventory, container, data, null);
+        this(containerId, playerInventory, container, data, container instanceof StorageTankBlockEntity stbe ? stbe : null);
     }
 
     public StorageTankMenu(int containerId, Inventory playerInventory, Container container, ContainerData data, StorageTankBlockEntity be) {
@@ -97,14 +97,18 @@ public class StorageTankMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (this.blockEntity != null) {
+        StorageTankBlockEntity targetBe = this.blockEntity;
+        if (targetBe == null && this.container instanceof StorageTankBlockEntity stbe) {
+            targetBe = stbe;
+        }
+        if (targetBe != null) {
             if (id == 0) {
                 // Dump / Drain all fluid
-                this.blockEntity.getFluidTank().dump();
+                targetBe.flushTank(player);
                 return true;
             } else if (id == 1) {
                 // Cycle target blueprint size
-                this.blockEntity.cycleTargetSize(player);
+                targetBe.cycleTargetSize(player);
                 return true;
             }
         }

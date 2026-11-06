@@ -27,11 +27,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 public class ElectricRefineryFurnaceBlock extends Block implements EntityBlock {
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -135,12 +138,22 @@ public class ElectricRefineryFurnaceBlock extends Block implements EntityBlock {
             if (partnerState.is(this) && partnerState.getValue(PART) != part) {
                 level.setBlock(partnerPos, Blocks.AIR.defaultBlockState(), 35);
                 level.levelEvent(player, 2001, partnerPos, Block.getId(partnerState));
-                if (!player.isCreative() && part == FurnacePart.UPPER) {
-                    Block.popResource(level, pos, new ItemStack(this));
-                }
+            }
+
+            // If the player destroyed the non-master upper part in survival, drop the single item
+            if (!player.isCreative() && part == FurnacePart.UPPER) {
+                Block.popResource(level, pos, new ItemStack(this));
             }
         }
         return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        if (state.getValue(PART) == FurnacePart.LOWER) {
+            return List.of(new ItemStack(this));
+        }
+        return List.of();
     }
 
     @Override

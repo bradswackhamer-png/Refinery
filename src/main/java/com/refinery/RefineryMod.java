@@ -495,6 +495,16 @@ public class RefineryMod {
             FeedingTroughBlock::new);
     public static final DeferredItem<BlockItem> FEEDING_TROUGH_ITEM = ITEMS.registerSimpleBlockItem("feeding_trough", FEEDING_TROUGH);
 
+    // === Bitumen Storage Pile (3x3 Multiblock) ===
+    public static final DeferredBlock<BitumenPileBlock> BITUMEN_PILE = BLOCKS.registerBlock("bitumen_pile",
+            BitumenPileBlock::new);
+    public static final DeferredItem<BlockItem> BITUMEN_PILE_ITEM = ITEMS.registerSimpleBlockItem("bitumen_pile", BITUMEN_PILE);
+
+    // === Crude Pump Jack (2x3x3 Beam Pump) ===
+    public static final DeferredBlock<CrudePumpJackBlock> CRUDE_PUMP_JACK = BLOCKS.registerBlock("crude_pump_jack",
+            CrudePumpJackBlock::new);
+    public static final DeferredItem<BlockItem> CRUDE_PUMP_JACK_ITEM = ITEMS.registerSimpleBlockItem("crude_pump_jack", CRUDE_PUMP_JACK);
+
     // === Industrial Multi-Smelter (5x4x3) Multiblock ===
     public static final DeferredBlock<MultiSmelterControllerBlock> MULTI_SMELTER_CONTROLLER = BLOCKS.registerBlock("multi_smelter_controller",
             MultiSmelterControllerBlock::new);
@@ -951,6 +961,14 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("feeding_trough",
                     () -> new BlockEntityType<>(FeedingTroughBlockEntity::new, FEEDING_TROUGH.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BitumenPileBlockEntity>> BITUMEN_PILE_BE =
+            BLOCK_ENTITY_TYPES.register("bitumen_pile",
+                    () -> new BlockEntityType<>(BitumenPileBlockEntity::new, BITUMEN_PILE.get()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrudePumpJackBlockEntity>> CRUDE_PUMP_JACK_BE =
+            BLOCK_ENTITY_TYPES.register("crude_pump_jack",
+                    () -> new BlockEntityType<>(CrudePumpJackBlockEntity::new, CRUDE_PUMP_JACK.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiSmelterControllerBlockEntity>> MULTI_SMELTER_CONTROLLER_BE =
             BLOCK_ENTITY_TYPES.register("multi_smelter_controller",
                     () -> new BlockEntityType<>(MultiSmelterControllerBlockEntity::new, MULTI_SMELTER_CONTROLLER.get()));
@@ -1157,6 +1175,8 @@ public class RefineryMod {
                         output.accept(SLOPED_CONVEYOR_BELT_ITEM.get());
                         output.accept(RIGHT_ANGLE_CONVEYOR_BELT_ITEM.get());
                         output.accept(FEEDING_TROUGH_ITEM.get());
+                        output.accept(BITUMEN_PILE_ITEM.get());
+                        output.accept(CRUDE_PUMP_JACK_ITEM.get());
                         output.accept(MULTI_SMELTER_CONTROLLER_ITEM.get());
                         output.accept(SMELTER_CASING_ITEM.get());
                         output.accept(SMELTER_CHAMBER_ITEM.get());
@@ -1772,6 +1792,43 @@ public class RefineryMod {
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, FEEDING_TROUGH_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be.getMaster()));
+
+        // Capabilities on Bitumen Storage Pile
+        event.registerBlockEntity(Capabilities.Item.BLOCK, BITUMEN_PILE_BE.get(),
+                (be, side) -> new WorldlyContainerWrapper(be, side));
+        event.registerBlock(Capabilities.Item.BLOCK, (level, pos, state, be, side) -> {
+            if (state.getBlock() instanceof BitumenPileBlock) {
+                var masterBe = BitumenPileBlock.getMasterBe(level, pos, state);
+                if (masterBe != null) {
+                    return new WorldlyContainerWrapper(masterBe, side);
+                }
+            }
+            return null;
+        }, BITUMEN_PILE.get());
+
+        // Capabilities on Crude Pump Jack
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, CRUDE_PUMP_JACK_BE.get(),
+                (be, side) -> be.energyStorage);
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, CRUDE_PUMP_JACK_BE.get(),
+                (be, side) -> be.fluidHandler);
+        event.registerBlock(Capabilities.Energy.BLOCK, (level, pos, state, be, side) -> {
+            if (state.getBlock() instanceof CrudePumpJackBlock) {
+                var masterBe = CrudePumpJackBlock.getMasterBe(level, pos, state);
+                if (masterBe != null) {
+                    return masterBe.energyStorage;
+                }
+            }
+            return null;
+        }, CRUDE_PUMP_JACK.get());
+        event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, be, side) -> {
+            if (state.getBlock() instanceof CrudePumpJackBlock) {
+                var masterBe = CrudePumpJackBlock.getMasterBe(level, pos, state);
+                if (masterBe != null) {
+                    return masterBe.fluidHandler;
+                }
+            }
+            return null;
+        }, CRUDE_PUMP_JACK.get());
 
         // Capabilities on Industrial Multi-Smelter Controller & Ports
         event.registerBlockEntity(Capabilities.Energy.BLOCK, MULTI_SMELTER_CONTROLLER_BE.get(),

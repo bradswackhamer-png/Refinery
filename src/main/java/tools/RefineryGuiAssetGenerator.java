@@ -25,7 +25,8 @@ public class RefineryGuiAssetGenerator {
         generateBurnerFurnaceGui();
         generateElectricFurnaceGui();
         generateRefineryGui();
-        System.out.println("All Refinery & Furnace GUI textures generated successfully!");
+        generateSteamTurbineGui();
+        System.out.println("All Refinery & Furnace & Turbine GUI textures generated successfully!");
     }
 
     public static void generateBurnerFurnaceGui() throws Exception {
@@ -210,6 +211,57 @@ public class RefineryGuiAssetGenerator {
 
         g.dispose();
         ImageIO.write(gui, "PNG", new File(GUI_DIR + "refinery.png"));
+    }
+
+    public static void generateSteamTurbineGui() throws Exception {
+        BufferedImage gui = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = gui.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+        int w = 176;
+        int h = 166;
+
+        // 1. Base Industrial Steel Panel (176 x 166)
+        drawBaseFrame(g, w, h, 7001L);
+
+        // 2. Multiblock Status LED Bezel in Top-Right Header (x: 161, y: 5, w: 8, h: 8)
+        drawRecessedWell(g, 161, 5, 8, 8, new Color(0x12, 0x15, 0x19));
+
+        // 3. Left Fluid Buffers Panel Plate: Steam Inflow & Water Condensation (x: 7, y: 17, w: 62, h: 54)
+        drawPanelPlate(g, 7, 17, 62, 54);
+
+        // Steam Buffer Tank Well (x: 13, y: 27, w: 22, h: 40) -> inner fill (14, 28, 20, 38)
+        drawRecessedWell(g, 13, 27, 22, 40, new Color(0x12, 0x16, 0x1C));
+        drawGaugeTicks(g, 14, 28, 20, 38, 4);
+
+        // Water Buffer Tank Well (x: 41, y: 27, w: 22, h: 40) -> inner fill (42, 28, 20, 38)
+        drawRecessedWell(g, 41, 27, 22, 40, new Color(0x12, 0x16, 0x1C));
+        drawGaugeTicks(g, 42, 28, 20, 38, 4);
+
+        // 4. Center Rotor & Tachometer Monitor Panel Plate (x: 73, y: 17, w: 54, h: 54)
+        drawPanelPlate(g, 73, 17, 54, 54);
+
+        // Digital Monitor Well (x: 77, y: 21, w: 46, h: 46) -> inner (78, 22, 44, 44)
+        drawRecessedWell(g, 77, 21, 46, 46, new Color(0x0E, 0x13, 0x18));
+        // Subtle CRT scanline accents inside monitor
+        g.setColor(new Color(0x13, 0x1A, 0x22));
+        for (int sy = 24; sy < 64; sy += 2) {
+            g.drawLine(79, sy, 121, sy);
+        }
+
+        // 5. Right Power Generation Panel Plate (x: 131, y: 17, w: 38, h: 54)
+        drawPanelPlate(g, 131, 17, 38, 54);
+
+        // Energy Battery Well (x: 138, y: 27, w: 24, h: 40) -> inner fill (139, 28, 22, 38)
+        drawRecessedWell(g, 138, 27, 24, 40, new Color(0x18, 0x1C, 0x22));
+        drawGaugeTicks(g, 139, 28, 22, 38, 4);
+        drawInductionCoilMuted(g, 139, 28, 22, 38);
+
+        // 6. Player Inventory & Hotbar Slot Wells (Inventory at y: 83, Hotbar at y: 141)
+        drawPlayerInventoryWells(g, 83, 141);
+
+        g.dispose();
+        ImageIO.write(gui, "PNG", new File(GUI_DIR + "steam_turbine.png"));
     }
 
     private static void drawBaseFrame(Graphics2D g, int w, int h, long seed) {

@@ -21,7 +21,7 @@ public class MetalPressScreen extends AbstractContainerScreen<MetalPressMenu> {
 
     public MetalPressScreen(MetalPressMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);
-        this.inventoryLabelY = 74;
+        this.inventoryLabelY = 72;
     }
 
     @Override
@@ -40,11 +40,11 @@ public class MetalPressScreen extends AbstractContainerScreen<MetalPressMenu> {
         // Base GUI background
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo, yo, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
 
-        // 1. Energy Storage Bar (x: 18, y: 18, w: 14, h: 50)
+        // 1. Energy Storage Bar (well x: 13..28, interior x: 14, y: 18, w: 14, h: 50)
         int energy = this.menu.getEnergy();
         if (energy > 0) {
             int energyHeight = Math.min(50, (int) ((energy / 50000.0f) * 50));
-            graphics.fill(RenderPipelines.GUI, xo + 18, yo + 18 + (50 - energyHeight), xo + 18 + 14, yo + 18 + 50, 0xFFEAB308);
+            graphics.fill(RenderPipelines.GUI, xo + 14, yo + 18 + (50 - energyHeight), xo + 14 + 14, yo + 18 + 50, 0xFFEAB308);
         }
 
         // 2. Stamping Ram Progress Indicator (x: 88, y: 28, w: 18, h: 26)
@@ -66,8 +66,8 @@ public class MetalPressScreen extends AbstractContainerScreen<MetalPressMenu> {
         int xo = this.leftPos;
         int yo = this.topPos;
 
-        // Energy Bar Hover (x: 18..32, y: 18..68)
-        if (mouseX >= xo + 18 && mouseX <= xo + 32 && mouseY >= yo + 18 && mouseY <= yo + 68) {
+        // Energy Bar Hover (x: 13..28, y: 17..68)
+        if (mouseX >= xo + 13 && mouseX <= xo + 28 && mouseY >= yo + 17 && mouseY <= yo + 68) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Energy Storage").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                     Component.literal(this.menu.getEnergy() + " / 50,000 FE").withStyle(ChatFormatting.GRAY),
