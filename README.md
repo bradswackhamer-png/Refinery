@@ -25,7 +25,8 @@
    - [Refinery Furnaces: Burner & Electric Heat Sources (1×2×1)](#refinery-furnaces-burner--electric-heat-sources-121)
    - [Oil Sand Cracking & Extraction](#oil-sand-cracking--extraction)
    - [Fuels & Byproducts](#fuels--byproducts)
-   - [Industrial Grinder & Pulverizer (3Ã—3Ã—3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
+   - [Industrial Grinder & Pulverizer (3×3×3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
+   - [Heavy Pit Quarry Excavator (3×3×3 Multiblock)](#heavy-pit-quarry-excavator-3x3x3)
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Conveyors, Pipes, & Interfacing](#8-automation-conveyors-pipes--interfacing)
    - [Industrial Belt Conveyor](#industrial-belt-conveyor)
@@ -674,6 +675,54 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
   - All other 8 positions: **Grinder Structural Casing**
 
 *(Note: Flexible port placement is supported—input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
+
+---
+
+### Heavy Pit Quarry Excavator (3×3×3)
+A heavy industrial open-pit continuous surface mining crawler rig engineered for automated geological excavation, surface bench clearing, and deep pit mining.
+
+- **Monolithic 3D Excavator Architecture**: Modeled after heavy open-pit surface mining crawler machines, featuring:
+  - **Crawler Track Undercarriage & Plinths**: Dual heavy steel continuous crawler track assemblies with 4 corner hydraulic stabilizer outrigger pads.
+  - **Slewing Turntable & Machinery Deck**: Center rotating ring with diamond treadplate deck, heavy electric winch drum wound with braided steel wire cable, drive motor, and hydraulic power pack.
+  - **Reinforced Operator Cabin**: Front-left elevated climate-controlled operator cabin with panoramic tinted safety glass, twin joystick consoles, and roof sunshade awning.
+  - **Structural Lattice A-Frame Gantry Tower**: 4 vertical lattice columns rising to Y=46 with crown sheaves, boom pulleys, and tension stays.
+  - **High-Intensity Work Lighting**: Dual high-intensity halogen work floodlights mounted to the upper gantry aiming forward and downward into the pit, providing full-bright optic lenses and emitting in-world **light level 15** while operating.
+  - **Warning Amber Hazard Strobe**: Active rotating amber strobe beacon mounted on the cabin roof.
+  - **Counterweight Ballast**: Rear ballast box with 45-degree yellow and black safety hazard stripes.
+- **3-Phase Automated Excavation Sequence**:
+  - **Phase 0: Surface Overburden Clearing ($43\times 43\times 3$)**: Mines an expansive $43\times 43\times 3$ box directly in front of the machine ($y = 0, -1, -2$), excavating a wide 3-block-deep recessed terrace bench.
+  - **Phase 1: Automated Safety Perimeter Fencing**: Once the $43\times 43\times 3$ clearing is completed, the quarry automatically lines the outside perimeter of the inner $41\times 41$ pit with safety railings (using fences supplied in the dedicated GUI fence slot, or crafting durable safety fences automatically from quarried stone).
+  - **Phase 2: Deep Pit Excavation to Bedrock**: Excavates the inner $41\times 41$ pit layer-by-layer downward from $y = -3$ all the way to bedrock (`level.getMinY()`). Fluid pockets (water and lava) are safely cleared, ores and minerals are harvested with diamond-pickaxe loot context, and unbreakable bedrock is safely preserved.
+- **3 Low-Profile Conveyor Export Chutes**:
+  - Features 3 extended industrial discharge arms—**Rear** `(0, 0, 3)`, **Left** `(-2, 0, 1)`, and **Right** `(2, 0, 1)`.
+  - Built at standard 5px conveyor bed height (`y: 0..5`), lining up flush with our mod's `ConveyorBeltBlock`, `RightAngleConveyorBeltBlock`, and `SlopedConveyorBeltBlock`.
+  - Automatically pushes mined aggregates and ores in a round-robin load-balanced cycle directly onto adjacent conveyor belts, into item pipes, or into connected storage containers (Chests, Barrels, Hoppers).
+  - 9 internal buffer slots safely store output if downstream lines are backed up.
+- **Energy Consumption & Proportional Speed Scaling**:
+  - **Max Speed**: 1 block per second (20 ticks per block) requiring strictly **20 FE/tick** (400 FE total per block).
+  - **Progressive Throttling**: The quarry automatically scales down speed proportionally as available energy drops below 20 FE/tick (10 FE/t = 50% speed, 5 FE/t = 25% speed), cleanly pausing when 0 FE is available.
+  - Internal Energy Storage: 50,000 FE.
+- **Interactive Control Terminal GUI**:
+  - **Radius Controls**: `[-]` and `[+]` buttons allowing the clearing radius to be adjusted down from 21 ($43\times 43$) down to 3 ($7\times 7$), with live box and pit dimension readouts.
+  - **Remaining Blocks Breakdown Dashboard**: Real-time monitor displaying total remaining blocks and a paginated, item-icon list showing how many of each individual block type remains to be mined (Stone, Deepslate, Coal Ore, Iron Ore, Copper Ore, Gold Ore, Diamond Ore, etc.).
+  - **Dedicated Fence Supply Slot**: Slot 9 accepts custom player fence blocks or iron bars.
+
+#### Multiblock Construction (Only 2 Blocks Required)
+Only 2 craftable blocks are needed to build the 3×3×3 Heavy Pit Quarry:
+1. **Heavy Pit Quarry Controller** (1x at `(0, 0, 0)`)
+2. **Quarry Structural Casing** (26x)
+
+> [!NOTE]
+> The multiblock structure is simple: 1 controller at the front-center and 26 casings forming the remainder of the 3×3×3 cube. There are no separate conveyor port, turntable, or lattice frame blocks needed.
+
+#### Layer Schematic (Local Coordinates)
+- **Layer 0 (Foundation Skid & Operator Station)**:
+  - `(0, 0, 0)`: **Heavy Pit Quarry Controller** (Bottom Center Front, operator console facing forward away from the excavation pit behind)
+  - Remaining 8 positions: **Quarry Structural Casing**
+- **Layer 1 (Machinery Deck)**:
+  - All 9 positions: **Quarry Structural Casing**
+- **Layer 2 (Gantry & Tower)**:
+  - All 9 positions: **Quarry Structural Casing**
 
 ---
 
@@ -1795,6 +1844,112 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.32 (Heavy Pit Quarry 1 Controller + 26 Casings Multiblock Recipe)
+- **Simplified Multiblock Structure**:
+  - The Heavy Pit Quarry multiblock now strictly requires **1 Heavy Pit Quarry Controller** and **26 Quarry Structural Casings**.
+  - All 26 member block positions require `Quarry Structural Casing`.
+  - Removed `Quarry Lattice Frame` blocks from the mod, streamlining resource gathering and crafting.
+
+---
+
+### Version 1.11.30 (Heavy Pit Quarry Digging Heights, Rear Floodlights, Spoil Ejection & Safe Displacement)
+- **Quarry Excavation Heights & Bedrock Progression**:
+  - The outer $43 \times 43 \times 3$ clearing area now clears top-down from the same Y level as the machine up 3 blocks ($Y = 2$ down to $Y = 0$).
+  - Automated safety perimeter railing is installed at $Y = 0$ along the bench rim.
+  - The inner $41 \times 41$ pit starts at $Y = -1$ below machine level and mines downward continuously to bedrock.
+- **Rear High-Intensity Work Floodlights**:
+  - Added dual rear-facing halogen work floodlights mounted to the lattice gantry tower.
+  - Glows at full brightness (`FULL_BRIGHT`) when the machine is active, brilliantly illuminating the excavation pit.
+- **Safe Multiblock Player Displacement**:
+  - Completing the 3x3x3 multiblock automatically teleports any players inside or standing on the multiblock safely to the ground in front of the operator station, preventing suffocation or getting trapped inside blocks.
+- **Dedicated Built-in Spoil Discharge**:
+  - Removed the front conveyor chute to keep the operator station clear and accessible.
+  - Items configured as Throw-Back blocks automatically roll off the built-in rear conveyor chute into the open pit void.
+- **Kept Products Buffer & Side Conveyor/Pipe Export**:
+  - Kept items wait in the 9-slot machine buffer until a normal conveyor (or belt below) or pipe is connected to the side ports (Left or Right), then actively export.
+
+---
+
+### Version 1.11.28 (Heavy Pit Quarry Throw-Back Blocks, Pit Spoil Ejection & Side Conveyor Routing)
+- **Throw-Back Blocks & Pit Spoil Ejection**:
+  - Implemented the ability to flag any mined block as a **"Throw Back"** block (overburden/waste rock such as dirt, sand, gravel, stone, deepslate, tuff, or cobblestone).
+  - Throw-back blocks bypass factory outputs and are automatically ejected out the **rear conveyor chute** (`0, 0, 3`), tumbling back down into the open pit void.
+  - Three convenient ways to configure Throw-Back blocks:
+    1. **Click any block in the Geological Manifest Monitor** in the GUI to toggle Throw-Back on/off. Active blocks display an orange outline, `[TB]` badge, and tooltip.
+    2. **Click `[SPOIL]`** in the monitor header to instantly toggle all common overburden blocks (dirt, sand, gravel, stone, deepslate, tuff, cobblestone, andesite, diorite, granite) in a single click.
+    3. **Insert any block into the dedicated Throw-Back Filter Slot** (Slot 10) in the GUI at `(220, 85)`.
+- **Side Conveyor Factory Integration**:
+  - All non-throw-back products ("the rest of the products", including valuable ores and minerals) are routed directly to connected normal conveyors on the left and right side conveyor ports (and front port).
+  - Detects connected conveyor belts (and below at floor level), places items on belts with forward velocity, and buffers items in the internal 9-slot buffer if no conveyors are connected yet.
+- **3D Model & Chute Animations**:
+  - Added the rear spoil discharge chute to the monolithic 3D excavator model, complete with traveling item animations tumbling off the rear chute into the pit.
+
+---
+
+### Version 1.11.26 (Heavy Pit Quarry 180° Inversion, Material Speed Tuning & Top-Down Clearing)
+- **180° Excavation Flip**:
+  - The Heavy Pit Quarry now digs **behind** the machine instead of in front.
+  - The controller's operator console and GUI face forward towards the player, while the $43 \times 43 \times 3$ clearing box and $41 \times 41$ pit to bedrock extend behind the machine.
+  - The center conveyor discharge chute is positioned at the front face (`0, 0, -1`), ejecting forward onto conveyor belts away from the pit edge alongside the left and right chutes.
+- **Dynamic Material-Specific Speed Multipliers**:
+  - Soft blocks (**Dirt, Sand, Gravel, and Tuff**) mine at **2x speed** (0.5s / 10 ticks per block at 20 FE/t).
+  - Hard precious ores (**Iron and Diamonds**, including deepslate and raw ore blocks) mine at **1/2 speed** (2.0s / 40 ticks per block at 20 FE/t).
+  - Standard blocks (Stone, Deepslate, Copper, Gold, etc.) mine at **1x base speed** (1.0s / 20 ticks per block at 20 FE/t).
+- **Proactive Top-Down Clearing**:
+  - The quarry monitors the excavated volume above its drill depth; any sand, gravel, fallen debris, or fluid stone that enters the cleared volume is systematically mined from the **top down** before resuming downward excavation.
+
+---
+
+### Version 1.11.24 (Heavy Pit Quarry GUI Redesign, Zero-Overlap Layout & Geological Manifest)
+- **Heavy Pit Quarry Industrial GUI Redesign**:
+  - Replaced the temporary GUI with a full-size $256 \times 196$ custom dark industrial steel interface matching the aesthetic of the mod.
+  - Eliminated text overlapping by separating operations into dedicated plates: machine status, 50,000 FE energy gauge, radius controls, dedicated fence slot, 9-slot buffer row, and centered player inventory.
+  - Pre-loads mining chunk columns to scan and catalog **every block type and its exact amount** across the entire volume without chunk boundary cutoffs.
+  - Integrated CRT Manifest Monitor with paginated block slots, compact count badges, hovering tooltips, and page/scroll controls.
+
+---
+
+### Version 1.11.23 (Heavy Pit Quarry 3D Model Camera Transform Fix & Member Flexibility)
+- **Heavy Pit Quarry 3D Monolithic Model Camera Anchor Fix**:
+  - Fixed an issue where the assembled 3D quarry excavator model was rendered using `poseStack.last()` inside `submitCustomGeometry` rather than the captured lambda `PoseStack.Pose`.
+  - In Minecraft 26.3's deferred render queue, referencing `poseStack.last()` caused the 3D model to bind to the camera/player view matrix (rendering directly on top of the player's head and screen).
+  - Geometry is now correctly anchored to the in-world multiblock controller block.
+- **Blueprint Hologram & Member Flexibility**:
+  - Aligned all multiblock blueprint requirements, in-world floating nametag holograms, and missing-component chat messages to strictly match the 3 real craftable blocks: **Heavy Pit Quarry Controller**, **Quarry Structural Casing**, and **Quarry Lattice Frame**.
+  - All 26 member block positions accept either `Quarry Structural Casing` or `Quarry Lattice Frame` interchangeably.
+
+---
+
+### Version 1.11.21 (Heavy Pit Quarry 3×3×3 Multiblock, 3 Conveyor Exports & Real-Time Remaining Block Breakdown)
+- **Heavy Pit Quarry 3×3×3 Multiblock Excavation Rig (`QuarryControllerBlock`, `QuarryCasingBlock`, `QuarryFrameBlock`, `QuarryControllerBlockEntity`, `QuarryModel`, `QuarryControllerRenderer`, `QuarryScreen`, `QuarryMenu`)**:
+  - Implemented the heavy industrial **Heavy Pit Quarry**: an authentic open-pit surface mining crawler machine engineered for automated strip mining, overburden clearing, and deep pit excavation.
+  - **3-Phase Automated Excavation Sequence**:
+    - **Phase 0 (Surface Overburden Clearing)**: Mines an expansive $43 \times 43 \times 3$ box directly in front of the machine ($y = 0, -1, -2$), excavating a wide 3-block-deep recessed terrace bench.
+    - **Phase 1 (Automated Safety Perimeter Fencing)**: Once the $43 \times 43 \times 3$ clearing is completed, the quarry automatically lines the outside perimeter of the inner $41 \times 41$ pit with safety railings (using fences supplied in the dedicated GUI fence slot, or crafting durable safety fences automatically from quarried stone).
+    - **Phase 2 (Deep Pit Excavation to Bedrock)**: Excavates the inner $41 \times 41$ pit layer-by-layer downward from $y = -3$ all the way to bedrock (`level.getMinY()`). Fluid pockets (water and lava) are safely cleared, ores and minerals are harvested with diamond-pickaxe loot context, and unbreakable bedrock is safely preserved.
+  - **3 Low-Profile Conveyor Export Chutes**:
+    - Features 3 extended industrial discharge arms—**Rear** `(0, 0, 3)`, **Left** `(-2, 0, 1)`, and **Right** `(2, 0, 1)`.
+    - Conveyor beds are constructed at standard 5px height (`y: 0..5`), aligning flush with our mod's `ConveyorBeltBlock`, `RightAngleConveyorBeltBlock`, and `SlopedConveyorBeltBlock`.
+    - Automatically pushes mined aggregates and ores in a round-robin load-balanced cycle directly onto adjacent conveyor belts, into item pipes, or into connected storage containers (Chests, Barrels, Hoppers).
+    - 9 internal buffer slots safely store output if downstream lines are backed up.
+  - **Energy Consumption & Proportional Speed Scaling**:
+    - **Max Speed**: 1 block per second (20 ticks per block) requiring strictly **20 FE/tick** (400 FE total per block).
+    - **Progressive Throttling**: The quarry automatically scales down speed proportionally as available energy drops below 20 FE/tick (10 FE/t = 50% speed, 5 FE/t = 25% speed), cleanly pausing when 0 FE is available.
+    - Internal Energy Storage: 50,000 FE.
+  - **Integrated Industrial Lighting**:
+    - Dual high-intensity halogen work floodlights mounted on the upper gantry aiming forward and downward into the pit.
+    - Emits in-world **light level 15** while operating, illuminating the entire mining pit.
+    - Model features full-bright optic lenses and an active rotating amber hazard warning strobe beacon.
+  - **Interactive Control Terminal GUI**:
+    - **Radius Controls**: Interactive `[-]` and `[+]` buttons allowing the clearing radius to be adjusted down from 21 ($43\times 43$) down to 3 ($7\times 7$), with live box and pit dimension readouts.
+    - **Remaining Blocks Breakdown Dashboard**: Real-time monitor displaying total remaining blocks and a paginated, item-icon list showing how many of each individual block type remains to be mined (Stone, Deepslate, Coal Ore, Iron Ore, Copper Ore, Gold Ore, Diamond Ore, etc.).
+    - **Dedicated Fence Supply Slot**: Slot 9 accepts custom player fence blocks or iron bars.
+  - **Monolithic 3D Model & 256×256 Texture Atlas**:
+    - Built according to the Monolithic 3D Architecture with zero texture bleeding, zero z-fighting, and transformed surface normals.
+    - High-detail crawler track undercarriage, stabilizer jacks, turntable deck, winch drum with braided steel wire cable, operator cabin with panoramic tinted glass, rear ballast with yellow/black hazard chevrons, and upper structural lattice gantry tower.
 
 ---
 

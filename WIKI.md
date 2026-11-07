@@ -23,7 +23,8 @@
    - [Petroleum Refinery (3Ã—3Ã—4 Multiblock)](#petroleum-refinery-334)
    - [Oil Sand Cracking & Extraction](#oil-sand-cracking--extraction)
    - [Fuels & Byproducts](#fuels--byproducts)
-   - [Industrial Grinder & Pulverizer (3Ã—3Ã—3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
+   - [Industrial Grinder & Pulverizer (3×3×3 Multiblock)](#industrial-grinder--pulverizer-3x3x3)
+   - [Heavy Pit Quarry Excavator (3×3×3 Multiblock)](#heavy-pit-quarry-excavator-3x3x3)
 7. [Comprehensive Recipe Codex](#7-comprehensive-recipe-codex)
 8. [Automation, Pipes, & Interfacing](#8-automation-pipes--interfacing)
 9. [Crude Oil World Generation & Retrogen](#9-crude-oil-world-generation--retrogen)
@@ -494,6 +495,57 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
   - All other 8 positions: **Grinder Structural Casing**
 
 *(Note: Flexible port placement is supported—input ports and output ports can be placed anywhere along the outer casing walls to fit your automation layout).*
+
+---
+
+### Heavy Pit Quarry Excavator (3×3×3)
+A heavy industrial open-pit continuous surface mining crawler rig engineered for automated geological excavation, surface bench clearing, and deep pit mining.
+
+- **Monolithic 3D Excavator Architecture**: Modeled after heavy open-pit surface mining crawler machines, featuring:
+  - **Crawler Track Undercarriage & Plinths**: Dual heavy steel continuous crawler track assemblies with 4 corner hydraulic stabilizer outrigger pads.
+  - **Slewing Turntable & Machinery Deck**: Center rotating ring with diamond treadplate deck, heavy electric winch drum wound with braided steel wire cable, drive motor, and hydraulic power pack.
+  - **Reinforced Operator Cabin**: Front-left elevated climate-controlled operator cabin with panoramic tinted safety glass, twin joystick consoles, and roof sunshade awning.
+  - **Structural Lattice A-Frame Gantry Tower**: 4 vertical lattice columns rising to Y=46 with crown sheaves, boom pulleys, and tension stays.
+  - **High-Intensity Work Lighting**: Dual high-intensity halogen work floodlights mounted to the upper gantry aiming forward and downward into the pit, providing full-bright optic lenses and emitting in-world **light level 15** while operating.
+  - **Warning Amber Hazard Strobe**: Active rotating amber strobe beacon mounted on the cabin roof.
+  - **Counterweight Ballast**: Rear ballast box with 45-degree yellow and black safety hazard stripes.
+- **3-Phase Automated Excavation Sequence**:
+  - **Phase 0: Surface Overburden Clearing ($43\times 43\times 3$)**: Mines an expansive $43\times 43\times 3$ box directly in front of the machine ($y = 0, -1, -2$), excavating a wide 3-block-deep recessed terrace bench.
+  - **Phase 1: Automated Safety Perimeter Fencing**: Once the $43\times 43\times 3$ clearing is completed, the quarry automatically lines the outside perimeter of the inner $41\times 41$ pit with safety railings (using fences supplied in the dedicated GUI fence slot, or crafting durable safety fences automatically from quarried stone).
+  - **Phase 2: Deep Pit Excavation to Bedrock**: Excavates the inner $41\times 41$ pit layer-by-layer downward from $y = -3$ all the way to bedrock (`level.getMinY()`). Fluid pockets (water and lava) are safely cleared, ores and minerals are harvested with diamond-pickaxe loot context, and unbreakable bedrock is safely preserved.
+- **3 Low-Profile Conveyor Export Chutes**:
+  - Features 3 extended industrial discharge arms—**Rear** `(0, 0, 3)`, **Left** `(-2, 0, 1)`, and **Right** `(2, 0, 1)`.
+  - Built at standard 5px conveyor bed height (`y: 0..5`), lining up flush with our mod's `ConveyorBeltBlock`, `RightAngleConveyorBeltBlock`, and `SlopedConveyorBeltBlock`.
+  - Automatically pushes mined aggregates and ores in a round-robin load-balanced cycle directly onto adjacent conveyor belts, into item pipes, or into connected storage containers (Chests, Barrels, Hoppers).
+  - 9 internal buffer slots safely store output if downstream lines are backed up.
+- **Energy Consumption & Proportional Speed Scaling**:
+  - **Max Speed**: 1 block per second (20 ticks per block) requiring strictly **20 FE/tick** (400 FE total per block).
+  - **Progressive Throttling**: The quarry automatically scales down speed proportionally as available energy drops below 20 FE/tick (10 FE/t = 50% speed, 5 FE/t = 25% speed), cleanly pausing when 0 FE is available.
+  - Internal Energy Storage: 50,000 FE.
+- **Interactive Control Terminal GUI**:
+  - **Radius Controls**: `[-]` and `[+]` buttons allowing the clearing radius to be adjusted down from 21 ($43\times 43$) down to 3 ($7\times 7$), with live box and pit dimension readouts.
+  - **Remaining Blocks Breakdown Dashboard**: Real-time monitor displaying total remaining blocks and a paginated, item-icon list showing how many of each individual block type remains to be mined (Stone, Deepslate, Coal Ore, Iron Ore, Copper Ore, Gold Ore, Diamond Ore, etc.).
+  - **Dedicated Fence Supply Slot**: Slot 9 accepts custom player fence blocks or iron bars.
+
+#### Quarry Layer Schematic (Local Coordinates)
+- **Layer 0 (Foundation Skid & 3 Conveyor Ports)**:
+  - `(0, 0, 0)`: **Heavy Quarry Controller** (Bottom Center Front, facing mining pit)
+  - `(-1, 0, 0)`, `(1, 0, 0)`, `(0, 0, 1)`, `(-1, 0, 2)`, `(1, 0, 2)`: **Quarry Structural Casing**
+  - `(-1, 0, 1)`: **Quarry Lattice Frame (Left Conveyor Port)**
+  - `(1, 0, 1)`: **Quarry Lattice Frame (Right Conveyor Port)**
+  - `(0, 0, 2)`: **Quarry Lattice Frame (Rear Conveyor Port)**
+- **Layer 1 (Machinery Deck, Winch & Cabin)**:
+  - `(-1, 1, 0)`, `(0, 1, 0)`, `(1, 1, 0)`: **Quarry Lattice Frame** (Boom mast & cabin supports)
+  - `(-1, 1, 1)`: **Quarry Structural Casing** (Operator Cabin)
+  - `(0, 1, 1)`: **Quarry Structural Casing** (Main Winch Core)
+  - `(1, 1, 1)`: **Quarry Structural Casing** (Electric Power Unit)
+  - `(-1, 1, 2)`, `(0, 1, 2)`, `(1, 1, 2)`: **Quarry Structural Casing** (Counterweight Ballast & Hydraulic Pack)
+- **Layer 2 (Lattice A-Frame Gantry, Pulleys & Floodlights)**:
+  - `(-1, 2, 0)`: **Quarry Lattice Frame** (Left Floodlight Mount)
+  - `(1, 2, 0)`: **Quarry Lattice Frame** (Right Floodlight Mount)
+  - `(0, 2, 0)`: **Quarry Lattice Frame** (Crown Cable Sheaves)
+  - `(-1, 2, 1)`, `(0, 2, 1)`, `(1, 2, 1)`: **Quarry Lattice Frame** (Gantry Apex & Strobe Mast)
+  - `(-1, 2, 2)`, `(0, 2, 2)`, `(1, 2, 2)`: **Quarry Lattice Frame** (Tension Stay Anchors & Counterweight Gantry)
 
 ---
 

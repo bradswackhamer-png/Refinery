@@ -56,6 +56,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.STEAM_TURBINE_MENU.get(), SteamTurbineScreen::new);
         event.register((MenuType) RefineryMod.METAL_PRESS_MENU.get(), MetalPressScreen::new);
         event.register((MenuType) RefineryMod.INDUSTRIAL_GRINDER_MENU.get(), IndustrialGrinderScreen::new);
+        event.register((MenuType) RefineryMod.QUARRY_MENU.get(), QuarryScreen::new);
         event.register((MenuType) RefineryMod.GATE_MENU.get(), GateScreen::new);
         event.register((MenuType) RefineryMod.ARC_MELTER_MENU.get(), ArcMelterScreen::new);
         event.register((MenuType) RefineryMod.CASTING_PRESS_MENU.get(), CastingPressScreen::new);
@@ -85,6 +86,7 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.STEAM_TURBINE_CONTROLLER_BE.get(), SteamTurbineControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.METAL_PRESS_CONTROLLER_BE.get(), MetalPressControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER_BE.get(), IndustrialGrinderControllerRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.QUARRY_CONTROLLER_BE.get(), QuarryControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.ARC_MELTER_CONTROLLER_BE.get(), ArcMelterControllerRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.CASTING_CHANNEL_BE.get(), CastingChannelRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.CASTING_PRESS_CONTROLLER_BE.get(), CastingPressControllerRenderer::new);

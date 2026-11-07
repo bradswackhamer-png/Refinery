@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "assembled=false": { "model": "refinery:block/quarry_casing" },
+    "assembled=true": { "model": "refinery:block/invisible" }
+  }
+}

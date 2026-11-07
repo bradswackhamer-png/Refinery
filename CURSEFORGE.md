@@ -28,120 +28,149 @@ This document contains everything needed to publish and update **Industrial Refi
 
 ---
 
-# ?? Industrial Refinery
+# 🏭 Industrial Refinery
 **Heavy Industry • Fractional Distillation • Thermodynamic Closed-Loop Steam Power • Metallurgy • BuildCraft-Style Pipe Logic Gates**
 
 *Built natively for Minecraft 26.3 on NeoForge.*
 
 ---
 
-## ? Overview
-**Industrial Refinery** is a complete industrial engineering mod designed to bring realistic, rewarding progression back to Minecraft. From prospecting for subterranean crude oil deposits in oceans and deserts to fractional distillation, closed-loop Rankine thermodynamic power cycles, high-temperature blast metallurgy, agricultural mechanization, and the legendary return of **BuildCraft-style programmable Pipe Logic Gates**!
+## 📖 Overview
+**Industrial Refinery** is an expansive industrial engineering mod designed to bring realistic, rewarding progression back to Minecraft. From prospecting for subterranean crude oil reservoirs in oceans and deserts with kinematic pump jacks, to fractional distillation, closed-loop Rankine thermodynamic power cycles, high-temperature electric arc metallurgy and continuous ingot casting, agricultural mechanization, extruded aluminum conveyor logistics, and the legendary return of **BuildCraft-style programmable Pipe Logic Gates**!
 
 Whether you play standalone or alongside logistics and tech mods, Industrial Refinery delivers high-performance, lag-free automation with zero hard dependencies.
 
 ---
 
-## ?? Key Features
+## ⚙️ Key Features
 
-### ??? 1. Petroleum Geology & Fractional Distillation
-- **Real In-World Fluid Crude Oil**: Naturally occurring subterranean oil reservoirs and surface lakes rimmed with bituminous oil sand. Viscous black liquid following authentic fluid physics.
+### 🛢️ 1. Petroleum Geology, Downhole Extraction & Fractional Distillation
+- **Real In-World Fluid Crude Oil**: Naturally occurring subterranean oil reservoirs and surface lakes rimmed with bituminous tar sand, red oil sand, and oil shale. Viscous black liquid featuring authentic fluid physics and animated flows.
 - **Deposit Capacities & Spacing**: Standard oil pits yield **600,000 mB to 1,000,000 mB**, with rare high-pressure **Super-Geysers** erupting with **2,000,000 mB**! Generates ~1 in 200 chunks with an enforced **20-chunk (320-block) minimum spacing** between wells to prevent clustered lakes.
 - **Persistent Anti-Retrogen**: Oil deposits are strictly registered once generated. Even when drained completely dry, chunks will never re-generate oil over your quarries or drills.
-- **3-Stage Fractional Distillation Column (3x9x3 Multiblock — Three 3x3x3 Stages)**: Divided into Stage 1 (Bottom: Liquid Tar & Bitumen), Stage 2 (Middle: Diesel), and Stage 3 (Top: Gasoline). Consumes **1,000 mB Crude Oil** per cycle with individually toggleable stages (e.g., Stage 1 only -> 500 mB Liquid Tar + 1 Bitumen; Stage 2 only -> 500 mB Diesel; Stage 3 only -> 500 mB Gasoline; S1+S2 -> 250 mB Tar + 250 mB Diesel + 1 Bitumen; S1+S3 -> 250 mB Tar + 250 mB Gas + 1 Bitumen; All 3 Stages -> 250 mB Tar + 250 mB Diesel + 250 mB Gasoline + 25% chance at 1 Bitumen).
-- **Burner & Electric Refinery Furnaces (1x2x1 Heat Sources)**: Choose between the fast-burning **Burner Refinery Furnace** (4x burn speed) or high-power **Electric Refinery Furnace** (500 FE/t) placed adjacent to Stage 1 to supply the `>= 350°C` operating heat required by the Refinery Tower!
+- **Crude Pump Jack (2x3x3 Multiblock Beam Pumping Unit)**:
+  - Heavy industrial oil extraction unit with an authentic kinematic walking beam (±12° rocking), counterweighted rotating crank wheels (360°), Samson post A-frame, arc horsehead, and vertically reciprocating polished rod entering the wellhead.
+  - Placed from a single inventory item with safe single-item drop recovery.
+  - Automatically prospects downhole vertical columns beneath the wellhead (up to 50 blocks depth, 10-block horizontal radius) for crude oil sources.
+  - Power-scalable extraction rates: 1 FE/t (100 mB/min), 2 FE/t (500 mB/min), and 4 FE/t (1,000 mB/min).
+  - Front wellhead acts as an auto-export port directly pushing crude oil into connected pipes and tanks.
+- **3-Stage Fractional Distillation Column (3x9x3 Multiblock — Three 3x3x3 Stages)**:
+  - Divided into Stage 1 (Bottom: Liquid Tar & Bitumen), Stage 2 (Middle: Diesel), and Stage 3 (Top: Gasoline).
+  - Consumes **1,000 mB Crude Oil** per cycle with individually toggleable stages via a dark gunmetal telemetry GUI.
+  - Flexible distillation outputs: Stage 1 only -> 500 mB Liquid Tar + 1 Bitumen; Stage 2 only -> 500 mB Diesel; Stage 3 only -> 500 mB Gasoline; All 3 Stages -> 250 mB Tar + 250 mB Diesel + 250 mB Gasoline + 25% chance for 1 Bitumen.
+  - Takeoff ports auto-push fluids into connected pipes and tanks; Byproduct Ports auto-eject solid Bitumen and Tar directly onto adjacent conveyor belts, pipes, or containers.
+- **Burner & Electric Refinery Furnaces (1x2x1 Heat Sources)**:
+  - Supply the required operating heat (>= 350°C) placed adjacent to Stage 1.
+  - Choose between the **Burner Refinery Furnace** (4x rapid burn speed across 3 fuel slots) or **Electric Refinery Furnace** (500 FE/t, 500,000 FE buffer).
+  - Single-item placement and drop safety with glowing serpentine crude-oil heating coils.
+- **Bitumen Storage Pile (3x3 Multiblock Bulk Storage)**:
+  - Heavy 18-part loose material bunker with real-time dynamic 3D visual heightfield mesh stages.
+  - Physically mounds up from a dusting inside reinforced steel retaining walls to a towering 2-block asphalt peak as inventory fills (up to 3,456 items across 54 double-chest slots).
+  - Hopper-style vacuum absorption automatically sucks in nearby dropped bitumen items with pebble impact sounds and particle splashes.
+  - Full multi-sided item extraction and hopper/pipe connectivity.
 
 ### ⚡ 2. Thermodynamic Closed-Loop Steam Power (Rankine Cycle)
-- **Small (3x3x3) & Large Heavy (5x5x5) Steam Boilers**: Boil water with solid coal/coke or liquid petroleum fuels into pressurized Steam. Features authentic boiler overheating mechanics and monolithic 3D models!
-- **Steam Turbine Generator (3x3x3 Multiblock)**: Converts high-pressure steam into **1,000 FE/t** of clean electricity while simultaneously condensing the exhaust steam back into pure water. Features a custom high-fidelity monolithic 3D turbine-generator skid in vibrant industrial electric blue, featuring an AC alternator, speed-reduction gearbox, curved split casing with bolted horizontal split line, flanged steam inlet nozzle, and upright control console with analog dial gauges and emergency stop controls.
-- **Closed-Loop Conservation**: Pipe the turbine's condensed water directly back into your boiler to build completely closed-loop, self-sustaining power plants!
+- **Small (3x3x3) & Large Heavy (5x5x5) Steam Boilers**:
+  - Boil water with solid coal/coke or liquid petroleum fuels into pressurized Steam.
+  - Monolithic Scotch marine boiler geometry with opening cleanout hatches, realistic overheating mechanics, and audible emergency raid siren alarms if water runs dry.
+- **Steam Turbine Generator (3x3x3 Multiblock)**:
+  - Converts high-pressure steam into **1,000 FE/t** of clean electricity while simultaneously condensing the exhaust steam back into pure water.
+  - High-fidelity monolithic 3D turbine-generator skid in vibrant industrial electric blue, featuring an AC alternator, speed-reduction gearbox, curved split casing, dial gauges, and emergency stop controls.
+  - Overhauled dark gunmetal GUI featuring digital telemetry (RPM readout, power rate, status LED), rotating blade activity monitor, and recessed fluid gauges.
+- **Closed-Loop Conservation**: Pipe the turbine's condensed water directly back into your boiler to build completely closed-loop, self-sustaining power plants with zero water loss!
+- **Industrial Diesel Generator (1x2x2 Compact Power Plant)**:
+  - Standalone internal combustion power station generating **256 FE/t** directly from refined Diesel fuel.
 
-### ?? 3. Heavy Metallurgy & Grinding
-- **Industrial Blast Smelter (5x5x5 Multiblock)**: Massive foundry with a continuous 3x3 industrial glass viewing window. Smelts iron ingots / blocks and coal / coal blocks into structural **Steel Ingots**.
-- **Industrial Metal Press (3x2x2 Multiblock)**: Mechanical stamping press with a 3-block-wide conveyor bed and overhead hydraulic ram. Requires swappable Stamping Dies (Plate Die, Gear Die, Corrugated Steel Die, Rail Die) to cold-form ingots and plates into industrial plates, gears (4x efficiency), corrugated steel panels (1 Steel Ingot -> 4 Sheets), and railway tracks.
-- **Industrial Grinder & Pulverizer (3x3x3 Multiblock)**: Dual-motor mineral crusher with twin counter-rotating spiked drums and animated block pulverization. Provides **2x Ore Doubling**, crushes stone into gravel and sand, and pulverizes oil sand into **3x Bitumen** with a 50% chance for **Tar**.
-- **Industrial Multi-Smelter (5x4x3 Multiblock)**: 8-in-1 high-throughput smelting array with dual-fuel operation (Solid Fuel or 30 FE/t RF). Features a 6-block hollow combustion chamber with dynamic 3D floating cooking items and pulsing ember/induction animations.
-- **Electric Arc Melter (3x3x3 Multiblock)**: Monolithic 3D Industrial Electric Arc Furnace (EAF) with water-cooled ribbed shell, high-voltage transformer vault, copper busbars, top charge hopper, and eccentric bottom-tapping launder spout. Features 3 reciprocating graphite electrodes discharging 3D electric arc plasma bolts into a dynamically rising/falling glowing molten metal bath (Molten Iron, Gold, Copper, Tin, Bronze, and Glass) with 2x ore doubling!
-- **Continuous Casting Press (3x3x3 Multiblock)**: Monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press with 4 chrome tie-rod columns, overhead crimson-amber hydraulic cylinder, reciprocating hazard-striped ram crosshead, water-cooled copper crystallizer mold, refractory tundish & lower `Y=0` channel receiver troughs, and motorized run-out roller table that stamps and quenches molten metal into solid ingots and glass blocks.
-- **Refractory Casting Channel**: Open 3D trough geometry for seamless in-world glowing molten metal transfer between Arc Melters, Casting Presses, and fluid pipes.
-- **Industrial Fermenter (Agricultural Biofuel)**: Standalone bioreactor that converts crops (Wheat, Potatoes, etc.) into high-yield **Ethanol** fuel.
+### 🔨 3. Heavy Metallurgy, Continuous Casting & Mineral Processing
+- **Industrial Blast Smelter (5x5x5 Multiblock)**:
+  - Massive refractory foundry with a 3x3 transparent heat-resistant glass viewing window.
+  - Smelts iron ingots/blocks and coal/coal blocks into structural **Steel Ingots**.
+- **Industrial Metal Press (3x2x2 Multiblock)**:
+  - Heavy hydraulic mechanical press with an animated ram, anvil impact sounds, and swappable Stamping Dies:
+    - **Plate Die**: Cold-forms ingots (Steel, Iron, Copper, Gold, Tin, Bronze) into industrial Plates.
+    - **Gear Die**: Cold-forms ingots or plates into industrial Gears at **4x material efficiency** over hand crafting.
+    - **Corrugated Steel Die**: Cold-forms 1 Steel Ingot/Plate into **4x Corrugated Steel Panels** (or 1 Iron -> 2 Panels).
+    - **Rail Die**: Cold-forms steel/iron/gold/copper into vanilla and powered rails.
+- **Industrial Multi-Smelter (5x4x3 Multiblock)**:
+  - Early-game 8-in-1 smelting array with dual-fuel operation (Solid Fuel or 30 FE/t RF).
+  - 6-block hollow combustion chamber with dynamic 3D floating cooking items and pulsing ember or RF induction animations.
+  - Crafted entirely from early-game materials — **no steel required**!
+- **Industrial Grinder & Pulverizer (3x3x3 Multiblock)**:
+  - Dual-motor mineral crusher with twin counter-rotating spiked drums and animated block pulverization.
+  - Delivers **2x Ore Doubling**, crushes stone into gravel and sand, and pulverizes oil sand into **3x Bitumen** with a 50% chance for **Tar**.
+- **Heavy Pit Quarry (3x3x3 Multiblock Excavator)**:
+  - Heavy open-pit continuous surface mining crawler rig engineered for automated geological strip mining and deep pit excavation.
+  - **3-Phase Automated Excavation Sequence**: Phase 0 clears a $43 \times 43 \times 3$ overburden terrace bench in front of the machine; Phase 1 lines the perimeter of the inner $41 \times 41$ pit with safety fencing (using custom player-supplied fences or auto-fabricated stone railings); Phase 2 excavates the inner $41 \times 41$ pit layer-by-layer all the way down to bedrock.
+  - **3 Flush Conveyor Export Chutes**: Extended Rear `(0, 0, 3)`, Left `(-2, 0, 1)`, and Right `(2, 0, 1)` discharge arms with 5px bed height that connect seamlessly to mod conveyors for round-robin auto-ejection.
+  - **Power-Scalable Speed**: Max speed 1 block/second requiring 20 FE/tick, smoothly running progressively slower as power drops below 20 FE/t and stopping when unpowered.
+  - **Industrial Lighting**: Dual high-intensity halogen work floodlights (emitting in-world light level 15) and rotating amber hazard strobe.
+  - **Telemetry GUI**: Interactive radius adjustment down to 3 ($7\times 7$), live remaining blocks breakdown dashboard tracking individual block counts with icons and tooltips, dedicated fence slot, and 9-slot buffer.
+- **Electric Arc Melter (3x3x3 Multiblock)**:
+  - Monolithic 3D Industrial Electric Arc Furnace (EAF) with cylindrical water-cooled ribbed shell, high-voltage transformer vault, copper busbars, charge hopper, and eccentric bottom-tapping launder spout.
+  - 3 reciprocating graphite electrodes discharging dynamic 3D plasma arc bolts into a glowing molten metal bath (Molten Iron, Gold, Copper, Tin, Bronze, and Glass) with 2x ore doubling!
+- **Continuous Casting Press (3x3x3 Multiblock)**:
+  - Monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press with 4 chrome tie-rod columns, overhead hydraulic cylinder, hazard-striped ram crosshead, copper crystallizer mold, receiver troughs, and motorized run-out roller table that stamps and quenches molten metal into solid ingots and glass blocks.
+- **Refractory Open Casting Channels**:
+  - Open 3D refractory trough geometry for seamless gravity-fed molten metal transfer between Arc Melters, Casting Presses, and fluid pipes.
+- **Corrugated Steel Panels**:
+  - Heavy industrial structural cladding and roofing panels in unpainted galvanized steel and 16 dyed colors.
+  - Seamless tiling with 3-axis pillar orientation and full **LabPBR 1.3 normal maps & Parallax Occlusion Mapping (POM)** for realistic 3D depth and metallic specular sheen in modern shaderpacks.
+- **Industrial Fermenter (Agricultural Biofuel)**:
+  - Standalone bioreactor that ferments crops (Wheat, Potatoes, Beetroots, Sugar Cane) into high-yield **Ethanol** fuel.
 
-### ?? 4. Standalone Agricultural Automation
-- **Auto Planter**: Smart cultivator with GUI On/Off switch and configurable work radius up to 9 blocks away in all directions (3x3 up to 19x19 / 361 tiles). Automatically prepares soil and plants seeds and tree saplings from internal storage, hoppers, or pipes.
-- **Auto Harvester**: Omnidirectional farm harvester with GUI On/Off switch and configurable radius up to 9 blocks in all directions. Auto-harvests mature crops, fells trees/leaves, replants seeds, and ejects drops into chests or pipes behind or below.
-- **Livestock Feeding Trough (`refinery:feeding_trough`)**: A 2-block-wide monolithic galvanized steel feed bunk engineered for automated livestock breeding and animal farming. Features a dynamic 3D golden straw mound that physically rises and falls with inventory stock, a 4.5m herd radar, automated breeding for any adult animal off cooldown, full dietary compatibility (wheat, seeds, vegetables, fruit, fungi, meat, fish), and seamless Logistics Automation pipe and hopper connectivity.
-
-### ⛽ 5. Portable Industrial Fluid Pumps & 3D Suction Hose
-- **Three Specialized Variants**:
-  - **Coal Fluid Pump (`refinery:coal_fluid_pump`)**: Heavy Cast-Iron Dark Charcoal frame (`#374151`). Single solid-fuel slot burning coal, charcoal, or furnace fuels at 1 coal per 3 seconds (60 ticks) of active pumping.
-  - **Diesel Fluid Pump (`refinery:diesel_fluid_pump`)**: Caterpillar Yellow-Orange frame (`#FA983A`). Internal 4,000 mB diesel reservoir consuming 10 mB per bucket pumped (1 bucket powers 100 buckets pumped). Refuelable via bucket slots or fluid pipes.
-  - **Electric Fluid Pump (`refinery:electric_fluid_pump`)**: High-Voltage Electric Blue frame (`#2563EB`). 20,000 FE buffer consuming 400 FE per bucket pumped (20 FE/t). Connects to external RF/FE power grids.
-- **In-World 3D Flexible Suction Hose**: Sneak-click with the Refinery Wrench to link, then click any block or fluid source in the world (up to 64 blocks away) to deploy a dynamic 3D spiral-ribbed suction hose with brass suction strainer.
-- **Connected Fluid Source BFS Flood-Fill**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward without touching unconnected pockets. Full water pool drainage now navigates both source and flowing water cleanly to drain pools dry.
-- **Infinite Water Mode (`[ INFINITE ]` / `[ DRAIN ]`)**: Toggleable in the dedicated GUI or by **Shift-Right-Clicking the pump block in-world** with an empty hand or wrench! Infinite mode draws unlimited water without destroying source blocks; Drain mode clears fluid bodies completely dry.
-- **Dedicated GUIs**: Clean, customized screen layouts displaying only the controls and gauges appropriate for that pump type (no useless RF gauges on coal pumps or coal slots on electric pumps). Intake coordinates are hidden for maximum UI clarity.
-- **Logistics Craft Output**: Automatically discharges pumped fluids directly into adjacent Logistics Craft fluid pipes and tanks through its top outlet flange.
-
-### 📦 6. Industrial Belt Conveyor System
+### 📦 4. Industrial Belt Conveyor Logistics System
 - **Modular Low-Profile Belt Conveyors (`refinery:conveyor_belt`)**:
-  - High-throughput item transport and entity conveyance modeled after extruded aluminum industrial conveyor lines.
-  - **Monolithic 3D Model**: Extruded anodized aluminum bed frame with side T-slot channels, heavy cast mounting foot pads, and galvanized steel deck bed.
-  - **Matte Black Industrial Belt**: High-density vulcanized rubber canvas belt with micro-grip friction ribs.
-  - **Dynamic In-World Animation**:
-    - Seamless UV texture scrolling animation smoothly moves the top belt forward and bottom return belt backward.
-    - Precision brushed stainless steel cylindrical end rollers physically rotate around their axles at exact belt surface velocity.
-    - Real-time physical item centering and smooth propulsion along the conveyor line.
-    - Item-only conveyance without player or mob interference.
-  - **Intelligent Seamless Snapping**:
-    - Placing conveyors in a row automatically snaps them together into a continuous, seamless belt assembly.
-    - Intermediate end terminals open up, seamlessly joining side rails, T-slots, and belt surfaces with zero gaps or visible seams.
-    - Head and tail rollers and machined bearing plates automatically render only at the exposed line terminals.
-  - **Automated Machine & Container Integration**:
-    - Items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, furnaces, and machines via the NeoForge item transfer system.
-    - Hoppers, droppers, and pipes can directly deposit items onto the belt surface.
-  - **Redstone & In-Place Rotation Controls**:
-    - Redstone signals pause conveyor operation, halting belt scrolling and item transit.
-    - Right-click with a Wrench rotates conveyor orientation clockwise; Sneak-Right-Click with a Wrench rotates counter-clockwise.
-    - Sneak-Right-Click with an empty hand also rotates orientation clockwise.
+  - Extruded anodized aluminum bed frame with side T-slot channels, heavy cast mounting foot pads, and galvanized steel deck bed.
+  - Dynamic UV scrolling matte black rubber belt and rotating brushed stainless steel end rollers matching belt velocity.
+  - Physical item centering, smooth propulsion, and item-only conveyance with zero mob or player interference.
+  - Intelligent seamless snapping: placing conveyors in a row automatically removes intermediate terminals, rendering end rollers only at open line terminals.
+  - Direct machine injection: items reaching the conveyor head automatically inject into adjacent inventories, chests, hoppers, and machines.
+- **Adaptive Corner & T-Intersection Junctions**:
+  - Automatically adapts side frames when conveyors meet at 90 degrees or form T-junctions: retracts the receiving side rail so items roll smoothly onto the belt, while adding a protective rear corner guard rail at 90° bends to prevent item spillage.
 - **Sloped Conveyor Belt (`refinery:sloped_conveyor_belt`)**:
-  - Transports items smoothly up or down 1-block elevations with height-interpolating slope physics and centered tracking.
-  - Automatically transitions items to adjacent conveyors, chests, and machine inventories at the upper and lower terminals.
-  - Right-click with a wrench or sneak-empty-hand to rotate facing; Sneak-Right-Click with a wrench to toggle elevation incline between `UP` and `DOWN`.
+  - Transports items smoothly up or down 1-block elevations with height-interpolating slope physics and seamless crest handoffs.
+  - Dynamically extends continuous aluminum support legs with heavy bolted foot pads down to the ground (raycasts up to 32 blocks down).
 - **Right-Angle Conveyor Belt (`refinery:right_angle_conveyor_belt`)**:
-  - 90-degree corner conveyor for clean factory turn routing with zero item spillage.
-  - Two-phase corner vectoring: guides incoming items into center, then turns velocity 90 degrees toward the exit.
-  - 3D monolithic model with curved aluminum rails and 8-segment animated curved belt.
-  - Right-click with a wrench or sneak-empty-hand to rotate facing; Sneak-Right-Click with a wrench to toggle turn direction between `RIGHT` and `LEFT`.
+  - Dedicated 90-degree curved corner conveyor with two-phase vectoring to guide incoming items cleanly into 90° turns without dead zones.
 
-### 🛢️ 7. Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks
-- **Industrial Bulk Liquid Storage**: High-capacity Glass-Fused-to-Steel (GFS) / Enamel bolted industrial liquid storage tanks based on modern municipal and petroleum tank engineering.
-- **Six Standard Sizes & Scalable Capacities**:
+### 🛢️ 5. Glass-Fused-to-Steel (GFS) Multiblock Liquid Storage Tanks
+- **Industrial Bulk Liquid Storage**: High-capacity Glass-Fused-to-Steel (GFS) / Enamel bolted industrial liquid storage tanks based on municipal and petroleum engineering.
+- **Six Scalable Capacities**:
   - `3x3x3`: **64,000 mB** (64 Buckets)
   - `3x3x6`: **256,000 mB** (256 Buckets)
   - `3x3x9`: **512,000 mB** (512 Buckets)
   - `5x5x5`: **1,000,000 mB** (1,000 Buckets)
   - `5x5x7`: **2,000,000 mB** (2,000 Buckets)
-  - `5x5x9`: **4,000,000 mB** (4,000 Buckets)
-- **Universal Fluid Handling**: Accepts and stores any fluid resource (Water, Lava, Crude Oil, Diesel, Gasoline, High-Pressure Steam, Ethanol, Molten Metals) with transactional rollback integrity.
-- **Top-Center Intake & Bottom-Center Drainage**:
-  - Fills from the top-center valve (`refinery:storage_tank_fill_valve`) via pipes, pumps, or buckets.
-  - Drains from the bottom-center valve (`refinery:storage_tank_drain_valve`).
-- **No Extraction Pipe Required (Direct Logistics & Pipe Auto-Push)**:
-  - The drain valve actively pushes stored fluid downward into pipes run beneath the tank floor and horizontally into neighboring pipes.
-  - Connecting regular liquid pipes immediately receives fluid flow without needing an extractor pipe or mechanical puller!
-- **Dedicated Industrial GUI & Sight Glass Gauge**:
-  - Brushed steel interface with input/output bucket interaction slots.
-  - Full-height illuminated sight glass tube displaying fluid color, percentage, formatted fluid name, and exact mB volume.
-  - Dedicated "Dump / Flush" button to quickly purge residual fluids when reconfiguring tank storage.
+  - `5x5x9`: **4,000,000 mB** (4,000 Buckets!)
+- **Universal Fluid Handling**: Accepts and stores any fluid resource (Water, Lava, Crude Oil, Diesel, Gasoline, Steam, Ethanol, Molten Metals) with transactional rollback safety.
+- **Top Intake & Bottom Direct Auto-Push Drainage**:
+  - Fills through the top-center fill valve via pipes, pumps, or buckets.
+  - Drains through the bottom-center drain valve, which actively pushes stored fluid downward and horizontally into connected pipes — **no extraction pipe or mechanical puller required**!
+- **Sight Glass & Purge Controls**:
+  - Full-height illuminated sight glass displaying fluid color, percentage, formatted fluid name, and exact mB volume.
+  - Dedicated "Dump / Flush" button in the GUI to instantly purge residual fluids when reconfiguring tank storage.
 - **Monolithic 3D Render & Holographic Blueprints**:
-  - Monolithic shell with high-gloss dark enamel bolted plates, reinforced concrete foundation curb, galvanized wind stiffener rings, caged safety climbing ladder, intermediate rest landing, and roof perimeter handrails.
-  - Full holographic blueprint projection with the Refinery Wrench (`Shift-Right-Click` cycles target sizes; `Right-Click` activates the ghost guide).
+  - Glossy dark enamel bolted plates, concrete foundation curb, wind stiffener rings, caged safety ladder, and roof handrails.
 
-### 🔌 8. BuildCraft-Style Pipe Logic Gates & Wires
-The classic BuildCraft automation system, re-engineered for modern Minecraft!
+### ⛽ 6. Portable Industrial Fluid Pumps & 3D Suction Hose
+- **Three Specialized Variants**:
+  - **Coal Fluid Pump**: Heavy Cast-Iron Dark Charcoal frame. Single solid-fuel slot burning coal, charcoal, or furnace fuels at 1 coal per 3 seconds of active pumping.
+  - **Diesel Fluid Pump**: Caterpillar Yellow-Orange frame. 4,000 mB internal diesel reservoir consuming 10 mB per bucket pumped (1 bucket powers 100 buckets pumped).
+  - **Electric Fluid Pump**: High-Voltage Electric Blue frame. 20,000 FE buffer consuming 400 FE per bucket pumped (20 FE/t).
+- **In-World 3D Flexible Suction Hose**: Sneak-click with the Refinery Wrench to link, then click any block or fluid source in the world (up to 64 blocks away) to deploy a dynamic 3D spiral-ribbed suction hose with brass suction strainer.
+- **BFS Flood-Fill Navigation**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward.
+- **Infinite Water Mode (`[ INFINITE ]` / `[ DRAIN ]`)**: Toggleable in the dedicated GUI or by **Shift-Right-Clicking the pump block in-world** with an empty hand or wrench! Infinite mode draws unlimited water without destroying source blocks; Drain mode clears fluid bodies completely dry.
+
+### 🔌 7. BuildCraft-Style Pipes & Pipe Logic Gates
+The classic BuildCraft automation experience, re-engineered natively for modern Minecraft!
+- **Native 3D Monolithic Pipes**:
+  - Slender pixel-art profile with 360° clear glass bodies and heavy industrial collars.
+  - Traveling items are fully visible in transit with smooth interpolation and ambient lighting.
+  - Includes Item Pipes, Fluid Pipes, Redstone Valve Pipes, Buffer Pipes, Quartz Merge Pipes, Insertion, Sorting, Round-Robin, and Void Pipes.
+- **BuildCraft-Style Pipe Facades & Structure Pipes**:
+  - Conceal pipes seamlessly behind any full block texture (Vanilla, Refinery, or modded) with LabPBR metallic specular and normal map support.
+  - Structure pipes provide zero-flow structural routing for wires and gates.
 - **Slim Face Attachment**: Attaches flush onto **any face of a pipe**, machine, chest, or refinery port with non-solid hitboxes.
-- **High-Definition Visuals**: Beautifully detailed 14x14 beveled industrial attachment plates with tier-specific metallic bezels, corner mounting bolts, and glowing logic cores; pipe wires render as industrial wire spools with metallic spindles and coiled insulation.
-- **Native Cross-Mod Integration**: Directly interfaces with **Logistics Mod Item & Fluid Pipes** as well as standard NeoForge containers and machines.
 - **4 Gate Tiers**:
   - **Basic Gate**: 1 conditional trigger-action pair.
   - **Iron Gate**: 2 conditional pairs + Red & Blue wire channels.
@@ -149,29 +178,34 @@ The classic BuildCraft automation system, re-engineered for modern Minecraft!
   - **Diamond Gate**: 8 conditional pairs across an industrial dual-column dashboard.
 - **Autarchic Pulsar (Automated Extraction)**: Upgrade any gate with an **Autarchic Chipset** (via crafting or in-world right-click) to pulse every 1 second, pulling 1 item from adjacent containers into the pipe or pumping 250 mB of fluid. **No redstone clocks or external engines required!**
 - **4-Color Pipe Wires**: Broadcast Red, Blue, Green, and Yellow logic signals along continuous pipe networks up to 24 blocks.
-- **Visual Console**: Interactive GUI with live glowing green status LEDs for every active condition!
 
-### 🔧 9. 3D Holographic In-World Blueprints & The Refinery Wrench
-- Right-click any multiblock controller with the **Refinery Wrench** to project a life-sized, translucent **3D building hologram**.
-- **Color-Coded Blueprints**: Every block type renders in a signature high-contrast color (Emerald Controllers, Petroleum Amber Ports, Canary Diesel, Flame Orange Fuel, Fiery Red Fireboxes, Lime Energy, Crystal Purple Glass) so multiblock construction is effortless!
-- **Instant Dismantling**: Shift + Right-Click any machine block with the wrench to instantly break and collect it into your inventory.
+### 🌾 8. Standalone Agricultural Automation
+- **Automated Planter**: Smart cultivator with GUI On/Off switch and configurable work radius up to 9 blocks in all directions (3x3 up to 19x19 / 361 tiles). Automatically tills soil and plants seeds or tree saplings.
+- **Automated Harvester**: Omnidirectional farm harvester with GUI On/Off switch and configurable radius up to 9 blocks. Auto-harvests mature crops, fells whole trees via 3D recursive flood-fill, replants seeds, and auto-ejects drops into chests or pipes behind or below.
+- **Livestock Feeding Trough**: Monolithic galvanized steel feed bunk with dynamic 3D golden hay mound that rises and falls with inventory stock, 4.5m herd radar, automated breeding for off-cooldown adults, and full dietary compatibility with zero food waste.
+
+### 🔧 9. 3D Holographic Blueprints & The Refinery Wrench
+- **The Refinery Wrench**: Right-click any multiblock controller to project a life-sized, translucent **3D in-world building hologram** for 30 seconds.
+- **Color-Coded Holograms**: Every block type renders in a signature high-contrast color (Emerald Controllers, Petroleum Amber Ports, Canary Diesel, Flame Orange Fuel, Fiery Red Fireboxes, Lime Energy, Crystal Purple Glass) so multiblock construction is effortless.
+- **Instant Dismantling**: Shift + Right-Click any mod machine block with the wrench to instantly break and collect it into your inventory.
+- **In-Game Field Manual / Guide Book**: Comprehensive in-game handbook covering multiblock layouts, recipes, progression flowcharts, and automation mechanics.
 
 ---
 
-## ?? Mod Compatibility
+## 🔌 Mod Compatibility
 
 Industrial Refinery is built with zero hard dependencies:
 - **Logistics Mod**:
   - Full native pipe attachment & gate operation.
-  - 1:1 interchange recipes between `refinery:tar` $\leftrightarrow$ `logistics:core/tar` and `refinery:bitumen` $\leftrightarrow$ `logistics:core/bitumen`.
+  - 1:1 interchange recipes between `refinery:tar` <-> `logistics:core/tar` and `refinery:bitumen` <-> `logistics:core/bitumen`.
   - 8 Logistics fluid pipes craftable using Refinery tar.
   - Industrial Grinder pulverizes all Logistics oil sands and outputs preferred Logistics items when present.
-- **Any Tech / Modpack Setup**:
+- **Universal Tech / Modpack Setup**:
   - Fully compatible with standard NeoForge Transfer API (`Capabilities.Item.BLOCK`, `Capabilities.Fluid.BLOCK`, `Capabilities.Energy.BLOCK`).
 
 ---
 
-## ??? Administrative Commands
+## 💻 Administrative Commands
 
 - `/admin spawn_oil_pit [true|false]`: Spawns a natural oil pit (`false`) or super-geyser (`true`) at your coordinates.
 - `/admin spawn_geyser`: Instantly spawns a 1,000,000 mB erupting super-geyser.
@@ -181,7 +215,7 @@ Industrial Refinery is built with zero hard dependencies:
 
 ---
 
-## ?? Modpack Permissions & FAQ
+## ❓ Modpack Permissions & FAQ
 
 - **Can I include this in my public or private modpack?**  
   **Yes!** You are completely free to include Industrial Refinery in any CurseForge, Modrinth, or custom modpack.
@@ -197,10 +231,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.20.jar`
+`refinery-1.11.32.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.20 (NeoForge 26.3)`
+`Industrial Refinery 1.11.32 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -216,9 +250,102 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.11.20
+# Industrial Refinery v1.11.32
 
-### What's New in v1.11.20:
+### What's New in v1.11.32:
+- **Heavy Pit Quarry 1 Controller + 26 Casings Multiblock Composition**:
+  - Simplified the multiblock requirements: now strictly requires **1 Heavy Pit Quarry Controller** and **26 Quarry Structural Casings**.
+  - All 26 blueprint positions and missing-component checks require `Quarry Structural Casing`.
+  - Removed `Quarry Lattice Frame` blocks from the mod.
+
+### What's New in v1.11.30:
+- **Rear High-Intensity Work Floodlights**:
+  - Dual overhead halogen work floodlights mounted on the gantry facing the pit illuminate the excavation zone with full brightness (`FULL_BRIGHT`) when active.
+- **Safe Multiblock Player Displacement**:
+  - Completing the 3x3x3 multiblock automatically teleports any players inside or standing on the multiblock safely to the ground in front of the operator station, preventing suffocation or getting trapped inside blocks.
+- **Quarry Excavation Heights & Bedrock Digging**:
+  - The outer $43 \times 43 \times 3$ clearing clears from the same Y level as the machine up 3 blocks ($Y = 2$ down to $Y = 0$).
+  - Safety railing perimeter fence is placed at $Y = 0$ along the bench rim.
+  - The inner $41 \times 41$ pit starts at $Y = -1$ below machine level and mines downward continuously to bedrock.
+- **Built-in Rear Spoil Chute & Clean Front Face**:
+  - Removed the front conveyor chute to keep the front operator station unobstructed.
+  - Items designated as Throw-Back blocks automatically roll off the built-in rear conveyor chute into the pit void.
+- **Kept Products Buffer & Side Conveyor/Pipe Export**:
+  - Kept items wait in the 9-slot buffer until a normal conveyor (or belt below) or pipe is connected to the side ports (Left or Right), then actively export.
+- **Strict 3-Block Multiblock Validation**:
+  - Blueprint requirements strictly check only `Heavy Pit Quarry Controller`, `Quarry Structural Casing`, and `Quarry Lattice Frame`.
+
+### What's New in v1.11.28:
+- **Heavy Pit Quarry Throw-Back Blocks & Pit Spoil Ejection**:
+  - Implemented configurable "Throw-Back" blocks that automatically eject out the rear conveyor chute into the open pit void.
+  - Three convenient ways to set throw-back blocks:
+    1. Click any block in the GUI Geological Manifest Monitor (highlights in orange with `[TB]` badge).
+    2. Click `[SPOIL]` in the monitor header to instantly toggle all common overburden (dirt, stone, deepslate, gravel, sand, tuff, cobblestone).
+    3. Insert any block into the dedicated Throw-Back Filter Slot (Slot 10) in the GUI at `(220, 85)`.
+- **Side Conveyor Factory Integration**:
+  - All non-throw-back products ("the rest of the products", including ores and minerals) route directly to connected normal conveyors on the left and right side conveyor ports (and front port).
+  - Pushes items onto connected conveyor belts with forward velocity, buffering items in the 9-slot machine buffer if no conveyors are connected yet.
+- **3D Model Rear Chute & Item Animations**:
+  - Added the rear spoil discharge chute to the 3D monolithic excavator model with animated spoil items tumbling off the chute into the pit.
+
+### What's New in v1.11.26:
+- **Heavy Pit Quarry 180° Inversion (Digs Behind Machine)**:
+  - Flipped work area 180° so excavation occurs entirely behind the machine, allowing the operator console and front face to remain clear and facing forward toward player workstations.
+  - Front conveyor chute relocated to `(0, 0, -1)` discharging forward away from the pit edge alongside the left and right chutes.
+- **Dynamic Material-Specific Speed Multipliers**:
+  - Soft blocks (**Dirt, Sand, Gravel, and Tuff**) mine at **2x speed** (0.5s / 10 ticks per block at 20 FE/t).
+  - Hard precious ores (**Iron and Diamonds**, including deepslate and raw ore blocks) mine at **1/2 speed** (2.0s / 40 ticks per block at 20 FE/t).
+  - Standard blocks (Stone, Deepslate, Copper, Gold, etc.) mine at **1x base speed** (1.0s / 20 ticks per block at 20 FE/t).
+- **Proactive Top-Down Clearing**:
+  - The quarry monitors the excavated volume above its drill depth; any sand, gravel, fallen debris, or fluid stone that enters the cleared volume is systematically mined from the **top down** before resuming downward excavation.
+
+### What's New in v1.11.24:
+- **Heavy Pit Quarry Industrial GUI Redesign & Complete Pit Block Manifest**:
+  - Re-themed the Quarry GUI texture and layout to match the dark industrial steel aesthetic of the mod.
+  - Rescaled all plates and readouts to permanently resolve text overlapping.
+  - Enhanced scanning to preload chunks across the entire mining footprint and catalog **every block type and its exact count** in the $43\times 43\times 3$ clearing and $41\times 41$ deep pit down to bedrock.
+  - Integrated CRT Manifest Monitor with paginated block slots, clean compact count badges, hovering tooltips (name, count, volume %), page controls, and mouse wheel scrolling.
+
+### What's New in v1.11.23:
+- **Heavy Pit Quarry 3D Monolithic Model Camera Anchor Fix**:
+  - Fixed an issue where the assembled 3D quarry excavator model was rendered using `poseStack.last()` inside `submitCustomGeometry` rather than the captured lambda `PoseStack.Pose`.
+  - In Minecraft 26.3's deferred render queue, this caused the 3D model to anchor to the camera / player view matrix (rendering directly on top of the player's head and screen).
+  - Geometry is now correctly anchored to the in-world multiblock controller block.
+
+### What's New in v1.11.22:
+- **Heavy Pit Quarry Blueprint Hologram & Member Flexibility Fix**:
+  - Aligned all multiblock blueprint requirements, in-world floating nametag holograms, and missing-component chat messages to strictly match the 3 real craftable blocks: **Heavy Pit Quarry Controller**, **Quarry Structural Casing**, and **Quarry Lattice Frame**.
+  - Removed confusing internal subcomponent label names (such as "Quarry Left Conveyor Port", "Quarry Turntable Base", etc.) so players are not misled into searching for non-existent blocks.
+  - Made multiblock verification flexible: all 26 member block positions now accept **either** `Quarry Structural Casing` or `Quarry Lattice Frame` interchangeably. Placing either block satisfies the structure position and clears that block from the active blueprint hologram.
+
+### What's New in v1.11.21:
+- **Heavy Pit Quarry 3×3×3 Multiblock Excavation Rig (`QuarryControllerBlock`, `QuarryCasingBlock`, `QuarryFrameBlock`, `QuarryControllerBlockEntity`, `QuarryModel`, `QuarryControllerRenderer`, `QuarryScreen`, `QuarryMenu`)**:
+  - Added the **Heavy Pit Quarry**: an authentic open-pit surface mining crawler machine engineered for automated strip mining, overburden clearing, and deep pit excavation.
+  - **3-Phase Automated Excavation Sequence**:
+    - **Phase 0 (Surface Overburden Clearing)**: Mines an expansive $43 \times 43 \times 3$ box directly in front of the machine ($y = 0, -1, -2$), excavating a wide 3-block-deep recessed terrace bench.
+    - **Phase 1 (Automated Safety Perimeter Fencing)**: Once the $43 \times 43 \times 3$ clearing is completed, the quarry automatically lines the outside perimeter of the inner $41 \times 41$ pit with safety railings (using fences supplied in the dedicated GUI fence slot, or crafting durable safety fences automatically from quarried stone).
+    - **Phase 2 (Deep Pit Excavation to Bedrock)**: Excavates the inner $41 \times 41$ pit layer-by-layer downward from $y = -3$ all the way to bedrock (`level.getMinY()`). Fluid pockets (water and lava) are safely cleared, ores and minerals are harvested with diamond-pickaxe loot context, and unbreakable bedrock is safely preserved.
+  - **3 Low-Profile Conveyor Export Chutes**:
+    - Features 3 extended industrial discharge arms—**Rear** `(0, 0, 3)`, **Left** `(-2, 0, 1)`, and **Right** `(2, 0, 1)`.
+    - Conveyor beds are constructed at standard 5px height (`y: 0..5`), aligning flush with our mod's `ConveyorBeltBlock`, `RightAngleConveyorBeltBlock`, and `SlopedConveyorBeltBlock`.
+    - Automatically pushes mined aggregates and ores in a round-robin load-balanced cycle directly onto adjacent conveyor belts, into item pipes, or into connected storage containers (Chests, Barrels, Hoppers).
+    - 9 internal buffer slots safely store output if downstream lines are backed up.
+  - **Energy Consumption & Proportional Speed Scaling**:
+    - **Max Speed**: 1 block per second (20 ticks per block) requiring strictly **20 FE/tick** (400 FE total per block).
+    - **Progressive Throttling**: The quarry automatically scales down speed proportionally as available energy drops below 20 FE/tick (10 FE/t = 50% speed, 5 FE/t = 25% speed), cleanly pausing when 0 FE is available.
+    - Internal Energy Storage: 50,000 FE.
+  - **Integrated Industrial Lighting**:
+    - Dual high-intensity halogen work floodlights mounted on the upper gantry aiming forward and downward into the pit.
+    - Emits in-world **light level 15** while operating, illuminating the entire mining pit.
+    - Model features full-bright optic lenses and an active rotating amber hazard warning strobe beacon.
+  - **Interactive Control Terminal GUI**:
+    - **Radius Controls**: Interactive `[-]` and `[+]` buttons allowing the clearing radius to be adjusted down from 21 ($43\times 43$) down to 3 ($7\times 7$), with live box and pit dimension readouts.
+    - **Remaining Blocks Breakdown Dashboard**: Real-time monitor displaying total remaining blocks and a paginated, item-icon list showing how many of each individual block type remains to be mined (Stone, Deepslate, Coal Ore, Iron Ore, Copper Ore, Gold Ore, Diamond Ore, etc.).
+    - **Dedicated Fence Supply Slot**: Slot 9 accepts custom player fence blocks or iron bars.
+  - **Monolithic 3D Model & 256×256 Texture Atlas**:
+    - Built according to the Monolithic 3D Architecture with zero texture bleeding, zero z-fighting, and transformed surface normals.
+    - High-detail crawler track undercarriage, stabilizer jacks, turntable deck, winch drum with braided steel wire cable, operator cabin with panoramic tinted glass, rear ballast with yellow/black hazard chevrons, and upper structural lattice gantry tower.
+```
 - **Refinery Heaters / Furnaces Single-Item Drop Fix (`BurnerRefineryFurnaceBlock`, `ElectricRefineryFurnaceBlock`)**:
   - Fixed an issue where destroying the 2-block-tall Burner Refinery Furnace or Electric Refinery Furnace dropped multiple items (one for each block it occupies).
   - Overrode `getDrops` in Java so only the master `LOWER` part returns `List.of(new ItemStack(this))` while the `UPPER` part returns empty drops.

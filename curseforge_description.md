@@ -62,6 +62,13 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 - **Industrial Metal Press (2x2x2 Multiblock)**: Mechanical stamping press that stamps ingots into heavy **Steel Plates**, rods, and components.
 - **Industrial Grinder & Pulverizer (3x3x3 Multiblock)**: Dual-motor mineral crusher with twin counter-rotating spiked drums and animated block pulverization. Provides **2x Ore Doubling**, crushes stone into gravel and sand, and pulverizes oil sand into **3x Bitumen** with a 50% chance for **Tar**.
 - **Industrial Multi-Smelter (5x4x3 Multiblock)**: 8-in-1 high-throughput smelting array with dual-fuel operation (Solid Fuel or 30 FE/t RF). Features a 6-block hollow combustion chamber with dynamic 3D floating cooking items and pulsing ember/induction animations.
+- **Heavy Pit Quarry (3x3x3 Multiblock Excavator)**:
+  - Heavy open-pit continuous surface mining crawler rig engineered for automated geological strip mining and deep pit excavation.
+  - **3-Phase Automated Excavation Sequence**: Phase 0 clears a $43 \times 43 \times 3$ overburden terrace bench in front of the machine; Phase 1 lines the perimeter of the inner $41 \times 41$ pit with safety fencing (using custom player-supplied fences or auto-fabricated stone railings); Phase 2 excavates the inner $41 \times 41$ pit layer-by-layer all the way down to bedrock.
+  - **3 Flush Conveyor Export Chutes**: Extended Rear `(0, 0, 3)`, Left `(-2, 0, 1)`, and Right `(2, 0, 1)` discharge arms with 5px bed height that connect seamlessly to mod conveyors for round-robin auto-ejection.
+  - **Power-Scalable Speed**: Max speed 1 block/second requiring 20 FE/tick, smoothly running progressively slower as power drops below 20 FE/t and stopping when unpowered.
+  - **Industrial Lighting**: Dual high-intensity halogen work floodlights (emitting in-world light level 15) and rotating amber hazard strobe.
+  - **Telemetry GUI**: Interactive radius adjustment down to 3 ($7\times 7$), live remaining blocks breakdown dashboard tracking individual block counts with icons and tooltips, dedicated fence slot, and 9-slot buffer.
 - **Electric Arc Melter (3x3x3 Multiblock)**: High-temperature metallurgical induction furnace that melts metal dusts and sand into glowing Molten Iron, Gold, Copper, Tin, Bronze, and Glass.
 - **Continuous Casting Press (3x3x3 Multiblock)**: Automated hydraulic quenching press that casts molten liquid from Arc Melters into solid ingots and glass blocks.
 - **Refractory Casting Channel**: Open 3D trough geometry for seamless in-world fluid transfer between melters and presses.
@@ -198,10 +205,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.20.jar`
+`refinery-1.11.32.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.20 (NeoForge 26.3)`
+`Industrial Refinery 1.11.21 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*

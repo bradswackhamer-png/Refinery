@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DCD",
+    "EME",
+    "SGS"
+  ],
+  "key": {
+    "D": "minecraft:diamond_pickaxe",
+    "C": "minecraft:comparator",
+    "E": "minecraft:redstone_block",
+    "M": "refinery:quarry_casing",
+    "S": "refinery:steel_plate",
+    "G": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "refinery:quarry_controller",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "refinery:block/quarry_casing",
+    "up": "refinery:block/quarry_casing",
+    "down": "refinery:block/quarry_casing",
+    "north": "refinery:block/quarry_controller_front_active",
+    "south": "refinery:block/quarry_casing",
+    "east": "refinery:block/quarry_casing",
+    "west": "refinery:block/quarry_casing"
+  }
+}

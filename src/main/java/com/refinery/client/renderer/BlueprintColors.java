@@ -128,6 +128,9 @@ public class BlueprintColors {
         if (lower.contains("grinder casing") || lower.contains("structural casing")) {
             return 0xFCD34D; // Industrial Hazard Yellow
         }
+        if (lower.contains("lattice frame") || lower.contains("frame")) {
+            return 0x38BDF8; // Electric Sky Blue
+        }
 
         // Fallback to brightened outline color if specified
         int rgb = fallbackColor & 0x00FFFFFF;

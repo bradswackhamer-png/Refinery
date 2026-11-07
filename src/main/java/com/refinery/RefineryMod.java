@@ -293,6 +293,15 @@ public class RefineryMod {
             p -> new GrinderPortBlock(GrinderPortBlock.PortType.OUTPUT, p));
     public static final DeferredItem<BlockItem> GRINDER_OUTPUT_PORT_ITEM = ITEMS.registerSimpleBlockItem("grinder_output_port", GRINDER_OUTPUT_PORT);
 
+    // === Heavy Pit Quarry (3x3x3) Multiblock ===
+    public static final DeferredBlock<QuarryControllerBlock> QUARRY_CONTROLLER = BLOCKS.registerBlock("quarry_controller",
+            QuarryControllerBlock::new);
+    public static final DeferredItem<BlockItem> QUARRY_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("quarry_controller", QUARRY_CONTROLLER);
+
+    public static final DeferredBlock<QuarryCasingBlock> QUARRY_CASING = BLOCKS.registerBlock("quarry_casing",
+            QuarryCasingBlock::new);
+    public static final DeferredItem<BlockItem> QUARRY_CASING_ITEM = ITEMS.registerSimpleBlockItem("quarry_casing", QUARRY_CASING);
+
     // === Electric Arc Melter Multiblock ===
     public static final DeferredBlock<ArcMelterControllerBlock> ARC_MELTER_CONTROLLER = BLOCKS.registerBlock("arc_melter_controller",
             ArcMelterControllerBlock::new);
@@ -889,6 +898,10 @@ public class RefineryMod {
                     () -> new BlockEntityType<>(GrinderPortBlockEntity::new,
                             GRINDER_INPUT_PORT.get(), GRINDER_OUTPUT_PORT.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<QuarryControllerBlockEntity>> QUARRY_CONTROLLER_BE =
+            BLOCK_ENTITY_TYPES.register("quarry_controller",
+                    () -> new BlockEntityType<>(QuarryControllerBlockEntity::new, QUARRY_CONTROLLER.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PipeGateBlockEntity>> PIPE_GATE_BE =
             BLOCK_ENTITY_TYPES.register("pipe_gate",
                     () -> new BlockEntityType<>(PipeGateBlockEntity::new,
@@ -1056,6 +1069,9 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<IndustrialGrinderMenu>> INDUSTRIAL_GRINDER_MENU =
             MENUS.register("industrial_grinder", () -> new MenuType<>(IndustrialGrinderMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<QuarryMenu>> QUARRY_MENU =
+            MENUS.register("quarry", () -> new MenuType<>(QuarryMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     public static final DeferredHolder<MenuType<?>, MenuType<ArcMelterMenu>> ARC_MELTER_MENU =
             MENUS.register("arc_melter", () -> new MenuType<>(ArcMelterMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
@@ -1152,6 +1168,8 @@ public class RefineryMod {
                         output.accept(GRINDER_CHAMBER_ITEM.get());
                         output.accept(GRINDER_INPUT_PORT_ITEM.get());
                         output.accept(GRINDER_OUTPUT_PORT_ITEM.get());
+                        output.accept(QUARRY_CONTROLLER_ITEM.get());
+                        output.accept(QUARRY_CASING_ITEM.get());
                         output.accept(ARC_MELTER_CONTROLLER_ITEM.get());
                         output.accept(MELTER_CASING_ITEM.get());
                         output.accept(MELTER_CHAMBER_ITEM.get());
@@ -1613,6 +1631,28 @@ public class RefineryMod {
                     if (controller == null) return null;
                     return side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be);
                 });
+
+        // Capabilities on Heavy Pit Quarry
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, QUARRY_CONTROLLER_BE.get(),
+                (be, side) -> be.energyStorage);
+
+        event.registerBlock(Capabilities.Energy.BLOCK,
+                (level, pos, state, be, side) -> {
+                    QuarryControllerBlockEntity controller = QuarryCasingBlock.findNearbyController(level, pos);
+                    return controller != null && controller.isAssembled() ? controller.energyStorage : null;
+                },
+                QUARRY_CASING.get());
+
+        event.registerBlockEntity(Capabilities.Item.BLOCK, QUARRY_CONTROLLER_BE.get(),
+                (be, side) -> side != null ? new WorldlyContainerWrapper(be, side) : VanillaContainerWrapper.of(be));
+
+        event.registerBlock(Capabilities.Item.BLOCK,
+                (level, pos, state, be, side) -> {
+                    QuarryControllerBlockEntity controller = QuarryCasingBlock.findNearbyController(level, pos);
+                    if (controller == null || !controller.isAssembled()) return null;
+                    return side != null ? new WorldlyContainerWrapper(controller, side) : VanillaContainerWrapper.of(controller);
+                },
+                QUARRY_CASING.get());
 
         // Capabilities on Electric Arc Melter
         event.registerBlockEntity(Capabilities.Energy.BLOCK, ARC_MELTER_CONTROLLER_BE.get(),

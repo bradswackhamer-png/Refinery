@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SPS",
+    "P P",
+    "SPS"
+  ],
+  "key": {
+    "S": "refinery:steel_ingot",
+    "P": "refinery:steel_plate"
+  },
+  "result": {
+    "id": "refinery:quarry_casing",
+    "count": 4
+  }
+}
