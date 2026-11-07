@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.38 (AWWA Safety-Yellow Fire Hydrant & Pipe-Fed Bucket Filling Station)](#version-11138-awwa-safety-yellow-fire-hydrant--pipe-fed-bucket-filling-station)
    - [Version 1.11.37 (Configurable Quarry Max Speed & Energy Rates, 240 FE/t & 1.5 blocks/s Defaults)](#version-11137-configurable-quarry-max-speed--energy-rates-240-fet--15-blockss-defaults)
    - [Version 1.11.35 (Perimeter Safety Fence Preservation, Stone-to-Cobblestone Throw-Back Equivalence)](#version-11135-perimeter-safety-fence-preservation-stone-to-cobblestone-throw-back-equivalence)
    - [Version 1.11.33 (In-Game Field Manual Guide Book Quarry & Machinery Additions, Wrench Hologram Projection)](#version-11133-in-game-field-manual-guide-book-quarry--machinery-additions-wrench-hologram-projection)
@@ -1848,6 +1849,19 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.38 (AWWA Safety-Yellow Fire Hydrant & Pipe-Fed Bucket Filling Station)
+- **AWWA Safety-Yellow Fire Hydrant (`FireHydrantBlock`, `FireHydrantBlockEntity`, `FireHydrantModel`, `FireHydrantRenderer`, `FireHydrantRenderState`)**:
+  - Added the **Fire Hydrant** (`refinery:fire_hydrant`), an industrial AWWA-style safety-yellow standpipe hydrant designed for convenient bucket filling along any fluid pipe network.
+  - **Monolithic 3D Model**: High-detail 3D model featuring a black cast-iron bottom flange ring with 8 protruding silver hex nuts and studs, safety-yellow lower flange ring with silver top bolt heads, cylindrical ribbed yellow barrel with front embossed circular `A` and `250 AWWA` plaque, 3-way nozzle outlets (front 4.5" pumper/steamer cap with `B 41` pentagonal nut plus left and right 2.5" side hose nozzles with wrench nuts and bottom chain-loop lugs), upper double bonnet flange with perimeter bolts, domed yellow bonnet cap, black thrust washer, and a rotatable top **Brass Pentagonal Operating Stem Nut**.
+  - **Pipe Connectivity & 8,000 mB Internal Buffer**:
+    - Automatically connects to Industrial Fluid Pipes on any face (bottom, sides, or back) and actively buffers up to **8,000 mB** (8 buckets) of any bucketable liquid (Water, Lava, Crude Oil, Diesel, Gasoline, Liquid Tar, Ethanol, and Molten Metals).
+    - Includes contiguous pipeline draw so right-clicking with a bucket immediately pulls available fluid from connected fluid pipes if at least 1,000 mB is present in the pipeline.
+  - **Right-Click Bucket Filling & Valve Animation**:
+    - Right-clicking the hydrant with an empty bucket (`minecraft:bucket`) fills it with **1,000 mB** of the supplied liquid, plays authentic bucket fill and valve clank sounds, emits liquid splash particles from the front pumper nozzle, and animates the top brass pentagonal operating nut.
+    - Right-clicking with an empty hand displays the buffered fluid type and volume; sneak-right-clicking with an empty hand flushes the internal buffer; right-clicking with a Refinery Wrench rotates the hydrant facing.
 
 ---
 

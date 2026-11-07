@@ -4,6 +4,18 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.38] - 2026-11-07
+
+### Added
+- **AWWA Safety-Yellow Fire Hydrant (`FireHydrantBlock`, `FireHydrantBlockEntity`, `FireHydrantModel`, `FireHydrantRenderer`, `FireHydrantRenderState`)**:
+  - Added `refinery:fire_hydrant`, an industrial safety-yellow standpipe fire hydrant that connects to fluid pipes and fills buckets when right-clicked with an empty bucket in hand.
+  - **High-Detail 3D Model**: Modeled with a black cast-iron bottom flange ring with 8 silver hex nuts/studs, yellow lower flange with silver bolt heads, ribbed yellow barrel with front embossed circular `A` emblem and `250 AWWA` markings, front 4.5" pumper/steamer nozzle cap with `B 41` pentagonal nut, left and right 2.5" side hose nozzles with wrench nuts and bottom chain-loop lugs, upper double bonnet flange with perimeter bolts, domed yellow bonnet cap, black thrust washer, and an animated top brass pentagonal operating stem nut.
+  - **Pipe-Fed Liquid Buffering & Contiguous Pipeline Draw**: Accepts any bucketable liquid from connected Industrial Fluid Pipes into an 8,000 mB internal reservoir and pulls from contiguous connected fluid pipes on demand when filling a bucket.
+  - **Bucket Filling & Player Interaction**: Right-clicking with an empty bucket (`minecraft:bucket`) consumes 1,000 mB from the hydrant to return the corresponding filled bucket with splash particles, bucket fill audio, and top stem nut rotation animation. Empty-hand right-click inspects tank status; shift-right-click flushes residual fluid; Refinery Wrench rotates facing.
+  - Added crafting recipe (`data/refinery/recipe/fire_hydrant.json`), loot table, pickaxe mineable tag entry, and Field Manual Guide Book documentation.
+
+---
+
 ## [1.11.37] - 2026-11-07
 
 ### Added

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "refinery:block/fire_hydrant" },
+    "facing=south": { "model": "refinery:block/fire_hydrant", "y": 180 },
+    "facing=west":  { "model": "refinery:block/fire_hydrant", "y": 270 },
+    "facing=east":  { "model": "refinery:block/fire_hydrant", "y": 90 }
+  }
+}

@@ -429,5 +429,9 @@
   "tooltip.refinery.bitumen_pile.desc": "Large 3x3 multi-block containment bunker storing up to 3,456 Bitumen. Dynamically heaps up as items accumulate and vacuum-absorbs bitumen dropped or falling onto it.",
   "block.refinery.crude_pump_jack": "Crude Pump Jack",
   "item.refinery.crude_pump_jack": "Crude Pump Jack",
-  "tooltip.refinery.crude_pump_jack.desc": "Large 2x3x3 beam pump that extracts crude oil from underground reservoirs within a 10-block horizontal radius down to 50 blocks depth. Extracts at 100 mB/min (1 FE/t), 500 mB/min (2 FE/t), and 1,000 mB/min (4 FE/t). Connect liquid pipes to the front wellhead and power cables to the rear motor console."
+  "tooltip.refinery.crude_pump_jack.desc": "Large 2x3x3 beam pump that extracts crude oil from underground reservoirs within a 10-block horizontal radius down to 50 blocks depth. Extracts at 100 mB/min (1 FE/t), 500 mB/min (2 FE/t), and 1,000 mB/min (4 FE/t). Connect liquid pipes to the front wellhead and power cables to the rear motor console.",
+  "block.refinery.fire_hydrant": "Fire Hydrant",
+  "item.refinery.fire_hydrant": "Fire Hydrant",
+  "tooltip.refinery.fire_hydrant.desc_1": "§eAWWA safety-yellow standpipe hydrant for connected fluid pipelines.",
+  "tooltip.refinery.fire_hydrant.desc_2": "§bRight-click with an Empty Bucket to fill it with the supplied liquid!"
 }

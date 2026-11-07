@@ -392,7 +392,9 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                state.getBlock() instanceof com.refinery.block.CastingChannelBlock ||
                state.getBlock() instanceof com.refinery.block.ArcMelterControllerBlock ||
                state.getBlock() instanceof com.refinery.block.CastingPressControllerBlock ||
-               state.getBlock() instanceof com.refinery.block.RefineryPortBlock;
+               state.getBlock() instanceof com.refinery.block.RefineryPortBlock ||
+               state.getBlock() instanceof com.refinery.block.FluidDischargeBlock ||
+               state.getBlock() instanceof com.refinery.block.FireHydrantBlock;
     }
 
     public void updateConnections() {

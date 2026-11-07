@@ -160,6 +160,7 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
 - **In-World 3D Flexible Suction Hose**: Sneak-click with the Refinery Wrench to link, then click any block or fluid source in the world (up to 64 blocks away) to deploy a dynamic 3D spiral-ribbed suction hose with brass suction strainer.
 - **BFS Flood-Fill Navigation**: Intelligently discovers and pumps all contiguous, connected fluid source blocks one at a time from the intake point outward.
 - **Infinite Water Mode (`[ INFINITE ]` / `[ DRAIN ]`)**: Toggleable in the dedicated GUI or by **Shift-Right-Clicking the pump block in-world** with an empty hand or wrench! Infinite mode draws unlimited water without destroying source blocks; Drain mode clears fluid bodies completely dry.
+- **AWWA Safety-Yellow Fire Hydrant (`refinery:fire_hydrant`)**: Pipe-fed standpipe hydrant with an 8,000 mB internal buffer and animated top brass pentagonal stem nut. When connected to a fluid pipe and supplied with liquid, players can simply right-click with an empty bucket in hand to fill it!
 
 ### 🔌 7. BuildCraft-Style Pipes & Pipe Logic Gates
 The classic BuildCraft automation experience, re-engineered natively for modern Minecraft!
@@ -231,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.37.jar`
+`refinery-1.11.38.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.37 (NeoForge 26.3)`
+`Industrial Refinery 1.11.38 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -250,6 +251,17 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.38
+
+### What's New in v1.11.38:
+- **AWWA Safety-Yellow Fire Hydrant (`refinery:fire_hydrant`)**:
+  - Added a 3D AWWA-style safety-yellow **Fire Hydrant** block that attaches directly to any Industrial Fluid Pipe line.
+  - **3D Model & Animated Brass Operating Nut**: Features a black cast-iron base flange with protruding silver hex bolts and nuts, yellow lower and upper double flanges, cylindrical yellow standpipe barrel with embossed `A` and `250 AWWA` markings, large front pumper nozzle cap with `B 41` pentagonal nut, left and right 2.5" side hose nozzles with chain lugs, domed yellow bonnet, and a top brass pentagonal stem nut that rotates when dispensing liquid.
+  - **Right-Click Bucket Filling**: Buffers up to **8,000 mB** of liquid fed from connected fluid pipes (and draws directly from contiguous connected fluid pipes on demand). Right-click with an empty bucket in hand to fill it with 1,000 mB of the supplied liquid (Water, Lava, Crude Oil, Diesel, Gasoline, Liquid Tar, Ethanol, or Molten Metals).
+  - **Inspection & Flushing**: Right-click with an empty hand to inspect buffered fluid level; sneak-right-click with an empty hand to drain/flush the hydrant barrel; right-click with a Refinery Wrench to rotate.
+
+---
+
 # Industrial Refinery v1.11.37
 
 ### What's New in v1.11.37:

@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "refinery:block/fire_hydrant_side",
+    "up": "refinery:block/fire_hydrant_top",
+    "down": "refinery:block/fire_hydrant_bottom",
+    "side": "refinery:block/fire_hydrant_side"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2],
+      "to": [14, 16, 14],
+      "faces": {
+        "down":  { "texture": "#down", "cullface": "down" },
+        "up":    { "texture": "#up" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west":  { "texture": "#side" },
+        "east":  { "texture": "#side" }
+      }
+    }
+  ]
+}

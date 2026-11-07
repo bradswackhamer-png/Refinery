@@ -486,6 +486,11 @@ public class RefineryMod {
             FluidDischargeBlock::new);
     public static final DeferredItem<BlockItem> FLUID_DISCHARGE_ITEM = ITEMS.registerSimpleBlockItem("fluid_discharge", FLUID_DISCHARGE);
 
+    // === AWWA Yellow Fire Hydrant (Pipe-Fed Bucket Filling Station) ===
+    public static final DeferredBlock<FireHydrantBlock> FIRE_HYDRANT = BLOCKS.registerBlock("fire_hydrant",
+            FireHydrantBlock::new);
+    public static final DeferredItem<BlockItem> FIRE_HYDRANT_ITEM = ITEMS.registerSimpleBlockItem("fire_hydrant", FIRE_HYDRANT);
+
     // === Industrial Belt Conveyor System ===
     public static final DeferredBlock<ConveyorBeltBlock> CONVEYOR_BELT = BLOCKS.registerBlock("conveyor_belt",
             p -> new ConveyorBeltBlock(p.noOcclusion()));
@@ -958,6 +963,10 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("fluid_discharge",
                     () -> new BlockEntityType<>(FluidDischargeBlockEntity::new, FLUID_DISCHARGE.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FireHydrantBlockEntity>> FIRE_HYDRANT_BE =
+            BLOCK_ENTITY_TYPES.register("fire_hydrant",
+                    () -> new BlockEntityType<>(FireHydrantBlockEntity::new, FIRE_HYDRANT.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ConveyorBeltBlockEntity>> CONVEYOR_BELT_BE =
             BLOCK_ENTITY_TYPES.register("conveyor_belt",
                     () -> new BlockEntityType<>(ConveyorBeltBlockEntity::new, CONVEYOR_BELT.get()));
@@ -1189,6 +1198,7 @@ public class RefineryMod {
                         output.accept(DIESEL_GENERATOR_ITEM.get());
                         output.accept(FLUID_PUMP_ITEM.get());
                         output.accept(FLUID_DISCHARGE_ITEM.get());
+                        output.accept(FIRE_HYDRANT_ITEM.get());
                         output.accept(CONVEYOR_BELT_ITEM.get());
                         output.accept(SLOPED_CONVEYOR_BELT_ITEM.get());
                         output.accept(RIGHT_ANGLE_CONVEYOR_BELT_ITEM.get());
@@ -1818,6 +1828,9 @@ public class RefineryMod {
                 (be, side) -> be.getFluidHandler(side));
 
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, FLUID_DISCHARGE_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
+
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, FIRE_HYDRANT_BE.get(),
                 (be, side) -> be.getFluidHandler(side));
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, COAL_FLUID_PUMP_BE.get(),

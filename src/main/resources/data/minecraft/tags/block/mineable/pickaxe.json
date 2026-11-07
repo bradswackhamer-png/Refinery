@@ -72,6 +72,7 @@
         "refinery:diesel_fluid_pump",
         "refinery:electric_fluid_pump",
         "refinery:fluid_discharge",
+        "refinery:fire_hydrant",
         "refinery:steel_fluid_pipe",
         "refinery:copper_fluid_pipe",
         "refinery:cast_iron_fluid_pipe",

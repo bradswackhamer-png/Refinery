@@ -794,9 +794,11 @@ public class GuideBookRegistry {
                 "• Coal Fluid Pump: Solid fuel powered extraction pump (Coal, Charcoal, Bitumen).\n" +
                 "• Diesel Fluid Pump: High-rate internal combustion pump fueled by Diesel or Ethanol.\n" +
                 "• Electric Fluid Pump: Continuous, clean electric pumping running on FE/RF power.\n" +
-                "• Fluid Discharge: Discharges pressurized fluids directly into the world as source blocks or flowing streams.",
+                "• Fluid Discharge: Discharges pressurized fluids directly into the world as source blocks or flowing streams.\n" +
+                "• Fire Hydrant: AWWA safety-yellow standpipe hydrant with an 8,000 mB reservoir. When attached to a fluid pipe and fed liquid, right-click with an Empty Bucket in hand to fill it!",
                 "• Right-click pumps with a Refinery Wrench to rotate their intake and discharge ports!\n" +
-                "• Right-click a Fluid Discharge with a wrench to toggle between Source Block and Flowing mode.",
+                "• Right-click a Fluid Discharge with a wrench to toggle between Source Block and Flowing mode.\n" +
+                "• Right-click a Fire Hydrant with an Empty Bucket to draw 1,000 mB of liquid; shift-right-click with an empty hand to flush.",
                 null,
                 null,
                 List.of()
