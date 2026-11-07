@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.39 (Fast 0.5s Pipe Gate Redstone Pulsing & Natural Action Cycle Order)](#version-11139-fast-05s-pipe-gate-redstone-pulsing--natural-action-cycle-order)
    - [Version 1.11.38 (AWWA Safety-Yellow Fire Hydrant & Pipe-Fed Bucket Filling Station)](#version-11138-awwa-safety-yellow-fire-hydrant--pipe-fed-bucket-filling-station)
    - [Version 1.11.37 (Configurable Quarry Max Speed & Energy Rates, 240 FE/t & 1.5 blocks/s Defaults)](#version-11137-configurable-quarry-max-speed--energy-rates-240-fet--15-blockss-defaults)
    - [Version 1.11.35 (Perimeter Safety Fence Preservation, Stone-to-Cobblestone Throw-Back Equivalence)](#version-11135-perimeter-safety-fence-preservation-stone-to-cobblestone-throw-back-equivalence)
@@ -1078,9 +1079,10 @@ Gates can communicate across long distances without bulky redstone dust lines:
 
 #### Actions (Outputs):
 - `Emit Redstone`: Constant redstone signal (power 15).
-- `Redstone Pulse`: Pulses redstone on and off every 1 second (ideal for clocks).
+- `Redstone Pulse (1s)`: Pulses redstone on and off every 1 second (20 ticks, ideal for standard clocks).
+- `Redstone Pulse (0.5s)`: Rapidly pulses redstone on and off every 0.5 seconds (10 ticks, ideal for high-frequency clocking and rapid circuits).
 - `Autarchic Pulse (Item)`: Extracts 1 item from adjacent container into pipe.
-- Autarchic Pulse (Item x5) / Autarchic Pulse (Item x10): Same, but extracts 5 or 10 items per pulse.
+- `Autarchic Pulse (Item x5)` / `Autarchic Pulse (Item x10)`: Same, but extracts 5 or 10 items per pulse.
 - `Autarchic Pulse (Fluid)`: Pumps 250 mB from adjacent tank into fluid pipe.
 - `Emit Red / Blue / Green / Yellow Wire`: Broadcasts logic signal to other gates along connected pipes.
 
@@ -1849,6 +1851,19 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.39 (Fast 0.5s Pipe Gate Redstone Pulsing & Natural Action Cycle Order)
+- **Fast 0.5-Second Pipe Gate Redstone Pulsing (`GateAction.REDSTONE_PULSE_HALF_SEC`)**:
+  - Added an extra redstone pulse option to all Pipe Gates (`Basic`, `Iron`, `Gold`, `Diamond`, and autarchic variants): `Redstone Pulse (0.5s)` (GUI short label `Pls .5s`), emitting rapid periodic redstone pulses alternating every 10 ticks (0.5 seconds on, 0.5 seconds off / 1.0 Hz clock frequency).
+  - Retained the existing 1.0-second pulse option (`Redstone Pulse (1s)` / `Pls 1s`) for standard 20-tick period clocking.
+  - Updated both `PipeGateBlockEntity` and `PipeGateEntity` to process `REDSTONE_PULSE_HALF_SEC` every tick via `(gameTime / 10) % 2 == 0`.
+  - Appended `REDSTONE_PULSE_HALF_SEC` to enum values after existing entries, fully preserving ordinal backwards compatibility for existing world saves and network container data synchronization.
+- **Natural Gate Action Cycling Order (`GateAction.CYCLE_ORDER`)**:
+  - Grouped gate actions into a natural cycling sequence (`None` -> `Emit Redstone` -> `Redstone Pulse (1s)` -> `Redstone Pulse (0.5s)` -> `Autarchic Pulses` -> `Pipe Wires`) for intuitive forward/backward selection in `GateScreen`.
+- **Field Manual Updates (`GuideBookRegistry`)**:
+  - Updated the in-game Field Manual Guide Book Pipe Gates section to document both 1.0s and rapid 0.5s redstone pulsing options for high-frequency clocking and automation circuits.
 
 ---
 

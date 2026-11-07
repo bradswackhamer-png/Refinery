@@ -879,7 +879,7 @@ public class GuideBookRegistry {
                 "Autarchic Pulsars & Conditional Automation",
                 GuideCategory.PIPES_GATES,
                 () -> new ItemStack(RefineryMod.DIAMOND_AUTARCHIC_GATE_ITEM.get()),
-                "Pipe Gates mount directly on pipe faces or chests to execute logic actions based on machine status, inventory space, or network signals.\n\n• Tiers: Basic (1 slot), Iron (2 slots), Gold (4 slots), Diamond (8 slots)\n• Autarchic Gates: Pull 1, 5, or 10 items at a time without engines\n• Pipe Wires: Red, Blue, Green, Yellow wires broadcast conditional signals along the pipe network.",
+                "Pipe Gates mount directly on pipe faces or chests to execute logic actions based on machine status, inventory space, or network signals.\n\n• Tiers: Basic (1 slot), Iron (2 slots), Gold (4 slots), Diamond (8 slots)\n• Redstone Actions: Constant power (15), periodic 1.0s pulse, or fast 0.5s pulse\n• Autarchic Gates: Pull 1, 5, or 10 items at a time without engines\n• Pipe Wires: Red, Blue, Green, Yellow wires broadcast conditional signals along the pipe network.",
                 "Combine 'Space in Inventory' -> 'Autarchic Pulse (Item x10)' to rapidly restock machines only when they need supplies!",
                 null,
                 null,

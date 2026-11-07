@@ -238,6 +238,10 @@ public class PipeGateBlockEntity extends BlockEntity implements MenuProvider, Ga
                     if ((level.getGameTime() / 20) % 2 == 0) {
                         shouldEmitRedstone = true;
                     }
+                } else if (action == GateAction.REDSTONE_PULSE_HALF_SEC) {
+                    if ((level.getGameTime() / 10) % 2 == 0) {
+                        shouldEmitRedstone = true;
+                    }
                 } else if (action.isPulsar() && gate.autarchic) {
                     hasPulsarActive = true;
                     pulsarCount = Math.max(pulsarCount, action.getItemCount());

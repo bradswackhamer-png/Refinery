@@ -528,6 +528,10 @@ public class PipeGateEntity extends Entity implements MenuProvider, GateHost {
                     if ((level().getGameTime() / 20) % 2 == 0) {
                         shouldEmitRedstone = true;
                     }
+                } else if (action == GateAction.REDSTONE_PULSE_HALF_SEC) {
+                    if ((level().getGameTime() / 10) % 2 == 0) {
+                        shouldEmitRedstone = true;
+                    }
                 } else if (action.isPulsar() && isAutarchic()) {
                     hasPulsarActive = true;
                     pulsarCount = Math.max(pulsarCount, action.getItemCount());
