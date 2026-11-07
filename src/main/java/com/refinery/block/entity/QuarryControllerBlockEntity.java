@@ -6,6 +6,7 @@ import com.refinery.block.QuarryCasingBlock;
 import com.refinery.block.QuarryControllerBlock;
 import com.refinery.block.RightAngleConveyorBeltBlock;
 import com.refinery.block.SlopedConveyorBeltBlock;
+import com.refinery.config.RefineryConfig;
 import com.refinery.menu.QuarryMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,8 +39,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -61,8 +64,17 @@ import java.util.*;
 public class QuarryControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INVENTORY_SIZE = 11; // 0..8: buffer slots, 9: fence supply slot, 10: throw-back filter slot
     public static final int ENERGY_CAPACITY = 50_000;
-    public static final int MAX_ENERGY_PER_TICK = 20; // 20 FE/tick at max speed (1 block / sec = 20 ticks)
-    public static final float PROGRESS_REQUIRED = 20.0f; // 20 ticks at 20 FE/t = 1 block
+    public static final int DEFAULT_ENERGY_PER_TICK = 240; // 240 FE/tick default at max speed
+    public static final double DEFAULT_MAX_MINING_SPEED = 1.5; // 1.5 blocks/second default base speed
+    public static final float PROGRESS_REQUIRED = 1.0f; // 1.0 = 1 full block progress
+
+    public int getMaxEnergyPerTick() {
+        return RefineryConfig.CONFIG != null ? RefineryConfig.CONFIG.getQuarryEnergyPerTick() : DEFAULT_ENERGY_PER_TICK;
+    }
+
+    public double getMaxMiningSpeed() {
+        return RefineryConfig.CONFIG != null ? RefineryConfig.CONFIG.getQuarryMaxMiningSpeed() : DEFAULT_MAX_MINING_SPEED;
+    }
 
     public static final int DEFAULT_RADIUS = 21; // 43x43 outer box, 41x41 inner pit
     public static final int MIN_RADIUS = 3;      // 7x7 outer box, 5x5 inner pit
@@ -132,11 +144,13 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
                 case 6 -> QuarryControllerBlockEntity.this.getBlockPos().getY() + QuarryControllerBlockEntity.this.currentY;
                 case 7 -> QuarryControllerBlockEntity.this.totalRemainingBlocks & 0xFFFF;
                 case 8 -> (QuarryControllerBlockEntity.this.totalRemainingBlocks >> 16) & 0xFFFF;
-                case 9 -> (int) (QuarryControllerBlockEntity.this.miningProgress);
-                case 10 -> (int) (Math.min(1.0f, QuarryControllerBlockEntity.this.energy / (float) MAX_ENERGY_PER_TICK) * 100);
+                case 9 -> (int) (QuarryControllerBlockEntity.this.miningProgress * 100);
+                case 10 -> (int) (Math.min(1.0f, QuarryControllerBlockEntity.this.energy / (float) QuarryControllerBlockEntity.this.getMaxEnergyPerTick()) * 100);
                 case 11 -> QuarryControllerBlockEntity.this.worldPosition.getX();
                 case 12 -> QuarryControllerBlockEntity.this.worldPosition.getY();
                 case 13 -> QuarryControllerBlockEntity.this.worldPosition.getZ();
+                case 14 -> QuarryControllerBlockEntity.this.getMaxEnergyPerTick();
+                case 15 -> (int) (QuarryControllerBlockEntity.this.getMaxMiningSpeed() * 100);
                 default -> 0;
             };
         }
@@ -150,7 +164,7 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
 
         @Override
         public int getCount() {
-            return 14;
+            return 16;
         }
     };
 
@@ -214,16 +228,40 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
         if (this.throwBackBlocks.contains(block)) {
             return true;
         }
+        // Equivalence rules: setting Stone throws back Cobblestone (and vice-versa); setting Deepslate throws back Cobbled Deepslate
+        if (block == Blocks.COBBLESTONE && this.throwBackBlocks.contains(Blocks.STONE)) {
+            return true;
+        }
+        if (block == Blocks.STONE && this.throwBackBlocks.contains(Blocks.COBBLESTONE)) {
+            return true;
+        }
+        if (block == Blocks.COBBLED_DEEPSLATE && this.throwBackBlocks.contains(Blocks.DEEPSLATE)) {
+            return true;
+        }
+        if (block == Blocks.DEEPSLATE && this.throwBackBlocks.contains(Blocks.COBBLED_DEEPSLATE)) {
+            return true;
+        }
+
         ItemStack filter = this.items.get(10);
         if (!filter.isEmpty() && filter.getItem() instanceof net.minecraft.world.item.BlockItem bi) {
-            return bi.getBlock() == block;
+            Block fb = bi.getBlock();
+            if (fb == block) return true;
+            if (block == Blocks.COBBLESTONE && fb == Blocks.STONE) return true;
+            if (block == Blocks.STONE && fb == Blocks.COBBLESTONE) return true;
+            if (block == Blocks.COBBLED_DEEPSLATE && fb == Blocks.DEEPSLATE) return true;
+            if (block == Blocks.DEEPSLATE && fb == Blocks.COBBLED_DEEPSLATE) return true;
         }
         return false;
     }
 
     public boolean isThrowBack(ItemStack stack) {
+        if (stack.isEmpty()) return false;
         if (stack.getItem() instanceof net.minecraft.world.item.BlockItem bi) {
             return isThrowBack(bi.getBlock());
+        }
+        // If Gravel is a throwback, flint drops are also ejected
+        if (stack.is(Items.FLINT) && isThrowBack(Blocks.GRAVEL)) {
+            return true;
         }
         return false;
     }
@@ -231,8 +269,16 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
     public void toggleThrowBack(Block block) {
         if (this.throwBackBlocks.contains(block)) {
             this.throwBackBlocks.remove(block);
+            if (block == Blocks.STONE) this.throwBackBlocks.remove(Blocks.COBBLESTONE);
+            if (block == Blocks.COBBLESTONE) this.throwBackBlocks.remove(Blocks.STONE);
+            if (block == Blocks.DEEPSLATE) this.throwBackBlocks.remove(Blocks.COBBLED_DEEPSLATE);
+            if (block == Blocks.COBBLED_DEEPSLATE) this.throwBackBlocks.remove(Blocks.DEEPSLATE);
         } else {
             this.throwBackBlocks.add(block);
+            if (block == Blocks.STONE) this.throwBackBlocks.add(Blocks.COBBLESTONE);
+            if (block == Blocks.COBBLESTONE) this.throwBackBlocks.add(Blocks.STONE);
+            if (block == Blocks.DEEPSLATE) this.throwBackBlocks.add(Blocks.COBBLED_DEEPSLATE);
+            if (block == Blocks.COBBLED_DEEPSLATE) this.throwBackBlocks.add(Blocks.DEEPSLATE);
         }
         setChanged();
         syncToClient();
@@ -259,10 +305,14 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
             for (Block b : spoilCandidates) {
                 this.throwBackBlocks.remove(b);
             }
+            this.throwBackBlocks.remove(Blocks.COBBLESTONE);
+            this.throwBackBlocks.remove(Blocks.COBBLED_DEEPSLATE);
         } else {
             for (Block b : spoilCandidates) {
                 this.throwBackBlocks.add(b);
             }
+            this.throwBackBlocks.add(Blocks.COBBLESTONE);
+            this.throwBackBlocks.add(Blocks.COBBLED_DEEPSLATE);
         }
         setChanged();
         syncToClient();
@@ -437,8 +487,8 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
         }
 
         // Energy consumption & proportional speed scaling:
-        // Max speed: 1 block per 20 ticks -> requires 20 FE/tick
-        // If energy < 20 FE, runs progressively slower (progress += energy / 20.0f)
+        // Configurable: maxEnergyPerTick (default 240 FE/tick) and maxMiningSpeed (default 1.5 blocks/sec)
+        // If energy < maxEnergyPerTick, runs progressively slower (progress scales with feToConsume / maxEnergyPerTick)
         // If 0 FE, progress is 0 (stops completely)
         boolean hasPower = this.energy > 0;
         boolean isOperating = false;
@@ -450,16 +500,20 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
                 // Buffer is full of kept items waiting for side conveyor/pipe export; pause mining engine
                 isOperating = false;
             } else {
-                int feToConsume = Math.min(this.energy, MAX_ENERGY_PER_TICK);
+                int maxFe = getMaxEnergyPerTick();
+                int feToConsume = Math.min(this.energy, maxFe);
                 float speedMultiplier = getSpeedMultiplierForBlock(targetState);
-                float progressDelta = (feToConsume / (float) MAX_ENERGY_PER_TICK) * speedMultiplier;
+                double baseBlocksPerTick = getMaxMiningSpeed() / 20.0;
+                float progressDelta = (float) (baseBlocksPerTick * (feToConsume / (double) maxFe) * speedMultiplier);
                 this.energyStorage.extract(feToConsume, null);
                 this.miningProgress += progressDelta;
                 isOperating = true;
 
-                if (this.miningProgress >= PROGRESS_REQUIRED) {
+                int steps = 0;
+                while (this.miningProgress >= PROGRESS_REQUIRED && steps++ < 10) {
                     this.miningProgress -= PROGRESS_REQUIRED;
                     executeStep(serverLevel, state.getValue(QuarryControllerBlock.FACING));
+                    if (this.phase == PHASE_DONE) break;
                 }
             }
         }
@@ -508,10 +562,13 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
 
         int innerRadius = this.radius - 1;
         int innerMaxForward = this.radius * 2;
-        int startY = 2;
+        // In PHASE_MINING, the top box (Y >= 0) has already been cleared and fenced off.
+        // Stop monitoring the top box so placed perimeter fences are never disturbed or remined.
+        // Only monitor the active inner pit excavation volume (Y <= -1).
+        int startY = (this.phase == PHASE_MINING) ? -1 : 2;
         int currentMineY = this.currentY;
 
-        // Top-down scan from Y = 2 down to currentMineY for any fallen or newly placed blocks
+        // Top-down scan from startY down to currentMineY for any fallen or newly placed blocks
         for (int dy = startY; dy >= currentMineY; dy--) {
             int r = (dy >= 0) ? this.radius : innerRadius;
             int minZ = (dy >= 0) ? 1 : 2;
@@ -529,7 +586,13 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
                     BlockState state = level.getBlockState(pos);
                     if (state.getBlock() instanceof LiquidBlock) {
                         level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                    } else if (!state.isAir() && state.getDestroySpeed(level, pos) >= 0.0f && !state.is(Blocks.BEDROCK)) {
+                    } else if (!state.isAir()
+                            && !(state.getBlock() instanceof FenceBlock)
+                            && !state.is(BlockTags.FENCES)
+                            && !(state.getBlock() instanceof WallBlock)
+                            && !state.is(BlockTags.WALLS)
+                            && state.getDestroySpeed(level, pos) >= 0.0f
+                            && !state.is(Blocks.BEDROCK)) {
                         return pos; // Found the highest obstruction!
                     }
                 }
@@ -766,8 +829,9 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
         syncToClient();
 
         // Route drops: throw-back waste blocks automatically roll off rear conveyor into pit; kept products wait in buffer for side conveyor/pipe
+        boolean minedThrowBack = isThrowBack(targetState.getBlock());
         for (ItemStack drop : drops) {
-            if (isThrowBack(drop)) {
+            if (minedThrowBack || isThrowBack(drop)) {
                 ejectViaRearConveyor(level, drop, facing);
             } else {
                 addItemToBuffer(drop);
@@ -1290,6 +1354,9 @@ public class QuarryControllerBlockEntity extends BlockEntity implements MenuProv
         this.radius = input.getIntOr("radius", DEFAULT_RADIUS);
         this.phase = input.getIntOr("phase", PHASE_CLEARING);
         this.miningProgress = input.getFloatOr("miningProgress", 0.0f);
+        if (this.miningProgress > 1.0f) {
+            this.miningProgress = 0.0f; // Reset legacy progress from 20-scale
+        }
         this.currentX = input.getIntOr("currentX", -this.radius);
         this.currentZ = input.getIntOr("currentZ", 1);
         this.currentY = input.getIntOr("currentY", 0);

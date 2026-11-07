@@ -205,10 +205,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.32.jar`
+`refinery-1.11.37.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.21 (NeoForge 26.3)`
+`Industrial Refinery 1.11.37 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -224,6 +224,53 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.37
+
+### What's New in v1.11.37:
+- **Configurable Heavy Pit Quarry Max Speed & Energy Rates (`config/refinery.toml`)**:
+  - Added user-configurable options for the Heavy Pit Quarry in `config/refinery.toml`:
+    - `quarryEnergyPerTick`: Max operational power draw (default: `240` FE/tick).
+    - `quarryMaxMiningSpeed`: Base excavation speed in blocks per second (default: `1.5` blocks/sec).
+  - Configurable strictly via configuration file (not changeable in-game) to preserve server integrity and pack author tuning.
+  - Dynamically synchronizes configured server values to client terminal screen tooltips.
+- **Excavation Speed & Energy Draw Tuning**:
+  - Increased base excavation speed from 1.0 to **1.5 blocks/second** (~13.3 ticks per standard block).
+  - Soft materials (dirt, sand, gravel, tuff) mine at 2x speed (**3.0 blocks/s**); hard ores (iron, diamond) mine at 0.5x speed (**0.75 blocks/s**).
+  - Adjusted maximum speed consumption to **240 FE/tick**.
+
+---
+
+# Industrial Refinery v1.11.35
+
+### What's New in v1.11.35:
+- **Perimeter Safety Fence Preservation During Quarry Deep Mining**:
+  - Fixed an issue where the quarry top-down obstruction scanner would re-mine and destroy the perimeter safety fence immediately after placing it in Phase 1.
+  - In Phase 2 (`PHASE_MINING`), top obstruction monitoring is now strictly restricted to the inner excavation volume ($Y \le -1$), completely ceasing monitoring of the upper bench ($Y \ge 0$).
+  - Added explicit exclusion for fences (`FenceBlock`, `BlockTags.FENCES`) and walls (`WallBlock`, `BlockTags.WALLS`), ensuring safety fences around the pit rim are permanently preserved.
+- **Stone-to-Cobblestone Throw-Back Equivalence**:
+  - Marking `Stone` as a Throw-Back block in the Geological Manifest or filter slot now automatically treats mined `Cobblestone` drops as throwbacks, ejecting them out the rear conveyor chute into the open pit void instead of filling the factory buffer.
+  - Symmetrically synchronized `Cobblestone` $\leftrightarrow$ `Stone` and `Deepslate` $\leftrightarrow$ `Cobbled Deepslate` pairs for both individual manifest toggles, the `[SPOIL]` bulk toggle button, and Slot 10 filter checks.
+
+---
+
+# Industrial Refinery v1.11.33
+
+### What's New in v1.11.33:
+- **In-Game Field Manual Guide Book Entries (`GuideBookRegistry`)**:
+  - **Heavy Pit Quarry**: Added full multiblock entry under Multiblocks category with 3-layer blueprint inspector (Layer 0, 1, 2), complete materials checklist (1 Controller + 26 Casings), crafting recipes, and operational instructions.
+  - **Crude Oil Pump Jack**: Added guide entry under Machinery detailing 2x3x3 footprint, downhole 50-block reach, power scaling (1–4 FE/t), and crafting recipe.
+  - **Bitumen Storage Pile**: Added guide entry under Logistics detailing 3x3 footprint, 8-stage visual heap growth, vacuum item ingestion, and harvesting mechanics.
+  - **Fluid Pumps & In-World Discharge**: Added guide entry under Machinery detailing Coal, Diesel, and Electric fluid extraction pumps alongside the pressurized Fluid Discharge nozzle.
+- **Refinery Wrench Blueprint Projection Support**:
+  - Right-clicking the Heavy Pit Quarry Controller with a Refinery Wrench toggles the 3D blueprint hologram wireframe in-world with auditory button click feedback.
+- **Heavy Pit Quarry 1 Controller + 26 Casings Multiblock Composition**:
+  - Simplified the multiblock requirements: now strictly requires **1 Heavy Pit Quarry Controller** and **26 Quarry Structural Casings**.
+  - All 26 blueprint positions and missing-component checks require `Quarry Structural Casing`.
+  - Removed confusing subcomponent names ("Quarry Left Conveyor Port", "Quarry Turntable Base", etc.) from requirement lists.
+  - Removed `Quarry Lattice Frame` blocks from the mod.
+
+---
+
 # Industrial Refinery v1.11.20
 
 ### What's New in v1.11.20:

@@ -279,6 +279,13 @@ public class RefineryWrenchItem extends Item {
             }
             return InteractionResult.SUCCESS;
         }
+        if (state.getBlock() instanceof QuarryControllerBlock) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof QuarryControllerBlockEntity be) {
+                be.toggleBlueprintProjection(player);
+                level.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.8f, 1.2f);
+            }
+            return InteractionResult.SUCCESS;
+        }
 
         if (state.getBlock() instanceof FluidDischargeBlock) {
             if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FluidDischargeBlockEntity be) {

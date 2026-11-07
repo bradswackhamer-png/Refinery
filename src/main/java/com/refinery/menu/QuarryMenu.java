@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
 
 public class QuarryMenu extends AbstractContainerMenu {
     public static final int CONTAINER_SIZE = QuarryControllerBlockEntity.INVENTORY_SIZE; // 10
-    public static final int DATA_COUNT = 14;
+    public static final int DATA_COUNT = 16;
 
     private final Container container;
     private final ContainerData data;
@@ -122,6 +122,16 @@ public class QuarryMenu extends AbstractContainerMenu {
 
     public int getSpeedPercent() {
         return this.data.get(10);
+    }
+
+    public int getMaxEnergyPerTick() {
+        int val = this.data.get(14);
+        return val > 0 ? val : 240;
+    }
+
+    public double getMaxMiningSpeed() {
+        int val = this.data.get(15);
+        return val > 0 ? val / 100.0 : 1.5;
     }
 
     @Override

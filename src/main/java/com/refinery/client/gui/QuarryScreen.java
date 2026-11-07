@@ -222,10 +222,12 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
 
         // 1. Energy Bar Tooltip (xo + 9..23, yo + 30..80)
         if (mouseX >= xo + 9 && mouseX <= xo + 23 && mouseY >= yo + 30 && mouseY <= yo + 80) {
+            int maxFe = this.menu.getMaxEnergyPerTick();
+            double maxSpeed = this.menu.getMaxMiningSpeed();
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Energy Storage").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                     Component.literal(String.format("%,d", this.menu.getEnergy()) + " / 50,000 FE").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Max Speed Consumption: 20 FE/t (1 block/s)").withStyle(ChatFormatting.GREEN),
+                    Component.literal("Max Speed Consumption: " + maxFe + " FE/t (" + String.format(java.util.Locale.US, "%.1f", maxSpeed) + " blocks/s)").withStyle(ChatFormatting.GREEN),
                     Component.literal("Throttles speed proportionally when low power").withStyle(ChatFormatting.DARK_GRAY)
             ), mouseX, mouseY);
             return;

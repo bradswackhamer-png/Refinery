@@ -4,6 +4,55 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.37] - 2026-11-07
+
+### Added
+- **Configurable Heavy Pit Quarry Max Speed & Energy Rates (`RefineryConfig`, `refinery.toml`)**:
+  - Added `quarryEnergyPerTick` (default `240` FE/t, range `1` to `100,000`) and `quarryMaxMiningSpeed` (default `1.5` blocks/s, range `0.05` to `50.0`) under the `[Heavy_Pit_Quarry]` section in `config/refinery.toml`.
+  - Settings are configured strictly through the mod config file (not changeable in-game) to ensure server authority and modpack balance.
+  - Dynamically synchronized config values to client GUI via container data slots (`QuarryMenu`, `QuarryControllerBlockEntity`), updating the energy gauge tooltip to show live rates (`240 FE/t (1.5 blocks/s)`).
+
+### Changed
+- **Quarry Operational Rates Tuning (`QuarryControllerBlockEntity`)**:
+  - Increased base excavation speed from 1.0 block/s to **1.5 blocks/second** (~13.3 ticks per standard block).
+  - Material speed multipliers scale accordingly: soft overburden (dirt, sand, gravel, tuff) at 2x (**3.0 blocks/s**); precious ores (iron, diamond) at 0.5x (**0.75 blocks/s**).
+  - Raised maximum power draw from 20 FE/t to **240 FE/tick** at full speed, with linear proportional throttling when under-powered.
+
+---
+
+## [1.11.35] - 2026-11-06
+
+### Fixed
+- **Perimeter Safety Fence Preservation During Quarry Deep Mining (`QuarryControllerBlockEntity`)**:
+  - Fixed an issue where the quarry top-down obstruction scanner would re-mine and destroy the perimeter safety fence immediately after placing it in Phase 1.
+  - In Phase 2 (`PHASE_MINING`), top obstruction monitoring is now strictly restricted to the inner excavation volume ($Y \le -1$), completely ceasing monitoring of the upper bench ($Y \ge 0$).
+  - Added explicit exclusion for fences (`FenceBlock`, `BlockTags.FENCES`) and walls (`WallBlock`, `BlockTags.WALLS`) in `findTopObstruction`, ensuring safety fences around the pit rim are permanently preserved.
+- **Stone-to-Cobblestone Throw-Back Equivalence (`QuarryControllerBlockEntity`)**:
+  - Marking `Stone` as a Throw-Back block in the Geological Manifest or filter slot now automatically treats mined `Cobblestone` drops as throwbacks, ejecting them out the rear conveyor chute into the open pit void instead of filling the factory buffer.
+  - Symmetrically synchronized `Cobblestone` $\leftrightarrow$ `Stone` and `Deepslate` $\leftrightarrow$ `Cobbled Deepslate` pairs for both individual manifest toggles, the `[SPOIL]` bulk toggle button, and Slot 10 filter checks.
+  - Guaranteed that any drop resulting from mining a marked throwback block is automatically routed to rear spoil disposal.
+
+---
+
+## [1.11.33] - 2026-11-06
+
+### Added
+- **In-Game Field Manual Guide Book Entries (`GuideBookRegistry`)**:
+  - **Heavy Pit Quarry (`GuideCategory.MULTIBLOCKS`)**: Added interactive multiblock guide entry complete with 3-layer blueprint inspector (Layer 0, Layer 1, Layer 2), full material requirements checklist (1 Heavy Pit Quarry Controller + 26 Quarry Structural Casings), crafting recipes, and comprehensive operational handbook (180° inverted pit digging behind the rig, top-down clearing, rear spoil ejection, and side conveyor routing).
+  - **Crude Oil Pump Jack (`GuideCategory.MACHINERY`)**: Added industrial beam pumping unit guide entry detailing the 2x3x3 footprint, downhole vertical drilling reach up to 50 blocks beneath the wellhead, power-scaled extraction rates (1–4 FE/t), and crafting recipe.
+  - **Bitumen Storage Pile (`GuideCategory.LOGISTICS`)**: Added open-air asphalt stockpile guide entry detailing the 3x3 ground perimeter, 8-stage dynamic mound growth up to 16,384 chunks (256 stacks), vacuum item ingestion, and harvesting mechanics.
+  - **Fluid Pumps & In-World Discharge (`GuideCategory.MACHINERY`)**: Added documentation for Coal, Diesel, and Electric fluid extraction pumps alongside the pressurized Fluid Discharge nozzle.
+- **Refinery Wrench Blueprint Projection Support (`RefineryWrenchItem`)**:
+  - Right-clicking the Heavy Pit Quarry Controller with a Refinery Wrench now toggles the 3D blueprint hologram wireframe in-world with auditory button click feedback, matching all other industrial multiblock machines.
+
+### Changed
+- **Heavy Pit Quarry 1 Controller + 26 Casings Multiblock Composition (`QuarryControllerBlockEntity`, `RefineryMod`)**:
+  - Simplified the Heavy Pit Quarry multiblock structure to strictly require **1 Heavy Pit Quarry Controller** and **26 Quarry Structural Casings**.
+  - All 26 blueprint requirements and structure validation checks now uniformly require and display `Quarry Structural Casing`, eliminating confusing internal subcomponent labels ("Quarry Left Conveyor Port", "Quarry Turntable Base", etc.) that misled players into searching for non-existent blocks.
+  - Completely removed `QuarryFrameBlock` (Quarry Lattice Frame) and its assets/recipes from the mod, streamlining crafting requirements so players only need controller and casing blocks.
+
+---
+
 ## [1.11.32] - 2026-11-06
 
 ### Changed

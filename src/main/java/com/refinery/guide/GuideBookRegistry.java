@@ -648,6 +648,72 @@ public class GuideBookRegistry {
         }
 
         // =========================================================================
+        // 8B. HEAVY PIT QUARRY EXCAVATOR (3x3x3 Multiblock)
+        // =========================================================================
+        {
+            Map<Character, LayerSymbol> legend = new HashMap<>();
+            legend.put('C', new LayerSymbol('C', "Quarry Controller", 0xFF38BDF8, () -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get())));
+            legend.put('X', new LayerSymbol('X', "Quarry Structural Casing", 0xFFD9821E, () -> new ItemStack(RefineryMod.QUARRY_CASING.get())));
+
+            List<GuideBlockRequirement> reqs = List.of(
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get()), "Heavy Pit Quarry Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.QUARRY_CASING.get()), "Quarry Structural Casing", 26)
+            );
+
+            List<GuideLayer> layers = List.of(
+                    new GuideLayer(0, "Layer 0 (Foundation Skid & Operator Station)", new String[]{
+                            "XXX",
+                            "XXX",
+                            "XCX"
+                    }, legend),
+                    new GuideLayer(1, "Layer 1 (Machinery Deck & Winch)", new String[]{
+                            "XXX",
+                            "XXX",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(2, "Layer 2 (A-Frame Gantry & Floodlights)", new String[]{
+                            "XXX",
+                            "XXX",
+                            "XXX"
+                    }, legend)
+            );
+
+            List<GuideRecipe> recipes = List.of(
+                    new GuideRecipe("Quarry Structural Casing (x4)",
+                            List.of(() -> new ItemStack(RefineryMod.STEEL_INGOT.get(), 4), () -> new ItemStack(RefineryMod.STEEL_PLATE.get(), 4)),
+                            List.of(() -> new ItemStack(RefineryMod.QUARRY_CASING.get(), 4)),
+                            "Crafted with 4 Steel Plates and 4 Steel Ingots in a crafting table."),
+                    new GuideRecipe("Heavy Pit Quarry Controller",
+                            List.of(() -> new ItemStack(Items.DIAMOND_PICKAXE, 2), () -> new ItemStack(RefineryMod.QUARRY_CASING.get()), () -> new ItemStack(RefineryMod.STEEL_PLATE.get(), 2)),
+                            List.of(() -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get())),
+                            "Crafted with Diamond Pickaxes, Comparator, Redstone Blocks, Quarry Casing, Steel Plates, and Gold Ingot.")
+            );
+
+            register(new GuideEntry(
+                    "quarry",
+                    "Heavy Pit Quarry Excavator",
+                    "3x3x3 Multiblock • Automated Surface Mining",
+                    GuideCategory.MULTIBLOCKS,
+                    () -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get()),
+                    "The Heavy Pit Quarry Excavator is an industrial-scale automated open-pit mining machine designed to excavate massive terraced pits down to bedrock.\n\n" +
+                    "• 180° Inverted Work Area: Excavates entirely behind the machine while the operator cabin and status display face safely forward toward your base.\n" +
+                    "• Phase 0 (Outer Bench Clearing): Clears a 43x43x3 perimeter box from the machine's level up 3 blocks (Y=+2 down to Y=0).\n" +
+                    "• Phase 1 (Perimeter Safety Railing): Automatically places safety fences around the 41x41 pit perimeter using fences supplied in GUI slot 9.\n" +
+                    "• Phase 2 (Deep Pit Excavation): Sinks a 41x41 shaft from Y=-1 down to bedrock, clearing liquids and obstructions from the top down.\n" +
+                    "• Built-in Rear Spoil Chute: Items designated as Throw-Back spoil automatically roll off the rear conveyor into the pit void.\n" +
+                    "• Internal Buffer & Side Ports: Valuable ores and kept products accumulate in a 9-slot internal buffer and auto-export when pipes or conveyors connect to the Left or Right side ports.",
+                    "• Sneak-right-click the Controller with a Refinery Wrench to toggle an in-world 3D holographic blueprint!\n" +
+                    "• Click any block in the GUI Geological Manifest Monitor or press [SPOIL] to toggle Throw-Back rejection.\n" +
+                    "• Soft blocks (Dirt, Sand, Gravel, Tuff) mine at 2x speed; Iron and Diamond ores mine at 1/2 speed.\n" +
+                    "• Scales speed proportionally with supplied energy (default 240 FE/t at max speed; configurable in refinery.toml).\n" +
+                    "• Base max excavation speed: 1.5 blocks/second (configurable in refinery.toml).",
+                    reqs,
+                    layers,
+                    recipes
+            ));
+        }
+
+        // =========================================================================
         // 9. STANDALONE MACHINES: GENERATOR & FERMENTER
         // =========================================================================
         register(new GuideEntry(
@@ -694,6 +760,48 @@ public class GuideBookRegistry {
                 List.of()
         ));
 
+        register(new GuideEntry(
+                "crude_pump_jack",
+                "Crude Oil Pump Jack",
+                "2x3x3 Machine • Downhole Well Extraction",
+                GuideCategory.MACHINERY,
+                () -> new ItemStack(RefineryMod.CRUDE_PUMP_JACK_ITEM.get()),
+                "The Crude Oil Pump Jack is an authentic walking-beam beam pump engineered for automated subterranean oil well extraction.\n\n" +
+                "• In-World Footprint: Placed as a single block that automatically forms a full 2-wide by 3-deep by 3-high (2x3x3) structural steel walking beam assembly.\n" +
+                "• Downhole Reach: Probes up to 50 blocks downward and 10 blocks horizontally, detecting underground crude oil pockets and natural oil reservoirs.\n" +
+                "• Kinematic Beam Movement: Features animated horsehead counterweights, pitman arms, and authentic mechanical chug audio.\n" +
+                "• Energy & Pumping Speed: Operates on 1 to 4 FE/t with proportional speed scaling. Stores up to 16,000 mB of Crude Oil in its internal reservoir, automatically pushing to connected fluid pipes.",
+                "• Place directly above or within 10 blocks of subterranean crude oil reservoirs detected during prospecting.\n" +
+                "• Connect Industrial Fluid Pipes to the base to pump oil directly into your 3-Stage Petroleum Refinery!\n" +
+                "• Breaks as a single block and cleanly drops 1 Crude Pump Jack item.",
+                null,
+                null,
+                List.of(
+                        new GuideRecipe("Crude Oil Pump Jack",
+                                List.of(() -> new ItemStack(RefineryMod.ELECTRIC_FLUID_PUMP.get()), () -> new ItemStack(RefineryMod.STEEL_GEAR.get()), () -> new ItemStack(RefineryMod.STEEL_PLATE.get(), 4), () -> new ItemStack(RefineryMod.REINFORCED_CASING.get())),
+                                List.of(() -> new ItemStack(RefineryMod.CRUDE_PUMP_JACK_ITEM.get())),
+                                "Crafted with an Electric Fluid Pump, Steel Gear, 4 Steel Plates, and 1 Reinforced Structural Casing.")
+                )
+        ));
+
+        register(new GuideEntry(
+                "fluid_pumps",
+                "Fluid Pumps & In-World Discharge",
+                "Surface & Well Liquid Pumping",
+                GuideCategory.MACHINERY,
+                () -> new ItemStack(RefineryMod.ELECTRIC_FLUID_PUMP.get()),
+                "Refinery provides powerful pumps for surface liquids, underground pools, and in-world fluid placement:\n\n" +
+                "• Coal Fluid Pump: Solid fuel powered extraction pump (Coal, Charcoal, Bitumen).\n" +
+                "• Diesel Fluid Pump: High-rate internal combustion pump fueled by Diesel or Ethanol.\n" +
+                "• Electric Fluid Pump: Continuous, clean electric pumping running on FE/RF power.\n" +
+                "• Fluid Discharge: Discharges pressurized fluids directly into the world as source blocks or flowing streams.",
+                "• Right-click pumps with a Refinery Wrench to rotate their intake and discharge ports!\n" +
+                "• Right-click a Fluid Discharge with a wrench to toggle between Source Block and Flowing mode.",
+                null,
+                null,
+                List.of()
+        ));
+
         // =========================================================================
         // 10. LOGISTICS: CONVEYORS & STORAGE TANKS
         // =========================================================================
@@ -721,6 +829,30 @@ public class GuideBookRegistry {
                 null,
                 null,
                 List.of()
+        ));
+
+        register(new GuideEntry(
+                "bitumen_pile",
+                "Bitumen Storage Pile",
+                "3x3 Footprint • Dynamic Visual Asphalt Stockpile",
+                GuideCategory.LOGISTICS,
+                () -> new ItemStack(RefineryMod.BITUMEN.get()),
+                "The Bitumen Storage Pile is a large open-air industrial bulk storage dump for asphalt bitumen and petroleum tar.\n\n" +
+                "• 3x3 Footprint: Placed as a single block establishing an authentic 3x3 ground perimeter.\n" +
+                "• Dynamic Visual Growth: Gradually mounds and piles up visually through 8 distinct height stages as more bitumen is added (holding up to 256 stacks / 16,384 bitumen chunks).\n" +
+                "• Vacuum Ingestion: Automatically suctions and vacuums up bitumen items dropped or tossed nearby.\n" +
+                "• Logistics Feeds: Easily supplied from overhead conveyors, chutes, or hoppers.",
+                "• Right-click with Bitumen to deposit; sneak-right-click with an empty hand to extract chunks.\n" +
+                "• Hit the pile with a shovel or pickaxe to extract bitumen quickly.\n" +
+                "• Breaking the pile drops the Bitumen Storage Pile item plus all stored bitumen contents!",
+                null,
+                null,
+                List.of(
+                        new GuideRecipe("Bitumen Storage Pile",
+                                List.of(() -> new ItemStack(RefineryMod.BITUMEN.get(), 8)),
+                                List.of(() -> new ItemStack(RefineryMod.BITUMEN_PILE.get())),
+                                "Crafted with 8 Bitumen chunks around an empty center in a crafting table.")
+                )
         ));
 
         // =========================================================================

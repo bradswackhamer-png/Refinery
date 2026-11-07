@@ -31,6 +31,10 @@ public class RefineryConfig {
     public final ModConfigSpec.IntValue geyserOilVolumeMb;
     public final ModConfigSpec.ConfigValue<List<? extends String>> allowedBiomes;
 
+    // Heavy Pit Quarry configuration
+    public final ModConfigSpec.IntValue quarryEnergyPerTick;
+    public final ModConfigSpec.DoubleValue quarryMaxMiningSpeed;
+
     public RefineryConfig(ModConfigSpec.Builder builder) {
         builder.push("Oil_Worldgen_And_Retrogen");
 
@@ -95,6 +99,40 @@ public class RefineryConfig {
                 );
 
         builder.pop();
+
+        builder.push("Heavy_Pit_Quarry");
+
+        quarryEnergyPerTick = builder
+                .comment("Energy consumed per tick by the Heavy Pit Quarry at maximum mining speed (in FE/tick).",
+                        "When energy supply is lower than this value, mining speed throttles down proportionally.",
+                        "Default: 240 FE/tick.")
+                .defineInRange("quarryEnergyPerTick", 240, 1, 100000);
+
+        quarryMaxMiningSpeed = builder
+                .comment("Maximum base excavation speed of the Heavy Pit Quarry (in blocks per second).",
+                        "At default 1.5 blocks/sec, standard stone is mined every ~13.3 ticks (1.5 blocks/sec),",
+                        "soft materials (dirt, sand, gravel, tuff) mine at 2x (3.0 blocks/sec),",
+                        "and precious ores (iron, diamond) mine at 0.5x (0.75 blocks/sec).",
+                        "Default: 1.5 blocks/sec.")
+                .defineInRange("quarryMaxMiningSpeed", 1.5, 0.05, 50.0);
+
+        builder.pop();
+    }
+
+    public int getQuarryEnergyPerTick() {
+        try {
+            return quarryEnergyPerTick != null ? quarryEnergyPerTick.get() : 240;
+        } catch (Exception e) {
+            return 240;
+        }
+    }
+
+    public double getQuarryMaxMiningSpeed() {
+        try {
+            return quarryMaxMiningSpeed != null ? quarryMaxMiningSpeed.get() : 1.5;
+        } catch (Exception e) {
+            return 1.5;
+        }
     }
 
     public boolean isBiomeAllowed(Holder<Biome> biomeHolder) {

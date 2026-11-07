@@ -56,6 +56,10 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.37 (Configurable Quarry Max Speed & Energy Rates, 240 FE/t & 1.5 blocks/s Defaults)](#version-11137-configurable-quarry-max-speed--energy-rates-240-fet--15-blockss-defaults)
+   - [Version 1.11.35 (Perimeter Safety Fence Preservation, Stone-to-Cobblestone Throw-Back Equivalence)](#version-11135-perimeter-safety-fence-preservation-stone-to-cobblestone-throw-back-equivalence)
+   - [Version 1.11.33 (In-Game Field Manual Guide Book Quarry & Machinery Additions, Wrench Hologram Projection)](#version-11133-in-game-field-manual-guide-book-quarry--machinery-additions-wrench-hologram-projection)
+   - [Version 1.11.32 (Heavy Pit Quarry 1 Controller + 26 Casings Multiblock Recipe)](#version-11132-heavy-pit-quarry-1-controller--26-casings-multiblock-recipe)
    - [Version 1.11.20 (Refinery Heaters Single-Item Drop, Steam Turbine GUI Overhaul & Header Alignment)](#version-11120-refinery-heaters-single-item-drop-steam-turbine-gui-overhaul--header-alignment)
    - [Version 1.11.19 (Crude Pump Jack 2x3x3 Multiblock, Bitumen Pile Alignment & Drop Fixes)](#version-11119-crude-pump-jack-2x3x3-multiblock-bitumen-pile-alignment--drop-fixes)
    - [Version 1.11.18 (Bitumen Storage Pile 3x3 Footprint, Single-Item Drop Fix, GUI Label Rescaling)](#version-11118-bitumen-storage-pile-3x3-footprint-single-item-drop-fix-gui-label-rescaling)
@@ -1844,6 +1848,42 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.37 (Configurable Quarry Max Speed & Energy Rates, 240 FE/t & 1.5 blocks/s Defaults)
+- **Configurable Heavy Pit Quarry Options (`config/refinery.toml`)**:
+  - Added user and server configuration options for the Heavy Pit Quarry:
+    - `quarryEnergyPerTick`: Max operational power draw (default: `240` FE/tick).
+    - `quarryMaxMiningSpeed`: Base excavation speed in blocks per second (default: `1.5` blocks/sec).
+  - Configurable strictly through the mod config file (not changeable in-game) to preserve server authority and modpack balance.
+  - Dynamically synchronizes configured server values to client terminal screen tooltips.
+- **Excavation Speed & Energy Tuning (`QuarryControllerBlockEntity`)**:
+  - Increased base excavation speed from 1.0 to **1.5 blocks/second** (~13.3 ticks per standard block).
+  - Soft materials (dirt, sand, gravel, tuff) mine at 2x speed (**3.0 blocks/s**); hard ores (iron, diamond) mine at 0.5x speed (**0.75 blocks/s**).
+  - Raised maximum power draw to **240 FE/tick** at full speed, with linear proportional throttling when under-powered.
+
+---
+
+### Version 1.11.35 (Perimeter Safety Fence Preservation, Stone-to-Cobblestone Throw-Back Equivalence)
+- **Perimeter Safety Fence Preservation During Deep Mining (`QuarryControllerBlockEntity`)**:
+  - Fixed an issue where the quarry top-down obstruction scanner would re-mine and destroy the perimeter safety fence immediately after placing it in Phase 1.
+  - In Phase 2 (`PHASE_MINING`), top obstruction monitoring is now strictly restricted to the inner excavation volume ($Y \le -1$), completely ceasing monitoring of the upper bench ($Y \ge 0$).
+  - Added explicit exclusion for fences (`FenceBlock`, `BlockTags.FENCES`) and walls (`WallBlock`, `BlockTags.WALLS`), ensuring safety fences around the pit rim are permanently preserved.
+- **Stone-to-Cobblestone Throw-Back Equivalence (`QuarryControllerBlockEntity`)**:
+  - Marking `Stone` as a Throw-Back block in the Geological Manifest or filter slot now automatically treats mined `Cobblestone` drops as throwbacks, ejecting them out the rear conveyor chute into the open pit void instead of filling the factory buffer.
+  - Symmetrically synchronized `Cobblestone` $\leftrightarrow$ `Stone` and `Deepslate` $\leftrightarrow$ `Cobbled Deepslate` pairs for both individual manifest toggles, the `[SPOIL]` bulk toggle button, and Slot 10 filter checks.
+
+---
+
+### Version 1.11.33 (In-Game Field Manual Guide Book Quarry & Machinery Additions, Wrench Hologram Projection)
+- **In-Game Field Manual Guide Book Updates (`GuideBookRegistry`)**:
+  - **Heavy Pit Quarry (`GuideCategory.MULTIBLOCKS`)**: Added comprehensive guide book entry featuring interactive 3-layer blueprint slice viewer (Layers 0, 1, 2), complete material requirements checklist (1 Controller + 26 Casings), crafting recipes, and full operational handbook.
+  - **Crude Oil Pump Jack (`GuideCategory.MACHINERY`)**: Added entry detailing 2x3x3 footprint, downhole 50-block reach, power-scaled pumping speed (1–4 FE/t), and crafting recipe.
+  - **Bitumen Storage Pile (`GuideCategory.LOGISTICS`)**: Added entry detailing 3x3 open-air bulk storage footprint, 8-stage visual mound growth, and vacuum absorption.
+  - **Fluid Pumps & In-World Discharge (`GuideCategory.MACHINERY`)**: Added documentation for Coal, Diesel, and Electric pumps and Fluid Discharge.
+- **Refinery Wrench Hologram Wand Support**:
+  - Right-clicking the Heavy Pit Quarry Controller with a Refinery Wrench now toggles the 3D blueprint hologram wireframe in-world with auditory button click feedback.
 
 ---
 

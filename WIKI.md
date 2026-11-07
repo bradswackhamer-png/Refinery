@@ -506,46 +506,43 @@ A heavy industrial open-pit continuous surface mining crawler rig engineered for
   - **Slewing Turntable & Machinery Deck**: Center rotating ring with diamond treadplate deck, heavy electric winch drum wound with braided steel wire cable, drive motor, and hydraulic power pack.
   - **Reinforced Operator Cabin**: Front-left elevated climate-controlled operator cabin with panoramic tinted safety glass, twin joystick consoles, and roof sunshade awning.
   - **Structural Lattice A-Frame Gantry Tower**: 4 vertical lattice columns rising to Y=46 with crown sheaves, boom pulleys, and tension stays.
-  - **High-Intensity Work Lighting**: Dual high-intensity halogen work floodlights mounted to the upper gantry aiming forward and downward into the pit, providing full-bright optic lenses and emitting in-world **light level 15** while operating.
+  - **High-Intensity Work Lighting**: Dual front-facing and dual rear-facing high-intensity halogen work floodlights mounted to the upper gantry aiming downward into the excavation pit, providing full-bright optic lenses and emitting in-world **light level 15** while operating.
   - **Warning Amber Hazard Strobe**: Active rotating amber strobe beacon mounted on the cabin roof.
   - **Counterweight Ballast**: Rear ballast box with 45-degree yellow and black safety hazard stripes.
 - **3-Phase Automated Excavation Sequence**:
-  - **Phase 0: Surface Overburden Clearing ($43\times 43\times 3$)**: Mines an expansive $43\times 43\times 3$ box directly in front of the machine ($y = 0, -1, -2$), excavating a wide 3-block-deep recessed terrace bench.
-  - **Phase 1: Automated Safety Perimeter Fencing**: Once the $43\times 43\times 3$ clearing is completed, the quarry automatically lines the outside perimeter of the inner $41\times 41$ pit with safety railings (using fences supplied in the dedicated GUI fence slot, or crafting durable safety fences automatically from quarried stone).
-  - **Phase 2: Deep Pit Excavation to Bedrock**: Excavates the inner $41\times 41$ pit layer-by-layer downward from $y = -3$ all the way to bedrock (`level.getMinY()`). Fluid pockets (water and lava) are safely cleared, ores and minerals are harvested with diamond-pickaxe loot context, and unbreakable bedrock is safely preserved.
-- **3 Low-Profile Conveyor Export Chutes**:
-  - Features 3 extended industrial discharge arms—**Rear** `(0, 0, 3)`, **Left** `(-2, 0, 1)`, and **Right** `(2, 0, 1)`.
-  - Built at standard 5px conveyor bed height (`y: 0..5`), lining up flush with our mod's `ConveyorBeltBlock`, `RightAngleConveyorBeltBlock`, and `SlopedConveyorBeltBlock`.
-  - Automatically pushes mined aggregates and ores in a round-robin load-balanced cycle directly onto adjacent conveyor belts, into item pipes, or into connected storage containers (Chests, Barrels, Hoppers).
-  - 9 internal buffer slots safely store output if downstream lines are backed up.
+  - **Phase 0: Surface Overburden Clearing ($43\times 43\times 3$)**: Mines an expansive $43\times 43\times 3$ box behind the machine from the machine's ground level up 3 blocks ($y = 2, 1, 0$), clearing top-down.
+  - **Phase 1: Automated Safety Perimeter Fencing**: Once the $43\times 43\times 3$ clearing is completed, the quarry automatically lines the outside perimeter of the inner $41\times 41$ pit at $y = 0$ with safety railings (using fences supplied in the dedicated GUI fence slot, or crafting durable safety fences automatically from quarried stone).
+  - **Phase 2: Deep Pit Excavation to Bedrock**: Excavates the inner $41\times 41$ pit layer-by-layer downward from $y = -1$ all the way to bedrock (`level.getMinY()`). Fluid pockets (water and lava) are safely cleared, ores and minerals are harvested with diamond-pickaxe loot context, and unbreakable bedrock is safely preserved.
+- **Built-in Rear Spoil Ejection & Side Conveyor/Pipe Exports**:
+  - **Built-in Rear Spoil Chute** `(0, 0, 3)`: Configured "Throw-Back" overburden blocks (dirt, sand, gravel, stone, deepslate, tuff, cobblestone) automatically roll off the rear chute and tumble directly back into the excavation pit void. Setting Stone as a Throw-Back automatically treats Cobblestone drops as throwbacks (and Deepslate treats Cobbled Deepslate as throwbacks).
+  - **Left & Right Side Export Ports** `(-2, 0, 1)` and `(2, 0, 1)`: Valuable ores and kept minerals accumulate in an internal 9-slot buffer and auto-export when normal conveyors or pipes connect to the side ports.
+- **Mining Speeds & Material Multipliers**:
+  - **Base Speed**: Default **1.5 blocks per second** (~13.3 ticks per block at standard speed, fully configurable in `config/refinery.toml`).
+  - Dirt, Sand, Gravel, and Tuff mine at **2x speed** (3.0 blocks/s default).
+  - Iron and Diamond ores mine at **1/2 speed** (0.75 blocks/s default).
+  - Standard blocks (Stone, Deepslate, etc.) mine at base speed (1.5 blocks/s default).
 - **Energy Consumption & Proportional Speed Scaling**:
-  - **Max Speed**: 1 block per second (20 ticks per block) requiring strictly **20 FE/tick** (400 FE total per block).
-  - **Progressive Throttling**: The quarry automatically scales down speed proportionally as available energy drops below 20 FE/tick (10 FE/t = 50% speed, 5 FE/t = 25% speed), cleanly pausing when 0 FE is available.
+  - **Max Speed Consumption**: Default **240 FE/tick** (fully configurable in `config/refinery.toml`).
+  - **Progressive Throttling**: The quarry automatically scales down speed proportionally as available energy drops below the configured rate (e.g., 120 FE/t = 50% speed, 60 FE/t = 25% speed), cleanly pausing when 0 FE is available.
   - Internal Energy Storage: 50,000 FE.
 - **Interactive Control Terminal GUI**:
   - **Radius Controls**: `[-]` and `[+]` buttons allowing the clearing radius to be adjusted down from 21 ($43\times 43$) down to 3 ($7\times 7$), with live box and pit dimension readouts.
-  - **Remaining Blocks Breakdown Dashboard**: Real-time monitor displaying total remaining blocks and a paginated, item-icon list showing how many of each individual block type remains to be mined (Stone, Deepslate, Coal Ore, Iron Ore, Copper Ore, Gold Ore, Diamond Ore, etc.).
-  - **Dedicated Fence Supply Slot**: Slot 9 accepts custom player fence blocks or iron bars.
+  - **Geological Manifest Monitor**: Real-time monitor displaying total remaining blocks and a paginated, item-icon list showing remaining counts for each block type. Clicking any block toggles Throw-Back rejection; `[SPOIL]` toggles all overburden blocks at once.
+  - **Dedicated Slots**: Slot 9 accepts custom fence blocks for perimeter railing; Slot 10 is a dedicated Throw-Back rejection filter slot.
+
+#### Multiblock Construction (Only 2 Blocks Required)
+Only 2 craftable blocks are needed to build the 3×3×3 Heavy Pit Quarry:
+1. **Heavy Pit Quarry Controller** (1x at `(0, 0, 0)`)
+2. **Quarry Structural Casing** (26x)
 
 #### Quarry Layer Schematic (Local Coordinates)
-- **Layer 0 (Foundation Skid & 3 Conveyor Ports)**:
-  - `(0, 0, 0)`: **Heavy Quarry Controller** (Bottom Center Front, facing mining pit)
-  - `(-1, 0, 0)`, `(1, 0, 0)`, `(0, 0, 1)`, `(-1, 0, 2)`, `(1, 0, 2)`: **Quarry Structural Casing**
-  - `(-1, 0, 1)`: **Quarry Lattice Frame (Left Conveyor Port)**
-  - `(1, 0, 1)`: **Quarry Lattice Frame (Right Conveyor Port)**
-  - `(0, 0, 2)`: **Quarry Lattice Frame (Rear Conveyor Port)**
-- **Layer 1 (Machinery Deck, Winch & Cabin)**:
-  - `(-1, 1, 0)`, `(0, 1, 0)`, `(1, 1, 0)`: **Quarry Lattice Frame** (Boom mast & cabin supports)
-  - `(-1, 1, 1)`: **Quarry Structural Casing** (Operator Cabin)
-  - `(0, 1, 1)`: **Quarry Structural Casing** (Main Winch Core)
-  - `(1, 1, 1)`: **Quarry Structural Casing** (Electric Power Unit)
-  - `(-1, 1, 2)`, `(0, 1, 2)`, `(1, 1, 2)`: **Quarry Structural Casing** (Counterweight Ballast & Hydraulic Pack)
-- **Layer 2 (Lattice A-Frame Gantry, Pulleys & Floodlights)**:
-  - `(-1, 2, 0)`: **Quarry Lattice Frame** (Left Floodlight Mount)
-  - `(1, 2, 0)`: **Quarry Lattice Frame** (Right Floodlight Mount)
-  - `(0, 2, 0)`: **Quarry Lattice Frame** (Crown Cable Sheaves)
-  - `(-1, 2, 1)`, `(0, 2, 1)`, `(1, 2, 1)`: **Quarry Lattice Frame** (Gantry Apex & Strobe Mast)
-  - `(-1, 2, 2)`, `(0, 2, 2)`, `(1, 2, 2)`: **Quarry Lattice Frame** (Tension Stay Anchors & Counterweight Gantry)
+- **Layer 0 (Foundation Skid & Operator Station)**:
+  - `(0, 0, 0)`: **Heavy Quarry Controller** (Bottom Center Front, operator cabin facing forward away from pit)
+  - Remaining 8 positions: **Quarry Structural Casing**
+- **Layer 1 (Machinery Deck & Winch)**:
+  - All 9 positions: **Quarry Structural Casing**
+- **Layer 2 (Gantry, Pulleys & Floodlights)**:
+  - All 9 positions: **Quarry Structural Casing**
 
 ---
 
@@ -734,6 +731,24 @@ Commands can be issued via `/admin` or `/refinery`:
 - `/admin oil_stats`: Displays scanned chunks and total generated oil wells.
 - `/admin reset_oil_retrogen`: Resets retrogen history for the world.
 - *(Also mirrored under `/refinery spawn_oil_pit`, `/refinery spawn_geyser`, `/refinery stats`)*
+
+### Crude Oil Pump Jack (2×3×3 Walking-Beam Machine)
+An authentic mechanical walking-beam pump engineered for automated subterranean oil well extraction.
+
+- **Footprint**: Placed as a single block that automatically forms a full 2-wide by 3-deep by 3-high (`2x3x3`) structural steel assembly.
+- **Deep Downhole Reach**: Scans up to 50 blocks downward and 10 blocks horizontally, detecting and pumping subterranean crude oil pockets.
+- **Kinematic Walking Beam**: Features animated horsehead counterweights, pitman arms, and authentic mechanical chug audio.
+- **Energy & Output**: Runs on 1 to 4 FE/t with proportional speed scaling. Stores up to 16,000 mB of Crude Oil in its internal reservoir, automatically pushing to connected fluid pipes.
+- **Crafting**: 1 Electric Fluid Pump, 1 Steel Gear, 4 Steel Plates, and 1 Reinforced Structural Casing.
+
+### Bitumen Storage Pile (3×3 Footprint Bulk Storage)
+A large open-air industrial bulk storage dump for asphalt bitumen and petroleum tar.
+
+- **Footprint**: Placed as a single block establishing an authentic 3×3 ground perimeter.
+- **Dynamic Visual Growth**: Gradually mounds and piles up visually through 8 distinct height stages as more bitumen is added (holding up to 256 stacks / 16,384 bitumen chunks).
+- **Vacuum Ingestion**: Automatically suctions and vacuums up bitumen items dropped or tossed nearby.
+- **Logistics Feeds**: Easily supplied from overhead conveyors, chutes, or hoppers.
+- **Crafting**: 8 Bitumen chunks around an empty center in a crafting table.
 
 ---
 
