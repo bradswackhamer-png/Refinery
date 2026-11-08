@@ -56,7 +56,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
     public static final int TANK_CAPACITY = 4000;
     public static final int ENERGY_CAPACITY = 500_000;
     public static final int ENERGY_PER_TICK = 600;
-    public static final int PROCESS_TIME = 240; // 12 seconds per press stroke (turned down by 200%)
+    public static final int PROCESS_TIME = 400; // 20 seconds per press stroke (400 ticks)
 
     private boolean assembled = false;
     private int energy = 0;

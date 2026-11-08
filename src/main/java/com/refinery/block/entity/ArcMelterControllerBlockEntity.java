@@ -55,7 +55,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public static final int TANK_CAPACITY = 8000;
     public static final int ENERGY_CAPACITY = 2_000_000;
     public static final int ENERGY_PER_TICK = 10_000;
-    public static final int PROCESS_TIME = 120; // 6 seconds per batch (slowed down another 100%)
+    public static final int PROCESS_TIME = 200; // 10 seconds per batch (200 ticks)
 
     private boolean assembled = false;
     private int energy = 0;

@@ -255,19 +255,22 @@ public class CastingPressModel {
         float[] fluidRgb = ArcMelterModel.getMoltenFluidColor(moltenFluid, isActive);
 
         // Smooth hydraulic press ram stroke (0.0 = top retracted, 1.0 = bottom stamping hold)
-        // 0..90:   Downward stamping stroke
-        // 90..150: Bottom high-pressure dwell & water-quench solidification
-        // 150..240:Smooth upward hydraulic retraction
+        // 0..downEnd:   Downward stamping stroke
+        // downEnd..dwellEnd: Bottom high-pressure dwell & water-quench solidification
+        // dwellEnd..maxP: Smooth upward hydraulic retraction
+        float maxP = (float) com.refinery.block.entity.CastingPressControllerBlockEntity.PROCESS_TIME;
+        float downEnd = maxP * 0.375f;
+        float dwellEnd = maxP * 0.625f;
         float strokeRatio = 0.0f;
         if (isActive || progress > 0) {
-            float p = Mth.clamp(progress + (isActive ? partialTicks : 0f), 0f, 240f);
-            if (p < 90f) {
-                float t = p / 90f;
+            float p = Mth.clamp(progress + (isActive ? partialTicks : 0f), 0f, maxP);
+            if (p < downEnd) {
+                float t = p / downEnd;
                 strokeRatio = t * t * (3f - 2f * t); // smoothstep approach
-            } else if (p < 150f) {
+            } else if (p < dwellEnd) {
                 strokeRatio = 1.0f + 0.02f * Mth.sin(time * 0.8f); // high-pressure dwell throb
             } else {
-                float t = (p - 150f) / 90f;
+                float t = (p - dwellEnd) / (maxP - dwellEnd);
                 strokeRatio = 1.0f - (t * t * (3f - 2f * t)); // smooth hydraulic retraction
             }
         }
@@ -318,7 +321,7 @@ public class CastingPressModel {
 
             // 4. Molten Inflow and Solidified Billet inside the crystallizer mold basin
             if (isActive || progress > 0 || moltenAmount > 0) {
-                boolean solidifying = (progress >= 90);
+                boolean solidifying = (progress >= downEnd);
                 float alpha = solidifying ? 1.0f : 0.95f;
 
                 if (solidifying) {

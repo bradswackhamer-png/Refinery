@@ -17,6 +17,7 @@ public class GuideEntry {
     private final @Nullable List<GuideBlockRequirement> requirements;
     private final @Nullable List<GuideLayer> layers;
     private final List<GuideRecipe> recipes;
+    private final @Nullable String energyInfo;
 
     public GuideEntry(
             String id,
@@ -30,6 +31,22 @@ public class GuideEntry {
             @Nullable List<GuideLayer> layers,
             List<GuideRecipe> recipes
     ) {
+        this(id, title, subtitle, category, iconSupplier, description, proTips, requirements, layers, recipes, null);
+    }
+
+    public GuideEntry(
+            String id,
+            String title,
+            String subtitle,
+            GuideCategory category,
+            Supplier<ItemStack> iconSupplier,
+            String description,
+            String proTips,
+            @Nullable List<GuideBlockRequirement> requirements,
+            @Nullable List<GuideLayer> layers,
+            List<GuideRecipe> recipes,
+            @Nullable String energyInfo
+    ) {
         this.id = id;
         this.title = title;
         this.subtitle = subtitle;
@@ -40,6 +57,7 @@ public class GuideEntry {
         this.requirements = requirements;
         this.layers = layers;
         this.recipes = recipes;
+        this.energyInfo = energyInfo;
     }
 
     public String getId() {
@@ -68,6 +86,10 @@ public class GuideEntry {
 
     public String getProTips() {
         return proTips;
+    }
+
+    public @Nullable String getEnergyInfo() {
+        return energyInfo;
     }
 
     public boolean isMultiblock() {

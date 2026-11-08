@@ -92,11 +92,15 @@ public class GuideBookRegistry {
                     "5x5x5 Multiblock • Heavy Metallurgy",
                     GuideCategory.METALLURGY,
                     () -> new ItemStack(RefineryMod.BLAST_FURNACE_CONTROLLER.get()),
-                    "The Industrial Blast Smelter is the primary high-temperature foundry for smelting raw ores into molten liquid metals and alloyed steel. It features a hollow 3x3x3 internal combustion chamber and a 3x3 heat-resistant glass viewing window.\n\nFueled by Coal, Coke, Charcoal, or Bitumen. Outputs molten metal directly into connected Casting Channels or fluid pipes.",
+                    "The Industrial Blast Smelter is the primary high-temperature foundry for smelting raw ores into molten liquid metals and alloyed steel. It features a hollow 3x3x3 internal combustion chamber and a 3x3 heat-resistant glass viewing window.\n\n" +
+                    "• Power Consumption: 0 FE/t (Powered strictly by solid fuels)\n" +
+                    "• Supported Fuels: Coal, Charcoal, Coke, or Bitumen (1 fuel unit per operation, 9 per Coal Block)\n" +
+                    "• Outputs: Molten metal (100 mB per raw ore) poured directly into connected Casting Channels or fluid pipes, plus Slag byproduct.",
                     "Sneak-right-click the Controller with a Refinery Wrench to toggle an in-world 3D holographic projection of the multiblock!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power: Unpowered (Consumes Solid Fuel: Coal, Charcoal, Bitumen; 0 FE/t)"
             ));
         }
 
@@ -155,11 +159,17 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • High-Yield Metallurgy",
                     GuideCategory.METALLURGY,
                     () -> new ItemStack(RefineryMod.ARC_MELTER_CONTROLLER.get()),
-                    "The Electric Arc Melter employs massive carbon electrodes to melt ores and scrap metals into molten fluid. It doubles the output of raw ores (yielding 200 mB per raw ore).\n\nRequires RF/FE electrical power. The bottom-front spout pours molten metal into open Casting Channels without pipes.",
+                    "The Electric Arc Melter employs massive carbon electrodes to melt ores and scrap metals into molten fluid. It doubles the output of raw ores (yielding 200 mB per raw ore).\n\n" +
+                    "• Power Consumption: 10,000 FE/t during active melting (2,000,000 FE total per 200-tick / 10.0s melt cycle)\n" +
+                    "• Cycle Time: 10.0 seconds (200 ticks) per batch\n" +
+                    "• Energy Storage Buffer: 2,000,000 FE (Max input rate: 100,000 FE/t)\n" +
+                    "• Molten Discharge: Bottom-front spout pours molten metal directly into open Casting Channels without pipes.\n" +
+                    "• Top Hopper Funnel: Items dropped into the overhead gantry opening are suctioned directly into the crucible.",
                     "Position an open Casting Channel directly in front of the Molten Output Port to channel molten metal into a Continuous Casting Press!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power Draw: 10,000 FE/t (Buffer: 2,000,000 FE | Max In: 100,000 FE/t)"
             ));
         }
 
@@ -220,11 +230,16 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • Automated Metal Casting",
                     GuideCategory.METALLURGY,
                     () -> new ItemStack(RefineryMod.CASTING_PRESS_CONTROLLER.get()),
-                    "The Continuous Casting Press automates the solidification of molten metal into finished goods. Equipped with an animated hydraulic stamping ram, it accepts molten feeds from casting channels, pipes, or buckets and presses them into solid ingots or plates.",
+                    "The Continuous Casting Press automates the solidification of molten metal into finished goods. Equipped with an animated hydraulic stamping ram, it accepts molten feeds from casting channels, pipes, or buckets and presses them into solid ingots or plates.\n\n" +
+                    "• Power Consumption: 600 FE/t while hydraulic stamping ram is operating (240,000 FE total per 400-tick / 20.0s stroke)\n" +
+                    "• Cycle Time: 20.0 seconds (400 ticks) per stroke\n" +
+                    "• Energy Storage Buffer: 500,000 FE (Max input rate: 20,000 FE/t)\n" +
+                    "• Fluid Consumption: 100 mB of molten metal per stroke",
                     "Eject finished ingots directly onto an adjacent conveyor belt placed next to the Casting Discharge Port!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power Draw: 600 FE/t (Buffer: 500,000 FE | Max In: 20,000 FE/t)"
             ));
         }
 
@@ -315,7 +330,11 @@ public class GuideBookRegistry {
                     new GuideRecipe("Two Stages Enabled (1,000 mB Crude)",
                             List.of(() -> new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get())),
                             List.of(() -> new ItemStack(RefineryFluids.LIQUID_TAR_BUCKET.get()), () -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(RefineryMod.BITUMEN.get())),
-                            "S1+S2: 250 mB Tar + 250 mB Diesel + 1 Bitumen | S1+S3: 250 mB Tar + 250 mB Gas + 1 Bitumen | S2+S3: 250 mB Diesel + 250 mB Gas.")
+                            "S1+S2: 250 mB Tar + 250 mB Diesel + 1 Bitumen | S1+S3: 250 mB Tar + 250 mB Gas + 1 Bitumen | S2+S3: 250 mB Diesel + 250 mB Gas."),
+                    new GuideRecipe("Oil Sand Feedstock Extraction",
+                            List.of(() -> new ItemStack(RefineryMod.OIL_SAND.get())),
+                            List.of(() -> new ItemStack(RefineryFluids.CRUDE_OIL_BUCKET.get()), () -> new ItemStack(Blocks.SAND)),
+                            "When heated (>= 350°C), extracts 200 mB of Crude Oil and returns 1 Sand per Oil Sand block.")
             );
 
             register(new GuideEntry(
@@ -324,24 +343,35 @@ public class GuideBookRegistry {
                     "3x9x3 Multiblock • Three 3x3x3 Stages",
                     GuideCategory.MULTIBLOCKS,
                     () -> new ItemStack(RefineryMod.REFINERY_CONTROLLER.get()),
-                    "The 3-Stage Petroleum Refinery is a 3x9x3 fractional distillation column divided into three 3x3x3 vertical stages:\n• Bottom Third (Stage 1): Liquid Tar & Bitumen\n• Middle Third (Stage 2): Diesel Fuel\n• Top Third (Stage 3): Gasoline\n\nRequires an external Heat Source (>= 350°C) from either a Burner Refinery Furnace or Electric Refinery Furnace placed adjacent to Stage 1!",
+                    "The 3-Stage Petroleum Refinery is a 3x9x3 fractional distillation column divided into three 3x3x3 vertical stages:\n" +
+                    "• Stage 1 (Bottom 3x3x3): Liquid Tar & Bitumen (350°C–500°C)\n" +
+                    "• Stage 2 (Middle 3x3x3): Diesel Fuel (250°C–350°C)\n" +
+                    "• Stage 3 (Top 3x3x3): Gasoline (40°C–110°C)\n\n" +
+                    "• Power Consumption: 0 FE/t direct electrical draw (Powered by thermal heat)\n" +
+                    "• Heat Requirement: Requires an external Heat Source (>= 350°C) from either an adjacent Burner Refinery Furnace or Electric Refinery Furnace touching Stage 1.\n" +
+                    "• Feedstocks: Distills piped/bucketed Crude Oil, or extracts 200 mB Crude Oil + 1 Sand per block of natural Oil Sand!",
                     "Toggle individual stages ON or OFF inside the Refinery GUI to customize your output ratios per 1,000 mB of Crude Oil!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power: Unpowered (Requires Adjacent Furnace Heat >= 350°C; 0 FE/t)"
             ));
 
             register(new GuideEntry(
                     "refinery_furnaces",
                     "Refinery Furnaces (Burner & Electric)",
-                    "1x2x1 Heat Sources • 350°C–500°C",
+                    "1x2x1 Heat Sources • 350°C–500°C Operating Range",
                     GuideCategory.MACHINERY,
                     () -> new ItemStack(RefineryMod.BURNER_REFINERY_FURNACE.get()),
-                    "The 3-Stage Petroleum Refinery requires an adjacent Refinery Furnace at >= 350°C to heat crude oil vapors.\n\n• Burner Refinery Furnace: Burns solid fuels and fuel buckets at 4x rapid combustion speed.\n• Electric Refinery Furnace: Consumes 500 FE/t of high-voltage RF power to heat cleanly without ash.\n\nEach furnace is placed as a single item occupying 2 vertical blocks (1x2x1) and drops 1 item when broken.",
+                    "The 3-Stage Petroleum Refinery requires an adjacent Refinery Furnace at >= 350°C to heat crude oil vapors.\n\n" +
+                    "• Electric Refinery Furnace: Consumes 500 FE/t of high-voltage RF power while heating to maintain 350°C–500°C. Internal buffer: 500,000 FE. Clean, soot-free, zero ash.\n" +
+                    "• Burner Refinery Furnace: Burns solid fuels (Coal, Charcoal, Bitumen) and fuel buckets at 4x rapid combustion speed. 0 FE/t electrical draw.\n\n" +
+                    "Each furnace occupies 2 vertical blocks (1x2x1) and is placed and broken as a single item.",
                     "Place your chosen Refinery Furnace directly touching the outside of Stage 1 (bottom 3x3x3 section) of the Refinery Tower!",
                     null,
                     null,
-                    List.of()
+                    List.of(),
+                    "⚡ Electric: 500 FE/t (Buffer: 500,000 FE) | Burner: Solid Fuels (0 FE/t)"
             ));
         }
 
@@ -400,11 +430,16 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • Ore Pulverizer",
                     GuideCategory.MACHINERY,
                     () -> new ItemStack(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get()),
-                    "The Industrial Grinder features massive counter-rotating steel rolls to crush ores, gravel, and stone into doubled mineral dusts and rare byproducts.\n\nAutomatically expels finished dusts onto adjacent conveyor belts!",
+                    "The Industrial Rock Crusher features massive counter-rotating steel rolls to crush ores, gravel, and stone into doubled mineral dusts and rare byproducts.\n\n" +
+                    "• Power Consumption: 2,000 FE/t during active crushing\n" +
+                    "• Energy Storage Buffer: 500,000 FE (Max input rate: 50,000 FE/t)\n" +
+                    "• Vacuum Intake: Dropped items falling into the top hopper funnel opening are suctioned directly into the crushing chamber.\n" +
+                    "• Auto-Export: Finished dusts automatically roll out onto adjacent conveyor belts!",
                     "Feed ores into the top feed port via hopper or conveyor, and capture output dusts with a flat conveyor on the ground!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power Draw: 2,000 FE/t (Buffer: 500,000 FE | Max In: 50,000 FE/t)"
             ));
         }
 
@@ -461,11 +496,15 @@ public class GuideBookRegistry {
                     "3x2x2 Multiblock • Cold-Forming Press",
                     GuideCategory.MACHINERY,
                     () -> new ItemStack(RefineryMod.METAL_PRESS_CONTROLLER.get()),
-                    "The Hydraulic Metal Press is a cold-forming machine that compresses ingots and plates into industrial components.\n\nStamping strictly requires an installed Die (Plate Die, Gear Die, Corrugated Steel Die, or Rail Die) locked into the tooling slot below the ram.",
+                    "The Hydraulic Metal Press is a cold-forming machine that compresses ingots and plates into industrial components.\n\n" +
+                    "• Power Consumption: 500 FE/t while hydraulic stamping ram is in motion\n" +
+                    "• Energy Storage Buffer: 100,000 FE (Max input rate: 20,000 FE/t)\n" +
+                    "• Tooling Dies: Requires an installed Die (Plate Die, Gear Die, Corrugated Steel Die, or Rail Die) locked into the tooling slot below the ram.",
                     "Place conveyor belts directly aligned with the Anvil Bed for seamless automated pass-through stamping!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power Draw: 500 FE/t (Buffer: 100,000 FE | Max In: 20,000 FE/t)"
             ));
         }
 
@@ -518,7 +557,7 @@ public class GuideBookRegistry {
                     new GuideRecipe("Parallel 8-Slot Smelting",
                             List.of(() -> new ItemStack(Items.RAW_COPPER, 8), () -> new ItemStack(Items.COAL)),
                             List.of(() -> new ItemStack(Items.COPPER_INGOT, 8)),
-                            "Smelts 8 items simultaneously in parallel, consuming fuel evenly across all batches.")
+                            "Smelts 8 items simultaneously in parallel, consuming fuel or RF evenly across all batches.")
             );
 
             register(new GuideEntry(
@@ -527,16 +566,21 @@ public class GuideBookRegistry {
                     "5x4x3 Multiblock • 8-Batch Heavy Smelter",
                     GuideCategory.MACHINERY,
                     () -> new ItemStack(RefineryMod.MULTI_SMELTER_CONTROLLER.get()),
-                    "The Industrial Multi-Smelter is an 8-slot heavy batch furnace array. It accepts full stacks of items and smelts all 8 slots in parallel with remarkable thermal efficiency.",
+                    "The Industrial Multi-Smelter is an 8-slot heavy batch furnace array that smelts full stacks of items in parallel with remarkable thermal efficiency.\n\n" +
+                    "• Dual Power Operation:\n" +
+                    "  1. Electric Induction: Consumes 5,000 FE/t of RF/FE power via connected cables or the Fuel/Energy Port. Internal buffer: 1,000,000 FE (Max input: 50,000 FE/t).\n" +
+                    "  2. Solid Fuel: Burns solid fuels (Coal, Charcoal, Bitumen) in its fuel slot (0 FE/t).\n" +
+                    "• Parallel Throughput: Smelts up to 8 batches simultaneously!",
                     "Connect an Input Port on the left and Output Port on the right to fully automate your ore smelting pipeline!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power Draw: 5,000 FE/t or Solid Fuel (Buffer: 1,000,000 FE | Max In: 50,000 FE/t)"
             ));
         }
 
         // =========================================================================
-        // 8. STEAM BOILERS & STEAM TURBINE (Thermodynamics & Power)
+        // 8. STEAM BOILERS (Solid-Fuel: Small & Large)
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
@@ -577,26 +621,109 @@ public class GuideBookRegistry {
             );
 
             List<GuideRecipe> recipes = List.of(
-                    new GuideRecipe("High-Pressure Steam Generation",
+                    new GuideRecipe("Small Boiler Steam Generation",
                             List.of(() -> new ItemStack(Items.WATER_BUCKET), () -> new ItemStack(Items.COAL)),
                             List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get())),
-                            "Generates 1,000 mB of high-pressure steam from 1,000 mB water under sustained heat.")
+                            "Boils 50 mB/t Water into 100 mB/t High Pressure Steam under sustained combustion."),
+                    new GuideRecipe("Large Boiler Steam Generation",
+                            List.of(() -> new ItemStack(Items.WATER_BUCKET, 3), () -> new ItemStack(Items.COAL, 2)),
+                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get(), 3)),
+                            "Boils 150 mB/t Water into 300 mB/t High Pressure Steam across 8 fuel slots (matches 3 Small Boilers).")
             );
 
             register(new GuideEntry(
                     "boilers",
-                    "Steam Boilers (Small & Large)",
-                    "3x3x3 & 5x5x5 Multiblock • Steam Generation",
+                    "Solid-Fuel Steam Boilers (Small & Large)",
+                    "3x3x3 & 5x5x5 Multiblock • Solid Fuel Steam Generation",
                     GuideCategory.POWER,
                     () -> new ItemStack(RefineryMod.SMALL_BOILER_CONTROLLER.get()),
-                    "Steam Boilers burn solid fuels (or diesel in Diesel Boilers) to flash water into high-pressure steam.\n\nKeep water supplied continuously! If a boiler runs dry while hot, it enters a critical countdown with a loud siren alarm before explosive meltdown.",
+                    "Steam Boilers burn solid fuels (Coal, Coke, Charcoal, Bitumen) to flash water into high-pressure steam for Steam Turbines.\n\n" +
+                    "• Power Consumption: 0 FE/t (Thermal combustion powered)\n" +
+                    "• Small Steam Boiler (3x3x3): 4 fuel slots. Boils 50 mB/t Water into 100 mB/t Steam. Reservoir: 16,000 mB.\n" +
+                    "• Large Steam Boiler (5x5x5): 8 fuel slots. Boils 150 mB/t Water into 300 mB/t Steam (exactly 3x Small). Reservoir: 64,000 mB.\n" +
+                    "• Meltdown Hazard: Keep water supplied continuously! If a boiler runs dry while hot, a siren alarm warns of impending catastrophic explosion.",
                     "Always pipe turbine exhaust water back into the Boiler Water Port to maintain a safe, closed Rankine loop!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power: Unpowered (Consumes Solid Fuel: Coal, Charcoal, Bitumen; 0 FE/t)"
             ));
         }
 
+        // =========================================================================
+        // 8A. DIESEL STEAM BOILERS (Small & Large)
+        // =========================================================================
+        {
+            Map<Character, LayerSymbol> legend = new HashMap<>();
+            legend.put('C', new LayerSymbol('C', "Diesel Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get())));
+            legend.put('F', new LayerSymbol('F', "Boiler Diesel Input Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
+            legend.put('W', new LayerSymbol('W', "Boiler Water Input Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get())));
+            legend.put('S', new LayerSymbol('S', "Boiler Steam Output Port", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Diesel Burner Firebox", 0xFFEA580C, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
+            legend.put('P', new LayerSymbol('P', "Boiler Pressure Pipe", 0xFFF59E0B, () -> new ItemStack(RefineryMod.BOILER_PIPE.get())));
+            legend.put('X', new LayerSymbol('X', "Steel Boiler Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get())));
+
+            List<GuideBlockRequirement> reqs = List.of(
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get()), "Small Diesel Boiler Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pipe", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get()), "Steel Boiler Casing", 21)
+            );
+
+            List<GuideLayer> layers = List.of(
+                    new GuideLayer(0, "Layer 0 (Firebox & Fuel)", new String[]{
+                            "XFX",
+                            "XBX",
+                            "XCX"
+                    }, legend),
+                    new GuideLayer(1, "Layer 1 (Water In & Steam Out)", new String[]{
+                            "XSX",
+                            "WPX",
+                            "XXX"
+                    }, legend),
+                    new GuideLayer(2, "Layer 2 (Steam Dome)", new String[]{
+                            "XXX",
+                            "XXX",
+                            "XXX"
+                    }, legend)
+            );
+
+            List<GuideRecipe> recipes = List.of(
+                    new GuideRecipe("Small Diesel Boiler Cycle",
+                            List.of(() -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET)),
+                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get())),
+                            "Consumes 10 mB Diesel & 100 mB Water per 10-tick cycle to produce 250 mB Steam / cycle (25 mB/t)."),
+                    new GuideRecipe("Large Diesel Boiler Cycle",
+                            List.of(() -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET, 3)),
+                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get(), 3)),
+                            "Consumes 30 mB Diesel & 300 mB Water per 10-tick cycle to produce 750 mB Steam / cycle (75 mB/t; 3x Small).")
+            );
+
+            register(new GuideEntry(
+                    "diesel_boilers",
+                    "Diesel Steam Boilers (Small & Large)",
+                    "3x3x3 & 5x5x5 Multiblock • Liquid Fuel Steam Generation",
+                    GuideCategory.POWER,
+                    () -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get()),
+                    "Diesel Steam Boilers burn liquid hydrocarbons (Diesel or Ethanol Biofuel) to produce massive volumes of high-pressure steam with zero solid ash.\n\n" +
+                    "• Power Consumption: 0 FE/t (Liquid combustion powered)\n" +
+                    "• Small Diesel Boiler (3x3x3): Consumes 10 mB Diesel & 100 mB Water per 10-tick cycle to produce 250 mB Steam / cycle (25 mB/t). Reservoir: 16,000 mB.\n" +
+                    "• Large Diesel Boiler (5x5x5): Consumes 30 mB Diesel & 300 mB Water per 10-tick cycle to produce 750 mB Steam / cycle (75 mB/t; 3x Small). Reservoir: 64,000 mB.\n" +
+                    "• Siren Alarm: Warns of low water before dry-run thermal meltdown.",
+                    "Supply fuel via Industrial Fluid Pipes connected to the Boiler Fuel Port from your Diesel storage tanks!",
+                    reqs,
+                    layers,
+                    recipes,
+                    "⚡ Power: Unpowered (Consumes Diesel or Ethanol Fuel; 0 FE/t)"
+            ));
+        }
+
+        // =========================================================================
+        // 8B. STEAM TURBINE GENERATOR (3x3x3 Multiblock)
+        // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
             legend.put('C', new LayerSymbol('C', "Turbine Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get())));
@@ -639,16 +766,21 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • Rankine Power Plant",
                     GuideCategory.POWER,
                     () -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get()),
-                    "The Steam Turbine Generator expands high-pressure steam across a 3-tier rotor shaft to produce 10,000 FE/t of electricity.\n\nIt features an internal surface condenser that recaptures steam as recyclable water (150 mB/t at full rate).",
+                    "The Steam Turbine Generator expands high-pressure steam across a 3-tier rotor shaft to produce massive electrical power.\n\n" +
+                    "• Power Generation: Produces 10,000 FE/t of electricity at full steam consumption\n" +
+                    "• Steam Consumption: Consumes 300 mB/t High-Pressure Steam at full load (matches 1 Large Steam Boiler or 3 Small Boilers)\n" +
+                    "• Water Condensation: Internal surface condenser recaptures 150 mB/t recyclable Water (2:1 steam-to-water ratio)\n" +
+                    "• Energy Export: Internal buffer holds 1,000,000 FE and actively pushes up to 50,000 FE/t to connected energy cables/machines.",
                     "Route water back to your boiler with an insulated fluid pipe to run continuous, closed-loop zero-loss power generation!",
                     reqs,
                     layers,
-                    List.of()
+                    List.of(),
+                    "⚡ Power Generation: 10,000 FE/t (Buffer: 1,000,000 FE | Max Out: 50,000 FE/t)"
             ));
         }
 
         // =========================================================================
-        // 8B. HEAVY PIT QUARRY EXCAVATOR (3x3x3 Multiblock)
+        // 8C. HEAVY PIT QUARRY EXCAVATOR (3x3x3 Multiblock)
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
@@ -695,21 +827,22 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • Automated Surface Mining",
                     GuideCategory.MULTIBLOCKS,
                     () -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get()),
-                    "The Heavy Pit Quarry Excavator is an industrial-scale automated open-pit mining machine designed to excavate massive terraced pits down to bedrock.\n\n" +
-                    "• 180° Inverted Work Area: Excavates entirely behind the machine while the operator cabin and status display face safely forward toward your base.\n" +
-                    "• Phase 0 (Outer Bench Clearing): Clears a 43x43x3 perimeter box from the machine's level up 3 blocks (Y=+2 down to Y=0).\n" +
-                    "• Phase 1 (Perimeter Safety Railing): Automatically places safety fences around the 41x41 pit perimeter using fences supplied in GUI slot 9.\n" +
-                    "• Phase 2 (Deep Pit Excavation): Sinks a 41x41 shaft from Y=-1 down to bedrock, clearing liquids and obstructions from the top down.\n" +
-                    "• Built-in Rear Spoil Chute: Items designated as Throw-Back spoil automatically roll off the rear conveyor into the pit void.\n" +
-                    "• Internal Buffer & Side Ports: Valuable ores and kept products accumulate in a 9-slot internal buffer and auto-export when pipes or conveyors connect to the Left or Right side ports.",
-                    "• Sneak-right-click the Controller with a Refinery Wrench to toggle an in-world 3D holographic blueprint!\n" +
-                    "• Click any block in the GUI Geological Manifest Monitor or press [SPOIL] to toggle Throw-Back rejection.\n" +
-                    "• Soft blocks (Dirt, Sand, Gravel, Tuff) mine at 2x speed; Iron and Diamond ores mine at 1/2 speed.\n" +
-                    "• Scales speed proportionally with supplied energy (default 240 FE/t at max speed; configurable in refinery.toml).\n" +
-                    "• Base max excavation speed: 1.5 blocks/second (configurable in refinery.toml).",
+                    "The Heavy Pit Quarry Excavator is an automated open-pit mining machine designed to excavate massive terraced pits down to bedrock.\n\n" +
+                    "• Power Consumption: 240 FE/t default at max mining speed (configurable via quarryEnergyPerTick in refinery.toml)\n" +
+                    "• Base Mining Speed: 1.5 blocks/second default (configurable via quarryMaxMiningSpeed in refinery.toml)\n" +
+                    "• Proportional Speed Scaling: Throttles speed proportionally if supplied energy is below 240 FE/t\n" +
+                    "• Energy Buffer: 50,000 FE (Max input: 1,000 FE/t)\n" +
+                    "• Material Speed Multipliers: Soft blocks (Dirt, Sand, Gravel, Tuff) mine at 2x (3.0 blocks/s); Ores (Iron, Diamond) mine at 0.5x (0.75 blocks/s)\n" +
+                    "• Phase 0 (Outer Bench): Clears a 43x43x3 perimeter box (Y=+2 down to Y=0)\n" +
+                    "• Phase 1 (Safety Railing): Automatically erects safety fences around the 41x41 rim using fences supplied in GUI slot 9\n" +
+                    "• Phase 2 (Deep Pit Excavation): Sinks a 41x41 shaft from Y=-1 down to bedrock\n" +
+                    "• Rear Spoil Chute: Items designated as Throw-Back spoil roll off the rear chute into the pit void; Left/Right side ports export products.",
+                    "• Click any block in the Geological Manifest Monitor or press [SPOIL] to toggle Throw-Back rejection!\n" +
+                    "• Sneak-right-click the Controller with a Refinery Wrench to toggle an in-world 3D holographic blueprint!",
                     reqs,
                     layers,
-                    recipes
+                    recipes,
+                    "⚡ Power Draw: 240 FE/t default (Buffer: 50,000 FE | Configurable in refinery.toml)"
             ));
         }
 
@@ -722,11 +855,16 @@ public class GuideBookRegistry {
                 "1x2x2 Compact Power Plant",
                 GuideCategory.POWER,
                 () -> new ItemStack(RefineryMod.DIESEL_GENERATOR.get()),
-                "A compact 1x2x2 internal combustion generator that runs on Diesel or Ethanol Biofuel. Produces high-voltage RF/FE energy directly from its output terminals.\n\nIdeal for remote drilling sites or powering arc furnaces before steam infrastructure is built.",
-                "Sneak-click with a wrench to align its electrical output facing toward your energy network.",
+                "A compact 1x2x2 internal combustion generator that runs on Diesel or Ethanol Biofuel. Produces high-voltage RF/FE energy directly from its output terminals.\n\n" +
+                "• Energy Generation: Produces 256 FE/t directly into connected cables or machines\n" +
+                "• Fuel Consumption: Burns 1 mB diesel every 4 ticks (1,000 FE per mB of diesel fuel)\n" +
+                "• Energy Storage Buffer: 500,000 FE (Max export rate: 1,024 FE/t)\n" +
+                "• Redstone Automation: Supports Always On, Active High, or Active Low (backup emergency generator mode).",
+                "Set redstone mode to Active Low so the generator turns on automatically as a backup whenever your primary grid drops power!",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Power Generation: 256 FE/t (Fuel: Diesel/Ethanol | Buffer: 500,000 FE)"
         ));
 
         register(new GuideEntry(
@@ -735,8 +873,12 @@ public class GuideBookRegistry {
                 "Biochemical Ethanol Production",
                 GuideCategory.MACHINERY,
                 () -> new ItemStack(RefineryMod.FERMENTER.get()),
-                "The Industrial Fermenter is a biochemical processing vat that digests agricultural crops into Ethanol Biofuel.\n\nAccepts sugar cane, sweet berries, potatoes, apples, and wheat seeds.",
-                "Pair with an Automated Harvester for infinite, 100% renewable green electricity!",
+                "The Industrial Fermenter is a biochemical processing vat that digests agricultural crops into Ethanol Biofuel.\n\n" +
+                "• Power Consumption: 15 FE/t over 60 ticks / 3.0s per crop (900 FE total per batch)\n" +
+                "• Energy Storage Buffer: 20,000 FE (Max input rate: 500 FE/t)\n" +
+                "• Tank Capacity: 8,000 mB Ethanol\n" +
+                "• Supported Crops: Sugar cane, sweet berries, potatoes, apples, and wheat seeds (produces 250 mB Ethanol per batch).",
+                "Pair with an Automated Harvester and Diesel Generator for an infinite, 100% renewable green electricity loop!",
                 null,
                 null,
                 List.of(
@@ -744,7 +886,8 @@ public class GuideBookRegistry {
                                 List.of(() -> new ItemStack(Items.SUGAR_CANE, 4)),
                                 List.of(() -> new ItemStack(RefineryFluids.ETHANOL_BUCKET.get())),
                                 "Ferments organic biomass into 250 mB of high-octane Ethanol liquid fuel.")
-                )
+                ),
+                "⚡ Power Draw: 15 FE/t (Buffer: 20,000 FE | Max In: 500 FE/t)"
         ));
 
         register(new GuideEntry(
@@ -753,11 +896,15 @@ public class GuideBookRegistry {
                 "Autonomous Crop & Tree Farming",
                 GuideCategory.MACHINERY,
                 () -> new ItemStack(RefineryMod.AUTO_HARVESTER.get()),
-                "The Auto Planter and Auto Harvester automate agricultural cultivation in up to a 9x9 field.\n\nAuto Harvester cuts down mature crops and timber trees automatically, routing harvested goods to its internal storage.\n\nThe Feeding Trough keeps animals fed and bred autonomously.",
+                "The Auto Planter and Auto Harvester automate agricultural cultivation in up to a 9x9 field.\n\n" +
+                "• Auto Planter: Sows seeds and tills soil. Consumes 1 FE/t idle standby + 10 FE per planting/tilling action. Buffer: 10,000 FE (Max in: 500 FE/t).\n" +
+                "• Auto Harvester: Cuts mature crops and timber trees. Consumes 1 FE/t idle standby + 20 FE per crop harvest. For timber trees: consumes 20 FE base + 5 FE/log + 2 FE/leaf (leaf decay: 20 FE + 2 FE/leaf). Buffer: 10,000 FE (Max in: 500 FE/t).\n" +
+                "• Feeding Trough: Autonomous livestock feeder and breeder. Unpowered (0 FE/t).",
                 "Attach an extraction pipe with an autarchic pulse gate to automatically draw wheat, seeds, and logs into your storage network!",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Harvester: 1 FE/t idle + 20 FE/crop | Planter: 1 FE/t idle + 10 FE/action"
         ));
 
         register(new GuideEntry(
@@ -767,10 +914,14 @@ public class GuideBookRegistry {
                 GuideCategory.MACHINERY,
                 () -> new ItemStack(RefineryMod.CRUDE_PUMP_JACK_ITEM.get()),
                 "The Crude Oil Pump Jack is an authentic walking-beam beam pump engineered for automated subterranean oil well extraction.\n\n" +
-                "• In-World Footprint: Placed as a single block that automatically forms a full 2-wide by 3-deep by 3-high (2x3x3) structural steel walking beam assembly.\n" +
-                "• Downhole Reach: Probes up to 50 blocks downward and 10 blocks horizontally, detecting underground crude oil pockets and natural oil reservoirs.\n" +
-                "• Kinematic Beam Movement: Features animated horsehead counterweights, pitman arms, and authentic mechanical chug audio.\n" +
-                "• Energy & Pumping Speed: Operates on 1 to 4 FE/t with proportional speed scaling. Stores up to 16,000 mB of Crude Oil in its internal reservoir, automatically pushing to connected fluid pipes.",
+                "• Power Consumption & Speed Scaling:\n" +
+                "  • 4 FE/t: Full speed (1,000 mB/min)\n" +
+                "  • 2 FE/t: Half speed (500 mB/min)\n" +
+                "  • 1 FE/t: Low speed (100 mB/min)\n" +
+                "• Energy Storage Buffer: 10,000 FE (Max input rate: 64 FE/t)\n" +
+                "• Downhole Reach: Probes up to 50 blocks downward and 10 blocks horizontally, detecting underground crude oil pockets and natural reservoirs.\n" +
+                "• Internal Reservoir: Stores up to 16,000 mB of Crude Oil, auto-pushing to connected fluid pipes.\n" +
+                "• In-World Footprint: Placed as a single block that automatically forms a full 2x3x3 structural steel walking beam assembly.",
                 "• Place directly above or within 10 blocks of subterranean crude oil reservoirs detected during prospecting.\n" +
                 "• Connect Industrial Fluid Pipes to the base to pump oil directly into your 3-Stage Petroleum Refinery!\n" +
                 "• Breaks as a single block and cleanly drops 1 Crude Pump Jack item.",
@@ -781,7 +932,8 @@ public class GuideBookRegistry {
                                 List.of(() -> new ItemStack(RefineryMod.ELECTRIC_FLUID_PUMP.get()), () -> new ItemStack(RefineryMod.STEEL_GEAR.get()), () -> new ItemStack(RefineryMod.STEEL_PLATE.get(), 4), () -> new ItemStack(RefineryMod.REINFORCED_CASING.get())),
                                 List.of(() -> new ItemStack(RefineryMod.CRUDE_PUMP_JACK_ITEM.get())),
                                 "Crafted with an Electric Fluid Pump, Steel Gear, 4 Steel Plates, and 1 Reinforced Structural Casing.")
-                )
+                ),
+                "⚡ Power Draw: 1 to 4 FE/t (Buffer: 10,000 FE | Max In: 64 FE/t)"
         ));
 
         register(new GuideEntry(
@@ -791,17 +943,18 @@ public class GuideBookRegistry {
                 GuideCategory.MACHINERY,
                 () -> new ItemStack(RefineryMod.ELECTRIC_FLUID_PUMP.get()),
                 "Refinery provides powerful pumps for surface liquids, underground pools, and in-world fluid placement:\n\n" +
-                "• Coal Fluid Pump: Solid fuel powered extraction pump (Coal, Charcoal, Bitumen).\n" +
-                "• Diesel Fluid Pump: High-rate internal combustion pump fueled by Diesel or Ethanol.\n" +
-                "• Electric Fluid Pump: Continuous, clean electric pumping running on FE/RF power.\n" +
-                "• Fluid Discharge: Discharges pressurized fluids directly into the world as source blocks or flowing streams.\n" +
-                "• Fire Hydrant: AWWA safety-yellow standpipe hydrant with an 8,000 mB reservoir. When attached to a fluid pipe and fed liquid, right-click with an Empty Bucket in hand to fill it!",
+                "• Electric Fluid Pump: Consumes 400 FE per pump cycle (operates every 10 ticks, pumping 2,000 mB = ~40 FE/t continuous). Buffer: 20,000 FE (Max in: 1,000 FE/t).\n" +
+                "• Coal Fluid Pump: Solid fuel powered extraction pump (Coal, Charcoal, Bitumen; 0 FE/t).\n" +
+                "• Diesel Fluid Pump: High-rate internal combustion pump fueled by Diesel or Ethanol (0 FE/t).\n" +
+                "• Fluid Discharge: Discharges pressurized fluids directly into the world as source blocks or flowing streams (0 FE/t).\n" +
+                "• Fire Hydrant: AWWA safety-yellow standpipe hydrant with an 8,000 mB reservoir. When attached to a fluid pipe and fed liquid, right-click with an Empty Bucket in hand to fill it (0 FE/t)!",
                 "• Right-click pumps with a Refinery Wrench to rotate their intake and discharge ports!\n" +
                 "• Right-click a Fluid Discharge with a wrench to toggle between Source Block and Flowing mode.\n" +
                 "• Right-click a Fire Hydrant with an Empty Bucket to draw 1,000 mB of liquid; shift-right-click with an empty hand to flush.",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Electric Pump: 400 FE/cycle (~40 FE/t) | Coal/Diesel: Fuel | Hydrant: 0 FE/t"
         ));
 
         // =========================================================================
@@ -813,11 +966,15 @@ public class GuideBookRegistry {
                 "Smooth In-World Item Transport",
                 GuideCategory.LOGISTICS,
                 () -> new ItemStack(RefineryMod.CONVEYOR_BELT.get()),
-                "Conveyor belts provide continuous in-world item transport at 0.1 blocks/tick. Available in Flat, Sloped (Climbing/Descending), and Right-Angle (Corner) varieties.\n\nIncludes universal cross-mod compatibility to pass items seamlessly into other conveyor systems like Ole Saw Mill without bunching or getting stuck.",
+                "Conveyor belts provide continuous in-world item transport at 0.1 blocks/tick. Available in Flat, Sloped (Climbing/Descending), and Right-Angle (Corner) varieties.\n\n" +
+                "• Power Consumption: 0 FE/t (Mechanical belt drive)\n" +
+                "• Non-Despawn: Items dropped onto belts can never despawn and are picked up instantly by players or funneled into grinders\n" +
+                "• Universal Compatibility: Passes items seamlessly into other conveyor systems like Ole Saw Mill without bunching or getting stuck.",
                 "Items dropped onto belts can never despawn and are picked up instantly by players or funneled into grinders!",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Power: Unpowered (0 FE/t)"
         ));
 
         register(new GuideEntry(
@@ -826,11 +983,15 @@ public class GuideBookRegistry {
                 "Glass-Fused-to-Steel Multiblock Tanks",
                 GuideCategory.LOGISTICS,
                 () -> new ItemStack(RefineryMod.STORAGE_TANK_DRAIN_VALVE.get()),
-                "Modular liquid storage tanks holding from 576,000 mB up to 4,000,000+ mB of any liquid.\n\nFeatures integrated ladder climbing, lower drain valve, upper fill valve, and top overflow vent.",
+                "Modular liquid storage tanks holding from 576,000 mB up to 4,000,000+ mB of any liquid.\n\n" +
+                "• Power Consumption: 0 FE/t (Gravity/containment vessel)\n" +
+                "• Sizes: 3x3x4, 5x5x6, or 7x7x8 built using Storage Tank Casings and Valves\n" +
+                "• Features: Integrated ladder climbing, lower drain valve, upper fill valve, and top overflow vent.",
                 "Build sizes: 3x3x4, 5x5x6, or 7x7x8 using Storage Tank Casings and Valves.",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Power: Unpowered (0 FE/t)"
         ));
 
         register(new GuideEntry(
@@ -840,6 +1001,7 @@ public class GuideBookRegistry {
                 GuideCategory.LOGISTICS,
                 () -> new ItemStack(RefineryMod.BITUMEN.get()),
                 "The Bitumen Storage Pile is a large open-air industrial bulk storage dump for asphalt bitumen and petroleum tar.\n\n" +
+                "• Power Consumption: 0 FE/t\n" +
                 "• 3x3 Footprint: Placed as a single block establishing an authentic 3x3 ground perimeter.\n" +
                 "• Dynamic Visual Growth: Gradually mounds and piles up visually through 8 distinct height stages as more bitumen is added (holding up to 256 stacks / 16,384 bitumen chunks).\n" +
                 "• Vacuum Ingestion: Automatically suctions and vacuums up bitumen items dropped or tossed nearby.\n" +
@@ -854,7 +1016,8 @@ public class GuideBookRegistry {
                                 List.of(() -> new ItemStack(RefineryMod.BITUMEN.get(), 8)),
                                 List.of(() -> new ItemStack(RefineryMod.BITUMEN_PILE.get())),
                                 "Crafted with 8 Bitumen chunks around an empty center in a crafting table.")
-                )
+                ),
+                "⚡ Power: Unpowered (0 FE/t)"
         ));
 
         // =========================================================================
@@ -866,11 +1029,23 @@ public class GuideBookRegistry {
                 "Fluid, Item, & Logic Piping",
                 GuideCategory.PIPES_GATES,
                 () -> new ItemStack(RefineryMod.WOOD_ITEM_PIPE.get()),
-                "Refinery provides specialized industrial pipes for fluids and items:\n\n• Wood: Filtered Extraction (right-click to open 9-slot filter GUI; pulses strictly with Autarchic Gates!)\n• Iron: Directional one-way valve\n• Gold: High-speed acceleration & priority insertion\n• Diamond: 9-slot directional sorting filter\n• Quartz: Merge pipe (5 inputs -> 1 selected output)\n• Emerald: Round-robin load balancer\n• Valve: Redstone/Gate actuated flow control (Normal: closes on redstone, Inverted: opens on redstone)\n• Obsidian: In-world item suction vacuum\n• Void: Incineration of unwanted byproducts\n• Buffer: 1-slot inline chest pipe",
+                "Refinery provides specialized industrial pipes for fluids and items:\n\n" +
+                "• Power Consumption: 0 FE/t\n" +
+                "• Wood: Filtered Extraction (right-click to open 9-slot filter GUI; pulses strictly with Autarchic Gates!)\n" +
+                "• Iron: Directional one-way valve\n" +
+                "• Gold: High-speed acceleration & priority insertion\n" +
+                "• Diamond: 9-slot directional sorting filter\n" +
+                "• Quartz: Merge pipe (5 inputs -> 1 selected output)\n" +
+                "• Emerald: Round-robin load balancer\n" +
+                "• Valve: Redstone/Gate actuated flow control (Normal: closes on redstone, Inverted: opens on redstone)\n" +
+                "• Obsidian: In-world item suction vacuum\n" +
+                "• Void: Incineration of unwanted byproducts\n" +
+                "• Buffer: 1-slot inline chest pipe",
                 "Right-click pipes with a Refinery Wrench to toggle connections or change merger output directions!",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Power: Unpowered (0 FE/t)"
         ));
 
         register(new GuideEntry(
@@ -879,11 +1054,20 @@ public class GuideBookRegistry {
                 "Autarchic Pulsars & Conditional Automation",
                 GuideCategory.PIPES_GATES,
                 () -> new ItemStack(RefineryMod.DIAMOND_AUTARCHIC_GATE_ITEM.get()),
-                "Pipe Gates mount directly on pipe faces or chests to execute logic actions based on machine status, inventory space, or network signals.\n\n• Tiers: Basic (1 slot), Iron (2 slots), Gold (4 slots), Diamond (8 slots)\n• Redstone Actions: Constant power (15), periodic 1.0s pulse, or fast 0.5s pulse\n• Autarchic Gates: Pull 1, 5, or 10 items at a time without engines\n• Pipe Wires: Red, Blue, Green, Yellow wires broadcast conditional signals along the pipe network.",
+                "Pipe Gates mount directly on pipe faces or chests to execute logic actions based on machine status, inventory space, or network signals.\n\n" +
+                "• Power Consumption: 0 FE/t (Logic driven)\n" +
+                "• Tiers: Blank, Basic (1 slot), Iron (2 slots), Gold (4 slots), Diamond (8 slots)\n" +
+                "• Redstone Actions:\n" +
+                "  • Constant power (Signal 15)\n" +
+                "  • Periodic 1.0s pulse (20-tick period)\n" +
+                "  • Rapid 0.5s pulse (10-tick period / 1.0 Hz clock frequency)\n" +
+                "• Autarchic Gates: Pull 1, 5, or 10 items at a time without external engines\n" +
+                "• Pipe Wires: Red, Blue, Green, Yellow wires broadcast conditional signals along the pipe network.",
                 "Combine 'Space in Inventory' -> 'Autarchic Pulse (Item x10)' to rapidly restock machines only when they need supplies!",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Power: Unpowered (Logic Driven; 0 FE/t)"
         ));
 
         register(new GuideEntry(
@@ -892,11 +1076,15 @@ public class GuideBookRegistry {
                 "Essential Engineering Multitool",
                 GuideCategory.MACHINERY,
                 () -> new ItemStack(RefineryMod.REFINERY_WRENCH.get()),
-                "The Refinery Wrench is your indispensable tool for setting up industrial base infrastructure.\n\n• Multiblocks: Sneak-right-click any controller to toggle a luminous 3D holographic projection of the multiblock structure in the world!\n• Pipes: Right-click pipe faces to connect/disconnect branches or cycle Quartz merge outputs.\n• Machines: Right-click pumps or generators to rotate their facing.",
+                "The Refinery Wrench is your indispensable tool for setting up industrial base infrastructure.\n\n" +
+                "• Multiblocks: Sneak-right-click any controller to toggle a luminous 3D holographic projection of the multiblock structure in the world!\n" +
+                "• Pipes: Right-click pipe faces to connect/disconnect branches or cycle Quartz merge outputs.\n" +
+                "• Machines: Right-click pumps or generators to rotate their facing.",
                 "Always carry a Refinery Wrench when building complex multiblocks!",
                 null,
                 null,
-                List.of()
+                List.of(),
+                "⚡ Power: Unpowered Handheld Tool"
         ));
     }
 

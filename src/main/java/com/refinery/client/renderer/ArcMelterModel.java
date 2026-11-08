@@ -333,7 +333,7 @@ public class ArcMelterModel {
             // 3. Dynamic molten bath surface inside crucible hearth (X: 0.1..15.9, Z: 16.1..31.9)
             float fillRatio = Mth.clamp(moltenAmount / 16000.0f, 0.0f, 1.0f);
             if (isActive && fillRatio < 0.25f) {
-                fillRatio = 0.25f + 0.15f * (progress / 100.0f);
+                fillRatio = 0.25f + 0.15f * Math.min(1.0f, (float) progress / com.refinery.block.entity.ArcMelterControllerBlockEntity.PROCESS_TIME);
             }
             float bathY = 11.2f + fillRatio * 10.5f;
             if (isActive) {

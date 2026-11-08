@@ -4,6 +4,28 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.42] - 2026-11-07
+
+### Added
+- **In-Game Guide Book Energy & Power Specifications (`RefineryGuideScreen`, `GuideEntry`, `GuideBookRegistry`)**:
+  - Added prominent energy and power specification badges (`⚡ Power / Energy: ...`) to the Industrial Field Manual for every machine, multiblock, and tool.
+  - Detailed live rates across all devices: Electric Arc Melter (10,000 FE/t), Heavy Multi-Smelter (5,000 FE/t or solid fuel), Industrial Grinder (2,000 FE/t), Continuous Casting Press (600 FE/t), Hydraulic Metal Press (500 FE/t), Electric Refinery Furnace (500 FE/t), Steam Turbine Generator (+10,000 FE/t), Heavy Pit Quarry (240 FE/t default), Industrial Diesel Generator (+256 FE/t), Electric Fluid Pump (400 FE/cycle, ~40 FE/t), Industrial Fermenter (15 FE/t), Crude Oil Pump Jack (1–4 FE/t), Auto Harvester (1 FE/t + 20 FE/crop), Auto Planter (1 FE/t + 10 FE/action), and unpowered solid-fuel/liquid-fuel boilers and logistics (0 FE/t).
+  - Added smooth mouse wheel scrolling (`contentScrollOffset`) and amber visual scrollbars to the Overview tab, Bill of Materials, and Recipes tabs in `RefineryGuideScreen` to ensure extensive machine documentation never truncates.
+  - Added dedicated Guide Book entry for **Diesel Steam Boilers (Small & Large)** (`diesel_boilers`) with complete 3x3x3 multiblock bill of materials, layer diagrams, and diesel fuel consumption rates.
+  - Added Oil Sand Feedstock Extraction recipe (200 mB Crude Oil + 1 Sand per heated block) to the Petroleum Refinery guide entry.
+
+### Changed
+- **Continuous Casting Press Cycle Duration (`CastingPressControllerBlockEntity`, `CastingPressModel`, `GuideBookRegistry`)**:
+  - Increased casting stroke cycle time from 12.0s (240 ticks) to **20.0 seconds (400 ticks)** per process stroke.
+  - Dynamically scaled 3D animated hydraulic stamping ram (approach stroke, high-pressure dwell hold, and smooth hydraulic retraction) and molten basin solidification across the full 400-tick duration.
+  - Total energy consumed per stroke is 240,000 FE (600 FE/t over 400 ticks).
+- **Electric Arc Melter Batch Duration (`ArcMelterControllerBlockEntity`, `ArcMelterModel`, `GuideBookRegistry`)**:
+  - Increased ore melting cycle time from 6.0s (120 ticks) to **10.0 seconds (200 ticks)** per batch.
+  - Dynamically synchronized the 3D electrode arc plasma animation and crucible molten bath filling to the new 200-tick duration.
+  - Total energy consumed per batch is 2,000,000 FE (10,000 FE/t over 200 ticks), exactly matching the full 2,000,000 FE internal buffer.
+
+---
+
 ## [1.11.40] - 2026-11-07
 
 ### Changed

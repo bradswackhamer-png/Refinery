@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.41.jar`
+`refinery-1.11.42.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.40 (NeoForge 26.3)`
+`Industrial Refinery 1.11.42 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,40 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.42
+
+### What's New in v1.11.42:
+- **In-Game Guide Book Energy & Power Specifications**:
+  - Integrated dedicated power badges (`⚡ Power / Energy: ...`) into the Industrial Field Manual for every machine, multiblock, and tool.
+  - Documents exact FE/RF per tick rates, operating buffers, and fuel/thermal requirements:
+    - **Electric Arc Melter**: 10,000 FE/t (2,000,000 FE buffer, 100,000 FE/t max in)
+    - **Heavy Multi-Smelter**: 5,000 FE/t electric induction or solid fuel (1,000,000 FE buffer, 50,000 FE/t max in)
+    - **Industrial Rock Crusher / Grinder**: 2,000 FE/t (500,000 FE buffer, 50,000 FE/t max in)
+    - **Continuous Casting Press**: 600 FE/t (500,000 FE buffer, 20,000 FE/t max in)
+    - **Hydraulic Metal Press**: 500 FE/t (100,000 FE buffer, 20,000 FE/t max in)
+    - **Electric Refinery Furnace**: 500 FE/t when heating (500,000 FE buffer)
+    - **Steam Turbine Generator**: Produces 10,000 FE/t (1,000,000 FE buffer, 50,000 FE/t max active export)
+    - **Heavy Pit Quarry**: 240 FE/t default (1.5 blocks/sec mining speed, configurable in `refinery.toml`)
+    - **Industrial Diesel Generator**: Produces 256 FE/t (500,000 FE buffer, 1,024 FE/t max export)
+    - **Electric Fluid Pump**: 400 FE/cycle (10 ticks = 2,000 mB, ~40 FE/t continuous, 20,000 FE buffer)
+    - **Industrial Fermenter**: 15 FE/t (20,000 FE buffer, 500 FE/t max in)
+    - **Crude Oil Pump Jack**: 1 to 4 FE/t proportional scaling (10,000 FE buffer)
+    - **Auto Planter & Harvester**: 1 FE/t idle standby + 10 FE/action or 20 FE/crop
+    - **Boilers, Furnaces, & Logistics**: Fully documented unpowered / solid/liquid fuel operation (0 FE/t)
+  - Added smooth mouse wheel scrolling (`contentScrollOffset`) and visual scrollbars to the Overview tab, Bill of Materials, and Recipes tabs in `RefineryGuideScreen`.
+  - Added a dedicated Guide Book entry for **Diesel Steam Boilers (Small & Large)** (`diesel_boilers`) with 3x3x3 multiblock bill of materials, layer diagrams, and fuel consumption rates.
+  - Added Oil Sand Feedstock Extraction recipe to the Petroleum Refinery guide entry.
+- **Continuous Casting Press Cycle Duration**:
+  - Increased casting stroke cycle time from 12.0s to **20.0 seconds (400 ticks)** per process stroke.
+  - Dynamically scaled 3D animated hydraulic stamping ram (approach stroke, high-pressure dwell hold, and smooth hydraulic retraction) and molten basin solidification across the full 400-tick duration.
+  - Consumes 240,000 FE total per stroke (600 FE/t over 400 ticks).
+- **Electric Arc Melter Batch Duration**:
+  - Increased ore melting cycle time from 6.0s to **10.0 seconds (200 ticks)** per batch.
+  - Dynamically synchronized the 3D electrode arc plasma animation and crucible molten bath filling to the new 200-tick duration.
+  - Consumes 2,000,000 FE total per batch (10,000 FE/t over 200 ticks), perfectly matching the full 2,000,000 FE internal buffer.
+
+---
+
 # Industrial Refinery v1.11.40
 
 ### What's New in v1.11.40:

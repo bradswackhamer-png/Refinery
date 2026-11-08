@@ -44,6 +44,7 @@ public class RefineryGuideScreen extends Screen {
     public static void openToEntry(String entryId) {
         RefineryGuideScreen screen = new RefineryGuideScreen();
         screen.currentEntry = GuideBookRegistry.getEntry(entryId);
+        screen.contentScrollOffset = 0;
         if (screen.currentEntry != null && screen.currentEntry.isMultiblock()) {
             screen.entrySubTab = 1; // Open directly to requirements/layout!
         }
@@ -266,19 +267,46 @@ public class RefineryGuideScreen extends Screen {
         graphics.text(this.font, Component.literal(entry.getTitle()).withStyle(net.minecraft.ChatFormatting.BOLD), x + 28, y + 5, 0xFFF8FAFC, false);
         graphics.text(this.font, Component.literal(entry.getSubtitle()), x + 28, y + 16, 0xFF38BDF8, false);
 
-        int textY = y + 34;
+        int textStartY = y + 32;
 
-        // Description Paragraphs
-        List<FormattedCharSequence> lines = this.font.split(Component.literal(entry.getDescription()), width - 8);
-        for (FormattedCharSequence line : lines) {
-            if (textY + 10 > y + height - 36) break;
-            graphics.text(this.font, line, x + 4, textY, 0xFFCBD5E1, false);
-            textY += 10;
+        // Energy / Power Badge (if present)
+        if (entry.getEnergyInfo() != null && !entry.getEnergyInfo().isEmpty()) {
+            int badgeH = 14;
+            graphics.fill(RenderPipelines.GUI, x, textStartY, x + width, textStartY + badgeH, 0xFF141923);
+            graphics.fill(RenderPipelines.GUI, x, textStartY, x + 2, textStartY + badgeH, 0xFFF59E0B);
+            graphics.text(this.font, Component.literal(entry.getEnergyInfo()), x + 6, textStartY + 3, 0xFFFCD34D, false);
+            textStartY += badgeH + 4;
+        }
+
+        int tipBoxY = y + height - 34;
+        int visibleTextHeight = tipBoxY - textStartY - 4;
+
+        // Description Paragraphs with scrolling
+        List<FormattedCharSequence> lines = this.font.split(Component.literal(entry.getDescription()), width - 12);
+        int totalTextHeight = lines.size() * 10;
+        int maxScroll = Math.max(0, totalTextHeight - visibleTextHeight);
+        this.contentScrollOffset = Math.max(0, Math.min(this.contentScrollOffset, maxScroll));
+
+        for (int i = 0; i < lines.size(); i++) {
+            int lineY = textStartY + (i * 10) - this.contentScrollOffset;
+            if (lineY >= textStartY - 2 && lineY + 9 <= tipBoxY) {
+                graphics.text(this.font, lines.get(i), x + 4, lineY, 0xFFCBD5E1, false);
+            }
+        }
+
+        // Draw scroll bar if scrollable
+        if (maxScroll > 0) {
+            int barX = x + width - 4;
+            int barY = textStartY;
+            int barH = visibleTextHeight;
+            graphics.fill(RenderPipelines.GUI, barX, barY, barX + 2, barY + barH, 0xFF2A313E);
+            int thumbH = Math.max(8, (int) ((float) barH * visibleTextHeight / totalTextHeight));
+            int thumbY = barY + (int) ((float) (barH - thumbH) * this.contentScrollOffset / maxScroll);
+            graphics.fill(RenderPipelines.GUI, barX, thumbY, barX + 2, thumbY + thumbH, 0xFFF59E0B);
         }
 
         // Pro-Tip Box at Bottom
         if (entry.getProTips() != null && !entry.getProTips().isEmpty()) {
-            int tipBoxY = y + height - 34;
             graphics.fill(RenderPipelines.GUI, x, tipBoxY, x + width, tipBoxY + 32, 0xFF172033);
             graphics.fill(RenderPipelines.GUI, x, tipBoxY, x + 3, tipBoxY + 32, 0xFFF59E0B);
             graphics.text(this.font, Component.literal("PRO TIP:").withStyle(net.minecraft.ChatFormatting.BOLD), x + 8, tipBoxY + 4, 0xFFFCD34D, false);
@@ -303,32 +331,47 @@ public class RefineryGuideScreen extends Screen {
         String totalBadge = "Total: " + entry.getTotalRequiredBlocks() + " Blocks";
         graphics.text(this.font, Component.literal(totalBadge), x + width - font.width(totalBadge) - 8, y + 6, 0xFF10B981, false);
 
-        int itemY = y + 24;
+        int totalHeight = reqs.size() * 22;
+        int visibleHeight = height - 26;
+        int maxScroll = Math.max(0, totalHeight - visibleHeight);
+        this.contentScrollOffset = Math.max(0, Math.min(this.contentScrollOffset, maxScroll));
+
+        int itemY = y + 24 - this.contentScrollOffset;
         for (GuideBlockRequirement req : reqs) {
-            if (itemY + 22 > y + height) break;
+            if (itemY + 20 >= y + 24 && itemY <= y + height) {
+                boolean isHovered = mouseX >= x && mouseX <= x + width && mouseY >= itemY && mouseY <= itemY + 20;
+                int bgCol = isHovered ? 0xFF2A313E : 0xFF191D24;
+                graphics.fill(RenderPipelines.GUI, x, itemY, x + width, itemY + 20, bgCol);
 
-            boolean isHovered = mouseX >= x && mouseX <= x + width && mouseY >= itemY && mouseY <= itemY + 20;
-            int bgCol = isHovered ? 0xFF2A313E : 0xFF191D24;
-            graphics.fill(RenderPipelines.GUI, x, itemY, x + width, itemY + 20, bgCol);
+                ItemStack stack = req.getItemStack();
+                if (!stack.isEmpty()) {
+                    graphics.item(stack, x + 4, itemY + 2);
+                }
 
-            ItemStack stack = req.getItemStack();
-            if (!stack.isEmpty()) {
-                graphics.item(stack, x + 4, itemY + 2);
+                // Name
+                graphics.text(this.font, Component.literal(req.name()), x + 26, itemY + 6, isHovered ? 0xFFF8FAFC : 0xFFE2E8F0, false);
+
+                // Count
+                String countText = req.count() + "x";
+                graphics.text(this.font, Component.literal(countText).withStyle(net.minecraft.ChatFormatting.BOLD), x + width - font.width(countText) - 8, itemY + 6, 0xFFF59E0B, false);
+
+                // Hover Tooltip for Item
+                if (isHovered && !stack.isEmpty()) {
+                    graphics.setTooltipForNextFrame(this.font, stack, mouseX, mouseY);
+                }
             }
-
-            // Name
-            graphics.text(this.font, Component.literal(req.name()), x + 26, itemY + 6, isHovered ? 0xFFF8FAFC : 0xFFE2E8F0, false);
-
-            // Count
-            String countText = req.count() + "x";
-            graphics.text(this.font, Component.literal(countText).withStyle(net.minecraft.ChatFormatting.BOLD), x + width - font.width(countText) - 8, itemY + 6, 0xFFF59E0B, false);
-
-            // Hover Tooltip for Item
-            if (isHovered && !stack.isEmpty()) {
-                graphics.setTooltipForNextFrame(this.font, stack, mouseX, mouseY);
-            }
-
             itemY += 22;
+        }
+
+        // Scroll bar
+        if (maxScroll > 0) {
+            int barX = x + width - 3;
+            int barY = y + 24;
+            int barH = visibleHeight;
+            graphics.fill(RenderPipelines.GUI, barX, barY, barX + 2, barY + barH, 0xFF2A313E);
+            int thumbH = Math.max(8, (int) ((float) barH * visibleHeight / totalHeight));
+            int thumbY = barY + (int) ((float) (barH - thumbH) * this.contentScrollOffset / maxScroll);
+            graphics.fill(RenderPipelines.GUI, barX, thumbY, barX + 2, thumbY + thumbH, 0xFFF59E0B);
         }
     }
 
@@ -443,47 +486,62 @@ public class RefineryGuideScreen extends Screen {
         List<GuideRecipe> recipes = entry.getRecipes();
         if (recipes.isEmpty()) return;
 
-        int recY = y;
+        int totalHeight = recipes.size() * 40;
+        int visibleHeight = height;
+        int maxScroll = Math.max(0, totalHeight - visibleHeight);
+        this.contentScrollOffset = Math.max(0, Math.min(this.contentScrollOffset, maxScroll));
+
+        int recY = y - this.contentScrollOffset;
         for (GuideRecipe rec : recipes) {
-            if (recY + 36 > y + height) break;
+            if (recY + 36 >= y && recY <= y + height) {
+                graphics.fill(RenderPipelines.GUI, x, recY, x + width, recY + 36, 0xFF191D24);
+                graphics.fill(RenderPipelines.GUI, x, recY, x + width, recY + 1, 0xFF2A313E);
 
-            graphics.fill(RenderPipelines.GUI, x, recY, x + width, recY + 36, 0xFF191D24);
-            graphics.fill(RenderPipelines.GUI, x, recY, x + width, recY + 1, 0xFF2A313E);
+                // Title
+                graphics.text(this.font, Component.literal(rec.title()).withStyle(net.minecraft.ChatFormatting.BOLD), x + 6, recY + 4, 0xFFFCD34D, false);
 
-            // Title
-            graphics.text(this.font, Component.literal(rec.title()).withStyle(net.minecraft.ChatFormatting.BOLD), x + 6, recY + 4, 0xFFFCD34D, false);
-
-            // Inputs -> Arrow -> Outputs
-            int itemX = x + 8;
-            for (ItemStack in : rec.getInputStacks()) {
-                if (!in.isEmpty()) {
-                    graphics.item(in, itemX, recY + 16);
-                    if (mouseX >= itemX && mouseX <= itemX + 16 && mouseY >= recY + 16 && mouseY <= recY + 32) {
-                        graphics.setTooltipForNextFrame(this.font, in, mouseX, mouseY);
+                // Inputs -> Arrow -> Outputs
+                int itemX = x + 8;
+                for (ItemStack in : rec.getInputStacks()) {
+                    if (!in.isEmpty()) {
+                        graphics.item(in, itemX, recY + 16);
+                        if (mouseX >= itemX && mouseX <= itemX + 16 && mouseY >= recY + 16 && mouseY <= recY + 32) {
+                            graphics.setTooltipForNextFrame(this.font, in, mouseX, mouseY);
+                        }
+                        itemX += 20;
                     }
-                    itemX += 20;
+                }
+
+                graphics.text(this.font, Component.literal("➔"), itemX + 4, recY + 20, 0xFF38BDF8, false);
+                itemX += 20;
+
+                for (ItemStack out : rec.getOutputStacks()) {
+                    if (!out.isEmpty()) {
+                        graphics.item(out, itemX, recY + 16);
+                        if (mouseX >= itemX && mouseX <= itemX + 16 && mouseY >= recY + 16 && mouseY <= recY + 32) {
+                            graphics.setTooltipForNextFrame(this.font, out, mouseX, mouseY);
+                        }
+                        itemX += 20;
+                    }
+                }
+
+                // Notes
+                if (rec.notes() != null) {
+                    graphics.text(this.font, Component.literal(font.plainSubstrByWidth(rec.notes(), width - (itemX - x) - 8)), itemX + 8, recY + 20, 0xFF94A3B8, false);
                 }
             }
-
-            graphics.text(this.font, Component.literal("➔"), itemX + 4, recY + 20, 0xFF38BDF8, false);
-            itemX += 20;
-
-            for (ItemStack out : rec.getOutputStacks()) {
-                if (!out.isEmpty()) {
-                    graphics.item(out, itemX, recY + 16);
-                    if (mouseX >= itemX && mouseX <= itemX + 16 && mouseY >= recY + 16 && mouseY <= recY + 32) {
-                        graphics.setTooltipForNextFrame(this.font, out, mouseX, mouseY);
-                    }
-                    itemX += 20;
-                }
-            }
-
-            // Notes
-            if (rec.notes() != null) {
-                graphics.text(this.font, Component.literal(font.plainSubstrByWidth(rec.notes(), width - (itemX - x) - 8)), itemX + 8, recY + 20, 0xFF94A3B8, false);
-            }
-
             recY += 40;
+        }
+
+        // Scroll bar
+        if (maxScroll > 0) {
+            int barX = x + width - 3;
+            int barY = y;
+            int barH = visibleHeight;
+            graphics.fill(RenderPipelines.GUI, barX, barY, barX + 2, barY + barH, 0xFF2A313E);
+            int thumbH = Math.max(8, (int) ((float) barH * visibleHeight / totalHeight));
+            int thumbY = barY + (int) ((float) (barH - thumbH) * this.contentScrollOffset / maxScroll);
+            graphics.fill(RenderPipelines.GUI, barX, thumbY, barX + 2, thumbY + thumbH, 0xFFF59E0B);
         }
     }
 
@@ -509,6 +567,7 @@ public class RefineryGuideScreen extends Screen {
                 this.selectedCategory = cat;
                 this.currentEntry = null; // Return to TOC
                 this.tocScrollOffset = 0;
+                this.contentScrollOffset = 0;
                 if (this.minecraft != null) {
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
                 }
@@ -533,6 +592,7 @@ public class RefineryGuideScreen extends Screen {
                     this.currentEntry = entries.get(i);
                     this.entrySubTab = 0;
                     this.selectedLayerIndex = 0;
+                    this.contentScrollOffset = 0;
                     if (this.minecraft != null) {
                         this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
                     }
@@ -544,6 +604,7 @@ public class RefineryGuideScreen extends Screen {
             // Back Button (< Contents)
             if (mouseX >= contentX + 4 && mouseX <= contentX + 76 && mouseY >= top + 7 && mouseY <= top + 23) {
                 this.currentEntry = null;
+                this.contentScrollOffset = 0;
                 if (this.minecraft != null) {
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
                 }
@@ -571,6 +632,7 @@ public class RefineryGuideScreen extends Screen {
                 int tw = font.width(tabName) + 12;
                 if (mouseX >= tabX && mouseX <= tabX + tw && mouseY >= tabY && mouseY <= tabY + tabH) {
                     this.entrySubTab = i;
+                    this.contentScrollOffset = 0;
                     if (this.minecraft != null) {
                         this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.1f));
                     }
@@ -611,8 +673,10 @@ public class RefineryGuideScreen extends Screen {
         if (this.currentEntry == null) {
             this.tocScrollOffset = Math.max(0, this.tocScrollOffset - (int) (scrollY * 18));
             return true;
+        } else {
+            this.contentScrollOffset = Math.max(0, this.contentScrollOffset - (int) (scrollY * 18));
+            return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -620,6 +684,7 @@ public class RefineryGuideScreen extends Screen {
         if (event.isEscape()) {
             if (this.currentEntry != null) {
                 this.currentEntry = null; // ESC goes back to Table of Contents first!
+                this.contentScrollOffset = 0;
                 return true;
             }
             this.onClose();
