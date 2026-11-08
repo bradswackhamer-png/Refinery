@@ -54,8 +54,8 @@ import java.util.Set;
 public class CastingPressControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INVENTORY_SIZE = 4; // 4 output slots
     public static final int TANK_CAPACITY = 4000;
-    public static final int ENERGY_CAPACITY = 50000;
-    public static final int ENERGY_PER_TICK = 40;
+    public static final int ENERGY_CAPACITY = 500_000;
+    public static final int ENERGY_PER_TICK = 600;
     public static final int PROCESS_TIME = 240; // 12 seconds per press stroke (turned down by 200%)
 
     private boolean assembled = false;
@@ -69,7 +69,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1000, 0) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 20_000, 0) {
         @Override
         public void set(int amount) {
             super.set(amount);

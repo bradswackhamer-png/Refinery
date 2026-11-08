@@ -58,8 +58,8 @@ import java.util.Set;
 
 public class IndustrialGrinderControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INVENTORY_SIZE = 8; // 4 input slots (0..3), 4 output slots (4..7)
-    public static final int ENERGY_CAPACITY = 50_000;
-    public static final int ENERGY_PER_TICK = 30;
+    public static final int ENERGY_CAPACITY = 500_000;
+    public static final int ENERGY_PER_TICK = 2_000;
     public static final int PROCESS_TIME = 60; // 3 seconds per grind cycle
 
     private boolean assembled = false;
@@ -71,7 +71,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1_000, 0) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 50_000, 0) {
         @Override
         public void set(int amount) {
             super.set(amount);

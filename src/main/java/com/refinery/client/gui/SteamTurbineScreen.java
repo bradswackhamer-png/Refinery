@@ -159,8 +159,8 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Internal Energy Battery").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                     Component.literal(this.menu.getEnergyStored() + " / 1,000,000 FE").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Generation: 1,000 FE/t").withStyle(ChatFormatting.YELLOW),
-                    Component.literal("Max Output: 10,000 FE/t").withStyle(ChatFormatting.GREEN)
+                    Component.literal("Generation: 10,000 FE/t").withStyle(ChatFormatting.YELLOW),
+                    Component.literal("Max Output: 50,000 FE/t").withStyle(ChatFormatting.GREEN)
             ), mouseX, mouseY);
         }
     }

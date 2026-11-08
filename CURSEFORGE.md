@@ -74,7 +74,7 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
   - Boil water with solid coal/coke or liquid petroleum fuels into pressurized Steam.
   - Monolithic Scotch marine boiler geometry with opening cleanout hatches, realistic overheating mechanics, and audible emergency raid siren alarms if water runs dry.
 - **Steam Turbine Generator (3x3x3 Multiblock)**:
-  - Converts high-pressure steam into **1,000 FE/t** of clean electricity while simultaneously condensing the exhaust steam back into pure water.
+  - Converts high-pressure steam into **10,000 FE/t** of clean electricity (consuming 300 mB/t steam) while simultaneously condensing 150 mB/t exhaust steam back into pure water.
   - High-fidelity monolithic 3D turbine-generator skid in vibrant industrial electric blue, featuring an AC alternator, speed-reduction gearbox, curved split casing, dial gauges, and emergency stop controls.
   - Overhauled dark gunmetal GUI featuring digital telemetry (RPM readout, power rate, status LED), rotating blade activity monitor, and recessed fluid gauges.
 - **Closed-Loop Conservation**: Pipe the turbine's condensed water directly back into your boiler to build completely closed-loop, self-sustaining power plants with zero water loss!
@@ -92,7 +92,7 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
     - **Corrugated Steel Die**: Cold-forms 1 Steel Ingot/Plate into **4x Corrugated Steel Panels** (or 1 Iron -> 2 Panels).
     - **Rail Die**: Cold-forms steel/iron/gold/copper into vanilla and powered rails.
 - **Industrial Multi-Smelter (5x4x3 Multiblock)**:
-  - Early-game 8-in-1 smelting array with dual-fuel operation (Solid Fuel or 30 FE/t RF).
+  - Early-game 8-in-1 smelting array with dual-fuel operation (Solid Fuel or 5,000 FE/t RF).
   - 6-block hollow combustion chamber with dynamic 3D floating cooking items and pulsing ember or RF induction animations.
   - Crafted entirely from early-game materials — **no steel required**!
 - **Industrial Grinder & Pulverizer (3x3x3 Multiblock)**:
@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.39.jar`
+`refinery-1.11.41.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.39 (NeoForge 26.3)`
+`Industrial Refinery 1.11.40 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,22 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.40
+
+### What's New in v1.11.40:
+- **Industrial Power & Steam Rebalance**:
+  - **Electric Arc Melter**: Rebalanced power consumption to **10,000 FE/t** with an expanded **2,000,000 FE** internal buffer (100,000 FE/t max receive) for heavy industrial electrometallurgy.
+  - **Steam Turbine Generator**: Overhauled to produce **10,000 FE/t** Forge Energy while consuming **300 mB/t** steam (exactly 3x Small Steam Boiler steam production). Condenses and recirculates **150 mB/t** water into the Rankine cycle, with max output throughput raised to **50,000 FE/t** and active energy pushing to adjacent cables.
+  - **Large Steam Boilers**: Synchronized Large Steam Boiler output to **300 mB/t** steam consuming **150 mB/t** water, exactly matching 3 Small Steam Boilers. Synchronized Large Diesel Boiler to **750 mB steam / cycle** (300 mB water & 30 mB diesel per 10-tick cycle), exactly matching 3x Small Diesel Boiler.
+  - **Industrial Multi-Smelter**: Rebalanced electric induction power consumption to **5,000 FE/t** with an expanded **1,000,000 FE** buffer.
+  - **Industrial Rock Crusher / Grinder**: Rebalanced power consumption to **2,000 FE/t** with an expanded **500,000 FE** buffer.
+  - **Industrial Metal Press**: Rebalanced stamping power consumption to **500 FE/t** with an expanded **100,000 FE** buffer.
+  - **Continuous Casting Press**: Rebalanced casting power consumption to **600 FE/t** with an expanded **500,000 FE** buffer.
+- **GUI Energy Bar & Tooltip Calibration**:
+  - Dynamically scaled energy storage meters, status indicators, and hover tooltips across all machine GUIs (`ArcMelterScreen`, `SteamTurbineScreen`, `LargeDieselBoilerScreen`, `MultiSmelterScreen`, `IndustrialGrinderScreen`, `MetalPressScreen`, `CastingPressScreen`) to accurately display the new capacities and operational draw rates.
+
+---
+
 # Industrial Refinery v1.11.39
 
 ### What's New in v1.11.39:

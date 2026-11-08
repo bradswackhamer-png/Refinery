@@ -4,6 +4,42 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.40] - 2026-11-07
+
+### Changed
+- **Electric Arc Melter Power Consumption & Storage (`ArcMelterControllerBlockEntity`, `ArcMelterScreen`)**:
+  - Rebalanced power consumption to **10,000 FE/t** (up from 40 FE/t) for high-voltage industrial smelting.
+  - Expanded internal energy storage buffer from 50,000 FE to **2,000,000 FE**, with maximum receive rate increased to **100,000 FE/t** to reliably buffer and power full 120-tick melt cycles.
+  - Updated `ArcMelterScreen` GUI energy bar scaling and tooltips to display live capacity and `10,000 FE/t` consumption rate.
+- **Steam Turbine Generator Output & Steam Consumption Ratio (`SteamTurbineControllerBlockEntity`, `SteamTurbineScreen`, `TurbinePortBlockEntity`)**:
+  - Rebalanced electrical generation to **10,000 FE/t** (up from 1,000 FE/t).
+  - Scaled steam consumption rate to **300 mB/t** (up from 50 mB/t), requiring 3x the steam output of a Small Steam Boiler (3 × 100 mB/t).
+  - Maintained closed-loop Rankine cycle condensation ratio (2 mB steam -> 1 mB water), returning **150 mB/t** of condensed water back to boilers.
+  - Increased maximum energy export rate to **50,000 FE/t** and added active energy auto-push from both the controller and Energy Output Port into adjacent energy handlers and cables.
+  - Updated `SteamTurbineScreen` tooltips to reflect `10,000 FE/t` generation and `50,000 FE/t` output.
+- **Large Steam Boiler Steam & Water Production (`LargeBoilerControllerBlockEntity`, `LargeDieselBoilerControllerBlockEntity`, `LargeDieselBoilerScreen`)**:
+  - Rebalanced Large Steam Boiler production to **300 mB/t** High Pressure Steam consuming **150 mB/t** Water, exactly matching the combined production of 3 Small Steam Boilers (3 × 100 mB/t steam, 3 × 50 mB/t water).
+  - Rebalanced Large Diesel Boiler production to **750 mB steam / cycle** (consuming 300 mB water & 30 mB diesel per 10-tick cycle), exactly matching 3x the Small Diesel Boiler.
+  - Updated `LargeDieselBoilerScreen` tooltips with the new consumption and production rates.
+- **Industrial Multi-Smelter Electric Energy Consumption (`MultiSmelterControllerBlockEntity`, `MultiSmelterScreen`)**:
+  - Rebalanced electric induction power consumption to **5,000 FE/t** (up from 30 FE/t) when running on RF/FE.
+  - Expanded internal energy storage buffer from 50,000 FE to **1,000,000 FE**, with maximum receive rate increased to **50,000 FE/t**.
+  - Updated `MultiSmelterScreen` GUI energy bar scaling, coil activation threshold, and tooltips to show `5,000 FE/t` electric smelting consumption.
+- **Industrial Grinder Power Consumption & Storage (`IndustrialGrinderControllerBlockEntity`, `IndustrialGrinderScreen`)**:
+  - Rebalanced power consumption to **2,000 FE/t** (up from 30 FE/t).
+  - Expanded internal energy storage buffer from 50,000 FE to **500,000 FE**, with maximum receive rate increased to **50,000 FE/t**.
+  - Updated `IndustrialGrinderScreen` GUI energy bar scaling and tooltips to show `2,000 FE/t` grinding consumption.
+- **Industrial Metal Press Power Consumption & Storage (`MetalPressControllerBlockEntity`, `MetalPressScreen`)**:
+  - Rebalanced power consumption to **500 FE/t** (up from 20 FE/t).
+  - Expanded internal energy storage buffer from 50,000 FE to **100,000 FE**, with maximum receive rate increased to **20,000 FE/t**.
+  - Updated `MetalPressScreen` GUI energy bar scaling and tooltips to show `500 FE/t` stamping consumption.
+- **Continuous Casting Press Power Consumption & Storage (`CastingPressControllerBlockEntity`, `CastingPressScreen`)**:
+  - Rebalanced power consumption to **600 FE/t** (up from 40 FE/t).
+  - Expanded internal energy storage buffer from 50,000 FE to **500,000 FE**, with maximum receive rate increased to **20,000 FE/t**.
+  - Updated `CastingPressScreen` GUI energy bar scaling and tooltips to show `600 FE/t` casting consumption.
+
+---
+
 ## [1.11.39] - 2026-11-07
 
 ### Added

@@ -85,7 +85,7 @@ public class LargeDieselBoilerScreen extends AbstractContainerScreen<LargeDiesel
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Heavy Diesel Tank").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                     Component.literal(this.menu.getDieselAmount() + " / 64,000 mB").withStyle(ChatFormatting.YELLOW),
-                    Component.literal("Consumption: 25 mB per cycle").withStyle(ChatFormatting.GRAY)
+                    Component.literal("Consumption: 30 mB per cycle").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);
         }
 
@@ -94,7 +94,7 @@ public class LargeDieselBoilerScreen extends AbstractContainerScreen<LargeDiesel
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Water Buffer").withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD),
                     Component.literal(this.menu.getWaterAmount() + " / 64,000 mB").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Consumption: 250 mB per cycle").withStyle(ChatFormatting.GRAY)
+                    Component.literal("Consumption: 300 mB per cycle").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);
         }
 
@@ -103,7 +103,7 @@ public class LargeDieselBoilerScreen extends AbstractContainerScreen<LargeDiesel
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("High Pressure Steam").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     Component.literal(this.menu.getSteamAmount() + " / 64,000 mB").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Production: 650 mB per cycle").withStyle(ChatFormatting.GREEN)
+                    Component.literal("Production: 750 mB per cycle").withStyle(ChatFormatting.GREEN)
             ), mouseX, mouseY);
         }
 

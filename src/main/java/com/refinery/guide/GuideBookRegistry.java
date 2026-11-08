@@ -639,7 +639,7 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • Rankine Power Plant",
                     GuideCategory.POWER,
                     () -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get()),
-                    "The Steam Turbine Generator expands high-pressure steam across a 3-tier rotor shaft to produce up to 2,048 FE/t of electricity.\n\nIt features an internal surface condenser that recaptures 90% of steam as pure water.",
+                    "The Steam Turbine Generator expands high-pressure steam across a 3-tier rotor shaft to produce 10,000 FE/t of electricity.\n\nIt features an internal surface condenser that recaptures steam as recyclable water (150 mB/t at full rate).",
                     "Route water back to your boiler with an insulated fluid pipe to run continuous, closed-loop zero-loss power generation!",
                     reqs,
                     layers,

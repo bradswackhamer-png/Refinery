@@ -60,8 +60,8 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
     public static final int FUEL_SLOT_INDEX = 16;
     public static final int INVENTORY_SIZE = 17; // 0..7: in, 8..15: out, 16: fuel
 
-    public static final int ENERGY_CAPACITY = 50_000;
-    public static final int ENERGY_PER_TICK = 30;
+    public static final int ENERGY_CAPACITY = 1_000_000;
+    public static final int ENERGY_PER_TICK = 5_000;
     public static final int PROCESS_TIME = 100; // 5 seconds per item (fast parallel smelting)
 
     private boolean assembled = false;
@@ -77,7 +77,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1_000, 0) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 50_000, 0) {
         @Override
         public void set(int amount) {
             super.set(amount);

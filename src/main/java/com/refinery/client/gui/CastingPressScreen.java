@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.refinery.block.entity.CastingPressControllerBlockEntity;
 import com.refinery.menu.CastingPressMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -39,7 +40,7 @@ public class CastingPressScreen extends AbstractContainerScreen<CastingPressMenu
 
         // 1. Energy Storage Bar (x: 14..28, y: 18..68, width: 14, height: 50)
         int energy = this.menu.getEnergy();
-        int maxEnergy = 50000;
+        int maxEnergy = CastingPressControllerBlockEntity.ENERGY_CAPACITY;
         int energyH = Math.min(50, (int) ((long) energy * 50 / maxEnergy));
         if (energyH > 0) {
             graphics.fill(RenderPipelines.GUI, xo + 14, yo + 18 + (50 - energyH), xo + 28, yo + 68, 0xFFDC2626);
@@ -81,7 +82,8 @@ public class CastingPressScreen extends AbstractContainerScreen<CastingPressMenu
         if (mouseX >= xo + 14 && mouseX <= xo + 28 && mouseY >= yo + 18 && mouseY <= yo + 68) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("§cEnergy Storage:"),
-                    Component.literal("§7" + String.format("%,d", energy) + " / 50,000 FE")
+                    Component.literal("§7" + String.format("%,d", energy) + " / " + String.format("%,d", CastingPressControllerBlockEntity.ENERGY_CAPACITY) + " FE"),
+                    Component.literal("Consumption: 600 FE/t while stamping").withStyle(ChatFormatting.GREEN)
             ), mouseX, mouseY);
         }
 

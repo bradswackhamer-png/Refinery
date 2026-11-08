@@ -36,8 +36,8 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     public static final int STEAM_CAPACITY = 32_000;
     public static final int WATER_CAPACITY = 16_000;
     public static final int ENERGY_CAPACITY = 1_000_000;
-    public static final int STEAM_PER_TICK = 50; // Consumes up to 50 mB steam per tick
-    public static final int ENERGY_PER_STEAM = 20; // 20 FE per mB of steam -> 1,000 FE/t
+    public static final int STEAM_PER_TICK = 300; // Consumes up to 300 mB steam per tick (3x Small Boiler production)
+    public static final int ENERGY_PER_TICK = 10_000; // Generates 10,000 FE/t at full steam consumption
     public static final int WATER_PER_STEAM_RATIO = 2; // 2 mB steam -> 1 mB water (condensed)
 
     private boolean assembled = false;
@@ -47,7 +47,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 0, 10_000) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 0, 50_000) {
         @Override
         public void set(int amount) {
             super.set(amount);
@@ -248,8 +248,8 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         int energySpace = ENERGY_CAPACITY - this.energy;
         int waterSpace = WATER_CAPACITY - this.waterAmount;
 
-        if (this.steamAmount >= 2 && energySpace >= (2 * ENERGY_PER_STEAM) && waterSpace >= 1) {
-            int maxSteamByEnergy = energySpace / ENERGY_PER_STEAM;
+        if (this.steamAmount >= 2 && energySpace >= 67 && waterSpace >= 1) {
+            int maxSteamByEnergy = (int) (((long) energySpace * STEAM_PER_TICK) / ENERGY_PER_TICK);
             int maxSteamByWater = waterSpace * WATER_PER_STEAM_RATIO;
             int steamToConsume = Math.min(STEAM_PER_TICK, Math.min(this.steamAmount, Math.min(maxSteamByEnergy, maxSteamByWater)));
 
@@ -260,7 +260,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
 
             if (steamToConsume > 0) {
                 this.steamAmount -= steamToConsume;
-                int feGenerated = steamToConsume * ENERGY_PER_STEAM;
+                int feGenerated = (int) (((long) steamToConsume * ENERGY_PER_TICK) / STEAM_PER_TICK);
                 int waterCondensed = steamToConsume / WATER_PER_STEAM_RATIO;
 
                 addEnergy(feGenerated);
@@ -290,10 +290,48 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
             pushWaterFromPos(serverLevel, waterPortPos);
         }
 
+        // Auto-transfer generated energy to adjacent consumers/pipes
+        if (this.energy > 0) {
+            pushEnergyFromPos(serverLevel, pos);
+            Direction facing = state.getValue(SteamTurbineControllerBlock.FACING);
+            BlockPos energyPortPos = getRelativePos(1, 0, 0, facing);
+            pushEnergyFromPos(serverLevel, energyPortPos);
+        }
+
         if (wasActive != isActive) {
             BlockState latest = getBlockState();
             if (latest.getBlock() instanceof SteamTurbineControllerBlock) {
                 level.setBlock(pos, latest.setValue(SteamTurbineControllerBlock.ACTIVE, isActive), 3);
+            }
+        }
+    }
+
+    private void pushEnergyFromPos(ServerLevel level, BlockPos origin) {
+        if (this.energy <= 0) return;
+
+        for (Direction dir : Direction.values()) {
+            BlockPos target = origin.relative(dir);
+            BlockEntity targetBE = level.getBlockEntity(target);
+            if (targetBE instanceof TurbinePortBlockEntity portBE && this.worldPosition.equals(portBE.getControllerPos())) {
+                continue;
+            }
+            if (targetBE instanceof ITurbineController turbine && this.worldPosition.equals(turbine.getPosition())) {
+                continue;
+            }
+
+            var handler = level.getCapability(Capabilities.Energy.BLOCK, target, dir.getOpposite());
+            if (handler != null) {
+                int toPush = Math.min(this.energy, 50_000);
+                try (Transaction tx = Transaction.openRoot()) {
+                    int inserted = handler.insert(toPush, tx);
+                    if (inserted > 0) {
+                        tx.commit();
+                        this.energy -= inserted;
+                        this.energyStorage.set(this.energy);
+                        setChanged();
+                        if (this.energy <= 0) break;
+                    }
+                }
             }
         }
     }

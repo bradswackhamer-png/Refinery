@@ -55,8 +55,8 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
     public static final int INPUT_SLOT_2 = 2;
     public static final int OUTPUT_SLOT_1 = 3;
     public static final int OUTPUT_SLOT_2 = 4;
-    public static final int ENERGY_CAPACITY = 50_000;
-    public static final int ENERGY_PER_TICK = 20;
+    public static final int ENERGY_CAPACITY = 100_000;
+    public static final int ENERGY_PER_TICK = 500;
     public static final int TOTAL_PROCESS_TIME = 40; // 2 seconds per press cycle
 
     private boolean assembled = false;
@@ -69,7 +69,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 1_000, 0) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 20_000, 0) {
         @Override
         public void set(int amount) {
             super.set(amount);

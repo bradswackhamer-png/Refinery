@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.refinery.block.entity.IndustrialGrinderControllerBlockEntity;
 import com.refinery.menu.IndustrialGrinderMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -41,7 +42,7 @@ public class IndustrialGrinderScreen extends AbstractContainerScreen<IndustrialG
         // 1. Energy Storage Bar (x: 14, y: 18, w: 14, h: 50)
         int energy = this.menu.getEnergy();
         if (energy > 0) {
-            int energyHeight = Math.min(50, (int) ((energy / 50000.0f) * 50));
+            int energyHeight = Math.min(50, (int) ((energy / (float) IndustrialGrinderControllerBlockEntity.ENERGY_CAPACITY) * 50));
             graphics.fill(RenderPipelines.GUI, xo + 14, yo + 18 + (50 - energyHeight), xo + 14 + 14, yo + 18 + 50, 0xFFEAB308);
         }
 
@@ -67,8 +68,8 @@ public class IndustrialGrinderScreen extends AbstractContainerScreen<IndustrialG
         if (mouseX >= xo + 14 && mouseX <= xo + 28 && mouseY >= yo + 18 && mouseY <= yo + 68) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Energy Storage").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                    Component.literal(this.menu.getEnergy() + " / 50,000 FE").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Consumption: 30 FE/t while grinding").withStyle(ChatFormatting.GREEN)
+                    Component.literal(String.format("%,d", this.menu.getEnergy()) + " / " + String.format("%,d", IndustrialGrinderControllerBlockEntity.ENERGY_CAPACITY) + " FE").withStyle(ChatFormatting.GRAY),
+                    Component.literal("Consumption: 2,000 FE/t while grinding").withStyle(ChatFormatting.GREEN)
             ), mouseX, mouseY);
         }
 

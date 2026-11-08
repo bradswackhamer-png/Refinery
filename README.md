@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.40 (Industrial Power & Steam Rebalance: 10k Arc Melter, 10k Steam Turbine, 3x Large Boiler, 5k Multi-Smelter, 2k Grinder, 500 Press, 600 Caster)](#version-11140-industrial-power--steam-rebalance-10k-arc-melter-10k-steam-turbine-3x-large-boiler-5k-multi-smelter-2k-grinder-500-press-600-caster)
    - [Version 1.11.39 (Fast 0.5s Pipe Gate Redstone Pulsing & Natural Action Cycle Order)](#version-11139-fast-05s-pipe-gate-redstone-pulsing--natural-action-cycle-order)
    - [Version 1.11.38 (AWWA Safety-Yellow Fire Hydrant & Pipe-Fed Bucket Filling Station)](#version-11138-awwa-safety-yellow-fire-hydrant--pipe-fed-bucket-filling-station)
    - [Version 1.11.37 (Configurable Quarry Max Speed & Energy Rates, 240 FE/t & 1.5 blocks/s Defaults)](#version-11137-configurable-quarry-max-speed--energy-rates-240-fet--15-blockss-defaults)
@@ -367,7 +368,7 @@ A universal hydraulic mechanical press with a 3-block-wide conveyor bed and an o
     - **1 Copper Ingot (or Plate)** $\rightarrow$ **2x Activator Rails** (`minecraft:activator_rail`).
 - **Dimensions**: 3 wide × 2 tall × 2 deep (12 blocks total; also supports 3×2×1 layout).
 - **Physical 3D Stamping Animation**: Features an in-world animated hydraulic piston ram with a power stroke, heavy anvil impact (`SoundEvents.ANVIL_LAND`), and spark ejection!
-- **Energy**: 50,000 FE buffer; consumes 20 FE/t (800 FE per cycle).
+- **Energy**: 100,000 FE buffer; consumes 500 FE/t (20,000 FE per cycle).
 - **Logistics**:
   - **Slot 0 (Die)**: Tooling slot (stacks to 1); protected from hopper extraction.
   - **Top & Sides**: Inserts raw materials into the 2-slot input queue (Slots 1..2).
@@ -404,7 +405,7 @@ An early-to-midgame high-throughput industrial smelting array that unifies **8 i
   - Smelting speed: **100 ticks (5.0 seconds)** per item (standard blast furnace speed).
 - **Dual-Power System (Solid Fuel OR RF/FE)**:
   - **Burnt Material / Solid Fuel Mode**: Powers all 8 parallel smelting slots simultaneously from a single piece of fuel. Accepts Coal, Charcoal (1,600t), Coal Blocks (16,000t), Lava Buckets (20,000t), Blaze Rods (2,400t), Logs/Planks (300t), Sticks (100t), Petroleum Tar (1,600t), Bitumen (1,600t), or Ethanol Buckets (4,000t). 1 piece of Coal can smelt up to 16 items when all 8 slots are active!
-  - **Electric / RF Mode**: Integrated 50,000 FE energy storage buffer. Consumes **30 FE/t** total while cooking items without burning any solid fuel.
+  - **Electric / RF Mode**: Integrated 1,000,000 FE energy storage buffer. Consumes **5,000 FE/t** total while cooking items without burning any solid fuel.
 - **Early-Game Accessible (NO Steel Required!)**:
   - Engineered specifically for early game automation prior to obtaining steel.
   - Crafted entirely from **Iron Ingots, Copper Ingots, Clay Bricks, Smooth Stone, Furnaces, Glass, Hoppers, and Droppers**. Absolutely no Steel Plates or Steel Ingots are needed!
@@ -488,7 +489,7 @@ An industrial-grade boiler engineered for massive steam output.
   - **Catwalk & Control Console**: Maintenance platform with safety railing, access ladder, side electrical cabinet, and twin vertical water level sight columns.
 - **Custom Industrial GUI**: High-capacity dark steel GUI with dual water and steam buffer columns, 8-slot fuel buffer, combustion viewport, redstone lamp, and meltdown alert.
 - **Capacity**: 64,000 mB Water, 64,000 mB Steam, 8 Fuel slots.
-- **Performance**: 5× production rate (250 mB Water -> 500 mB Steam per cycle).
+- **Performance**: 3× Small Boiler production rate (150 mB Water -> 300 mB Steam per cycle, exactly matching 3 Small Steam Boilers).
 - **Redstone Requirement**: Requires an active redstone signal to burn.
 - **Meltdown Condition**: Running dry for 60 seconds triggers a **massive 10.0 power crater explosion**!
 
@@ -519,7 +520,7 @@ Modern liquid-fueled steam boilers designed to burn refined **Diesel** fuel inst
   - Controller: `refinery:large_diesel_boiler_controller`
   - Heavy twin-furnace high-volume diesel steam plant.
   - **Tanks**: 64,000 mB Diesel, 64,000 mB Water, 64,000 mB High-Pressure Steam.
-  - **Consumption & Output**: Consumes 50 mB Diesel + 250 mB Water -> Produces 500 mB Steam per operational cycle.
+  - **Consumption & Output**: Consumes 30 mB Diesel + 300 mB Water -> Produces 750 mB Steam per operational cycle (3× Small Diesel Boiler).
   - **Custom 3-Tank Industrial GUI**: High-capacity Diesel, Water, and Steam gauges with automated port interfacing.
 - **Structure**: Uses the exact same multiblock casing, pipe, and port layouts as the standard boilers, swapping only the controller block to `Small Diesel Boiler Controller` or `Large Diesel Boiler Controller`. Water and Diesel can be supplied through ports or directly into the controller.
 
@@ -539,9 +540,8 @@ A heavy Rankine-cycle turbine converting High Pressure Steam into Forge Energy a
   - **Seamless Invisibility**: Constituent blocks become invisible with empty occlusion shapes when assembled, seamlessly rendering the monolithic model with interaction forwarding to the controller menu and wrench blueprint toggles.
 - **Capacity**: 32,000 mB Steam, 16,000 mB Water, **1,000,000 FE battery**.
 - **Thermodynamic Conversion**:
-  - 1 mB High Pressure Steam -> 20 FE + 0.5 mB Condensed Water.
-  - Consumes up to 50 mB Steam/t -> Generates **1,000 FE/t**.
-  - Output extraction rate: Up to 10,000 FE/t via Energy Port or Controller.
+  - Consumes up to 300 mB Steam/t (requires 3× Small Boiler steam generation) -> Generates **10,000 FE/t** + 150 mB/t Condensed Water (closed Rankine cycle back to boilers).
+  - Output extraction rate: Up to 50,000 FE/t via Energy Port or Controller with automated power push to adjacent handlers.
 
 #### Turbine Layer Schematic
 - **Layer 0 (Base & Ports)**:
@@ -662,8 +662,8 @@ A heavy rock crushing and pulverizing plant that doubles raw ore yields and proc
   - **Sand Pulverizing**: Crushes Gravel into **1x Sand**.
   - **Ingot Grinding**: Converts Ingots into **1x Dust** for metallurgy and chemistry.
 - **Specs**:
-  - Energy Storage: 50,000 FE
-  - Energy Consumption: 30 FE/t while grinding
+  - Energy Storage: 500,000 FE
+  - Energy Consumption: 2,000 FE/t while grinding
   - Process Duration: 60 ticks (3.0 seconds) per batch
   - Internal Buffer: 4 Input slots + 4 Output slots
 
@@ -1187,7 +1187,7 @@ The Continuous Molten Metallurgy suite introduces an automated, visually stunnin
              |
              v
 +-------------------------------+
-|  Electric Arc Melter (3x3x3)  |  <--- 40 FE/t, Electrodes & Arc Flash Animation
+|  Electric Arc Melter (3x3x3)  |  <--- 10,000 FE/t, Electrodes & Arc Flash Animation
 +-------------------------------+
              | (1,000 mB Molten Liquid)
              v
@@ -1236,7 +1236,7 @@ The **Electric Arc Melter** superheats mineral dusts and raw ores into liquid mo
 - **Hologram Support**: Right-click the Controller with a **Refinery Wrench** to project the full color-coded 3D holographic blueprint.
 
 #### Operation & Monolithic 3D Animated Model (`ArcMelterModel`):
-- **Power Consumption**: 40 FE/t while melting.
+- **Power Consumption**: 10,000 FE/t while melting (2,000,000 FE internal buffer).
 - **Process Speed**: 160 ticks (8 seconds) per item.
 - **Fluid Yield**: 1 Ore / Raw Ore $\rightarrow$ 2,000 mB (2x doubling); 1 Ingot / Dust / Sand $\rightarrow$ 1,000 mB of Molten Fluid.
 - **Internal Tank**: 8,000 mB capacity with automatic molten fluid push into adjacent Open Casting Channels, fluid pipes, or tanks.
@@ -1275,7 +1275,7 @@ The **Continuous Casting Press** receives molten liquids and uses a heavy overhe
   - 1x **Casting Press Output Port** (`refinery:casting_output_port`) â€” bottom or side exit conveyor chute. Automatically ejects finished ingots and blocks into hoppers, chests, or transport pipes!
 
 #### Operation & Monolithic 3D Animated Model (`CastingPressModel`):
-- **Power Consumption**: 40 FE/t while stamping.
+- **Power Consumption**: 600 FE/t while stamping (500,000 FE internal buffer).
 - **Process Speed**: 240 ticks (12 seconds) per casting & quenching cycle.
 - **Input Requirement**: 1,000 mB of Molten Fluid per ingot/block.
 - **Monolithic 3D Hydraulic Caster Architecture (`casting_press.png` 256×256 Atlas)**:
@@ -1851,6 +1851,29 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.40 (Industrial Power & Steam Rebalance: 10k Arc Melter, 10k Steam Turbine, 3x Large Boiler, 5k Multi-Smelter, 2k Grinder, 500 Press, 600 Caster)
+- **Electric Arc Melter Power Scaling (`ArcMelterControllerBlockEntity`, `ArcMelterScreen`)**:
+  - Rebalanced power consumption to **10,000 FE/t** (up from 40 FE/t).
+  - Expanded internal energy capacity to **2,000,000 FE** with **100,000 FE/t** maximum receive rate to buffer and power high-throughput melts.
+- **Steam Turbine Generator High-Output Overhaul (`SteamTurbineControllerBlockEntity`, `SteamTurbineScreen`, `TurbinePortBlockEntity`)**:
+  - Rebalanced power generation to **10,000 FE/t** (up from 1,000 FE/t).
+  - Scaled steam consumption to **300 mB/t** (up from 50 mB/t), requiring 3x the output of a Small Steam Boiler (3 × 100 mB/t).
+  - Recaptures **150 mB/t** condensed water in the closed Rankine cycle back to boilers.
+  - Increased energy export throughput to **50,000 FE/t** with automated power pushing into adjacent cables and machines.
+- **Large Boiler Output Synchronization (`LargeBoilerControllerBlockEntity`, `LargeDieselBoilerControllerBlockEntity`, `LargeDieselBoilerScreen`)**:
+  - Synchronized Large Steam Boiler production to **300 mB/t** High Pressure Steam consuming **150 mB/t** Water, exactly matching 3 Small Steam Boilers.
+  - Scaled Large Diesel Boiler to **750 mB steam / cycle** (consuming 300 mB water & 30 mB diesel per 10-tick cycle), exactly matching 3x the Small Diesel Boiler.
+- **Industrial Multi-Smelter Electric Induction (`MultiSmelterControllerBlockEntity`, `MultiSmelterScreen`)**:
+  - Rebalanced electric mode consumption to **5,000 FE/t** (up from 30 FE/t) with an expanded **1,000,000 FE** buffer.
+- **Industrial Grinder Pulverizing Power (`IndustrialGrinderControllerBlockEntity`, `IndustrialGrinderScreen`)**:
+  - Rebalanced crushing consumption to **2,000 FE/t** (up from 30 FE/t) with an expanded **500,000 FE** buffer.
+- **Industrial Metal Press Hydraulic Forming (`MetalPressControllerBlockEntity`, `MetalPressScreen`)**:
+  - Rebalanced stamping consumption to **500 FE/t** (up from 20 FE/t) with an expanded **100,000 FE** buffer.
+- **Continuous Casting Press Solidification (`CastingPressControllerBlockEntity`, `CastingPressScreen`)**:
+  - Rebalanced continuous casting consumption to **600 FE/t** (up from 40 FE/t) with an expanded **500,000 FE** buffer.
 
 ---
 

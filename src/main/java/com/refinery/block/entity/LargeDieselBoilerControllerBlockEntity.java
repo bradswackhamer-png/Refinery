@@ -43,9 +43,9 @@ import java.util.List;
 
 public class LargeDieselBoilerControllerBlockEntity extends BlockEntity implements IBoilerController, MenuProvider, WorldlyContainer {
     public static final int TANK_CAPACITY = 64_000;
-    public static final int DIESEL_CONSUMPTION = 25;  // 25 mB diesel per cycle
-    public static final int WATER_CONSUMPTION = 250;  // 250 mB water per cycle
-    public static final int STEAM_PRODUCTION = 650;   // 650 mB high pressure steam per cycle
+    public static final int DIESEL_CONSUMPTION = 30;  // 30 mB diesel per cycle (3x small diesel boiler)
+    public static final int WATER_CONSUMPTION = 300;  // 300 mB water per cycle (3x small diesel boiler)
+    public static final int STEAM_PRODUCTION = 750;   // 750 mB high pressure steam per cycle (3x small diesel boiler)
     public static final int CYCLE_TIME = 10;          // 10 ticks (0.5s) per cycle
     public static final int MAX_OVERHEAT_TICKS = 1200;
 

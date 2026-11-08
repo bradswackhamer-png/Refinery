@@ -1,5 +1,6 @@
 package com.refinery.client.gui;
 
+import com.refinery.block.entity.MultiSmelterControllerBlockEntity;
 import com.refinery.menu.MultiSmelterMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -42,7 +43,7 @@ public class MultiSmelterScreen extends AbstractContainerScreen<MultiSmelterMenu
         // 1. Energy Storage Bar (x: 10, y: 18, w: 12, h: 50)
         int energy = this.menu.getEnergy();
         if (energy > 0) {
-            int energyHeight = Math.min(50, (int) ((energy / 50000.0f) * 50));
+            int energyHeight = Math.min(50, (int) ((energy / (float) MultiSmelterControllerBlockEntity.ENERGY_CAPACITY) * 50));
             graphics.fill(RenderPipelines.GUI, xo + 10, yo + 18 + (50 - energyHeight), xo + 22, yo + 68, 0xFFEAB308);
             graphics.fill(RenderPipelines.GUI, xo + 10, yo + 18 + (50 - energyHeight), xo + 12, yo + 68, 0xFFFDE047);
         }
@@ -58,7 +59,7 @@ public class MultiSmelterScreen extends AbstractContainerScreen<MultiSmelterMenu
         }
 
         // 3. Electric Induction Heating Indicator (x: 110, y: 63, w: 14, h: 14)
-        if (energy >= 30 && this.menu.isSmelting()) {
+        if (energy >= MultiSmelterControllerBlockEntity.ENERGY_PER_TICK && this.menu.isSmelting()) {
             graphics.fill(RenderPipelines.GUI, xo + 110, yo + 63, xo + 124, yo + 77, 0xFF0284C7);
             graphics.fill(RenderPipelines.GUI, xo + 112, yo + 65, xo + 122, yo + 75, 0xFF38BDF8);
             graphics.fill(RenderPipelines.GUI, xo + 115, yo + 67, xo + 119, yo + 73, 0xFFE0F2FE);
@@ -90,8 +91,8 @@ public class MultiSmelterScreen extends AbstractContainerScreen<MultiSmelterMenu
         if (mouseX >= xo + 9 && mouseX <= xo + 23 && mouseY >= yo + 17 && mouseY <= yo + 69) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Energy Storage").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                    Component.literal(String.format("%,d", this.menu.getEnergy()) + " / 50,000 FE").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Consumption: 30 FE/t while electric smelting").withStyle(ChatFormatting.GREEN),
+                    Component.literal(String.format("%,d", this.menu.getEnergy()) + " / " + String.format("%,d", MultiSmelterControllerBlockEntity.ENERGY_CAPACITY) + " FE").withStyle(ChatFormatting.GRAY),
+                    Component.literal("Consumption: 5,000 FE/t while electric smelting").withStyle(ChatFormatting.GREEN),
                     Component.literal("Dual-power: Runs on FE or Solid Fuel!").withStyle(ChatFormatting.DARK_GRAY)
             ), mouseX, mouseY);
         }
@@ -109,7 +110,7 @@ public class MultiSmelterScreen extends AbstractContainerScreen<MultiSmelterMenu
 
         // Electric Induction Coil Hover (x: 109..125, y: 62..78)
         else if (mouseX >= xo + 109 && mouseX <= xo + 125 && mouseY >= yo + 62 && mouseY <= yo + 78) {
-            boolean active = this.menu.getEnergy() >= 30 && this.menu.isSmelting();
+            boolean active = this.menu.getEnergy() >= MultiSmelterControllerBlockEntity.ENERGY_PER_TICK && this.menu.isSmelting();
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Induction Heating Coils").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     Component.literal("Status: " + (active ? "Active Electric Smelting" : "Standby")).withStyle(active ? ChatFormatting.GREEN : ChatFormatting.GRAY),
