@@ -55,6 +55,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public static final int TANK_CAPACITY = 8000;
     public static final int ENERGY_CAPACITY = 2_000_000;
     public static final int ENERGY_PER_TICK = 10_000;
+    public static final int MIN_START_ENERGY = 50_000;
     public static final int PROCESS_TIME = 200; // 10 seconds per batch (200 ticks)
 
     private boolean assembled = false;
@@ -286,7 +287,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                 int fluidProduced = isIngot(input) ? 500 : 1000;
                 boolean canFit = (this.moltenFluid == Fluids.EMPTY || this.moltenFluid == resultFluid)
                         && (this.moltenAmount + fluidProduced <= TANK_CAPACITY);
-                int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+                int requiredEnergy = (this.progress == 0) ? MIN_START_ENERGY : ENERGY_PER_TICK;
                 if (canFit && this.energy >= requiredEnergy) {
                     isActive = true;
                     this.energy -= ENERGY_PER_TICK;
@@ -549,37 +550,37 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
         Block casing = RefineryMod.MELTER_CASING.get();
 
         // Layer 0: Foundation & Tapping Spout
-        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Melter Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Arc Melter Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 0, controller, "Electric Arc Melter Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Melter Molten Output Port", 0xFFF97316));
-        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 2, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Melter Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Arc Melter Output Port", 0xFFF97316));
+        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 2, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Arc Melter Casing", 0xFF64748B));
 
         // Layer 1: Melting Crucible & Electrodes
-        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Melter Quartz Viewport", 0xFF38BDF8));
-        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Crucible Bath (or Hollow)", 0xFFF59E0B));
-        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 1, 2, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 2, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 1, 2, casing, "Melter Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Arc Melter Heating Chamber", 0xFF38BDF8));
+        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Arc Melter Heating Chamber", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 2, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 2, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 2, casing, "Arc Melter Casing", 0xFF64748B));
 
         // Layer 2: Gantry & Feed Port
-        list.add(new BlueprintRequirement(-1, 2, 0, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 0, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 2, 0, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 2, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 1, inputPort, "Melter Feed Input Port", 0xFF3B82F6));
-        list.add(new BlueprintRequirement( 1, 2, 1, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 2, 2, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 2, casing, "Melter Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 2, 2, casing, "Melter Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 0, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 0, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 0, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 1, inputPort, "Arc Melter Input Port", 0xFF3B82F6));
+        list.add(new BlueprintRequirement( 1, 2, 1, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 2, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 2, casing, "Arc Melter Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 2, casing, "Arc Melter Casing", 0xFF64748B));
 
         return list;
     }

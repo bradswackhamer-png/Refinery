@@ -1756,14 +1756,22 @@ public class RefineryMod {
                 (level, pos, state, be, side) -> {
                     CastingPressControllerBlockEntity controller = CastingCasingBlock.findNearbyController(level, pos);
                     if (controller == null || !controller.isAssembled()) return null;
-                    return new SingleFluidHandler(
-                            controller::getMoltenFluid,
-                            controller::setMoltenFluid,
-                            controller::getMoltenAmount,
-                            controller::setMoltenAmount,
-                            CastingPressControllerBlockEntity.TANK_CAPACITY,
-                            true, false, controller::setChanged,
-                            f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty());
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(
+                                    controller::getMoltenFluid,
+                                    controller::setMoltenFluid,
+                                    controller::getMoltenAmount,
+                                    controller::setMoltenAmount,
+                                    CastingPressControllerBlockEntity.TANK_CAPACITY,
+                                    true, false, controller::setChanged,
+                                    f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty()),
+                            new SingleFluidHandler(
+                                    () -> net.minecraft.world.level.material.Fluids.WATER,
+                                    controller::getWaterAmount,
+                                    controller::setWaterAmount,
+                                    CastingPressControllerBlockEntity.WATER_CAPACITY,
+                                    true, false, controller::setChanged)
+                    );
                 },
                 CASTING_CASING.get(), CASTING_BASIN.get(), CASTING_CHAMBER.get());
 
@@ -1773,14 +1781,22 @@ public class RefineryMod {
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, CASTING_PRESS_CONTROLLER_BE.get(),
                 (be, side) -> {
                     if (!be.isAssembled()) return null;
-                    return new SingleFluidHandler(
-                            be::getMoltenFluid,
-                            be::setMoltenFluid,
-                            be::getMoltenAmount,
-                            be::setMoltenAmount,
-                            CastingPressControllerBlockEntity.TANK_CAPACITY,
-                            true, false, be::setChanged,
-                            f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty());
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(
+                                    be::getMoltenFluid,
+                                    be::setMoltenFluid,
+                                    be::getMoltenAmount,
+                                    be::setMoltenAmount,
+                                    CastingPressControllerBlockEntity.TANK_CAPACITY,
+                                    true, false, be::setChanged,
+                                    f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty()),
+                            new SingleFluidHandler(
+                                    () -> net.minecraft.world.level.material.Fluids.WATER,
+                                    be::getWaterAmount,
+                                    be::setWaterAmount,
+                                    CastingPressControllerBlockEntity.WATER_CAPACITY,
+                                    true, false, be::setChanged)
+                    );
                 });
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, CASTING_PORT_BE.get(),
@@ -1794,14 +1810,22 @@ public class RefineryMod {
                 (be, side) -> {
                     var controller = be.getController();
                     if (controller == null || be.getPortType() != CastingPortBlock.PortType.INPUT) return null;
-                    return new SingleFluidHandler(
-                            controller::getMoltenFluid,
-                            controller::setMoltenFluid,
-                            controller::getMoltenAmount,
-                            controller::setMoltenAmount,
-                            CastingPressControllerBlockEntity.TANK_CAPACITY,
-                            true, false, controller::setChanged,
-                            f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty());
+                    return new MultiFluidHandler(
+                            new SingleFluidHandler(
+                                    controller::getMoltenFluid,
+                                    controller::setMoltenFluid,
+                                    controller::getMoltenAmount,
+                                    controller::setMoltenAmount,
+                                    CastingPressControllerBlockEntity.TANK_CAPACITY,
+                                    true, false, controller::setChanged,
+                                    f -> !CastingPressControllerBlockEntity.getCastingProduct(f).isEmpty()),
+                            new SingleFluidHandler(
+                                    () -> net.minecraft.world.level.material.Fluids.WATER,
+                                    controller::getWaterAmount,
+                                    controller::setWaterAmount,
+                                    CastingPressControllerBlockEntity.WATER_CAPACITY,
+                                    true, false, controller::setChanged)
+                    );
                 });
 
         // Capabilities on Industrial Fermenter (Energy, Fluid Ethanol, Items)

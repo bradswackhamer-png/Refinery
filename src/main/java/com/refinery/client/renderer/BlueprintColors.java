@@ -52,10 +52,10 @@ public class BlueprintColors {
         if (lower.contains("diesel")) {
             return 0xFACC15; // Canary Yellow
         }
-        if (lower.contains("gas port") || lower.contains("gasoline")) {
+        if (lower.contains("gas port") || lower.contains("gas output") || lower.contains("gasoline")) {
             return 0x06B6D4; // Electric Cyan
         }
-        if (lower.contains("steam")) {
+        if (lower.contains("steam") && !lower.contains("casing")) {
             return 0x38BDF8; // Frost Sky Blue
         }
         if (lower.contains("water")) {
@@ -67,13 +67,13 @@ public class BlueprintColors {
         if (lower.contains("fuel")) {
             return 0xFB923C; // Flame Orange
         }
-        if (lower.contains("byproduct")) {
+        if (lower.contains("byproduct") || lower.contains("liquid tar")) {
             return 0xEC4899; // Radiant Fuchsia Pink
         }
-        if (lower.contains("foundry input") || (lower.contains("grinder") && lower.contains("input"))) {
+        if (lower.contains("input port") || lower.contains("fill valve")) {
             return 0x4ADE80; // Bright Mint Green
         }
-        if (lower.contains("foundry output") || (lower.contains("grinder") && lower.contains("output"))) {
+        if (lower.contains("output port") || lower.contains("drain valve")) {
             return 0xFB923C; // Warm Tangerine
         }
 
@@ -96,10 +96,10 @@ public class BlueprintColors {
         if (lower.contains("rotor")) {
             return 0x2DD4BF; // Electric Teal
         }
-        if (lower.contains("anvil") || lower.contains("press bed")) {
+        if (lower.contains("anvil") || lower.contains("press bed") || lower.contains("mold basin")) {
             return 0x818CF8; // Cobalt Indigo
         }
-        if (lower.contains("hydraulic") || lower.contains("press head")) {
+        if (lower.contains("hydraulic") || lower.contains("press head") || lower.contains("stamping head")) {
             return 0xA855F7; // Vivid Purple
         }
         if (lower.contains("crushing chamber") || lower.contains("chamber")) {
@@ -110,19 +110,19 @@ public class BlueprintColors {
         }
 
         // 4. Casings (High-contrast distinct metallic and industrial tones)
-        if (lower.contains("reinforced casing")) {
+        if (lower.contains("reinforced") && lower.contains("casing")) {
             return 0xCBD5E1; // Platinum Slate
         }
-        if (lower.contains("blast furnace casing") || lower.contains("foundry casing")) {
+        if (lower.contains("blast furnace casing") || lower.contains("foundry casing") || lower.contains("melter casing") || lower.contains("smelter casing")) {
             return 0x93C5FD; // Light Steel Blue
         }
         if (lower.contains("steel boiler casing") || lower.contains("boiler casing")) {
             return 0xEAB308; // Industrial Brass
         }
-        if (lower.contains("turbine casing")) {
+        if (lower.contains("turbine casing") || lower.contains("storage tank casing")) {
             return 0xA5F3FC; // Titanium Cyan
         }
-        if (lower.contains("press casing")) {
+        if (lower.contains("press casing") || lower.contains("press structural casing")) {
             return 0xC7D2FE; // Heavy Periwinkle
         }
         if (lower.contains("grinder casing") || lower.contains("structural casing")) {

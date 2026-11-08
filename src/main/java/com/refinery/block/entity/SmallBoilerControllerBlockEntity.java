@@ -548,7 +548,7 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
 
         // Layer 0: Hearth & Bottom
         list.add(new BlueprintRequirement(-1, 0, 0, waterPort, "Boiler Water Input Port", 0xFF3B82F6));
-        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Small Boiler Controller", 0xFF10B981));
+        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Small Steam Boiler Controller", 0xFF10B981));
         list.add(new BlueprintRequirement( 1, 0, 0, fuelPort, "Boiler Fuel Input Port", 0xFFEA580C));
         list.add(new BlueprintRequirement(-1, 0, 1, casing, "Steel Boiler Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 1, firebox, "Boiler Firebox Hearth", 0xFFEF4444));

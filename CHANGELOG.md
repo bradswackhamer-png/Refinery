@@ -4,6 +4,25 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.43] - 2026-11-08
+
+### Added
+- **Continuous Casting Press Water Quenching Requirement (1:1 Ratio with Molten Metal) (`CastingPressControllerBlockEntity`, `CastingPressMenu`, `CastingPressScreen`, `RefineryMod`)**:
+  - Added a dedicated **4,000 mB Quenching Water Tank** alongside the 4,000 mB Molten Metal Basin on the Continuous Casting Press.
+  - Each casting and quenching cycle now requires a **1:1 fluid ratio**: **1,000 mB of Water** and **1,000 mB of Molten Metal** per ingot/block cast (consumed together at the high-pressure quenching point).
+  - Registered `MultiFluidHandler` capability across the Casting Press controller, input port, casing, basin, and chamber blocks so both Water and Molten Metal can be piped in simultaneously or filled by right-clicking with Water Buckets / Molten Metal Buckets.
+  - Updated `CastingPressScreen` to render dual side-by-side fluid gauges (`Molten Inflow Basin` and `Quenching Water Tank`) with detailed hover tooltips.
+
+### Changed
+- **Electric Arc Melter 50,000 FE Start Threshold (`ArcMelterControllerBlockEntity`)**:
+  - Changed the Electric Arc Melter so that it begins melting a batch as soon as its internal energy buffer reaches **50,000 FE** (`MIN_START_ENERGY = 50_000`) instead of requiring the full 2,000,000 FE buffer upfront before starting.
+- **Continuous Casting Press Ground-Level Input Port (`CastingPressControllerBlockEntity`, `GuideBookRegistry`)**:
+  - Swapped the `Casting Input Port` at `(0, 1, 2)` (Layer 1, rear-center) with the `Casting Press Casing` block below it at `(0, 0, 2)` (Layer 0, rear-center), allowing ground-level `Y=0` Open Casting Channels from the Electric Arc Melter to feed straight into the Casting Input Port without elevation changes.
+- **Multiblock Hologram & Guide Book Name Parity with JEI (`*ControllerBlockEntity`, `StorageTankBlockEntity`, `BlueprintColors`, `GuideBookRegistry`)**:
+  - Updated all 3D blueprint hologram labels across all 14 multiblock machines (Industrial Blast Furnace, Electric Arc Melter, Continuous Casting Press, 3-Stage Petroleum Refinery, Industrial Grinder, Industrial Metal Press, Heavy Multi-Smelter, Small & Large Steam Boilers, Small & Large Diesel Boilers, Steam Turbine Generator, Heavy Pit Quarry, and Multiblock Liquid Storage Tank) and the in-game Field Manual Guide Book so every block label matches its exact localized item name in JEI (`en_us.json`).
+
+---
+
 ## [1.11.42] - 2026-11-07
 
 ### Added

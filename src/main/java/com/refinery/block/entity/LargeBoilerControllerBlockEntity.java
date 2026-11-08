@@ -526,7 +526,7 @@ public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBo
         for (int z = 0; z < 5; z++) {
             for (int x = -2; x <= 2; x++) {
                 if (x == 0 && z == 0) {
-                    list.add(new BlueprintRequirement(x, 0, z, controller, "Large Boiler Controller", 0xFF10B981));
+                    list.add(new BlueprintRequirement(x, 0, z, controller, "Large Steam Boiler Controller", 0xFF10B981));
                 } else if (x == -1 && z == 0) {
                     list.add(new BlueprintRequirement(x, 0, z, waterPort, "Boiler Water Input Port", 0xFF3B82F6));
                 } else if (x == 1 && z == 0) {

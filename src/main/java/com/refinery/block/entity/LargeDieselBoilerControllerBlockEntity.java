@@ -574,11 +574,11 @@ public class LargeDieselBoilerControllerBlockEntity extends BlockEntity implemen
                 } else if (x == -1 && z == 0) {
                     list.add(new BlueprintRequirement(x, 0, z, waterPort, "Boiler Water Input Port", 0xFF3B82F6));
                 } else if (x == 1 && z == 0) {
-                    list.add(new BlueprintRequirement(x, 0, z, fuelPort, "Boiler Diesel Input Port", 0xFFF59E0B));
+                    list.add(new BlueprintRequirement(x, 0, z, fuelPort, "Boiler Fuel Input Port", 0xFFF59E0B));
                 } else if (x == 0 && z == 4) {
                     list.add(new BlueprintRequirement(x, 0, z, steamPort, "Boiler Steam Output Port", 0xFF38BDF8));
                 } else if (x >= -1 && x <= 1 && z >= 1 && z <= 3) {
-                    list.add(new BlueprintRequirement(x, 0, z, firebox, "Diesel Burner Firebox", 0xFFEF4444));
+                    list.add(new BlueprintRequirement(x, 0, z, firebox, "Boiler Firebox Hearth", 0xFFEF4444));
                 } else {
                     list.add(new BlueprintRequirement(x, 0, z, casing, "Steel Boiler Casing", 0xFF64748B));
                 }

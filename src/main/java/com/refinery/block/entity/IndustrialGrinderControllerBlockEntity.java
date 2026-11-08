@@ -864,8 +864,8 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
 
         // Layer 0: Foundation & Discharge
         list.add(new BlueprintRequirement(-1, 0, 0, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Grinder Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Grinder Output Port", 0xFF38BDF8));
+        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Industrial Grinder Controller", 0xFF10B981));
+        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Grinder Discharge Output Port", 0xFF38BDF8));
         list.add(new BlueprintRequirement(-1, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 1, 0, 1, casing, "Grinder Structural Casing", 0xFF64748B));
@@ -875,10 +875,10 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
 
         // Layer 1: Crushing Chamber
         list.add(new BlueprintRequirement(-1, 1, 0, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Grinder Chamber Window", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Grinder Crushing Chamber", 0xFFF59E0B));
         list.add(new BlueprintRequirement( 1, 1, 0, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement(-1, 1, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Grinder Crushing Chamber (or Hollow)", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Grinder Crushing Chamber", 0xFFF59E0B));
         list.add(new BlueprintRequirement( 1, 1, 1, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement(-1, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 1, 2, casing, "Grinder Structural Casing", 0xFF64748B));
@@ -889,7 +889,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         list.add(new BlueprintRequirement( 0, 2, 0, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 1, 2, 0, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement(-1, 2, 1, casing, "Grinder Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 1, inputPort, "Grinder Input Port", 0xFFEA580C));
+        list.add(new BlueprintRequirement( 0, 2, 1, inputPort, "Grinder Feed Input Port", 0xFFEA580C));
         list.add(new BlueprintRequirement( 1, 2, 1, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement(-1, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 2, 2, casing, "Grinder Structural Casing", 0xFF64748B));

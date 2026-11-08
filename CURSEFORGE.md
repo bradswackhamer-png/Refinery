@@ -107,9 +107,9 @@ Whether you play standalone or alongside logistics and tech mods, Industrial Ref
   - **Telemetry GUI**: Interactive radius adjustment down to 3 ($7\times 7$), live remaining blocks breakdown dashboard tracking individual block counts with icons and tooltips, dedicated fence slot, and 9-slot buffer.
 - **Electric Arc Melter (3x3x3 Multiblock)**:
   - Monolithic 3D Industrial Electric Arc Furnace (EAF) with cylindrical water-cooled ribbed shell, high-voltage transformer vault, copper busbars, charge hopper, and eccentric bottom-tapping launder spout.
-  - 3 reciprocating graphite electrodes discharging dynamic 3D plasma arc bolts into a glowing molten metal bath (Molten Iron, Gold, Copper, Tin, Bronze, and Glass) with 2x ore doubling!
+  - 3 reciprocating graphite electrodes discharging dynamic 3D plasma arc bolts into a glowing molten metal bath (Molten Iron, Gold, Copper, Tin, Bronze, and Glass) with 2x ore doubling! Starts melting as soon as its energy buffer reaches **50,000 FE**.
 - **Continuous Casting Press (3x3x3 Multiblock)**:
-  - Monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press with 4 chrome tie-rod columns, overhead hydraulic cylinder, hazard-striped ram crosshead, copper crystallizer mold, receiver troughs, and motorized run-out roller table that stamps and quenches molten metal into solid ingots and glass blocks.
+  - Monolithic 3D Heavy Hydraulic Continuous Casting & Quenching Press with 4 chrome tie-rod columns, overhead hydraulic cylinder, hazard-striped ram crosshead, copper crystallizer mold, ground-level `Casting Input Port` at `(0, 0, 2)` for direct `Y=0` channel connections, and motorized run-out roller table that stamps and water-quenches molten metal (1:1 ratio: 1,000 mB Water + 1,000 mB Molten Metal) into solid ingots and glass blocks.
 - **Refractory Open Casting Channels**:
   - Open 3D refractory trough geometry for seamless gravity-fed molten metal transfer between Arc Melters, Casting Presses, and fluid pipes.
 - **Corrugated Steel Panels**:
@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.42.jar`
+`refinery-1.11.43.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.42 (NeoForge 26.3)`
+`Industrial Refinery 1.11.43 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,23 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.43
+
+### What's New in v1.11.43:
+- **Continuous Casting Press Water Quenching Requirement (1:1 Ratio with Molten Metal)**:
+  - Added a dedicated **4,000 mB Quenching Water Tank** alongside the 4,000 mB Molten Metal Basin on the Continuous Casting Press.
+  - Each casting and quenching cycle now requires a **1:1 fluid ratio**: **1,000 mB of Water** and **1,000 mB of Molten Metal** per ingot/block cast.
+  - Water and Molten Metal can be piped simultaneously into any Casting Press block or filled by right-clicking with Water Buckets / Molten Metal Buckets.
+  - Added side-by-side `Molten Inflow Basin` and `Quenching Water Tank` gauges to the Continuous Casting Press GUI with live tooltips.
+- **Electric Arc Melter 50,000 FE Start Threshold**:
+  - The Electric Arc Melter now begins melting a batch as soon as its internal energy buffer reaches **50,000 FE** instead of waiting for the full 2,000,000 FE buffer to fill first.
+- **Continuous Casting Press Ground-Level Input Port**:
+  - Swapped the `Casting Input Port` at `(0, 1, 2)` (Layer 1, rear-center) with the `Casting Press Casing` block below it at `(0, 0, 2)` (Layer 0, rear-center), allowing ground-level `Y=0` Open Casting Channels from the Electric Arc Melter to connect directly into the Casting Input Port without elevation changes.
+- **Multiblock Hologram & Guide Book Name Parity with JEI**:
+  - Updated all 3D blueprint hologram labels across all 14 multiblock machines and the in-game Field Manual Guide Book so every block label matches its exact localized item name in JEI (`en_us.json`).
+
+---
+
 # Industrial Refinery v1.11.42
 
 ### What's New in v1.11.42:

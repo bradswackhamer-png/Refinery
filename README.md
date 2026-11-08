@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.43 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)](#version-11143-arc-melter-50k-fe-start-threshold-ground-level-casting-input-port-11-water-quenching--jei-hologram-name-parity)
    - [Version 1.11.42 (In-Game Guide Book Power & Energy Badges, 20s Casting Press & 10s Arc Melter Durations)](#version-11142-in-game-guide-book-power--energy-badges-20s-casting-press--10s-arc-melter-durations)
    - [Version 1.11.40 (Industrial Power & Steam Rebalance: 10k Arc Melter, 10k Steam Turbine, 3x Large Boiler, 5k Multi-Smelter, 2k Grinder, 500 Press, 600 Caster)](#version-11140-industrial-power--steam-rebalance-10k-arc-melter-10k-steam-turbine-3x-large-boiler-5k-multi-smelter-2k-grinder-500-press-600-caster)
    - [Version 1.11.39 (Fast 0.5s Pipe Gate Redstone Pulsing & Natural Action Cycle Order)](#version-11139-fast-05s-pipe-gate-redstone-pulsing--natural-action-cycle-order)
@@ -1229,16 +1230,16 @@ The **Electric Arc Melter** superheats mineral dusts and raw ores into liquid mo
 #### Multiblock Structure & Blueprint:
 - **Dimensions**: 3 blocks wide $\times$ 3 blocks tall $\times$ 3 blocks deep (27 blocks total).
 - **Core Requirements**:
-  - 1x **Electric Arc Melter Controller** (`refinery:arc_melter_controller`) â€” front face, center-bottom.
-  - 22x **Arc Melter Casing** (`refinery:melter_casing`) â€” heavy heat-dissipating refractory outer framing.
-  - 2x **Arc Melter Observation Chamber** (`refinery:melter_chamber`) â€” tinted safety glass viewports.
-  - 1x **Arc Melter Input Port** (`refinery:melter_input_port`) â€” top or side funnel hopper. Accepts dusts & raw ores from hoppers and item pipes.
-  - 1x **Arc Melter Output Port** (`refinery:melter_output_port`) â€” bottom or side molten spout. Automatically pushes molten liquid to adjacent Casting Channels, fluid pipes, or tanks!
-- **Hologram Support**: Right-click the Controller with a **Refinery Wrench** to project the full color-coded 3D holographic blueprint.
+  - 1x **Electric Arc Melter Controller** (`refinery:arc_melter_controller`) — front face, center-bottom.
+  - 22x **Arc Melter Casing** (`refinery:melter_casing`) — heavy heat-dissipating refractory outer framing.
+  - 2x **Arc Melter Heating Chamber** (`refinery:melter_chamber`) — tinted safety glass viewports.
+  - 1x **Arc Melter Input Port** (`refinery:melter_input_port`) — top or side funnel hopper. Accepts dusts & raw ores from hoppers and item pipes.
+  - 1x **Arc Melter Output Port** (`refinery:melter_output_port`) — bottom-front right molten spout. Automatically pushes molten liquid to adjacent Casting Channels, fluid pipes, or tanks!
+- **Hologram Support**: Right-click the Controller with a **Refinery Wrench** to project the full color-coded 3D holographic blueprint with exact JEI item labels.
 
 #### Operation & Monolithic 3D Animated Model (`ArcMelterModel`):
-- **Power Consumption**: 10,000 FE/t while melting (2,000,000 FE internal buffer).
-- **Process Speed**: 160 ticks (8 seconds) per item.
+- **Power Consumption**: 10,000 FE/t while melting (2,000,000 FE internal buffer, starts melting once the buffer reaches **50,000 FE**).
+- **Process Speed**: 200 ticks (10 seconds) per item.
 - **Fluid Yield**: 1 Ore / Raw Ore $\rightarrow$ 2,000 mB (2x doubling); 1 Ingot / Dust / Sand $\rightarrow$ 1,000 mB of Molten Fluid.
 - **Internal Tank**: 8,000 mB capacity with automatic molten fluid push into adjacent Open Casting Channels, fluid pipes, or tanks.
 - **Monolithic 3D EAF Architecture (`arc_melter.png` 256×256 Atlas)**:
@@ -1268,17 +1269,17 @@ The **Continuous Casting Press** receives molten liquids and uses a heavy overhe
 #### Multiblock Structure & Blueprint:
 - **Dimensions**: 3 blocks wide $\times$ 3 blocks tall $\times$ 3 blocks deep (27 blocks total).
 - **Core Requirements**:
-  - 1x **Continuous Casting Press Controller** (`refinery:casting_press_controller`) â€” front face, center-bottom.
-  - 20x **Casting Press Casing** (`refinery:casting_casing`) â€” heavy hydraulic frame with safety hazard striping.
-  - 2x **Casting Mold Basin** (`refinery:casting_basin`) â€” ceramic mold bed at the base where liquid pools.
-  - 2x **Casting Safety Chamber** (`refinery:casting_chamber`) â€” wire-reinforced safety viewing windows.
-  - 1x **Casting Press Input Port** (`refinery:casting_input_port`) â€” top or side intake. Connects directly to Casting Channels or fluid pipes.
-  - 1x **Casting Press Output Port** (`refinery:casting_output_port`) â€” bottom or side exit conveyor chute. Automatically ejects finished ingots and blocks into hoppers, chests, or transport pipes!
+  - 1x **Casting Press Controller** (`refinery:casting_press_controller`) — front face, center-bottom.
+  - 22x **Casting Press Casing** (`refinery:casting_casing`) — heavy hydraulic frame with safety hazard striping.
+  - 1x **Casting Mold Basin** (`refinery:casting_basin`) — ceramic mold bed at the base `(0, 0, 1)` where liquid pools.
+  - 1x **Casting Safety Chamber** (`refinery:casting_chamber`) — wire-reinforced safety viewing window at `(0, 1, 0)`.
+  - 1x **Casting Input Port** (`refinery:casting_input_port`) — ground-level rear-center intake at `(0, 0, 2)` (swapped to Layer 0 so ground-level `Y=0` Open Casting Channels and fluid pipes connect directly without elevation changes).
+  - 1x **Casting Output Port** (`refinery:casting_output_port`) — bottom-front right exit conveyor chute at `(1, 0, 0)`. Automatically ejects finished ingots and blocks onto conveyors, hoppers, chests, or transport pipes!
 
 #### Operation & Monolithic 3D Animated Model (`CastingPressModel`):
 - **Power Consumption**: 600 FE/t while stamping (500,000 FE internal buffer).
-- **Process Speed**: 240 ticks (12 seconds) per casting & quenching cycle.
-- **Input Requirement**: 1,000 mB of Molten Fluid per ingot/block.
+- **Process Speed**: 400 ticks (20 seconds) per casting & quenching cycle.
+- **Input Requirement (1:1 Fluid Ratio)**: **1,000 mB of Molten Fluid** AND **1,000 mB of Water** per ingot/block (4,000 mB Molten Basin capacity + 4,000 mB Quenching Water Tank capacity).
 - **Monolithic 3D Hydraulic Caster Architecture (`casting_press.png` 256×256 Atlas)**:
   - Reinforced steel foundation bed, central water-cooled copper & refractory crystallizer mold basin at `(0, 0, 1)`, 4 precision-ground chrome tie-rod columns with castle locknuts, overhead cast-steel crown platen with crimson-amber main hydraulic cylinder and twin return boosters, front safety grille observation window at `(0, 1, 0)`, upper refractory tundish & sloped launder chute at `(0, 1, 2)` plus lower `Y=0` refractory channel receiver troughs at `(0, 0, 2)` and `(-1, 0, 1)`, right-side water-cooling manifold cabinet, motorized steel run-out roller table at `(1, 0, 0)`, and front-left PLC operator cabinet.
 - **Dynamic Animations**:
@@ -1852,6 +1853,21 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.43 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)
+- **Continuous Casting Press Water Quenching Requirement (1:1 Ratio with Molten Metal) (`CastingPressControllerBlockEntity`, `CastingPressMenu`, `CastingPressScreen`, `RefineryMod`)**:
+  - Added a dedicated **4,000 mB Quenching Water Tank** alongside the 4,000 mB Molten Metal Basin on the Continuous Casting Press.
+  - Each casting and quenching cycle now requires a **1:1 fluid ratio**: **1,000 mB of Water** and **1,000 mB of Molten Metal** per ingot/block cast (consumed together at the high-pressure quenching point).
+  - Registered `MultiFluidHandler` capability across the Casting Press controller, input port, casing, basin, and chamber blocks so both Water and Molten Metal can be piped in simultaneously or filled by right-clicking with Water Buckets / Molten Metal Buckets.
+  - Updated `CastingPressScreen` to render dual side-by-side fluid gauges (`Molten Inflow Basin` and `Quenching Water Tank`) with detailed hover tooltips.
+- **Electric Arc Melter 50,000 FE Start Threshold (`ArcMelterControllerBlockEntity`)**:
+  - Changed the Electric Arc Melter so that it begins melting a batch as soon as its internal energy buffer reaches **50,000 FE** (`MIN_START_ENERGY = 50_000`) instead of requiring the full 2,000,000 FE buffer upfront before starting.
+- **Continuous Casting Press Ground-Level Input Port (`CastingPressControllerBlockEntity`, `GuideBookRegistry`)**:
+  - Swapped the `Casting Input Port` at `(0, 1, 2)` (Layer 1, rear-center) with the `Casting Press Casing` block below it at `(0, 0, 2)` (Layer 0, rear-center), allowing ground-level `Y=0` Open Casting Channels from the Electric Arc Melter to feed straight into the Casting Input Port without elevation changes.
+- **Multiblock Hologram & Guide Book Name Parity with JEI (`*ControllerBlockEntity`, `StorageTankBlockEntity`, `BlueprintColors`, `GuideBookRegistry`)**:
+  - Updated all 3D blueprint hologram labels across all 14 multiblock machines (Industrial Blast Furnace, Electric Arc Melter, Continuous Casting Press, 3-Stage Petroleum Refinery, Industrial Grinder, Industrial Metal Press, Heavy Multi-Smelter, Small & Large Steam Boilers, Small & Large Diesel Boilers, Steam Turbine Generator, Heavy Pit Quarry, and Multiblock Liquid Storage Tank) and the in-game Field Manual Guide Book so every block label matches its exact localized item name in JEI (`en_us.json`).
 
 ---
 

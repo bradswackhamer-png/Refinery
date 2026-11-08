@@ -25,8 +25,8 @@ public class GuideBookRegistry {
             legend.put('C', new LayerSymbol('C', "Blast Furnace Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.BLAST_FURNACE_CONTROLLER.get())));
             legend.put('I', new LayerSymbol('I', "Foundry Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.FOUNDRY_INPUT_PORT.get())));
             legend.put('O', new LayerSymbol('O', "Foundry Output Port", 0xFFF59E0B, () -> new ItemStack(RefineryMod.FOUNDRY_OUTPUT_PORT.get())));
-            legend.put('G', new LayerSymbol('G', "Foundry Heat Glass", 0xFF38BDF8, () -> new ItemStack(RefineryMod.FOUNDRY_GLASS.get())));
-            legend.put('X', new LayerSymbol('X', "Foundry Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.BLAST_FURNACE_CASING.get())));
+            legend.put('G', new LayerSymbol('G', "Foundry Heat-Resistant Glass", 0xFF38BDF8, () -> new ItemStack(RefineryMod.FOUNDRY_GLASS.get())));
+            legend.put('X', new LayerSymbol('X', "Blast Furnace Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.BLAST_FURNACE_CASING.get())));
             legend.put('.', new LayerSymbol('.', "Hollow Chamber (Air)", 0xFFEA580C, null));
 
             List<GuideBlockRequirement> reqs = List.of(
@@ -34,7 +34,7 @@ public class GuideBookRegistry {
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.FOUNDRY_INPUT_PORT.get()), "Foundry Input Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.FOUNDRY_OUTPUT_PORT.get()), "Foundry Output Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.FOUNDRY_GLASS.get()), "Foundry Heat-Resistant Glass", 9),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BLAST_FURNACE_CASING.get()), "Foundry Casing", 86)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BLAST_FURNACE_CASING.get()), "Blast Furnace Casing", 86)
             );
 
             List<GuideLayer> layers = List.of(
@@ -109,19 +109,19 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Arc Melter Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.ARC_MELTER_CONTROLLER.get())));
-            legend.put('O', new LayerSymbol('O', "Melter Molten Output Port", 0xFFF97316, () -> new ItemStack(RefineryMod.MELTER_OUTPUT_PORT.get())));
-            legend.put('I', new LayerSymbol('I', "Melter Feed Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.MELTER_INPUT_PORT.get())));
-            legend.put('Q', new LayerSymbol('Q', "Melter Quartz Viewport", 0xFF38BDF8, () -> new ItemStack(RefineryMod.MELTER_CHAMBER.get())));
+            legend.put('C', new LayerSymbol('C', "Electric Arc Melter Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.ARC_MELTER_CONTROLLER.get())));
+            legend.put('O', new LayerSymbol('O', "Arc Melter Output Port", 0xFFF97316, () -> new ItemStack(RefineryMod.MELTER_OUTPUT_PORT.get())));
+            legend.put('I', new LayerSymbol('I', "Arc Melter Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.MELTER_INPUT_PORT.get())));
+            legend.put('Q', new LayerSymbol('Q', "Arc Melter Heating Chamber", 0xFF38BDF8, () -> new ItemStack(RefineryMod.MELTER_CHAMBER.get())));
             legend.put('V', new LayerSymbol('V', "Crucible Bath (or Air)", 0xFFF59E0B, null));
-            legend.put('X', new LayerSymbol('X', "Melter Structural Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.MELTER_CASING.get())));
+            legend.put('X', new LayerSymbol('X', "Arc Melter Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.MELTER_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.ARC_MELTER_CONTROLLER.get()), "Electric Arc Melter Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_OUTPUT_PORT.get()), "Melter Molten Output Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_INPUT_PORT.get()), "Melter Feed Input Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_CHAMBER.get()), "Melter Quartz Viewport / Chamber", 2),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_CASING.get()), "Melter Structural Casing", 22)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_OUTPUT_PORT.get()), "Arc Melter Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_INPUT_PORT.get()), "Arc Melter Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_CHAMBER.get()), "Arc Melter Heating Chamber", 2),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MELTER_CASING.get()), "Arc Melter Casing", 22)
             );
 
             List<GuideLayer> layers = List.of(
@@ -146,7 +146,7 @@ public class GuideBookRegistry {
                     new GuideRecipe("Raw Ore Liquefaction (2x Doubling)",
                             List.of(() -> new ItemStack(Items.RAW_IRON)),
                             List.of(() -> new ItemStack(RefineryFluids.MOLTEN_IRON_BUCKET.get())),
-                            "Liquefies Raw Iron into 200 mB Molten Iron (2x metal yield compared to basic smelting)."),
+                            "Liquefies Raw Iron into 2,000 mB Molten Iron (2x metal yield compared to basic smelting)."),
                     new GuideRecipe("Molten Bronze & Glass Synthesis",
                             List.of(() -> new ItemStack(RefineryMod.BRONZE_DUST.get())),
                             List.of(() -> new ItemStack(RefineryFluids.MOLTEN_BRONZE_BUCKET.get())),
@@ -159,17 +159,18 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • High-Yield Metallurgy",
                     GuideCategory.METALLURGY,
                     () -> new ItemStack(RefineryMod.ARC_MELTER_CONTROLLER.get()),
-                    "The Electric Arc Melter employs massive carbon electrodes to melt ores and scrap metals into molten fluid. It doubles the output of raw ores (yielding 200 mB per raw ore).\n\n" +
+                    "The Electric Arc Melter employs massive carbon electrodes to melt ores and scrap metals into molten fluid. It doubles the output of raw ores (yielding 2,000 mB per raw ore).\n\n" +
                     "• Power Consumption: 10,000 FE/t during active melting (2,000,000 FE total per 200-tick / 10.0s melt cycle)\n" +
+                    "• Start Threshold: Begins melting once the internal buffer reaches 50,000 FE\n" +
                     "• Cycle Time: 10.0 seconds (200 ticks) per batch\n" +
                     "• Energy Storage Buffer: 2,000,000 FE (Max input rate: 100,000 FE/t)\n" +
                     "• Molten Discharge: Bottom-front spout pours molten metal directly into open Casting Channels without pipes.\n" +
                     "• Top Hopper Funnel: Items dropped into the overhead gantry opening are suctioned directly into the crucible.",
-                    "Position an open Casting Channel directly in front of the Molten Output Port to channel molten metal into a Continuous Casting Press!",
+                    "Position an open Casting Channel directly in front of the Arc Melter Output Port to channel molten metal into a Continuous Casting Press!",
                     reqs,
                     layers,
                     recipes,
-                    "⚡ Power Draw: 10,000 FE/t (Buffer: 2,000,000 FE | Max In: 100,000 FE/t)"
+                    "⚡ Power Draw: 10,000 FE/t (Starts at 50k FE | Buffer: 2,000,000 FE)"
             ));
         }
 
@@ -179,30 +180,30 @@ public class GuideBookRegistry {
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
             legend.put('C', new LayerSymbol('C', "Casting Press Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.CASTING_PRESS_CONTROLLER.get())));
-            legend.put('O', new LayerSymbol('O', "Casting Discharge Port (Output)", 0xFF38BDF8, () -> new ItemStack(RefineryMod.CASTING_OUTPUT_PORT.get())));
-            legend.put('I', new LayerSymbol('I', "Casting Fluid Inflow Port (Input)", 0xFFF97316, () -> new ItemStack(RefineryMod.CASTING_INPUT_PORT.get())));
-            legend.put('B', new LayerSymbol('B', "Refractory Casting Basin", 0xFFF59E0B, () -> new ItemStack(RefineryMod.CASTING_BASIN.get())));
-            legend.put('G', new LayerSymbol('G', "Casting Safety Grille Window", 0xFF38BDF8, () -> new ItemStack(RefineryMod.CASTING_CHAMBER.get())));
+            legend.put('O', new LayerSymbol('O', "Casting Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.CASTING_OUTPUT_PORT.get())));
+            legend.put('I', new LayerSymbol('I', "Casting Input Port", 0xFFF97316, () -> new ItemStack(RefineryMod.CASTING_INPUT_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Casting Mold Basin", 0xFFF59E0B, () -> new ItemStack(RefineryMod.CASTING_BASIN.get())));
+            legend.put('G', new LayerSymbol('G', "Casting Safety Chamber", 0xFF38BDF8, () -> new ItemStack(RefineryMod.CASTING_CHAMBER.get())));
             legend.put('.', new LayerSymbol('.', "Stamping Die Stroke (Air/Chamber)", 0xFFEA580C, null));
-            legend.put('X', new LayerSymbol('X', "Casting Structural Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.CASTING_CASING.get())));
+            legend.put('X', new LayerSymbol('X', "Casting Press Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.CASTING_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_PRESS_CONTROLLER.get()), "Casting Press Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_INPUT_PORT.get()), "Casting Fluid Inflow Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_OUTPUT_PORT.get()), "Casting Discharge Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_BASIN.get()), "Refractory Casting Basin", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_CHAMBER.get()), "Casting Safety Grille Window", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_CASING.get()), "Casting Structural Casing", 22)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_INPUT_PORT.get()), "Casting Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_OUTPUT_PORT.get()), "Casting Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_BASIN.get()), "Casting Mold Basin", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_CHAMBER.get()), "Casting Safety Chamber", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CASTING_CASING.get()), "Casting Press Casing", 22)
             );
 
             List<GuideLayer> layers = List.of(
-                    new GuideLayer(0, "Layer 0 (Foundation & Basin Bed)", new String[]{
-                            "XXX",
+                    new GuideLayer(0, "Layer 0 (Foundation, Inflow & Basin Bed)", new String[]{
+                            "XIX",
                             "XBX",
                             "XCO"
                     }, legend),
-                    new GuideLayer(1, "Layer 1 (Stamping Die & Inflow)", new String[]{
-                            "XIX",
+                    new GuideLayer(1, "Layer 1 (Stamping Die & Safety Chamber)", new String[]{
+                            "XXX",
                             "X.X",
                             "XGX"
                     }, legend),
@@ -214,14 +215,14 @@ public class GuideBookRegistry {
             );
 
             List<GuideRecipe> recipes = List.of(
-                    new GuideRecipe("Continuous Ingot Casting",
-                            List.of(() -> new ItemStack(RefineryFluids.MOLTEN_IRON_BUCKET.get())),
+                    new GuideRecipe("Continuous Ingot Casting (1:1 Water Quench)",
+                            List.of(() -> new ItemStack(RefineryFluids.MOLTEN_IRON_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET)),
                             List.of(() -> new ItemStack(Items.IRON_INGOT)),
-                            "Consumes 100 mB of molten metal per stroke to cast solidified ingots."),
-                    new GuideRecipe("Industrial Plate Stamping",
-                            List.of(() -> new ItemStack(RefineryFluids.MOLTEN_COPPER_BUCKET.get())),
-                            List.of(() -> new ItemStack(RefineryMod.COPPER_PLATE.get())),
-                            "Casts molten metals directly into high-durability plates and gears.")
+                            "Consumes 1,000 mB of molten metal and 1,000 mB of Water (1:1 ratio) per stroke to cast solidified ingots."),
+                    new GuideRecipe("Glass Block Casting (1:1 Water Quench)",
+                            List.of(() -> new ItemStack(RefineryFluids.MOLTEN_GLASS_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET)),
+                            List.of(() -> new ItemStack(Items.GLASS)),
+                            "Quenches 1,000 mB of Molten Glass with 1,000 mB of Water into crystal-clear Glass blocks.")
             );
 
             register(new GuideEntry(
@@ -230,16 +231,16 @@ public class GuideBookRegistry {
                     "3x3x3 Multiblock • Automated Metal Casting",
                     GuideCategory.METALLURGY,
                     () -> new ItemStack(RefineryMod.CASTING_PRESS_CONTROLLER.get()),
-                    "The Continuous Casting Press automates the solidification of molten metal into finished goods. Equipped with an animated hydraulic stamping ram, it accepts molten feeds from casting channels, pipes, or buckets and presses them into solid ingots or plates.\n\n" +
+                    "The Continuous Casting Press automates the solidification and water-quenching of molten metal into finished ingots. Equipped with an animated hydraulic stamping ram, its ground-level Casting Input Port at (0, 0, 2) accepts molten feeds directly from ground-level Casting Channels, pipes, or buckets.\n\n" +
                     "• Power Consumption: 600 FE/t while hydraulic stamping ram is operating (240,000 FE total per 400-tick / 20.0s stroke)\n" +
                     "• Cycle Time: 20.0 seconds (400 ticks) per stroke\n" +
                     "• Energy Storage Buffer: 500,000 FE (Max input rate: 20,000 FE/t)\n" +
-                    "• Fluid Consumption: 100 mB of molten metal per stroke",
-                    "Eject finished ingots directly onto an adjacent conveyor belt placed next to the Casting Discharge Port!",
+                    "• Fluid Consumption (1:1 Ratio): Requires 1,000 mB of Molten Metal AND 1,000 mB of Water per casting stroke (4,000 mB molten capacity + 4,000 mB water capacity).",
+                    "Supply cooling water via fluid pipes or buckets to any casing or input port, and run a ground-level Casting Channel straight into the rear Casting Input Port!",
                     reqs,
                     layers,
                     recipes,
-                    "⚡ Power Draw: 600 FE/t (Buffer: 500,000 FE | Max In: 20,000 FE/t)"
+                    "⚡ Power Draw: 600 FE/t (Buffer: 500,000 FE | Requires 1:1 Water & Molten Metal)"
             ));
         }
 
@@ -249,25 +250,25 @@ public class GuideBookRegistry {
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
             legend.put('C', new LayerSymbol('C', "Refinery Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.REFINERY_CONTROLLER.get())));
-            legend.put('F', new LayerSymbol('F', "Combustion Chamber", 0xFFEA580C, () -> new ItemStack(RefineryMod.COMBUSTION_CHAMBER.get())));
-            legend.put('I', new LayerSymbol('I', "Crude Oil Port (Input)", 0xFF18181B, () -> new ItemStack(RefineryMod.CRUDE_OIL_PORT.get())));
-            legend.put('B', new LayerSymbol('B', "Tar / Byproduct Port (Stage 1 Out)", 0xFF991B1B, () -> new ItemStack(RefineryMod.TAR_PORT.get())));
-            legend.put('D', new LayerSymbol('D', "Diesel Port (Stage 2 Out)", 0xFFEAB308, () -> new ItemStack(RefineryMod.DIESEL_PORT.get())));
-            legend.put('G', new LayerSymbol('G', "Gas Port (Stage 3 Out)", 0xFF38BDF8, () -> new ItemStack(RefineryMod.GAS_PORT.get())));
-            legend.put('H', new LayerSymbol('H', "Heat Exchanger", 0xFF38BDF8, () -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get())));
+            legend.put('F', new LayerSymbol('F', "Byproduct Output Port", 0xFFEA580C, () -> new ItemStack(RefineryMod.COMBUSTION_CHAMBER.get())));
+            legend.put('I', new LayerSymbol('I', "Crude Oil Input Port", 0xFF18181B, () -> new ItemStack(RefineryMod.CRUDE_OIL_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Liquid Tar Port", 0xFF991B1B, () -> new ItemStack(RefineryMod.TAR_PORT.get())));
+            legend.put('D', new LayerSymbol('D', "Diesel Output Port", 0xFFEAB308, () -> new ItemStack(RefineryMod.DIESEL_PORT.get())));
+            legend.put('G', new LayerSymbol('G', "Gas Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.GAS_PORT.get())));
+            legend.put('H', new LayerSymbol('H', "Refinery Heat Exchanger", 0xFF38BDF8, () -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get())));
             legend.put('T', new LayerSymbol('T', "Distillation Column", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.DISTILLATION_COLUMN.get())));
-            legend.put('X', new LayerSymbol('X', "Reinforced Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.REINFORCED_CASING.get())));
+            legend.put('X', new LayerSymbol('X', "Reinforced Refinery Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.REINFORCED_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.REFINERY_CONTROLLER.get()), "Refinery Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.COMBUSTION_CHAMBER.get()), "Combustion Chamber", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.COMBUSTION_CHAMBER.get()), "Byproduct Output Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.CRUDE_OIL_PORT.get()), "Crude Oil Input Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TAR_PORT.get()), "Liquid Tar / Byproduct Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TAR_PORT.get()), "Liquid Tar Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.DIESEL_PORT.get()), "Diesel Output Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GAS_PORT.get()), "Gas Output Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.DISTILLATION_COLUMN.get()), "Distillation Column", 8),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get()), "Heat Exchanger", 6),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.REINFORCED_CASING.get()), "Reinforced Casing", 61)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.HEAT_EXCHANGER.get()), "Refinery Heat Exchanger", 6),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.REINFORCED_CASING.get()), "Reinforced Refinery Casing", 61)
             );
 
             List<GuideLayer> layers = List.of(
@@ -380,18 +381,18 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Grinder Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get())));
-            legend.put('O', new LayerSymbol('O', "Grinder Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.GRINDER_OUTPUT_PORT.get())));
-            legend.put('I', new LayerSymbol('I', "Grinder Input Port", 0xFFEA580C, () -> new ItemStack(RefineryMod.GRINDER_INPUT_PORT.get())));
-            legend.put('W', new LayerSymbol('W', "Grinder Chamber Window", 0xFFF59E0B, () -> new ItemStack(RefineryMod.GRINDER_CHAMBER.get())));
+            legend.put('C', new LayerSymbol('C', "Industrial Grinder Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get())));
+            legend.put('O', new LayerSymbol('O', "Grinder Discharge Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.GRINDER_OUTPUT_PORT.get())));
+            legend.put('I', new LayerSymbol('I', "Grinder Feed Input Port", 0xFFEA580C, () -> new ItemStack(RefineryMod.GRINDER_INPUT_PORT.get())));
+            legend.put('W', new LayerSymbol('W', "Grinder Crushing Chamber", 0xFFF59E0B, () -> new ItemStack(RefineryMod.GRINDER_CHAMBER.get())));
             legend.put('.', new LayerSymbol('.', "Crushing Chamber Interior (Air)", 0xFFF59E0B, null));
             legend.put('X', new LayerSymbol('X', "Grinder Structural Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.GRINDER_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get()), "Grinder Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_INPUT_PORT.get()), "Grinder Input Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_OUTPUT_PORT.get()), "Grinder Output Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_CHAMBER.get()), "Grinder Chamber Window", 2),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.INDUSTRIAL_GRINDER_CONTROLLER.get()), "Industrial Grinder Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_INPUT_PORT.get()), "Grinder Feed Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_OUTPUT_PORT.get()), "Grinder Discharge Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_CHAMBER.get()), "Grinder Crushing Chamber", 2),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.GRINDER_CASING.get()), "Grinder Structural Casing", 22)
             );
 
@@ -448,16 +449,16 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Metal Press Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.METAL_PRESS_CONTROLLER.get())));
-            legend.put('B', new LayerSymbol('B', "Press Anvil Bed", 0xFFF59E0B, () -> new ItemStack(RefineryMod.PRESS_BED.get())));
-            legend.put('H', new LayerSymbol('H', "Press Hydraulic Head", 0xFF3B82F6, () -> new ItemStack(RefineryMod.PRESS_HEAD.get())));
-            legend.put('X', new LayerSymbol('X', "Press Structural Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.PRESS_CASING.get())));
+            legend.put('C', new LayerSymbol('C', "Industrial Metal Press Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.METAL_PRESS_CONTROLLER.get())));
+            legend.put('B', new LayerSymbol('B', "Metal Press Anvil Bed", 0xFFF59E0B, () -> new ItemStack(RefineryMod.PRESS_BED.get())));
+            legend.put('H', new LayerSymbol('H', "Metal Press Stamping Head", 0xFF3B82F6, () -> new ItemStack(RefineryMod.PRESS_HEAD.get())));
+            legend.put('X', new LayerSymbol('X', "Metal Press Structural Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.PRESS_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.METAL_PRESS_CONTROLLER.get()), "Metal Press Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.PRESS_BED.get()), "Press Anvil Bed", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.PRESS_HEAD.get()), "Press Hydraulic Head", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.PRESS_CASING.get()), "Press Structural Casing", 9)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.METAL_PRESS_CONTROLLER.get()), "Industrial Metal Press Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.PRESS_BED.get()), "Metal Press Anvil Bed", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.PRESS_HEAD.get()), "Metal Press Stamping Head", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.PRESS_CASING.get()), "Metal Press Structural Casing", 9)
             );
 
             List<GuideLayer> layers = List.of(
@@ -514,20 +515,20 @@ public class GuideBookRegistry {
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
             legend.put('C', new LayerSymbol('C', "Multi-Smelter Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.MULTI_SMELTER_CONTROLLER.get())));
-            legend.put('F', new LayerSymbol('F', "Smelter Fuel Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.SMELTER_FUEL_PORT.get())));
-            legend.put('I', new LayerSymbol('I', "Smelter Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.SMELTER_INPUT_PORT.get())));
-            legend.put('O', new LayerSymbol('O', "Smelter Output Port", 0xFFF59E0B, () -> new ItemStack(RefineryMod.SMELTER_OUTPUT_PORT.get())));
-            legend.put('G', new LayerSymbol('G', "Smelter Chamber Glass", 0xFF38BDF8, () -> new ItemStack(RefineryMod.SMELTER_CHAMBER.get())));
+            legend.put('F', new LayerSymbol('F', "Multi-Smelter Fuel Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.SMELTER_FUEL_PORT.get())));
+            legend.put('I', new LayerSymbol('I', "Multi-Smelter Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.SMELTER_INPUT_PORT.get())));
+            legend.put('O', new LayerSymbol('O', "Multi-Smelter Output Port", 0xFFF59E0B, () -> new ItemStack(RefineryMod.SMELTER_OUTPUT_PORT.get())));
+            legend.put('G', new LayerSymbol('G', "Multi-Smelter Heating Chamber", 0xFF38BDF8, () -> new ItemStack(RefineryMod.SMELTER_CHAMBER.get())));
             legend.put('.', new LayerSymbol('.', "Hollow Chamber (Air)", 0xFFF59E0B, null));
-            legend.put('X', new LayerSymbol('X', "Smelter Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.SMELTER_CASING.get())));
+            legend.put('X', new LayerSymbol('X', "Multi-Smelter Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.SMELTER_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.MULTI_SMELTER_CONTROLLER.get()), "Multi-Smelter Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_FUEL_PORT.get()), "Smelter Fuel Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_INPUT_PORT.get()), "Smelter Input Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_OUTPUT_PORT.get()), "Smelter Output Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_CHAMBER.get()), "Smelter Chamber Glass", 6),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_CASING.get()), "Smelter Casing", 44)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_FUEL_PORT.get()), "Multi-Smelter Fuel Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_INPUT_PORT.get()), "Multi-Smelter Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_OUTPUT_PORT.get()), "Multi-Smelter Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_CHAMBER.get()), "Multi-Smelter Heating Chamber", 6),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMELTER_CASING.get()), "Multi-Smelter Casing", 44)
             );
 
             List<GuideLayer> layers = List.of(
@@ -584,21 +585,21 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.SMALL_BOILER_CONTROLLER.get())));
-            legend.put('F', new LayerSymbol('F', "Boiler Fuel Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
-            legend.put('W', new LayerSymbol('W', "Boiler Water Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get())));
-            legend.put('S', new LayerSymbol('S', "Boiler Steam Port", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get())));
-            legend.put('B', new LayerSymbol('B', "Boiler Firebox", 0xFFEA580C, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
-            legend.put('P', new LayerSymbol('P', "Boiler Pipe", 0xFFF59E0B, () -> new ItemStack(RefineryMod.BOILER_PIPE.get())));
+            legend.put('C', new LayerSymbol('C', "Small Steam Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.SMALL_BOILER_CONTROLLER.get())));
+            legend.put('F', new LayerSymbol('F', "Boiler Fuel Input Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
+            legend.put('W', new LayerSymbol('W', "Boiler Water Input Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get())));
+            legend.put('S', new LayerSymbol('S', "Boiler Steam Output Port", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Boiler Firebox Hearth", 0xFFEA580C, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
+            legend.put('P', new LayerSymbol('P', "Boiler Pressure Pipe", 0xFFF59E0B, () -> new ItemStack(RefineryMod.BOILER_PIPE.get())));
             legend.put('X', new LayerSymbol('X', "Steel Boiler Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMALL_BOILER_CONTROLLER.get()), "Small Boiler Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pipe", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMALL_BOILER_CONTROLLER.get()), "Small Steam Boiler Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox Hearth", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pressure Pipe", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get()), "Steel Boiler Casing", 21)
             );
 
@@ -655,21 +656,21 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Diesel Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get())));
-            legend.put('F', new LayerSymbol('F', "Boiler Diesel Input Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
+            legend.put('C', new LayerSymbol('C', "Small Diesel Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get())));
+            legend.put('F', new LayerSymbol('F', "Boiler Fuel Input Port", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
             legend.put('W', new LayerSymbol('W', "Boiler Water Input Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get())));
             legend.put('S', new LayerSymbol('S', "Boiler Steam Output Port", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get())));
-            legend.put('B', new LayerSymbol('B', "Diesel Burner Firebox", 0xFFEA580C, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
+            legend.put('B', new LayerSymbol('B', "Boiler Firebox Hearth", 0xFFEA580C, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
             legend.put('P', new LayerSymbol('P', "Boiler Pressure Pipe", 0xFFF59E0B, () -> new ItemStack(RefineryMod.BOILER_PIPE.get())));
             legend.put('X', new LayerSymbol('X', "Steel Boiler Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get()), "Small Diesel Boiler Controller", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Port", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox", 1),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pipe", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox Hearth", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pressure Pipe", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get()), "Steel Boiler Casing", 21)
             );
 
@@ -726,12 +727,12 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Turbine Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get())));
+            legend.put('C', new LayerSymbol('C', "Steam Turbine Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get())));
             legend.put('E', new LayerSymbol('E', "Turbine Energy Output Port", 0xFFF59E0B, () -> new ItemStack(RefineryMod.TURBINE_ENERGY_PORT.get())));
             legend.put('S', new LayerSymbol('S', "Turbine Steam Input Port", 0xFFCBD5E1, () -> new ItemStack(RefineryMod.TURBINE_STEAM_PORT.get())));
             legend.put('W', new LayerSymbol('W', "Turbine Water Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.TURBINE_WATER_PORT.get())));
             legend.put('R', new LayerSymbol('R', "Turbine Rotor Shaft", 0xFFA855F7, () -> new ItemStack(RefineryMod.TURBINE_ROTOR.get())));
-            legend.put('X', new LayerSymbol('X', "Turbine Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.TURBINE_CASING.get())));
+            legend.put('X', new LayerSymbol('X', "Steam Turbine Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.TURBINE_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get()), "Steam Turbine Controller", 1),
@@ -739,7 +740,7 @@ public class GuideBookRegistry {
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TURBINE_STEAM_PORT.get()), "Turbine Steam Input Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TURBINE_WATER_PORT.get()), "Turbine Water Output Port", 1),
                     new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TURBINE_ROTOR.get()), "Turbine Rotor Shaft", 3),
-                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TURBINE_CASING.get()), "Turbine Casing", 20)
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.TURBINE_CASING.get()), "Steam Turbine Casing", 20)
             );
 
             List<GuideLayer> layers = List.of(
@@ -784,7 +785,7 @@ public class GuideBookRegistry {
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
-            legend.put('C', new LayerSymbol('C', "Quarry Controller", 0xFF38BDF8, () -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get())));
+            legend.put('C', new LayerSymbol('C', "Heavy Pit Quarry Controller", 0xFF38BDF8, () -> new ItemStack(RefineryMod.QUARRY_CONTROLLER.get())));
             legend.put('X', new LayerSymbol('X', "Quarry Structural Casing", 0xFFD9821E, () -> new ItemStack(RefineryMod.QUARRY_CASING.get())));
 
             List<GuideBlockRequirement> reqs = List.of(

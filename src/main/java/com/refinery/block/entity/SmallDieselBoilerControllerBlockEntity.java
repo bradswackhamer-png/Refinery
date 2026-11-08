@@ -562,9 +562,9 @@ public class SmallDieselBoilerControllerBlockEntity extends BlockEntity implemen
         // Layer 0: Hearth & Ports
         list.add(new BlueprintRequirement(-1, 0, 0, waterPort, "Boiler Water Input Port", 0xFF3B82F6));
         list.add(new BlueprintRequirement( 0, 0, 0, controller, "Small Diesel Boiler Controller", 0xFFEAB308));
-        list.add(new BlueprintRequirement( 1, 0, 0, fuelPort, "Boiler Diesel Input Port", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 1, 0, 0, fuelPort, "Boiler Fuel Input Port", 0xFFF59E0B));
         list.add(new BlueprintRequirement(-1, 0, 1, casing, "Steel Boiler Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 1, firebox, "Diesel Burner Firebox", 0xFFEF4444));
+        list.add(new BlueprintRequirement( 0, 0, 1, firebox, "Boiler Firebox Hearth", 0xFFEF4444));
         list.add(new BlueprintRequirement( 1, 0, 1, casing, "Steel Boiler Casing", 0xFF64748B));
         list.add(new BlueprintRequirement(-1, 0, 2, casing, "Steel Boiler Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 2, steamPort, "Boiler Steam Output Port", 0xFF38BDF8));

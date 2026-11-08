@@ -54,6 +54,7 @@ import java.util.Set;
 public class CastingPressControllerBlockEntity extends BlockEntity implements MenuProvider, WorldlyContainer {
     public static final int INVENTORY_SIZE = 4; // 4 output slots
     public static final int TANK_CAPACITY = 4000;
+    public static final int WATER_CAPACITY = 4000;
     public static final int ENERGY_CAPACITY = 500_000;
     public static final int ENERGY_PER_TICK = 600;
     public static final int PROCESS_TIME = 400; // 20 seconds per press stroke (400 ticks)
@@ -66,6 +67,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
 
     private Fluid moltenFluid = Fluids.EMPTY;
     private int moltenAmount = 0;
+    private int waterAmount = 0;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 
@@ -97,6 +99,8 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
                 case 4 -> assembled ? 1 : 0;
                 case 5 -> moltenAmount;
                 case 6 -> TANK_CAPACITY;
+                case 7 -> waterAmount;
+                case 8 -> WATER_CAPACITY;
                 default -> 0;
             };
         }
@@ -109,12 +113,13 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
                 case 3 -> energy = (energy & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 case 4 -> assembled = (value == 1);
                 case 5 -> moltenAmount = value;
+                case 7 -> waterAmount = value;
             }
         }
 
         @Override
         public int getCount() {
-            return 7;
+            return 9;
         }
     };
 
@@ -155,6 +160,54 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         }
         setChanged();
         syncToClient();
+    }
+
+    public int getWaterAmount() {
+        return this.waterAmount;
+    }
+
+    public void setWaterAmount(int amount) {
+        this.waterAmount = Math.max(0, Math.min(WATER_CAPACITY, amount));
+        setChanged();
+        syncToClient();
+    }
+
+    public boolean tryFillFromBucket(ItemStack stack, Level level, BlockPos pos, Player player, net.minecraft.world.InteractionHand hand) {
+        if (stack.is(Items.WATER_BUCKET)) {
+            if (this.waterAmount + 1000 <= WATER_CAPACITY) {
+                if (!level.isClientSide()) {
+                    setWaterAmount(this.waterAmount + 1000);
+                    level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+                    if (!player.isCreative()) {
+                        player.setItemInHand(hand, new ItemStack(Items.BUCKET));
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        Fluid bucketFluid = Fluids.EMPTY;
+        if (stack.is(RefineryFluids.MOLTEN_IRON_BUCKET.get())) bucketFluid = RefineryFluids.MOLTEN_IRON_SOURCE.get();
+        else if (stack.is(RefineryFluids.MOLTEN_GOLD_BUCKET.get())) bucketFluid = RefineryFluids.MOLTEN_GOLD_SOURCE.get();
+        else if (stack.is(RefineryFluids.MOLTEN_COPPER_BUCKET.get())) bucketFluid = RefineryFluids.MOLTEN_COPPER_SOURCE.get();
+        else if (stack.is(RefineryFluids.MOLTEN_TIN_BUCKET.get())) bucketFluid = RefineryFluids.MOLTEN_TIN_SOURCE.get();
+        else if (stack.is(RefineryFluids.MOLTEN_BRONZE_BUCKET.get())) bucketFluid = RefineryFluids.MOLTEN_BRONZE_SOURCE.get();
+        else if (stack.is(RefineryFluids.MOLTEN_GLASS_BUCKET.get())) bucketFluid = RefineryFluids.MOLTEN_GLASS_SOURCE.get();
+
+        if (bucketFluid != Fluids.EMPTY) {
+            if ((this.moltenFluid == Fluids.EMPTY || this.moltenFluid == bucketFluid) && this.moltenAmount + 1000 <= TANK_CAPACITY) {
+                if (!level.isClientSide()) {
+                    this.moltenFluid = bucketFluid;
+                    setMoltenAmount(this.moltenAmount + 1000);
+                    level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0f, 1.0f);
+                    if (!player.isCreative()) {
+                        player.setItemInHand(hand, new ItemStack(Items.BUCKET));
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     public void syncToClient() {
@@ -239,12 +292,12 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
             tryExportOutput(serverLevel);
         }
 
-        // Check if we have at least 1000 mB of molten fluid and room in output
+        // Check if we have at least 1000 mB of molten fluid, 1000 mB of water (1:1 ratio), and room in output
         ItemStack resultStack = getCastingProduct(this.moltenFluid);
-        boolean canCast = (this.progress > 120) || (!resultStack.isEmpty() && this.moltenAmount >= 1000 && canFitOutput(resultStack));
+        boolean canCast = (this.progress > 120) || (!resultStack.isEmpty() && this.moltenAmount >= 1000 && this.waterAmount >= 1000 && canFitOutput(resultStack));
 
         if (canCast) {
-            int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+            int requiredEnergy = ENERGY_PER_TICK;
             if (this.energy >= requiredEnergy) {
                 isActive = true;
                 this.energy -= ENERGY_PER_TICK;
@@ -260,6 +313,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
                     if (this.moltenAmount <= 0) {
                         this.moltenFluid = Fluids.EMPTY;
                     }
+                    this.waterAmount = Math.max(0, this.waterAmount - 1000);
                     if (!resultStack.isEmpty()) {
                         addOutput(resultStack.copy());
                     }
@@ -539,38 +593,38 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         Block basin = RefineryMod.CASTING_BASIN.get();
         Block casing = RefineryMod.CASTING_CASING.get();
 
-        // Layer 0: Foundation & Basin Bed
-        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Casting Structural Casing", 0xFF64748B));
+        // Layer 0: Foundation, Basin Bed & Fluid Inflow
+        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Casting Press Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 0, controller, "Casting Press Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Casting Discharge Port (Output)", 0xFF38BDF8));
-        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 1, basin, "Refractory Casting Basin", 0xFFF59E0B));
-        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 2, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Casting Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 0, outputPort, "Casting Output Port", 0xFF38BDF8));
+        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 1, basin, "Casting Mold Basin", 0xFFF59E0B));
+        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 2, inputPort, "Casting Input Port", 0xFFF97316));
+        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Casting Press Casing", 0xFF64748B));
 
-        // Layer 1: Stamping Stroke & Fluid Inflow
-        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Casting Safety Grille Window", 0xFF38BDF8));
-        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Stamping Die Stroke (or Hollow)", 0xFFEA580C));
-        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 1, 2, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 2, inputPort, "Casting Fluid Inflow Port (Input)", 0xFFF97316));
-        list.add(new BlueprintRequirement( 1, 1, 2, casing, "Casting Structural Casing", 0xFF64748B));
+        // Layer 1: Stamping Stroke & Safety Chamber
+        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 0, chamber, "Casting Safety Chamber", 0xFF38BDF8));
+        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 1, chamber, "Casting Safety Chamber", 0xFFEA580C));
+        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 2, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 2, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 2, casing, "Casting Press Casing", 0xFF64748B));
 
         // Layer 2: Overhead Hydraulic Cylinder Housing
-        list.add(new BlueprintRequirement(-1, 2, 0, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 0, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 2, 0, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 2, 1, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 1, casing, "Hydraulic Cylinder Head", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 2, 1, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 2, 2, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 2, 2, casing, "Casting Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 2, 2, casing, "Casting Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 0, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 0, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 0, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 1, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 2, 2, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 2, 2, casing, "Casting Press Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 2, 2, casing, "Casting Press Casing", 0xFF64748B));
 
         return list;
     }
@@ -726,6 +780,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         output.putInt("energy", this.energy);
         output.putInt("progress", this.progress);
         output.putInt("moltenAmount", this.moltenAmount);
+        output.putInt("waterAmount", this.waterAmount);
         if (this.moltenFluid != Fluids.EMPTY) {
             output.putString("moltenFluid", BuiltInRegistries.FLUID.getKey(this.moltenFluid).toString());
         }
@@ -740,6 +795,7 @@ public class CastingPressControllerBlockEntity extends BlockEntity implements Me
         this.energyStorage.set(this.energy);
         this.progress = input.getIntOr("progress", 0);
         this.moltenAmount = input.getIntOr("moltenAmount", 0);
+        this.waterAmount = input.getIntOr("waterAmount", 0);
         String fluidId = input.getStringOr("moltenFluid", "");
         if (!fluidId.isEmpty()) {
             Identifier id = Identifier.tryParse(fluidId);

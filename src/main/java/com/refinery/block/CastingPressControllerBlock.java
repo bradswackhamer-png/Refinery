@@ -86,6 +86,11 @@ public class CastingPressControllerBlock extends Block implements EntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
+        if (level.getBlockEntity(pos) instanceof CastingPressControllerBlockEntity controllerBE) {
+            if (controllerBE.tryFillFromBucket(stack, level, pos, player, hand)) {
+                return InteractionResult.SUCCESS;
+            }
+        }
         if (player.isShiftKeyDown()) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         }

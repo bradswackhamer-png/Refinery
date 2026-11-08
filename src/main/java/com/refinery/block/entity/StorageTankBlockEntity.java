@@ -610,24 +610,24 @@ public class StorageTankBlockEntity extends BlockEntity implements MenuProvider,
                     // 1. Bottom Floor Layer (y = 0)
                     if (y == 0) {
                         if (dx == 0 && dz == 0) {
-                            list.add(new BlueprintRequirement(dx, y, dz, drainValve, false, "Tank Drain Valve", 0xFF10B981));
+                            list.add(new BlueprintRequirement(dx, y, dz, drainValve, false, "Liquid Storage Tank Drain Valve", 0xFF10B981));
                         } else {
-                            list.add(new BlueprintRequirement(dx, y, dz, casing, false, "Tank Casing", 0xFF38BDF8));
+                            list.add(new BlueprintRequirement(dx, y, dz, casing, false, "Liquid Storage Tank Casing", 0xFF38BDF8));
                         }
                     }
                     // 2. Top Roof Layer (y = h - 1)
                     else if (y == h - 1) {
                         if (dx == 0 && dz == 0) {
-                            list.add(new BlueprintRequirement(dx, y, dz, fillValve, false, "Tank Fill Valve", 0xFF3B82F6));
+                            list.add(new BlueprintRequirement(dx, y, dz, fillValve, false, "Liquid Storage Tank Fill Valve", 0xFF3B82F6));
                         } else {
-                            list.add(new BlueprintRequirement(dx, y, dz, casing, false, "Tank Casing", 0xFF38BDF8));
+                            list.add(new BlueprintRequirement(dx, y, dz, casing, false, "Liquid Storage Tank Casing", 0xFF38BDF8));
                         }
                     }
                     // 3. Middle Wall Layers (y in 1..h-2)
                     else {
                         boolean isEdge = Math.abs(dx) == r || Math.abs(dz) == r;
                         if (isEdge) {
-                            list.add(new BlueprintRequirement(dx, y, dz, casing, false, "Tank Casing", 0xFF38BDF8));
+                            list.add(new BlueprintRequirement(dx, y, dz, casing, false, "Liquid Storage Tank Casing", 0xFF38BDF8));
                         } else {
                             // Hollow liquid storage chamber
                             list.add(new BlueprintRequirement(dx, y, dz, null, true, "Empty Chamber", 0xFFEA580C));

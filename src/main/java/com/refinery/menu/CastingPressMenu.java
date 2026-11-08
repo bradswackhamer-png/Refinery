@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class CastingPressMenu extends AbstractContainerMenu {
     public static final int CONTAINER_SIZE = CastingPressControllerBlockEntity.INVENTORY_SIZE; // 4
-    public static final int DATA_COUNT = 7;
+    public static final int DATA_COUNT = 9;
 
     private final Container container;
     private final ContainerData data;
@@ -97,6 +97,14 @@ public class CastingPressMenu extends AbstractContainerMenu {
 
     public int getTankCapacity() {
         return this.data.get(6);
+    }
+
+    public int getWaterAmount() {
+        return this.data.get(7);
+    }
+
+    public int getWaterCapacity() {
+        return this.data.get(8);
     }
 
     @Override

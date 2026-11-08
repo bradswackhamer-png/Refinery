@@ -66,6 +66,9 @@ public class CastingCasingBlock extends Block {
                     }
                     return InteractionResult.SUCCESS;
                 }
+                if (controller.tryFillFromBucket(stack, level, pos, player, hand)) {
+                    return InteractionResult.SUCCESS;
+                }
                 if (!player.isShiftKeyDown() && !level.isClientSide()) {
                     controller.syncAssembly();
                     player.openMenu(controller);

@@ -586,20 +586,20 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         Block casing = RefineryMod.PRESS_CASING.get();
 
         // Layer 0: 3-Wide Conveyor Bed & Foundation (x = -1, 0, +1)
-        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Metal Press Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement( 1, 0, 0, bed, "Press Anvil Bed", 0xFFF59E0B));
-        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 0, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 0, controller, "Industrial Metal Press Controller", 0xFF10B981));
+        list.add(new BlueprintRequirement( 1, 0, 0, bed, "Metal Press Anvil Bed", 0xFFF59E0B));
+        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 0, 1, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Metal Press Structural Casing", 0xFF64748B));
 
         // Layer 1: Gantry Frame & AIDA Stamping Head (x = -1, 0, +1)
-        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 0, head, "Press Hydraulic Head", 0xFF3B82F6));
-        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 0, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 0, head, "Metal Press Stamping Head", 0xFF3B82F6));
+        list.add(new BlueprintRequirement( 1, 1, 0, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 1, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 1, casing, "Metal Press Structural Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 1, casing, "Metal Press Structural Casing", 0xFF64748B));
 
         return list;
     }

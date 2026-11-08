@@ -607,19 +607,19 @@ public class BlastFurnaceControllerBlockEntity extends BlockEntity implements Me
                             } else if (x == 1) {
                                 list.add(new BlueprintRequirement(x, y, z, outPort, false, "Foundry Output Port", 0xFFF59E0B));
                             } else {
-                                list.add(new BlueprintRequirement(x, y, z, casing, false, "Foundry Casing", 0xFF475569));
+                                list.add(new BlueprintRequirement(x, y, z, casing, false, "Blast Furnace Casing", 0xFF475569));
                             }
                         } else if (y >= 1 && y <= 3 && x >= -1 && x <= 1) {
                             // 3x3 Transparent Viewing Window!
-                            list.add(new BlueprintRequirement(x, y, z, glass, false, "Foundry Heat Glass", 0xFF38BDF8));
+                            list.add(new BlueprintRequirement(x, y, z, glass, false, "Foundry Heat-Resistant Glass", 0xFF38BDF8));
                         } else {
-                            list.add(new BlueprintRequirement(x, y, z, casing, false, "Foundry Casing", 0xFF475569));
+                            list.add(new BlueprintRequirement(x, y, z, casing, false, "Blast Furnace Casing", 0xFF475569));
                         }
                         continue;
                     }
 
                     // 3. All remaining outer walls, floor, and roof
-                    list.add(new BlueprintRequirement(x, y, z, casing, false, "Foundry Casing", 0xFF475569));
+                    list.add(new BlueprintRequirement(x, y, z, casing, false, "Blast Furnace Casing", 0xFF475569));
                 }
             }
         }

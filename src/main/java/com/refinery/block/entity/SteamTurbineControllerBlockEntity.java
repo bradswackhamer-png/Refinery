@@ -460,12 +460,12 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         list.add(new BlueprintRequirement(-1, 0, 0, steamPort, "Turbine Steam Input Port", 0xFF38BDF8));
         list.add(new BlueprintRequirement( 0, 0, 0, controller, "Steam Turbine Controller", 0xFF10B981));
         list.add(new BlueprintRequirement( 1, 0, 0, energyPort, "Turbine Energy Output Port", 0xFFF59E0B));
-        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Turbine Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 1, casing, "Steam Turbine Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 1, rotor, "Turbine Rotor Shaft", 0xFFA855F7));
-        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Turbine Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Turbine Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 1, casing, "Steam Turbine Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 2, casing, "Steam Turbine Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 2, waterPort, "Turbine Water Output Port", 0xFF3B82F6));
-        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Turbine Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 2, casing, "Steam Turbine Casing", 0xFF64748B));
 
         // Layer 1: Core
         for (int z = 0; z < 3; z++) {
@@ -473,7 +473,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(x, 1, z, rotor, "Turbine Rotor Shaft", 0xFFA855F7));
                 } else {
-                    list.add(new BlueprintRequirement(x, 1, z, casing, "Turbine Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 1, z, casing, "Steam Turbine Casing", 0xFF64748B));
                 }
             }
         }
@@ -484,7 +484,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(x, 2, z, rotor, "Turbine Rotor Shaft", 0xFFA855F7));
                 } else {
-                    list.add(new BlueprintRequirement(x, 2, z, casing, "Turbine Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 2, z, casing, "Steam Turbine Casing", 0xFF64748B));
                 }
             }
         }

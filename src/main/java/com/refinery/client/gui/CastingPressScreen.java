@@ -26,7 +26,7 @@ public class CastingPressScreen extends AbstractContainerScreen<CastingPressMenu
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-        graphics.text(this.font, Component.literal("MOLTEN INFLOW").withStyle(ChatFormatting.DARK_GRAY), 20, 14, 0xFF444444, false);
+        graphics.text(this.font, Component.literal("FLUID INFLOW").withStyle(ChatFormatting.DARK_GRAY), 24, 14, 0xFF444444, false);
         graphics.text(this.font, Component.literal("CAST PRODUCTS").withStyle(ChatFormatting.DARK_GRAY), 104, 14, 0xFF444444, false);
     }
 
@@ -47,13 +47,25 @@ public class CastingPressScreen extends AbstractContainerScreen<CastingPressMenu
             graphics.fill(RenderPipelines.GUI, xo + 14, yo + 18 + (50 - energyH), xo + 28, yo + 18 + (50 - energyH) + 2, 0xFFEF4444);
         }
 
-        // 2. Molten Inflow Tank Gauge (x: 38..74, y: 26..62, width: 36, height: 36)
+        // 2a. Molten Inflow Tank Well & Gauge (x: 38..54, y: 26..62, width: 16, height: 36)
+        graphics.fill(RenderPipelines.GUI, xo + 37, yo + 25, xo + 55, yo + 63, 0xFF14171A);
         int amount = this.menu.getMoltenAmount();
         int capacity = this.menu.getTankCapacity();
         if (amount > 0 && capacity > 0) {
             int fluidH = Math.min(36, (int) ((long) amount * 36 / capacity));
-            graphics.fill(RenderPipelines.GUI, xo + 38, yo + 26 + (36 - fluidH), xo + 74, yo + 62, 0xFFEA580C);
-            graphics.fill(RenderPipelines.GUI, xo + 38, yo + 26 + (36 - fluidH), xo + 74, yo + 26 + (36 - fluidH) + 2, 0xFFFBBF24);
+            graphics.fill(RenderPipelines.GUI, xo + 38, yo + 26 + (36 - fluidH), xo + 54, yo + 62, 0xFFEA580C);
+            graphics.fill(RenderPipelines.GUI, xo + 38, yo + 26 + (36 - fluidH), xo + 54, yo + 26 + (36 - fluidH) + 2, 0xFFFBBF24);
+        }
+
+        // 2b. Quenching Water Tank Well & Gauge (x: 56..72, y: 26..62, width: 16, height: 36)
+        graphics.fill(RenderPipelines.GUI, xo + 55, yo + 25, xo + 73, yo + 63, 0xFF14171A);
+        graphics.fill(RenderPipelines.GUI, xo + 54, yo + 25, xo + 56, yo + 63, 0xFF2B3036);
+        int waterAmount = this.menu.getWaterAmount();
+        int waterCapacity = this.menu.getWaterCapacity();
+        if (waterAmount > 0 && waterCapacity > 0) {
+            int waterH = Math.min(36, (int) ((long) waterAmount * 36 / waterCapacity));
+            graphics.fill(RenderPipelines.GUI, xo + 56, yo + 26 + (36 - waterH), xo + 72, yo + 62, 0xFF2563EB);
+            graphics.fill(RenderPipelines.GUI, xo + 56, yo + 26 + (36 - waterH), xo + 72, yo + 26 + (36 - waterH) + 2, 0xFF60A5FA);
         }
 
         // 3. Casting Ram Stamping Progress Bar (x: 78..110, y: 34..50, width: 32, height: 16)
@@ -77,6 +89,8 @@ public class CastingPressScreen extends AbstractContainerScreen<CastingPressMenu
         int energy = this.menu.getEnergy();
         int amount = this.menu.getMoltenAmount();
         int capacity = this.menu.getTankCapacity();
+        int waterAmount = this.menu.getWaterAmount();
+        int waterCapacity = this.menu.getWaterCapacity();
 
         // 1. Energy Tooltip (x: 14..28, y: 18..68)
         if (mouseX >= xo + 14 && mouseX <= xo + 28 && mouseY >= yo + 18 && mouseY <= yo + 68) {
@@ -87,11 +101,21 @@ public class CastingPressScreen extends AbstractContainerScreen<CastingPressMenu
             ), mouseX, mouseY);
         }
 
-        // 2. Molten Inflow Basin Tooltip (x: 38..74, y: 26..62)
-        if (mouseX >= xo + 38 && mouseX <= xo + 74 && mouseY >= yo + 26 && mouseY <= yo + 62) {
+        // 2a. Molten Inflow Basin Tooltip (x: 38..54, y: 26..62)
+        if (mouseX >= xo + 38 && mouseX <= xo + 54 && mouseY >= yo + 26 && mouseY <= yo + 62) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("§6Molten Inflow Basin:"),
-                    Component.literal("§e" + String.format("%,d", amount) + " / " + String.format("%,d", capacity) + " mB")
+                    Component.literal("§e" + String.format("%,d", amount) + " / " + String.format("%,d", capacity) + " mB"),
+                    Component.literal("§7Consumes: 1,000 mB per cycle")
+            ), mouseX, mouseY);
+        }
+
+        // 2b. Quenching Water Tank Tooltip (x: 56..72, y: 26..62)
+        if (mouseX >= xo + 56 && mouseX <= xo + 72 && mouseY >= yo + 26 && mouseY <= yo + 62) {
+            graphics.setComponentTooltipForNextFrame(this.font, List.of(
+                    Component.literal("§9Quenching Water Tank:"),
+                    Component.literal("§b" + String.format("%,d", waterAmount) + " / " + String.format("%,d", waterCapacity) + " mB"),
+                    Component.literal("§7Consumes: 1,000 mB per cycle (1:1 with molten metal)")
             ), mouseX, mouseY);
         }
 

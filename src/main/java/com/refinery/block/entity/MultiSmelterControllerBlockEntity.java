@@ -454,13 +454,13 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                 for (int x = -2; x <= 2; x++) {
                     // Hollow interior core (X in [-1, 0, 1], Y in [1, 2], Z = 1)
                     if ((x >= -1 && x <= 1) && (y == 1 || y == 2) && z == 1) {
-                        list.add(new BlueprintRequirement(x, y, z, null, "Hollow Combustion Chamber (Air)", 0xFFF59E0B));
+                        list.add(new BlueprintRequirement(x, y, z, null, "Empty Chamber", 0xFFF59E0B));
                         continue;
                     }
 
                     // Front viewing windows (X in [-1, 0, 1], Y in [1, 2], Z = 0)
                     if ((x >= -1 && x <= 1) && (y == 1 || y == 2) && z == 0) {
-                        list.add(new BlueprintRequirement(x, y, z, chamber, "Smelter Chamber Glass", 0xFF38BDF8));
+                        list.add(new BlueprintRequirement(x, y, z, chamber, "Multi-Smelter Heating Chamber", 0xFF38BDF8));
                         continue;
                     }
 
@@ -472,20 +472,20 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
 
                     // Suggested port locations on bottom front/back:
                     if (x == -2 && y == 0 && z == 0) {
-                        list.add(new BlueprintRequirement(x, y, z, inputPort, "Smelter Input Port (or Casing)", 0xFF6366F1));
+                        list.add(new BlueprintRequirement(x, y, z, inputPort, "Multi-Smelter Input Port", 0xFF6366F1));
                         continue;
                     }
                     if (x == 2 && y == 0 && z == 0) {
-                        list.add(new BlueprintRequirement(x, y, z, outputPort, "Smelter Output Port (or Casing)", 0xFFEC4899));
+                        list.add(new BlueprintRequirement(x, y, z, outputPort, "Multi-Smelter Output Port", 0xFFEC4899));
                         continue;
                     }
                     if (x == 0 && y == 0 && z == 2) {
-                        list.add(new BlueprintRequirement(x, y, z, fuelPort, "Smelter Fuel/Energy Port (or Casing)", 0xFFEAB308));
+                        list.add(new BlueprintRequirement(x, y, z, fuelPort, "Multi-Smelter Fuel Port", 0xFFEAB308));
                         continue;
                     }
 
                     // Everything else is Smelter Casing
-                    list.add(new BlueprintRequirement(x, y, z, casing, "Smelter Structural Casing", 0xFF94A3B8));
+                    list.add(new BlueprintRequirement(x, y, z, casing, "Multi-Smelter Casing", 0xFF94A3B8));
                 }
             }
         }

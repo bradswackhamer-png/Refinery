@@ -632,26 +632,26 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
         // STAGE 1 (BOTTOM 3x3x3: Y = 0, 1, 2) - Liquid Tar & Bitumen
         // =====================================================================
         // Layer 0 (Y = 0)
-        list.add(new BlueprintRequirement(-1, 0, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 0, RefineryMod.REFINERY_CONTROLLER.get(), "Refinery Controller", 0xFF10B981));
-        list.add(new BlueprintRequirement( 1, 0, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 0, 1, RefineryMod.CRUDE_OIL_PORT.get(), "Crude Oil Port", 0xFF18181B));
+        list.add(new BlueprintRequirement( 1, 0, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 0, 1, RefineryMod.CRUDE_OIL_PORT.get(), "Crude Oil Input Port", 0xFF18181B));
         list.add(new BlueprintRequirement( 0, 0, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
-        list.add(new BlueprintRequirement( 1, 0, 1, RefineryMod.BYPRODUCT_PORT.get(), "Byproduct Port (Bitumen / Tar)", 0xFF475569));
-        list.add(new BlueprintRequirement(-1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 1, RefineryMod.BYPRODUCT_PORT.get(), "Byproduct Output Port", 0xFF475569));
+        list.add(new BlueprintRequirement(-1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
         list.add(new BlueprintRequirement( 0, 0, 2, RefineryMod.TAR_PORT.get(), "Liquid Tar Port", 0xFF78350F));
-        list.add(new BlueprintRequirement( 1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 0, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
 
         // Layer 1 (Y = 1)
-        list.add(new BlueprintRequirement(-1, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement(-1, 1, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
+        list.add(new BlueprintRequirement(-1, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 0, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement(-1, 1, 1, RefineryMod.HEAT_EXCHANGER.get(), "Refinery Heat Exchanger", 0xFF38BDF8));
         list.add(new BlueprintRequirement( 0, 1, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
-        list.add(new BlueprintRequirement( 1, 1, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
-        list.add(new BlueprintRequirement(-1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 0, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
-        list.add(new BlueprintRequirement( 1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 1, RefineryMod.HEAT_EXCHANGER.get(), "Refinery Heat Exchanger", 0xFF38BDF8));
+        list.add(new BlueprintRequirement(-1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 0, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
+        list.add(new BlueprintRequirement( 1, 1, 2, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
 
         // Layer 2 (Y = 2)
         for (int z = 0; z <= 2; z++) {
@@ -659,7 +659,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 2, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else {
-                    list.add(new BlueprintRequirement(x, 2, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 2, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
@@ -673,9 +673,9 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 3, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else if (x == 0 && z == 2) {
-                    list.add(new BlueprintRequirement(0, 3, 2, RefineryMod.DIESEL_PORT.get(), "Diesel Port", 0xFFEAB308));
+                    list.add(new BlueprintRequirement(0, 3, 2, RefineryMod.DIESEL_PORT.get(), "Diesel Output Port", 0xFFEAB308));
                 } else {
-                    list.add(new BlueprintRequirement(x, 3, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 3, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
@@ -686,9 +686,9 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 4, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else if ((x == -1 || x == 1) && z == 1) {
-                    list.add(new BlueprintRequirement(x, 4, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
+                    list.add(new BlueprintRequirement(x, 4, 1, RefineryMod.HEAT_EXCHANGER.get(), "Refinery Heat Exchanger", 0xFF38BDF8));
                 } else {
-                    list.add(new BlueprintRequirement(x, 4, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 4, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
@@ -699,7 +699,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 5, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else {
-                    list.add(new BlueprintRequirement(x, 5, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 5, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
@@ -713,9 +713,9 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 6, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else if (x == 0 && z == 2) {
-                    list.add(new BlueprintRequirement(0, 6, 2, RefineryMod.GAS_PORT.get(), "Gas Port", 0xFF06B6D4));
+                    list.add(new BlueprintRequirement(0, 6, 2, RefineryMod.GAS_PORT.get(), "Gas Output Port", 0xFF06B6D4));
                 } else {
-                    list.add(new BlueprintRequirement(x, 6, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 6, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
@@ -726,9 +726,9 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 7, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else if ((x == -1 || x == 1) && z == 1) {
-                    list.add(new BlueprintRequirement(x, 7, 1, RefineryMod.HEAT_EXCHANGER.get(), "Heat Exchanger", 0xFF38BDF8));
+                    list.add(new BlueprintRequirement(x, 7, 1, RefineryMod.HEAT_EXCHANGER.get(), "Refinery Heat Exchanger", 0xFF38BDF8));
                 } else {
-                    list.add(new BlueprintRequirement(x, 7, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 7, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
@@ -739,7 +739,7 @@ public class RefineryControllerBlockEntity extends BlockEntity implements MenuPr
                 if (x == 0 && z == 1) {
                     list.add(new BlueprintRequirement(0, 8, 1, RefineryMod.DISTILLATION_COLUMN.get(), "Distillation Column", 0xFFCBD5E1));
                 } else {
-                    list.add(new BlueprintRequirement(x, 8, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Casing", 0xFF64748B));
+                    list.add(new BlueprintRequirement(x, 8, z, RefineryMod.REINFORCED_CASING.get(), "Reinforced Refinery Casing", 0xFF64748B));
                 }
             }
         }
