@@ -130,7 +130,7 @@ public class FermenterBlockEntity extends BlockEntity implements MenuProvider, W
 
         if (recipe != null) {
             boolean canFit = (TANK_CAPACITY - this.ethanolAmount) >= recipe.ethanolYield && canInsertByproduct(recipe.byproduct);
-            int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+            int requiredEnergy = ENERGY_PER_TICK;
 
             if (canFit && this.energy >= requiredEnergy) {
                 isActive = true;

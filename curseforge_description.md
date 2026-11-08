@@ -205,10 +205,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.42.jar`
+`refinery-1.11.47.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.42 (NeoForge 26.3)`
+`Industrial Refinery 1.11.47 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -224,6 +224,15 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.47
+
+### What's New in v1.11.47:
+- **Autarchic Chipset Recipe Yield (4x Multiplier)**:
+  - Crafting an Autarchic Chipset now yields **4x Autarchic Chipsets** instead of 1 (crafting 1x Ender Pearl + 2x Redstone Dust + 2x Gold Nugget produces 4 chipsets).
+  - Significantly reduces microchip production bottlenecks when mass-upgrading Pipe Gates to Autarchic variants for automated pulsating extraction.
+
+---
+
 # Industrial Refinery v1.11.42
 
 ### What's New in v1.11.42:

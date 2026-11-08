@@ -107,13 +107,13 @@ public class CastingChannelBlockEntity extends BlockEntity {
         if (!(state.getBlock() instanceof CastingChannelBlock)) return;
 
         this.activeFlowTicks++;
-        // Lava-like viscous flow propagation delay: wait 25 ticks (1.25s) before cascading downstream
-        if (this.activeFlowTicks < 25) {
+        // Viscous flow propagation delay: wait 10 ticks (0.5s) before cascading downstream
+        if (this.activeFlowTicks < 10) {
             return;
         }
 
-        // Transfer in small rhythmic increments every 4 ticks to simulate creeping molten flow
-        if (this.level.getGameTime() % 4 != 0) {
+        // Transfer every 2 ticks for smooth, responsive molten flow
+        if (this.level.getGameTime() % 2 != 0) {
             return;
         }
 
@@ -123,26 +123,15 @@ public class CastingChannelBlockEntity extends BlockEntity {
         }
 
         // 2. Push to connected horizontal sides EXCLUDING the side fluid entered from (lastInputSide)
-        Direction ignoreSide = null;
-        if (this.lastInputSide != null && (this.level.getGameTime() - this.lastInputTick < 60)) {
-            ignoreSide = this.lastInputSide;
-        }
+        // Strictly prevent bounce-back into the upstream feed side
+        Direction ignoreSide = this.lastInputSide;
 
-        boolean pushed = false;
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             if (dir == ignoreSide) continue;
             if (isConnected(state, dir)) {
                 if (pushTo(dir)) {
-                    pushed = true;
                     if (this.moltenAmount <= 0) break;
                 }
-            }
-        }
-
-        // 3. Fallback: If forward is blocked/full for over 60 ticks (3 seconds), allow equalizing backwards
-        if (!pushed && ignoreSide != null && isConnected(state, ignoreSide)) {
-            if (this.level.getGameTime() - this.lastInputTick > 60) {
-                pushTo(ignoreSide);
             }
         }
     }
@@ -163,12 +152,12 @@ public class CastingChannelBlockEntity extends BlockEntity {
         BlockPos targetPos = this.worldPosition.relative(dir);
         var targetHandler = this.level.getCapability(Capabilities.Fluid.BLOCK, targetPos, dir.getOpposite());
         if (targetHandler != null) {
-            // While actively fed from upstream, retain a 150 mB visual channel pool so the line remains filled & glowing
+            // While actively fed from upstream, retain a small 50 mB visual channel pool so the line remains filled & glowing
             boolean activelyFed = this.lastInputSide != null && (this.level.getGameTime() - this.lastInputTick < 40);
-            int available = activelyFed ? Math.max(0, this.moltenAmount - 150) : this.moltenAmount;
+            int available = activelyFed ? Math.max(0, this.moltenAmount - 50) : this.moltenAmount;
             if (available <= 0) return false;
 
-            int toTransfer = Math.min(25, available);
+            int toTransfer = Math.min(50, available);
             FluidResource res = FluidResource.of(this.moltenFluid);
             try (Transaction tx = Transaction.openRoot()) {
                 int accepted = 0;
@@ -183,6 +172,7 @@ public class CastingChannelBlockEntity extends BlockEntity {
                     if (this.moltenAmount <= 0) {
                         this.moltenFluid = Fluids.EMPTY;
                         this.activeFlowTicks = 0;
+                        this.lastInputSide = null;
                     }
                     setChanged();
 

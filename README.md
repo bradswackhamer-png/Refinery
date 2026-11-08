@@ -56,7 +56,9 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
-   - [Version 1.11.43 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)](#version-11143-arc-melter-50k-fe-start-threshold-ground-level-casting-input-port-11-water-quenching--jei-hologram-name-parity)
+   - [Version 1.11.47 (Autarchic Chipset 4x Recipe Output)](#version-11147-autarchic-chipset-4x-recipe-output)
+   - [Version 1.11.45 (Per-Tick Machine Energy Requirements, 4x Faster Casting Channel Flow, & Anti-Bounce-Back)](#version-11145-per-tick-machine-energy-requirements-4x-faster-casting-channel-flow--anti-bounce-back)
+   - [Version 1.11.44 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)](#version-11144-arc-melter-50k-fe-start-threshold-ground-level-casting-input-port-11-water-quenching--jei-hologram-name-parity)
    - [Version 1.11.42 (In-Game Guide Book Power & Energy Badges, 20s Casting Press & 10s Arc Melter Durations)](#version-11142-in-game-guide-book-power--energy-badges-20s-casting-press--10s-arc-melter-durations)
    - [Version 1.11.40 (Industrial Power & Steam Rebalance: 10k Arc Melter, 10k Steam Turbine, 3x Large Boiler, 5k Multi-Smelter, 2k Grinder, 500 Press, 600 Caster)](#version-11140-industrial-power--steam-rebalance-10k-arc-melter-10k-steam-turbine-3x-large-boiler-5k-multi-smelter-2k-grinder-500-press-600-caster)
    - [Version 1.11.39 (Fast 0.5s Pipe Gate Redstone Pulsing & Natural Action Cycle Order)](#version-11139-fast-05s-pipe-gate-redstone-pulsing--natural-action-cycle-order)
@@ -1104,8 +1106,8 @@ Hold an **Autarchic Chipset** and right-click any placed in-world Gate. It insta
   - `Iron Gate` (center) + 2x `Gold Ingot` + 2x `Redstone Dust` $\rightarrow$ 1x Gold Gate.
 - **Diamond Gate**:
   - `Gold Gate` (center) + 2x `Diamond` + 2x `Redstone Dust` $\rightarrow$ 1x Diamond Gate.
-- **Autarchic Chipset**:
-  - `Ender Pearl` (center) + 2x `Redstone Dust` + 2x `Gold Nugget` $\rightarrow$ 1x Autarchic Chipset.
+- **Autarchic Chipset (4x per craft)**:
+  - `Ender Pearl` (center) + 2x `Redstone Dust` + 2x `Gold Nugget` $\rightarrow$ 4x Autarchic Chipset.
 - **Autarchic Gates (Crafting Grid)**:
   - Any Gate + 1x `Autarchic Chipset` (shapeless) $\rightarrow$ Autarchic Gate variant.
 - **Pipe Wires (4x per craft)**:
@@ -1856,7 +1858,31 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ---
 
-### Version 1.11.43 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)
+### Version 1.11.47 (Autarchic Chipset 4x Recipe Output)
+- **Autarchic Chipset Recipe Yield (4x Multiplier)**:
+  - Increased the crafting output of the Autarchic Chipset recipe from 1 to 4 chipsets per craft (`data/refinery/recipe/autarchic_chipset.json`).
+  - Standard crafting (1x Ender Pearl + 2x Redstone Dust + 2x Gold Nugget) now produces 4x Autarchic Chipsets, drastically speeding up gate upgrading and automation setups.
+
+---
+
+### Version 1.11.45 (Per-Tick Machine Energy Requirements, 4x Faster Casting Channel Flow, & Anti-Bounce-Back)
+- **Per-Tick Machine Energy Requirements Across All Machines (`*ControllerBlockEntity`, `FermenterBlockEntity`)**:
+  - Removed artificial whole-process and excessive buffer requirements across all machines (previously checking `(PROCESS_TIME - progress) * ENERGY_PER_TICK` or multi-thousand FE start thresholds).
+  - Machines now fire off and operate as long as they have at least their nominal per-tick power (`ENERGY_PER_TICK`):
+    - **Continuous Casting Press**: Starts immediately with $\ge$ 600 FE (instead of requiring 240,000 FE).
+    - **Industrial Rock Crusher / Grinder**: Starts immediately with $\ge$ 2,000 FE (instead of requiring 120,000 FE).
+    - **Industrial Metal Press**: Starts immediately with $\ge$ 500 FE (instead of requiring 20,000 FE).
+    - **Industrial Multi-Smelter**: Starts immediately with $\ge$ 5,000 FE (instead of requiring 500,000 FE).
+    - **Electric Arc Melter**: Starts immediately with $\ge$ 10,000 FE (instead of requiring 50,000+ FE).
+    - **Industrial Fermenter**: Starts immediately with $\ge$ 15 FE (instead of requiring 900 FE).
+- **Casting Channel Flow Speed Boost & Anti-Bounce-Back (`CastingChannelBlockEntity`)**:
+  - Increased molten fluid transfer rate in open refractory casting channels to 50 mB every 2 ticks (25 mB/tick, a 4x increase from the previous 6.25 mB/tick rate).
+  - Reduced initial viscous flow propagation delay from 25 ticks to 10 ticks (0.5s).
+  - Completely eliminated the fluid bounce-back mechanic: fluid flowing down a channel will strictly proceed downstream and can never reverse direction back into the upstream feed.
+
+---
+
+### Version 1.11.44 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)
 - **Continuous Casting Press Water Quenching Requirement (1:1 Ratio with Molten Metal) (`CastingPressControllerBlockEntity`, `CastingPressMenu`, `CastingPressScreen`, `RefineryMod`)**:
   - Added a dedicated **4,000 mB Quenching Water Tank** alongside the 4,000 mB Molten Metal Basin on the Continuous Casting Press.
   - Each casting and quenching cycle now requires a **1:1 fluid ratio**: **1,000 mB of Water** and **1,000 mB of Molten Metal** per ingot/block cast (consumed together at the high-pressure quenching point).

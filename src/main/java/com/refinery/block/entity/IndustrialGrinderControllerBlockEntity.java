@@ -250,7 +250,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
             ItemStack output = getGrindResult(input);
 
             if (!output.isEmpty()) {
-                int requiredEnergy = (PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+                int requiredEnergy = ENERGY_PER_TICK;
                 if (canFitOutput(output) && this.energy >= requiredEnergy) {
                     isActive = true;
                     this.energy -= ENERGY_PER_TICK;

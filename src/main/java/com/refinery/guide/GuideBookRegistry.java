@@ -160,8 +160,7 @@ public class GuideBookRegistry {
                     GuideCategory.METALLURGY,
                     () -> new ItemStack(RefineryMod.ARC_MELTER_CONTROLLER.get()),
                     "The Electric Arc Melter employs massive carbon electrodes to melt ores and scrap metals into molten fluid. It doubles the output of raw ores (yielding 2,000 mB per raw ore).\n\n" +
-                    "• Power Consumption: 10,000 FE/t during active melting (2,000,000 FE total per 200-tick / 10.0s melt cycle)\n" +
-                    "• Start Threshold: Begins melting once the internal buffer reaches 50,000 FE\n" +
+                    "• Power Consumption: 10,000 FE/t during active melting (2,000,000 FE buffer)\n" +
                     "• Cycle Time: 10.0 seconds (200 ticks) per batch\n" +
                     "• Energy Storage Buffer: 2,000,000 FE (Max input rate: 100,000 FE/t)\n" +
                     "• Molten Discharge: Bottom-front spout pours molten metal directly into open Casting Channels without pipes.\n" +
@@ -170,7 +169,7 @@ public class GuideBookRegistry {
                     reqs,
                     layers,
                     recipes,
-                    "⚡ Power Draw: 10,000 FE/t (Starts at 50k FE | Buffer: 2,000,000 FE)"
+                    "⚡ Power Draw: 10,000 FE/t (Buffer: 2,000,000 FE | Max In: 100,000 FE/t)"
             ));
         }
 

@@ -235,7 +235,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
         boolean canStamp = (this.progress > 20) || (!resultStack.isEmpty() && canFitOutput(resultStack));
 
         if (canStamp) {
-            int requiredEnergy = (TOTAL_PROCESS_TIME - this.progress) * ENERGY_PER_TICK;
+            int requiredEnergy = ENERGY_PER_TICK;
             if (this.energy >= requiredEnergy) {
                 isActive = true;
                 this.energy -= ENERGY_PER_TICK;

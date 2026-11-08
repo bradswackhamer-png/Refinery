@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.43.jar`
+`refinery-1.11.47.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.43 (NeoForge 26.3)`
+`Industrial Refinery 1.11.47 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,9 +251,37 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
-# Industrial Refinery v1.11.43
+# Industrial Refinery v1.11.47
 
-### What's New in v1.11.43:
+### What's New in v1.11.47:
+- **Autarchic Chipset Recipe Yield (4x Multiplier)**:
+  - Crafting an Autarchic Chipset now yields **4x Autarchic Chipsets** instead of 1 (crafting 1x Ender Pearl + 2x Redstone Dust + 2x Gold Nugget produces 4 chipsets).
+  - Significantly reduces microchip production bottlenecks when mass-upgrading Pipe Gates to Autarchic variants for automated pulsating extraction.
+
+---
+
+# Industrial Refinery v1.11.45
+
+### What's New in v1.11.45:
+- **Per-Tick Machine Energy Requirements Across All Machines**:
+  - Removed whole-process and excessive buffer requirements across all machines (previously checking `(PROCESS_TIME - progress) * ENERGY_PER_TICK` or multi-thousand FE thresholds).
+  - Machines now fire off and operate as long as they have at least their nominal per-tick power (`ENERGY_PER_TICK`):
+    - **Continuous Casting Press**: Starts immediately with $\ge$ 600 FE (instead of requiring 240,000 FE).
+    - **Industrial Rock Crusher / Grinder**: Starts immediately with $\ge$ 2,000 FE (instead of requiring 120,000 FE).
+    - **Industrial Metal Press**: Starts immediately with $\ge$ 500 FE (instead of requiring 20,000 FE).
+    - **Industrial Multi-Smelter**: Starts immediately with $\ge$ 5,000 FE (instead of requiring 500,000 FE).
+    - **Electric Arc Melter**: Starts immediately with $\ge$ 10,000 FE (instead of requiring 50,000+ FE).
+    - **Industrial Fermenter**: Starts immediately with $\ge$ 15 FE (instead of requiring 900 FE).
+- **Casting Channel Flow Speed Boost & Anti-Bounce-Back**:
+  - Increased molten fluid transfer rate in open refractory casting channels to 50 mB every 2 ticks (25 mB/tick, 4x faster).
+  - Reduced initial viscous flow propagation delay from 25 ticks to 10 ticks (0.5s).
+  - Completely eliminated fluid bounce-back: fluid flowing down a channel will strictly proceed downstream and can never reverse direction back into the upstream feed.
+
+---
+
+# Industrial Refinery v1.11.44
+
+### What's New in v1.11.44:
 - **Continuous Casting Press Water Quenching Requirement (1:1 Ratio with Molten Metal)**:
   - Added a dedicated **4,000 mB Quenching Water Tank** alongside the 4,000 mB Molten Metal Basin on the Continuous Casting Press.
   - Each casting and quenching cycle now requires a **1:1 fluid ratio**: **1,000 mB of Water** and **1,000 mB of Molten Metal** per ingot/block cast.

@@ -6,6 +6,7 @@
 - Bump `mod_version` in `gradle.properties` for each mod change, following Semantic Versioning. Keep version references in the README, CurseForge description, changelog, and packaged artifact instructions consistent with that value.
 - Maintain `CHANGELOG.md`: add an entry for every mod change under the new version, grouped under the appropriate Keep a Changelog headings (`Added`, `Changed`, `Fixed`, or `Removed`). Do not replace or discard previous release entries.
 - Before finishing, check these files together for stale descriptions, mismatched versions, and missing changelog entries.
+- **Mandatory Jar Compilation (`gradlew jar`)**: For every mod change, ALWAYS run `.\gradlew.bat jar` to compile and produce the final `.jar` in `build/libs` before completing your turn. Never stop at `compileJava` and never require the user to ask for the jar.
 
 ## Minecraft 26.3+ (1.21.4+) Item Model and Icon Architecture
 

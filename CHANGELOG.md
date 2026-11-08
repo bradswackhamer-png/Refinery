@@ -4,7 +4,35 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-## [1.11.43] - 2026-11-08
+## [1.11.47] - 2026-11-08
+
+### Changed
+- **Autarchic Chipset Recipe Yield (4x Multiplier)**:
+  - Increased the crafting output of the Autarchic Chipset recipe from 1 to 4 chipsets per craft (`data/refinery/recipe/autarchic_chipset.json`).
+  - Standard crafting (1x Ender Pearl + 2x Redstone Dust + 2x Gold Nugget) now yields 4x Autarchic Chipsets, quadrupling production efficiency for gate upgrades and automated pulsar automation.
+
+---
+
+## [1.11.45] - 2026-11-08
+
+### Changed
+- **Per-Tick Machine Energy Requirements Across All Machines (`*ControllerBlockEntity`, `FermenterBlockEntity`)**:
+  - Removed artificial whole-process and excessive buffer requirements (previously checking `(PROCESS_TIME - progress) * ENERGY_PER_TICK` or multi-thousand FE thresholds) across all machines.
+  - Machines now fire off and operate as long as they have at least their nominal per-tick power (`ENERGY_PER_TICK`):
+    - **Continuous Casting Press**: Starts immediately with $\ge$ 600 FE (instead of requiring 240,000 FE).
+    - **Industrial Rock Crusher / Grinder**: Starts immediately with $\ge$ 2,000 FE (instead of requiring 120,000 FE).
+    - **Industrial Metal Press**: Starts immediately with $\ge$ 500 FE (instead of requiring 20,000 FE).
+    - **Industrial Multi-Smelter**: Starts immediately with $\ge$ 5,000 FE (instead of requiring 500,000 FE).
+    - **Electric Arc Melter**: Starts immediately with $\ge$ 10,000 FE (instead of requiring 50,000+ FE).
+    - **Industrial Fermenter**: Starts immediately with $\ge$ 15 FE (instead of requiring 900 FE).
+- **Casting Channel Flow Speed Boost & Anti-Bounce-Back (`CastingChannelBlockEntity`)**:
+  - Increased molten fluid transfer rate in open refractory casting channels to 50 mB every 2 ticks (25 mB/tick, a 4x increase from the previous 6.25 mB/tick rate).
+  - Reduced initial viscous flow propagation delay from 25 ticks to 10 ticks (0.5s).
+  - Completely eliminated the fluid bounce-back mechanic: fluid flowing down a channel will strictly proceed downstream and can never reverse direction back into the upstream feed.
+
+---
+
+## [1.11.44] - 2026-11-08
 
 ### Added
 - **Continuous Casting Press Water Quenching Requirement (1:1 Ratio with Molten Metal) (`CastingPressControllerBlockEntity`, `CastingPressMenu`, `CastingPressScreen`, `RefineryMod`)**:

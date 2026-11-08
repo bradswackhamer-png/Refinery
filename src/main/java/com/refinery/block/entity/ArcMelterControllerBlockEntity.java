@@ -55,7 +55,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public static final int TANK_CAPACITY = 8000;
     public static final int ENERGY_CAPACITY = 2_000_000;
     public static final int ENERGY_PER_TICK = 10_000;
-    public static final int MIN_START_ENERGY = 50_000;
+    public static final int MIN_START_ENERGY = 10_000;
     public static final int PROCESS_TIME = 200; // 10 seconds per batch (200 ticks)
 
     private boolean assembled = false;
@@ -287,7 +287,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                 int fluidProduced = isIngot(input) ? 500 : 1000;
                 boolean canFit = (this.moltenFluid == Fluids.EMPTY || this.moltenFluid == resultFluid)
                         && (this.moltenAmount + fluidProduced <= TANK_CAPACITY);
-                int requiredEnergy = (this.progress == 0) ? MIN_START_ENERGY : ENERGY_PER_TICK;
+                int requiredEnergy = ENERGY_PER_TICK;
                 if (canFit && this.energy >= requiredEnergy) {
                     isActive = true;
                     this.energy -= ENERGY_PER_TICK;
