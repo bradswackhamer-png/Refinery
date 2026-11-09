@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.62 (Steam Turbine & Diesel Generator NeoForge Transaction Safety Fix)](#version-11161-steam-turbine--diesel-generator-neoforge-transaction-safety-fix)
    - [Version 1.11.60 (Thermodynamic Rebalance: 500 & 1,500 mB/s Boilers, 1,450 mB/s Turbine, 3,000 RPM Scaling & Fluid Pipe Flow Fix)](#version-11160-thermodynamic-rebalance-500--1500-mbs-boilers-1450-mbs-turbine-3000-rpm-scaling--fluid-pipe-flow-fix)
    - [Version 1.11.58 (In-Game Field Manual Boiler Guide Pages: Small & Large Steam and Diesel Boilers)](#version-11158-in-game-field-manual-boiler-guide-pages-small--large-steam-and-diesel-boilers)
    - [Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)](#version-11157-large-boiler-3d-model-block-hiding-steam-turbine-dynamic-load-throttling--diagnostic-monitor-sync)
@@ -1864,6 +1865,14 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 
 ---
 
+### Version 1.11.62 (Steam Turbine & Diesel Generator NeoForge Transaction Safety Fix)
+- **Steam Turbine & Diesel Generator NeoForge Transaction Safety**:
+  - Replaced manual state assignments in xtract(...) with NeoForge's standard onEnergyChanged(int previousAmount) handler on SimpleEnergyHandler.
+  - Resolved a severe ghost energy drain bug where external simulated transactions (such as AWG cables, fluxducts, or wire networks probing for grid demand) temporarily decremented energy storage and desynchronized the controller's internal nergy field without rolling back when the simulation aborted.
+  - Prevents generators from constantly bleeding generated FE into the void when connected to fully-charged energy storage banks or satisfied grids.
+
+---
+
 ### Version 1.11.60 (Thermodynamic Rebalance: 500 & 1,500 mB/s Boilers, 1,450 mB/s Turbine, 3,000 RPM Scaling & Fluid Pipe Flow Fix)
 - **Boiler & Steam Turbine Thermodynamic Balance Rebalancing (`SmallBoilerControllerBlockEntity`, `LargeBoilerControllerBlockEntity`, `SteamTurbineControllerBlockEntity`)**:
   - **Small Boilers**: Rebalanced solid fuel steam production to **500 mB/s** (25 mB/t, consuming 12 mB/t water).
@@ -1877,10 +1886,7 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
   - Fixed an issue where pipes equalized fluid using naive half-difference division (`(diff + 1) / 2`), halving throughput across every pipe block and throttling long pipelines down to ~24 mB/t.
   - Implemented directional flow momentum: pipes actively push fluid forward along the pipeline into downstream pipes and connected machine ports at the full material transfer rate (Iron: 500 mB/t, Steel: 1,500 mB/t) without distance attenuation or backward sloshing.
   - Steam turbine steam input port now immediately notifies the controller on fluid insertion for real-time sync.
-- **Steam Turbine & Diesel Generator NeoForge Transaction Safety**:
-  - Replaced manual state assignments in xtract(...) with NeoForge's standard onEnergyChanged(int previousAmount) handler on SimpleEnergyHandler.
-  - Resolved a severe ghost energy drain bug where external simulated transactions (such as AWG cables, fluxducts, or wire networks probing for grid demand) temporarily decremented energy storage and desynchronized the controller's internal nergy field without rolling back when the simulation aborted.
-  - Prevents generators from constantly bleeding generated FE into the void when connected to fully-charged energy storage banks or satisfied grids.
+
 
 ---
 
