@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.58 (Steam Turbine & Diesel Generator NeoForge Transaction Safety Fix)](#version-11158-steam-turbine--diesel-generator-neoforge-transaction-safety-fix)
    - [Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)](#version-11157-large-boiler-3d-model-block-hiding-steam-turbine-dynamic-load-throttling--diagnostic-monitor-sync)
    - [Version 1.11.54 (Multi-Smelter Plank Pyrolysis: Planks to Charcoal)](#version-11154-multi-smelter-plank-pyrolysis-planks-to-charcoal)
    - [Version 1.11.51 (Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix)](#version-11151-iron-item-pipe--cast-iron-fluid-pipe-recipe-collision-fix)
@@ -1861,6 +1862,11 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
 
 ---
+
+### Version 1.11.58 (Steam Turbine & Diesel Generator NeoForge Transaction Safety Fix)
+- **Transaction Safety & Ghost Drain Prevention**:
+  - Fixed a critical energy loss bug in SteamTurbineControllerBlockEntity and DieselGeneratorBlockEntity caused by manual state changes within xtract(...).
+  - Replaced manual overrides with NeoForge's onEnergyChanged(int previousAmount) handler, ensuring uncommitted simulation transactions (e.g. from cables probing full accumulators) safely rollback without leaking power.
 
 ### Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)
 - **Large Boiler & Diesel Boiler Multiblock Block Hiding (`LargeBoilerControllerBlock`, `LargeDieselBoilerControllerBlock`, `SmallDieselBoilerControllerBlock`, `SteelBoilerCasingBlock`)**:

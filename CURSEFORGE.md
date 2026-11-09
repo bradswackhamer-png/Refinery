@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.57.jar`
+`refinery-1.11.58.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.57 (NeoForge 26.3)`
+`Industrial Refinery 1.11.58 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,16 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.58
+
+### What's New in v1.11.58:
+- **Steam Turbine & Diesel Generator NeoForge Transaction Safety**:
+  - Fixed a critical ghost energy drain bug in SteamTurbineControllerBlockEntity and DieselGeneratorBlockEntity caused by manual xtract state synchronization during simulated transactions.
+  - When connected to fully-charged energy banks or cables that probed for power, uncommitted simulated extractions previously corrupted internal energy state and bled power each tick.
+  - Now uses standard onEnergyChanged callbacks so energy state only persists on committed transactions.
+
+---
+
 # Industrial Refinery v1.11.57
 
 ### What's New in v1.11.57:

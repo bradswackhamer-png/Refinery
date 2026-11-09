@@ -4,6 +4,16 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.58] - 2026-11-08
+
+### Fixed
+- **Steam Turbine Generator & Diesel Generator NeoForge Transaction Handling (SteamTurbineControllerBlockEntity, DieselGeneratorBlockEntity)**:
+  - Replaced manual xtract(...) state overrides with NeoForge's standard onEnergyChanged(int previousAmount) callback on SimpleEnergyHandler.
+  - Resolved a severe ghost energy drain bug where external simulated transactions (such as AWG cables, fluxducts, or wire networks probing for grid demand) temporarily decremented energy storage and desynchronized the controller's internal nergy field without rolling back when the simulation aborted.
+  - Prevents generators from constantly bleeding generated FE into the void when connected to fully-charged energy storage or satisfied grids.
+
+---
+
 ## [1.11.57] - 2026-11-08
 
 ### Changed

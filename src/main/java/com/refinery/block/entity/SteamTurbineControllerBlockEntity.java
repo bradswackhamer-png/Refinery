@@ -51,18 +51,9 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
 
     public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 0, ENERGY_PER_TICK) {
         @Override
-        public void set(int amount) {
-            super.set(amount);
-            SteamTurbineControllerBlockEntity.this.energy = amount;
-            setChanged();
-        }
-
-        @Override
-        public int extract(int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-            int extracted = super.extract(amount, transaction);
+        protected void onEnergyChanged(int previousAmount) {
             SteamTurbineControllerBlockEntity.this.energy = this.energy;
             setChanged();
-            return extracted;
         }
     };
 

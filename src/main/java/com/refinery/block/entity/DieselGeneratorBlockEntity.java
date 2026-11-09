@@ -50,17 +50,9 @@ public class DieselGeneratorBlockEntity extends BlockEntity implements MenuProvi
 
     public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 0, MAX_EXPORT_RATE) {
         @Override
-        public void set(int amount) {
-            super.set(amount);
-            DieselGeneratorBlockEntity.this.energy = amount;
-            setChanged();
-        }
-
-        @Override
-        public int extract(int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
-            int extracted = super.extract(amount, transaction);
+        protected void onEnergyChanged(int previousAmount) {
             DieselGeneratorBlockEntity.this.energy = this.energy;
-            return extracted;
+            setChanged();
         }
     };
 
