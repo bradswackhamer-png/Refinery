@@ -36,8 +36,9 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     public static final int STEAM_CAPACITY = 32_000;
     public static final int WATER_CAPACITY = 16_000;
     public static final int ENERGY_CAPACITY = 100_000;
-    public static final int STEAM_PER_TICK = 300; // Consumes up to 300 mB steam per tick (3x Small Boiler production)
-    public static final int ENERGY_PER_TICK = 10_000; // Generates 10,000 FE/t at full steam consumption
+    public static final int STEAM_PER_SEC = 1450; // Consumes up to 1,450 mB/s steam (72.5 mB/t average)
+    public static final int ENERGY_PER_TICK = 10_000; // Generates 10,000 FE/t at full steam consumption (3,000 RPM)
+    public static final int MAX_RPM = 3000;
     public static final int WATER_PER_STEAM_RATIO = 2; // 2 mB steam -> 1 mB water (condensed)
 
     private boolean assembled = false;
@@ -174,7 +175,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         }
     }
 
-    private void syncToClient() {
+    public void syncToClient() {
         if (this.level != null && !this.level.isClientSide()) {
             BlockState state = getBlockState();
             this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
@@ -242,24 +243,20 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         boolean wasActive = state.getValue(SteamTurbineControllerBlock.ACTIVE);
         boolean isActive = false;
 
-        // Process Steam -> Water + FE
+        // Process Steam -> Water + FE (1,450 mB/s = alternating 73 & 72 mB/t for exact 1,450 mB per 20 ticks)
+        int maxSteamThisTick = (level.getGameTime() % 2 == 0) ? 73 : 72;
         int energySpace = ENERGY_CAPACITY - this.energy;
         int waterSpace = WATER_CAPACITY - this.waterAmount;
 
-        if (this.steamAmount >= 2 && energySpace >= 67 && waterSpace >= 1) {
-            int maxSteamByEnergy = (int) (((long) energySpace * STEAM_PER_TICK) / ENERGY_PER_TICK);
+        if (this.steamAmount >= 1 && energySpace >= 137 && waterSpace >= 1) {
+            int maxSteamByEnergy = (int) (((long) energySpace * maxSteamThisTick) / ENERGY_PER_TICK);
             int maxSteamByWater = waterSpace * WATER_PER_STEAM_RATIO;
-            int steamToConsume = Math.min(STEAM_PER_TICK, Math.min(this.steamAmount, Math.min(maxSteamByEnergy, maxSteamByWater)));
-
-            // Ensure even number for water ratio
-            if (steamToConsume % 2 != 0) {
-                steamToConsume--;
-            }
+            int steamToConsume = Math.min(maxSteamThisTick, Math.min(this.steamAmount, Math.min(maxSteamByEnergy, maxSteamByWater)));
 
             if (steamToConsume > 0) {
                 this.steamAmount -= steamToConsume;
-                int feGenerated = (int) (((long) steamToConsume * ENERGY_PER_TICK) / STEAM_PER_TICK);
-                int waterCondensed = steamToConsume / WATER_PER_STEAM_RATIO;
+                int feGenerated = (int) (((long) steamToConsume * ENERGY_PER_TICK) / maxSteamThisTick);
+                int waterCondensed = Math.max(1, steamToConsume / WATER_PER_STEAM_RATIO);
 
                 addEnergy(feGenerated);
                 this.waterAmount += waterCondensed;
@@ -267,9 +264,10 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
                 this.activeTicks = 10;
                 isActive = true;
 
-                // Turbine hum sound & spinning cloud particles
+                // Turbine hum sound pitch & particles scale dynamically with RPM
+                float pitch = 0.8f + (feGenerated / (float) ENERGY_PER_TICK) * 0.8f;
                 if (level.getRandom().nextInt(10) == 0) {
-                    serverLevel.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 0.4f, 1.8f);
+                    serverLevel.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 0.4f, pitch);
                 }
                 if (level.getRandom().nextInt(3) == 0) {
                     Direction facing = state.getValue(SteamTurbineControllerBlock.FACING);

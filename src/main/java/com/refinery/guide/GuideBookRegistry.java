@@ -584,7 +584,7 @@ public class GuideBookRegistry {
         }
 
         // =========================================================================
-        // 8. STEAM BOILERS (Solid-Fuel: Small & Large)
+        // 8. SMALL STEAM BOILER (Solid-Fuel: 3x3x3 Multiblock)
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
@@ -628,25 +628,23 @@ public class GuideBookRegistry {
                     new GuideRecipe("Small Boiler Steam Generation",
                             List.of(() -> new ItemStack(Items.WATER_BUCKET), () -> new ItemStack(Items.COAL)),
                             List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get())),
-                            "Boils 50 mB/t Water into 100 mB/t High Pressure Steam under sustained combustion."),
-                    new GuideRecipe("Large Boiler Steam Generation",
-                            List.of(() -> new ItemStack(Items.WATER_BUCKET, 3), () -> new ItemStack(Items.COAL, 2)),
-                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get(), 3)),
-                            "Boils 150 mB/t Water into 300 mB/t High Pressure Steam across 8 fuel slots (matches 3 Small Boilers).")
+                            "Boils 12 mB/t Water into 25 mB/t High Pressure Steam (500 mB/s) under sustained solid fuel combustion.")
             );
 
             register(new GuideEntry(
-                    "boilers",
-                    "Solid-Fuel Steam Boilers (Small & Large)",
-                    "3x3x3 & 5x5x5 Multiblock • Solid Fuel Steam Generation",
+                    "small_boiler",
+                    "Small Steam Boiler",
+                    "3x3x3 Multiblock • Solid Fuel Steam Generation",
                     GuideCategory.POWER,
                     () -> new ItemStack(RefineryMod.SMALL_BOILER_CONTROLLER.get()),
-                    "Steam Boilers burn solid fuels (Coal, Coke, Charcoal, Bitumen) to flash water into high-pressure steam for Steam Turbines.\n\n" +
+                    "The Small Steam Boiler burns solid fuels (Coal, Coke, Charcoal, Bitumen) to flash water into high-pressure steam for Steam Turbines.\n\n" +
                     "• Power Consumption: 0 FE/t (Thermal combustion powered)\n" +
-                    "• Small Steam Boiler (3x3x3): 4 fuel slots. Boils 50 mB/t Water into 100 mB/t Steam. Reservoir: 16,000 mB.\n" +
-                    "• Large Steam Boiler (5x5x5): 8 fuel slots. Boils 150 mB/t Water into 300 mB/t Steam (exactly 3x Small). Reservoir: 64,000 mB.\n" +
-                    "• Meltdown Hazard: Keep water supplied continuously! If a boiler runs dry while hot, a siren alarm warns of impending catastrophic explosion.",
-                    "Always pipe turbine exhaust water back into the Boiler Water Port to maintain a safe, closed Rankine loop!",
+                    "• Fuel Capacity: 4 parallel solid fuel combustion slots\n" +
+                    "• Steam Production: Boils 12 mB/t Water into 25 mB/t Steam (500 mB/s)\n" +
+                    "• Tank Capacity: 16,000 mB Water & 16,000 mB Steam buffers\n" +
+                    "• Turbine Pairing: 1 Small Boiler produces 500 mB/s (~3,448 FE/t); 3 Small Boilers produce 1,500 mB/s to run 1 Turbine at full 10,000 FE/t capacity\n" +
+                    "• Meltdown Hazard: Keep water supplied! A siren alarm sounds if water empties while burning, followed by a boiler explosion after 60s.",
+                    "Pipe turbine exhaust water back into the Boiler Water Port to maintain a safe, closed Rankine loop!",
                     reqs,
                     layers,
                     recipes,
@@ -655,7 +653,96 @@ public class GuideBookRegistry {
         }
 
         // =========================================================================
-        // 8A. DIESEL STEAM BOILERS (Small & Large)
+        // 8A. LARGE STEAM BOILER (Solid-Fuel: 5x5x5 Multiblock)
+        // =========================================================================
+        {
+            Map<Character, LayerSymbol> legend = new HashMap<>();
+            legend.put('C', new LayerSymbol('C', "Large Steam Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.LARGE_BOILER_CONTROLLER.get())));
+            legend.put('F', new LayerSymbol('F', "Boiler Fuel Input Port", 0xFFEA580C, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
+            legend.put('W', new LayerSymbol('W', "Boiler Water Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get())));
+            legend.put('S', new LayerSymbol('S', "Boiler Steam Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Boiler Firebox Hearth", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
+            legend.put('P', new LayerSymbol('P', "Boiler Pressure Pipe", 0xFF94A3B8, () -> new ItemStack(RefineryMod.BOILER_PIPE.get())));
+            legend.put('X', new LayerSymbol('X', "Steel Boiler Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get())));
+
+            List<GuideBlockRequirement> reqs = List.of(
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.LARGE_BOILER_CONTROLLER.get()), "Large Steam Boiler Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox Hearth", 9),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pressure Pipe", 27),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get()), "Steel Boiler Casing", 85)
+            );
+
+            List<GuideLayer> layers = List.of(
+                    new GuideLayer(0, "Layer 0 (Base, Ports & 3x3 Hearth)", new String[]{
+                            "XWCFX",
+                            "XBBBX",
+                            "XBBBX",
+                            "XBBBX",
+                            "XXSXX"
+                    }, legend),
+                    new GuideLayer(1, "Layer 1 (3x3 Pressure Pipe Core & Walls)", new String[]{
+                            "XXXXX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XXXXX"
+                    }, legend),
+                    new GuideLayer(2, "Layer 2 (3x3 Pressure Pipe Core & Walls)", new String[]{
+                            "XXXXX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XXXXX"
+                    }, legend),
+                    new GuideLayer(3, "Layer 3 (3x3 Pressure Pipe Core & Walls)", new String[]{
+                            "XXXXX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XXXXX"
+                    }, legend),
+                    new GuideLayer(4, "Layer 4 (Reinforced Steel Roof)", new String[]{
+                            "XXXXX",
+                            "XXXXX",
+                            "XXXXX",
+                            "XXXXX",
+                            "XXXXX"
+                    }, legend)
+            );
+
+            List<GuideRecipe> recipes = List.of(
+                    new GuideRecipe("Heavy Steam Generation",
+                            List.of(() -> new ItemStack(Items.WATER_BUCKET, 3), () -> new ItemStack(Items.COAL, 2)),
+                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get(), 3)),
+                            "Boils 37 mB/t Water into 75 mB/t High Pressure Steam (1,500 mB/s) across 8 parallel fuel slots (powers 1 full-load Steam Turbine with 50 mB/s surplus).")
+            );
+
+            register(new GuideEntry(
+                    "large_boiler",
+                    "Large Steam Boiler",
+                    "5x5x5 Multiblock • High-Volume Steam Generation",
+                    GuideCategory.POWER,
+                    () -> new ItemStack(RefineryMod.LARGE_BOILER_CONTROLLER.get()),
+                    "The Large Steam Boiler is a massive 5x5x5 heavy industrial boiler engineered for utility-scale steam power generation.\n\n" +
+                    "• Power Consumption: 0 FE/t (Thermal combustion powered)\n" +
+                    "• Fuel Capacity: 8 parallel solid fuel combustion slots with automatic load balancing\n" +
+                    "• Steam Production: Consumes 37 mB/t Water to generate 75 mB/t High Pressure Steam (1,500 mB/s)\n" +
+                    "• Tank Buffers: 64,000 mB Water Reservoir & 64,000 mB High Pressure Steam Drum\n" +
+                    "• Turbine Pairing: 1 Large Steam Boiler generates 1,500 mB/s steam, exceeding the Steam Turbine's full-load 1,450 mB/s requirement for continuous 10,000 FE/t generation (3,000 RPM)\n" +
+                    "• Meltdown Hazard: Keep water topped up! Running dry while firing triggers an emergency siren and explodes after 60 seconds (1,200 ticks).",
+                    "Route water via Iron or Steel Fluid Pipes (500+ mB/t throughput) to ensure uninterrupted inflow under heavy steam demands!",
+                    reqs,
+                    layers,
+                    recipes,
+                    "⚡ Power: Unpowered (Consumes Solid Fuel: Coal, Charcoal, Bitumen; 0 FE/t)"
+            ));
+        }
+
+        // =========================================================================
+        // 8B. SMALL DIESEL BOILER (Liquid-Fuel: 3x3x3 Multiblock)
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
@@ -699,23 +786,20 @@ public class GuideBookRegistry {
                     new GuideRecipe("Small Diesel Boiler Cycle",
                             List.of(() -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET)),
                             List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get())),
-                            "Consumes 10 mB Diesel & 100 mB Water per 10-tick cycle to produce 250 mB Steam / cycle (25 mB/t)."),
-                    new GuideRecipe("Large Diesel Boiler Cycle",
-                            List.of(() -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET, 3)),
-                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get(), 3)),
-                            "Consumes 30 mB Diesel & 300 mB Water per 10-tick cycle to produce 750 mB Steam / cycle (75 mB/t; 3x Small).")
+                            "Consumes 10 mB Diesel & 100 mB Water per 10-tick cycle to produce 250 mB Steam / cycle (25 mB/t).")
             );
 
             register(new GuideEntry(
-                    "diesel_boilers",
-                    "Diesel Steam Boilers (Small & Large)",
-                    "3x3x3 & 5x5x5 Multiblock • Liquid Fuel Steam Generation",
+                    "small_diesel_boiler",
+                    "Small Diesel Boiler",
+                    "3x3x3 Multiblock • Liquid Fuel Steam Generation",
                     GuideCategory.POWER,
                     () -> new ItemStack(RefineryMod.SMALL_DIESEL_BOILER_CONTROLLER.get()),
-                    "Diesel Steam Boilers burn liquid hydrocarbons (Diesel or Ethanol Biofuel) to produce massive volumes of high-pressure steam with zero solid ash.\n\n" +
-                    "• Power Consumption: 0 FE/t (Liquid combustion powered)\n" +
-                    "• Small Diesel Boiler (3x3x3): Consumes 10 mB Diesel & 100 mB Water per 10-tick cycle to produce 250 mB Steam / cycle (25 mB/t). Reservoir: 16,000 mB.\n" +
-                    "• Large Diesel Boiler (5x5x5): Consumes 30 mB Diesel & 300 mB Water per 10-tick cycle to produce 750 mB Steam / cycle (75 mB/t; 3x Small). Reservoir: 64,000 mB.\n" +
+                    "The Small Diesel Boiler burns liquid hydrocarbons (Diesel or Ethanol Biofuel) to produce clean high-pressure steam with zero solid soot or ash.\n\n" +
+                    "• Power Consumption: 0 FE/t (Liquid hydrocarbon combustion)\n" +
+                    "• Consumption Rate: Consumes 10 mB Diesel & 100 mB Water per 10-tick cycle\n" +
+                    "• Steam Production: Generates 250 mB Steam / cycle (25 mB/t)\n" +
+                    "• Tank Reservoir: 16,000 mB Diesel, Water & Steam tanks\n" +
                     "• Siren Alarm: Warns of low water before dry-run thermal meltdown.",
                     "Supply fuel via Industrial Fluid Pipes connected to the Boiler Fuel Port from your Diesel storage tanks!",
                     reqs,
@@ -726,7 +810,95 @@ public class GuideBookRegistry {
         }
 
         // =========================================================================
-        // 8B. STEAM TURBINE GENERATOR (3x3x3 Multiblock)
+        // 8C. LARGE DIESEL BOILER (Liquid-Fuel: 5x5x5 Multiblock)
+        // =========================================================================
+        {
+            Map<Character, LayerSymbol> legend = new HashMap<>();
+            legend.put('C', new LayerSymbol('C', "Large Diesel Boiler Controller", 0xFF10B981, () -> new ItemStack(RefineryMod.LARGE_DIESEL_BOILER_CONTROLLER.get())));
+            legend.put('F', new LayerSymbol('F', "Boiler Fuel Input Port", 0xFFF59E0B, () -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get())));
+            legend.put('W', new LayerSymbol('W', "Boiler Water Input Port", 0xFF3B82F6, () -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get())));
+            legend.put('S', new LayerSymbol('S', "Boiler Steam Output Port", 0xFF38BDF8, () -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get())));
+            legend.put('B', new LayerSymbol('B', "Boiler Firebox Hearth", 0xFFEF4444, () -> new ItemStack(RefineryMod.BOILER_FIREBOX.get())));
+            legend.put('P', new LayerSymbol('P', "Boiler Pressure Pipe", 0xFF94A3B8, () -> new ItemStack(RefineryMod.BOILER_PIPE.get())));
+            legend.put('X', new LayerSymbol('X', "Steel Boiler Casing", 0xFF64748B, () -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get())));
+
+            List<GuideBlockRequirement> reqs = List.of(
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.LARGE_DIESEL_BOILER_CONTROLLER.get()), "Large Diesel Boiler Controller", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_WATER_PORT.get()), "Boiler Water Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FUEL_PORT.get()), "Boiler Fuel Input Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_STEAM_PORT.get()), "Boiler Steam Output Port", 1),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_FIREBOX.get()), "Boiler Firebox Hearth", 9),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.BOILER_PIPE.get()), "Boiler Pressure Pipe", 27),
+                    new GuideBlockRequirement(() -> new ItemStack(RefineryMod.STEEL_BOILER_CASING.get()), "Steel Boiler Casing", 85)
+            );
+
+            List<GuideLayer> layers = List.of(
+                    new GuideLayer(0, "Layer 0 (Base, Ports & 3x3 Hearth)", new String[]{
+                            "XWCFX",
+                            "XBBBX",
+                            "XBBBX",
+                            "XBBBX",
+                            "XXSXX"
+                    }, legend),
+                    new GuideLayer(1, "Layer 1 (3x3 Pressure Pipe Core & Walls)", new String[]{
+                            "XXXXX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XXXXX"
+                    }, legend),
+                    new GuideLayer(2, "Layer 2 (3x3 Pressure Pipe Core & Walls)", new String[]{
+                            "XXXXX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XXXXX"
+                    }, legend),
+                    new GuideLayer(3, "Layer 3 (3x3 Pressure Pipe Core & Walls)", new String[]{
+                            "XXXXX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XPPPX",
+                            "XXXXX"
+                    }, legend),
+                    new GuideLayer(4, "Layer 4 (Reinforced Steel Roof)", new String[]{
+                            "XXXXX",
+                            "XXXXX",
+                            "XXXXX",
+                            "XXXXX",
+                            "XXXXX"
+                    }, legend)
+            );
+
+            List<GuideRecipe> recipes = List.of(
+                    new GuideRecipe("Heavy Diesel Steam Generation",
+                            List.of(() -> new ItemStack(RefineryFluids.DIESEL_BUCKET.get()), () -> new ItemStack(Items.WATER_BUCKET, 3)),
+                            List.of(() -> new ItemStack(RefineryFluids.STEAM_BUCKET.get(), 3)),
+                            "Consumes 30 mB Diesel & 300 mB Water per 10-tick cycle to produce 750 mB Steam / cycle (75 mB/t; 3x Small).")
+            );
+
+            register(new GuideEntry(
+                    "large_diesel_boiler",
+                    "Large Diesel Boiler",
+                    "5x5x5 Multiblock • Heavy Liquid Hydrocarbon Steam",
+                    GuideCategory.POWER,
+                    () -> new ItemStack(RefineryMod.LARGE_DIESEL_BOILER_CONTROLLER.get()),
+                    "The Large Diesel Boiler is a heavy 5x5x5 liquid-fueled steam powerhouse, burning continuous streams of refined Diesel or Biofuel.\n\n" +
+                    "• Power Consumption: 0 FE/t (High-output diesel burner array)\n" +
+                    "• Fuel Consumption: Consumes 30 mB Diesel & 300 mB Water per 10-tick cycle\n" +
+                    "• Steam Production: Generates 750 mB High Pressure Steam / cycle (75 mB/t)\n" +
+                    "• Tank Buffers: 64,000 mB Diesel, Water & Steam Reservoirs\n" +
+                    "• Overheat Hazard: Audible warning siren alerts when water is critically depleted. Meltdown explosion occurs after 60 seconds if fuel continues burning dry.",
+                    "Directly pipe refinery distillate products into the Fuel Input Port to power industrial steam complexes seamlessly!",
+                    reqs,
+                    layers,
+                    recipes,
+                    "⚡ Power: Unpowered (Consumes Diesel or Ethanol Fuel; 0 FE/t)"
+            ));
+        }
+
+        // =========================================================================
+        // 8D. STEAM TURBINE GENERATOR (3x3x3 Multiblock)
         // =========================================================================
         {
             Map<Character, LayerSymbol> legend = new HashMap<>();
@@ -771,15 +943,15 @@ public class GuideBookRegistry {
                     GuideCategory.POWER,
                     () -> new ItemStack(RefineryMod.STEAM_TURBINE_CONTROLLER.get()),
                     "The Steam Turbine Generator expands high-pressure steam across a 3-tier rotor shaft to produce massive electrical power.\n\n" +
-                    "• Power Generation: Produces 10,000 FE/t of electricity at full steam consumption\n" +
-                    "• Steam Consumption: Consumes 300 mB/t High-Pressure Steam at full load (matches 1 Large Steam Boiler or 3 Small Boilers)\n" +
-                    "• Water Condensation: Internal surface condenser recaptures 150 mB/t recyclable Water (2:1 steam-to-water ratio)\n" +
-                    "• Energy Export: Internal buffer holds 1,000,000 FE and actively pushes up to 50,000 FE/t to connected energy cables/machines.",
+                    "• Power Generation: Produces up to 10,000 FE/t of electricity (RPM scales dynamically up to 3,000 RPM at peak load)\n" +
+                    "• Steam Consumption: Consumes up to 1,450 mB/s (72.5 mB/t) High-Pressure Steam at full load (matches 1 Large Steam Boiler or 3 Small Boilers)\n" +
+                    "• Water Condensation: Internal surface condenser recaptures 725 mB/s recyclable Water (2:1 steam-to-water ratio)\n" +
+                    "• Energy Export: Internal buffer holds 100,000 FE and actively pushes up to 10,000 FE/t to connected energy cables/machines.",
                     "Route water back to your boiler with an insulated fluid pipe to run continuous, closed-loop zero-loss power generation!",
                     reqs,
                     layers,
                     List.of(),
-                    "⚡ Power Generation: 10,000 FE/t (Buffer: 1,000,000 FE | Max Out: 50,000 FE/t)"
+                    "⚡ Power Generation: 10,000 FE/t (Buffer: 100,000 FE | Max Out: 10,000 FE/t)"
             ));
         }
 

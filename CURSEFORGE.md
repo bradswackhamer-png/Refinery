@@ -232,7 +232,7 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.58.jar`
+`refinery-1.11.60.jar`
 
 ### Display Name
 `Industrial Refinery 1.11.58 (NeoForge 26.3)`
@@ -254,10 +254,12 @@ When uploading your `.jar` file to CurseForge, use these values:
 # Industrial Refinery v1.11.58
 
 ### What's New in v1.11.58:
-- **Steam Turbine & Diesel Generator NeoForge Transaction Safety**:
-  - Fixed a critical ghost energy drain bug in SteamTurbineControllerBlockEntity and DieselGeneratorBlockEntity caused by manual xtract state synchronization during simulated transactions.
-  - When connected to fully-charged energy banks or cables that probed for power, uncommitted simulated extractions previously corrupted internal energy state and bled power each tick.
-  - Now uses standard onEnergyChanged callbacks so energy state only persists on committed transactions.
+- **In-Game Field Manual Boiler Guide Pages (`GuideBookRegistry`)**:
+  - Added dedicated, fully illustrated guide book pages with full multi-layer slice schematics, required block lists, and operational specifications for all four boiler multiblock types:
+    - **Small Steam Boiler (3x3x3)**: 27-block compact solid fuel boiler (1 Controller, 1 Water Port, 1 Fuel Port, 1 Steam Port, 1 Firebox, 1 Pressure Pipe, 21 Steel Boiler Casings) producing up to 100 mB/t steam with 2 fuel slots.
+    - **Large Heavy Steam Boiler (5x5x5)**: 125-block heavy-duty solid fuel boiler (1 Controller, 1 Water Port, 1 Fuel Port, 1 Steam Port, 9 Fireboxes, 27 Pressure Pipes, 85 Steel Boiler Casings) producing up to 300 mB/t steam with 8 fuel slots across 5 layer schematics.
+    - **Small Diesel Boiler (3x3x3)**: 27-block liquid fuel boiler utilizing Diesel, Biodiesel, or Ethanol via fluid fuel port.
+    - **Large Diesel Boiler (5x5x5)**: 125-block industrial liquid fuel boiler producing 300 mB/t steam with high-efficiency fluid burner combustion.
 
 ---
 

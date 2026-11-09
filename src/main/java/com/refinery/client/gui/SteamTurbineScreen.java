@@ -40,9 +40,16 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
 
         if (active) {
             graphics.text(this.font, "ONLINE", 83, 24, 0xFF22C55E, false);
-            graphics.text(this.font, "1800 RPM", 79, 36, 0xFFFBBF24, false);
             int fe = this.menu.getFeGenerated();
-            graphics.text(this.font, "+" + fe + " FE", 78, 48, 0xFFF59E0B, false);
+            int rpm = (int) (((long) fe * 3000) / 10000);
+            if (rpm < 100 && fe > 0) rpm = 100;
+            String rpmStr = (fe > 0 ? rpm : 0) + " RPM";
+            int rx = 100 - this.font.width(rpmStr) / 2;
+            graphics.text(this.font, rpmStr, rx, 36, 0xFFFBBF24, false);
+
+            String feStr = "+" + fe + " FE/t";
+            int fx = 100 - this.font.width(feStr) / 2;
+            graphics.text(this.font, feStr, fx, 48, 0xFFF59E0B, false);
         } else if (!assembled) {
             graphics.text(this.font, "UNFORMED", 79, 32, 0xFFEF4444, false);
             graphics.text(this.font, "INCOMPLETE", 78, 44, 0xFF71717A, false);
@@ -93,7 +100,10 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
 
         // 6. Active Rotating Turbine Blade Indicator inside Monitor (x: 82..118, y: 58..62)
         if (this.menu.isActive()) {
-            long tick = System.currentTimeMillis() / 150;
+            int fe = this.menu.getFeGenerated();
+            int rpm = (int) (((long) fe * 3000) / 10000);
+            long speedDiv = Math.max(30, 200 - (rpm / 20));
+            long tick = System.currentTimeMillis() / speedDiv;
             int phase = (int) (tick % 4);
             int barX = xo + 82 + phase * 9;
             graphics.fill(RenderPipelines.GUI, xo + 82, yo + 59, xo + 118, yo + 61, 0xFF1E293B);
@@ -126,7 +136,7 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
                     Component.literal("High Pressure Steam Buffer").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     Component.literal(this.menu.getSteamAmount() + " / 32,000 mB").withStyle(ChatFormatting.GRAY),
                     Component.literal("Inflow: Connect to Steam Port").withStyle(ChatFormatting.DARK_AQUA),
-                    Component.literal("Consumes up to 300 mB/t at peak load").withStyle(ChatFormatting.WHITE)
+                    Component.literal("Consumes up to 1,450 mB/s (72.5 mB/t) at peak load").withStyle(ChatFormatting.WHITE)
             ), mouseX, mouseY);
             return;
         }
@@ -146,9 +156,11 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
         // Center Monitor / Rotor Hover (x: 73..127, y: 17..71)
         if (mouseX >= xo + 73 && mouseX <= xo + 127 && mouseY >= yo + 17 && mouseY <= yo + 71) {
             boolean active = this.menu.isActive();
+            int fe = this.menu.getFeGenerated();
+            int rpm = (int) (((long) fe * 3000) / 10000);
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Steam Expansion Turbine").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD),
-                    Component.literal("Turbine Speed: " + (active ? "1,800 RPM" : "0 RPM (Idle)")).withStyle(active ? ChatFormatting.YELLOW : ChatFormatting.GRAY),
+                    Component.literal("Turbine Speed: " + (active ? (rpm + " RPM") : "0 RPM (Idle)") + " / 3,000 RPM (Max)").withStyle(active ? ChatFormatting.YELLOW : ChatFormatting.GRAY),
                     Component.literal("Thermodynamic Expansion: " + (active ? "ACTIVE" : "IDLE")).withStyle(active ? ChatFormatting.GREEN : ChatFormatting.GRAY),
                     Component.literal("Converts enthalpy to rotational alternator power").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);

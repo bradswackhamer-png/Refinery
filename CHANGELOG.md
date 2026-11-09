@@ -4,13 +4,35 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-## [1.11.58] - 2026-11-08
+## [1.11.60] - 2026-11-08
+
+### Changed
+- **Boiler & Steam Turbine Thermodynamic Balance Rebalancing (`SmallBoilerControllerBlockEntity`, `LargeBoilerControllerBlockEntity`, `SteamTurbineControllerBlockEntity`)**:
+  - **Small Boilers**: Rebalanced solid fuel steam production to **500 mB/s** (25 mB/t, consuming 12 mB/t water), matching Small Diesel Boilers.
+  - **Large Boilers**: Rebalanced solid fuel steam production to **1,500 mB/s** (75 mB/t, consuming 37 mB/t water), matching Large Diesel Boilers.
+  - **Steam Turbine Steam Requirement**: Tuned steam intake to **1,450 mB/s** (72.5 mB/t average) at peak generation (10,000 FE/t). 1 Large Boiler or 3 Small Boilers (1,500 mB/s) now provide a steady 50 mB/s surplus to keep the 32,000 mB steam buffer full. Recycles 725 mB/s water back into the closed loop.
+- **Dynamic Turbine RPM Scaling & Centered Diagnostic Readout (`SteamTurbineScreen`, `SteamTurbineControllerBlockEntity`)**:
+  - Turbine speed now dynamically scales with power generation up to **3,000 RPM at peak generation** (10,000 FE/t; 0 RPM when idle/standby).
+  - Diagnostic monitor now displays centered text showing exact live RPM (`3000 RPM`) and power (`+10000 FE/t`).
+  - Active turbine blade indicator animation speed and hum sound pitch dynamically increase with RPM.
 
 ### Fixed
-- **Steam Turbine Generator & Diesel Generator NeoForge Transaction Handling (SteamTurbineControllerBlockEntity, DieselGeneratorBlockEntity)**:
-  - Replaced manual xtract(...) state overrides with NeoForge's standard onEnergyChanged(int previousAmount) callback on SimpleEnergyHandler.
-  - Resolved a severe ghost energy drain bug where external simulated transactions (such as AWG cables, fluxducts, or wire networks probing for grid demand) temporarily decremented energy storage and desynchronized the controller's internal nergy field without rolling back when the simulation aborted.
-  - Prevents generators from constantly bleeding generated FE into the void when connected to fully-charged energy storage or satisfied grids.
+- **Fluid Pipe Pipeline Flow Bottleneck & Directional Momentum (`IndustrialPipeBlockEntity`, `RefineryMod`)**:
+  - Fixed an issue where pipes equalized fluid using naive static half-difference division (`(diff + 1) / 2`), halving throughput across every pipe block and throttling long pipelines down to ~24 mB/t.
+  - Implemented directional flow momentum (`recordFluidReceived` and `lastReceivedFrom` tracking): pipes actively push fluid forward along the pipeline into downstream pipes and connected machine ports at the full material transfer rate (Iron: 500 mB/t, Steel: 1,500 mB/t) without distance attenuation or backward sloshing.
+  - Steam turbine steam input port now immediately notifies the controller on fluid insertion to maintain seamless client-server state synchronization.
+
+---
+
+## [1.11.58] - 2026-11-08
+
+### Added
+- **In-Game Field Manual Boiler Guide Pages (`GuideBookRegistry`)**:
+  - Added dedicated, fully illustrated guide book pages with full multi-layer slice schematics, required block lists, and operational specifications for all four boiler multiblock types:
+    - **Small Steam Boiler (3x3x3)**: 27-block compact solid fuel boiler (1 Controller, 1 Water Port, 1 Fuel Port, 1 Steam Port, 1 Firebox, 1 Pressure Pipe, 21 Steel Boiler Casings) producing up to 100 mB/t steam with 2 fuel slots.
+    - **Large Heavy Steam Boiler (5x5x5)**: 125-block heavy-duty solid fuel boiler (1 Controller, 1 Water Port, 1 Fuel Port, 1 Steam Port, 9 Fireboxes, 27 Pressure Pipes, 85 Steel Boiler Casings) producing up to 300 mB/t steam with 8 fuel slots across 5 layer schematics.
+    - **Small Diesel Boiler (3x3x3)**: 27-block liquid fuel boiler utilizing Diesel, Biodiesel, or Ethanol via fluid fuel port.
+    - **Large Diesel Boiler (5x5x5)**: 125-block industrial liquid fuel boiler producing 300 mB/t steam with high-efficiency fluid burner combustion.
 
 ---
 

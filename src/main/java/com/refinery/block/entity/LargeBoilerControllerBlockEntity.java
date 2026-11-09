@@ -43,8 +43,8 @@ import java.util.List;
 public class LargeBoilerControllerBlockEntity extends BlockEntity implements IBoilerController, MenuProvider, WorldlyContainer {
     public static final int TANK_CAPACITY = 64_000;
     public static final int FUEL_SLOTS_COUNT = 8;
-    public static final int WATER_CONSUMPTION = 150;  // 150 mB water per batch (matching 3 small boilers)
-    public static final int STEAM_PRODUCTION = 300;   // 300 mB high pressure steam (matching 3 small boilers)
+    public static final int WATER_CONSUMPTION = 37;  // 37 mB water per tick (740 mB/s; 2:1 steam expansion)
+    public static final int STEAM_PRODUCTION = 75;   // 75 mB high pressure steam per tick (1,500 mB/s; 3x small boiler)
     public static final int MAX_OVERHEAT_TICKS = 1200; // 1 minute = 1200 ticks dry run before explosion
 
     private boolean assembled = false;

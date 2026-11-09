@@ -45,8 +45,8 @@ import java.util.List;
 public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBoilerController, MenuProvider, WorldlyContainer {
     public static final int TANK_CAPACITY = 16_000;
     public static final int FUEL_SLOTS_COUNT = 4;
-    public static final int WATER_CONSUMPTION = 50;  // 50 mB water per batch
-    public static final int STEAM_PRODUCTION = 100; // 100 mB high pressure steam
+    public static final int WATER_CONSUMPTION = 12;  // 12 mB water per tick (240 mB/s; 2:1 steam expansion)
+    public static final int STEAM_PRODUCTION = 25;   // 25 mB high pressure steam per tick (500 mB/s)
     public static final int MAX_OVERHEAT_TICKS = 1200; // 1 minute = 1200 ticks dry run before explosion
 
     private boolean assembled = false;
