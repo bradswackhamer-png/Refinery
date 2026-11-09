@@ -1570,7 +1570,10 @@ public class RefineryMod {
                                 controller::getSteamAmount,
                                 controller::setSteamAmount,
                                 SteamTurbineControllerBlockEntity.STEAM_CAPACITY,
-                                true, false, () -> {});
+                                true, false, () -> {
+                                    controller.setChanged();
+                                    controller.syncToClient();
+                                });
                         case WATER_OUT -> new SingleFluidHandler(
                                 () -> net.minecraft.world.level.material.Fluids.WATER,
                                 controller::getWaterAmount,
@@ -1940,7 +1943,7 @@ public class RefineryMod {
 
         // Capabilities on Native Industrial Pipes (Fluid and Item handling)
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, INDUSTRIAL_PIPE_BE.get(),
-                (be, side) -> (be.getPipeType().handlesFluid() && be.isValveOpen()) ? be.getFluidTank() : null);
+                (be, side) -> (be.getPipeType().handlesFluid() && be.isValveOpen()) ? be.getFluidHandler(side) : null);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, INDUSTRIAL_PIPE_BE.get(),
                 (be, side) -> (be.getPipeType().handlesItems() && be.isValveOpen()) ? VanillaContainerWrapper.of(be) : null);

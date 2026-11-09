@@ -15,4 +15,6 @@ public interface ITurbineController {
     void setWaterAmount(int amt);
     int getEnergyStored();
     int getMaxEnergyStored();
+    void setChanged();
+    default void syncToClient() {}
 }

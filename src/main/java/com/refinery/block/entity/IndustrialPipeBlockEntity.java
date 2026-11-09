@@ -65,6 +65,10 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     // Fluid Tank
     private final GenericFluidTank fluidTank;
 
+    // Directional Fluid Flow Tracking (prevents sloshing and gradient attenuation)
+    private @Nullable Direction lastReceivedFrom = null;
+    private int lastReceivedTicks = 0;
+
     // Item Storage & Traveling Items
     public static class TravelingItem {
         public ItemStack stack;
@@ -277,6 +281,46 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
 
     public GenericFluidTank getFluidTank() {
         return fluidTank;
+    }
+
+    public void recordFluidReceived(@Nullable Direction from) {
+        if (from != null) {
+            this.lastReceivedFrom = from;
+            this.lastReceivedTicks = 3;
+        }
+    }
+
+    public ResourceHandler<FluidResource> getFluidHandler(@Nullable Direction side) {
+        if (!this.pipeType.handlesFluid() || !isValveOpen()) return null;
+        if (side == null) return this.fluidTank;
+        return new ResourceHandler<FluidResource>() {
+            @Override
+            public int size() { return fluidTank.size(); }
+            @Override
+            public FluidResource getResource(int index) { return fluidTank.getResource(index); }
+            @Override
+            public long getAmountAsLong(int index) { return fluidTank.getAmountAsLong(index); }
+            @Override
+            public int getAmountAsInt(int index) { return fluidTank.getAmountAsInt(index); }
+            @Override
+            public long getCapacityAsLong(int index, FluidResource resource) { return fluidTank.getCapacityAsLong(index, resource); }
+            @Override
+            public int getCapacityAsInt(int index, FluidResource resource) { return fluidTank.getCapacityAsInt(index, resource); }
+            @Override
+            public boolean isValid(int index, FluidResource resource) { return fluidTank.isValid(index, resource); }
+            @Override
+            public int insert(int index, FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+                int inserted = fluidTank.insert(index, resource, amount, transaction);
+                if (inserted > 0) {
+                    recordFluidReceived(side);
+                }
+                return inserted;
+            }
+            @Override
+            public int extract(int index, FluidResource resource, int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+                return fluidTank.extract(index, resource, amount, transaction);
+            }
+        };
     }
 
     public List<TravelingItem> getTravelingItems() {
@@ -519,6 +563,13 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
     private void tickFluid(Level level, BlockPos pos) {
         if (!isValveOpen()) return;
 
+        if (this.lastReceivedTicks > 0) {
+            this.lastReceivedTicks--;
+            if (this.lastReceivedTicks == 0) {
+                this.lastReceivedFrom = null;
+            }
+        }
+
         // Active extraction
         if (isExtractor()) {
             int extractRate = material.getTransferRate();
@@ -540,6 +591,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                                         int accepted = fluidTank.insert(0, res, extracted, tx);
                                         if (accepted > 0) {
                                             tx.commit();
+                                            recordFluidReceived(dir);
                                             break;
                                         }
                                     }
@@ -591,6 +643,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                                     if (accepted > 0) {
                                         this.fluidTank.extract(0, fluidRes, accepted, tx);
                                         tx.commit();
+                                        otherPipe.recordFluidReceived(out.getOpposite());
                                     }
                                 }
                             }
@@ -607,7 +660,7 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
             FluidResource fluidRes = FluidResource.of(stored);
             int toTransfer = Math.min(fluidTank.getAmount(), material.getTransferRate());
 
-            // First: Push into connected machines (tanks, boilers, etc.)
+            // First: Push into connected machines (tanks, boilers, steam turbine ports, etc.)
             for (Map.Entry<Direction, PipeConnectionType> entry : connections.entrySet()) {
                 if (entry.getValue() == PipeConnectionType.MACHINE && !isExtractor()) {
                     Direction dir = entry.getKey();
@@ -629,29 +682,60 @@ public class IndustrialPipeBlockEntity extends BlockEntity implements Container,
                 }
             }
 
-            // Second: Equalize / push into connected pipes
+            // Second: Push downstream into connected pipes with directional momentum
+            List<Direction> forwardPipes = new ArrayList<>();
             for (Map.Entry<Direction, PipeConnectionType> entry : connections.entrySet()) {
-                if (entry.getValue() == PipeConnectionType.PIPE) {
-                    Direction dir = entry.getKey();
-                    BlockPos targetPos = pos.relative(dir);
+                if (entry.getValue() == PipeConnectionType.PIPE && entry.getKey() != this.lastReceivedFrom) {
+                    BlockPos targetPos = pos.relative(entry.getKey());
                     BlockEntity targetBe = level.getBlockEntity(targetPos);
                     if (targetBe instanceof IndustrialPipeBlockEntity otherPipe && otherPipe.pipeType.handlesFluid() && otherPipe.isValveOpen()) {
+                        if (otherPipe.pipeType == IndustrialPipeType.VOID || otherPipe.fluidTank.getAmount() < otherPipe.fluidTank.getCapacity()) {
+                            forwardPipes.add(entry.getKey());
+                        }
+                    }
+                }
+            }
+
+            // Fallback: If no downstream pipe found in forward direction, allow equalizing with any connected pipe that has less fluid
+            if (forwardPipes.isEmpty()) {
+                for (Map.Entry<Direction, PipeConnectionType> entry : connections.entrySet()) {
+                    if (entry.getValue() == PipeConnectionType.PIPE) {
+                        BlockPos targetPos = pos.relative(entry.getKey());
+                        BlockEntity targetBe = level.getBlockEntity(targetPos);
+                        if (targetBe instanceof IndustrialPipeBlockEntity otherPipe && otherPipe.pipeType.handlesFluid() && otherPipe.isValveOpen()) {
+                            if (otherPipe.pipeType == IndustrialPipeType.VOID || (this.fluidTank.getAmount() - otherPipe.fluidTank.getAmount() > 1)) {
+                                forwardPipes.add(entry.getKey());
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!forwardPipes.isEmpty()) {
+                int availableToTransfer = Math.min(fluidTank.getAmount(), material.getTransferRate());
+                int share = Math.max(1, availableToTransfer / forwardPipes.size());
+                for (Direction dir : forwardPipes) {
+                    if (availableToTransfer <= 0) break;
+                    BlockPos targetPos = pos.relative(dir);
+                    BlockEntity targetBe = level.getBlockEntity(targetPos);
+                    if (targetBe instanceof IndustrialPipeBlockEntity otherPipe) {
                         if (otherPipe.pipeType == IndustrialPipeType.VOID) {
                             try (Transaction tx = Transaction.openRoot()) {
-                                fluidTank.extract(0, fluidRes, toTransfer, tx);
+                                fluidTank.extract(0, fluidRes, availableToTransfer, tx);
                                 tx.commit();
                             }
-                            return;
+                            break;
                         }
-                        int diff = this.fluidTank.getAmount() - otherPipe.fluidTank.getAmount();
-                        if (diff > 1) {
-                            int toEqualize = (diff + 1) / 2;
-                            int pushAmt = Math.min(toEqualize, material.getTransferRate());
+                        int space = otherPipe.fluidTank.getCapacity() - otherPipe.fluidTank.getAmount();
+                        int pushAmt = Math.min(share, Math.min(availableToTransfer, space));
+                        if (pushAmt > 0) {
                             try (Transaction tx = Transaction.openRoot()) {
                                 int accepted = otherPipe.fluidTank.insert(0, fluidRes, pushAmt, tx);
                                 if (accepted > 0) {
                                     this.fluidTank.extract(0, fluidRes, accepted, tx);
                                     tx.commit();
+                                    otherPipe.recordFluidReceived(dir.getOpposite());
+                                    availableToTransfer -= accepted;
                                 }
                             }
                         }

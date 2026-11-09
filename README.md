@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.58 (In-Game Field Manual Boiler Guide Pages: Small & Large Steam and Diesel Boilers)](#version-11158-in-game-field-manual-boiler-guide-pages-small--large-steam-and-diesel-boilers)
    - [Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)](#version-11157-large-boiler-3d-model-block-hiding-steam-turbine-dynamic-load-throttling--diagnostic-monitor-sync)
    - [Version 1.11.54 (Multi-Smelter Plank Pyrolysis: Planks to Charcoal)](#version-11154-multi-smelter-plank-pyrolysis-planks-to-charcoal)
    - [Version 1.11.51 (Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix)](#version-11151-iron-item-pipe--cast-iron-fluid-pipe-recipe-collision-fix)
@@ -1859,6 +1860,16 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.58 (In-Game Field Manual Boiler Guide Pages: Small & Large Steam and Diesel Boilers)
+- **In-Game Field Manual Boiler Guide Pages (`GuideBookRegistry`)**:
+  - Added dedicated, fully illustrated guide book pages with full multi-layer slice schematics, required block lists, and operational specifications for all four boiler multiblock types:
+    - **Small Steam Boiler (3x3x3)**: 27-block compact solid fuel boiler (1 Controller, 1 Water Port, 1 Fuel Port, 1 Steam Port, 1 Firebox, 1 Pressure Pipe, 21 Steel Boiler Casings) producing up to 100 mB/t steam with 2 fuel slots.
+    - **Large Heavy Steam Boiler (5x5x5)**: 125-block heavy-duty solid fuel boiler (1 Controller, 1 Water Port, 1 Fuel Port, 1 Steam Port, 9 Fireboxes, 27 Pressure Pipes, 85 Steel Boiler Casings) producing up to 300 mB/t steam with 8 fuel slots across 5 layer schematics.
+    - **Small Diesel Boiler (3x3x3)**: 27-block liquid fuel boiler utilizing Diesel, Biodiesel, or Ethanol via fluid fuel port.
+    - **Large Diesel Boiler (5x5x5)**: 125-block industrial liquid fuel boiler producing 300 mB/t steam with high-efficiency fluid burner combustion.
 
 ---
 
