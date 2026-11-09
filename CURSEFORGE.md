@@ -266,6 +266,10 @@ When uploading your `.jar` file to CurseForge, use these values:
   - Fixed an issue where pipes equalized fluid using naive half-difference division (`(diff + 1) / 2`), halving throughput across every pipe block and throttling long pipelines down to ~24 mB/t.
   - Implemented directional flow momentum: pipes actively push fluid forward along the pipeline into downstream pipes and connected machine ports at the full material transfer rate (Iron: 500 mB/t, Steel: 1,500 mB/t) without distance attenuation or backward sloshing.
   - Steam turbine steam input port now immediately notifies the controller on fluid insertion for real-time sync.
+- **Steam Turbine & Diesel Generator NeoForge Transaction Safety**:
+  - Fixed a critical ghost energy drain bug in SteamTurbineControllerBlockEntity and DieselGeneratorBlockEntity caused by manual xtract state synchronization during simulated transactions.
+  - When connected to fully-charged energy storage or cables/wires that probe for power, uncommitted simulated extractions previously corrupted internal energy state and bled power each tick.
+  - Now uses standard onEnergyChanged callbacks so energy state only persists on committed transactions.
 
 ---
 

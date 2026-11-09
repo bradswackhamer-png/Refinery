@@ -21,6 +21,10 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
   - Fixed an issue where pipes equalized fluid using naive static half-difference division (`(diff + 1) / 2`), halving throughput across every pipe block and throttling long pipelines down to ~24 mB/t.
   - Implemented directional flow momentum (`recordFluidReceived` and `lastReceivedFrom` tracking): pipes actively push fluid forward along the pipeline into downstream pipes and connected machine ports at the full material transfer rate (Iron: 500 mB/t, Steel: 1,500 mB/t) without distance attenuation or backward sloshing.
   - Steam turbine steam input port now immediately notifies the controller on fluid insertion to maintain seamless client-server state synchronization.
+- **Steam Turbine Generator & Diesel Generator NeoForge Transaction Handling (SteamTurbineControllerBlockEntity, DieselGeneratorBlockEntity)**:
+  - Replaced manual state assignments in xtract(...) with NeoForge's standard onEnergyChanged(int previousAmount) handler on SimpleEnergyHandler.
+  - Resolved a severe ghost energy drain bug where external simulated transactions (such as AWG cables, fluxducts, or wire networks probing for grid demand) temporarily decremented energy storage and desynchronized the controller's internal nergy field without rolling back when the simulation aborted.
+  - Prevents generators from constantly bleeding generated FE into the void when connected to fully-charged energy storage banks or satisfied grids.
 
 ---
 
