@@ -152,9 +152,9 @@ public class SteelBoilerCasingBlock extends Block {
     }
 
     public static BlockEntity findNearbyController(Level level, BlockPos pos) {
-        for (int dx = -3; dx <= 3; dx++) {
-            for (int dy = -3; dy <= 3; dy++) {
-                for (int dz = -3; dz <= 3; dz++) {
+        for (int dx = -5; dx <= 5; dx++) {
+            for (int dy = -5; dy <= 5; dy++) {
+                for (int dz = -5; dz <= 5; dz++) {
                     BlockEntity be = level.getBlockEntity(pos.offset(dx, dy, dz));
                     if (be instanceof SmallBoilerControllerBlockEntity sbe && sbe.isAssembled()) {
                         return sbe;

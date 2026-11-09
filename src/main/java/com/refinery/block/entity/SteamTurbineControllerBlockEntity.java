@@ -35,7 +35,7 @@ import java.util.List;
 public class SteamTurbineControllerBlockEntity extends BlockEntity implements ITurbineController, MenuProvider {
     public static final int STEAM_CAPACITY = 32_000;
     public static final int WATER_CAPACITY = 16_000;
-    public static final int ENERGY_CAPACITY = 1_000_000;
+    public static final int ENERGY_CAPACITY = 100_000;
     public static final int STEAM_PER_TICK = 300; // Consumes up to 300 mB steam per tick (3x Small Boiler production)
     public static final int ENERGY_PER_TICK = 10_000; // Generates 10,000 FE/t at full steam consumption
     public static final int WATER_PER_STEAM_RATIO = 2; // 2 mB steam -> 1 mB water (condensed)
@@ -46,8 +46,10 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     private int energy = 0;
     private int blueprintProjectionTicks = 0;
     private int structureCheckCooldown = 0;
+    private int lastFeGenerated = 0;
+    private int activeTicks = 0;
 
-    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 0, 50_000) {
+    public final SimpleEnergyHandler energyStorage = new SimpleEnergyHandler(ENERGY_CAPACITY, 0, ENERGY_PER_TICK) {
         @Override
         public void set(int amount) {
             super.set(amount);
@@ -59,6 +61,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
         public int extract(int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
             int extracted = super.extract(amount, transaction);
             SteamTurbineControllerBlockEntity.this.energy = this.energy;
+            setChanged();
             return extracted;
         }
     };
@@ -71,7 +74,8 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
                 case 1 -> SteamTurbineControllerBlockEntity.this.waterAmount;
                 case 2 -> SteamTurbineControllerBlockEntity.this.energy;
                 case 3 -> SteamTurbineControllerBlockEntity.this.assembled ? 1 : 0;
-                case 4 -> (SteamTurbineControllerBlockEntity.this.assembled && SteamTurbineControllerBlockEntity.this.steamAmount > 0) ? 1 : 0;
+                case 4 -> (SteamTurbineControllerBlockEntity.this.assembled && SteamTurbineControllerBlockEntity.this.activeTicks > 0) ? 1 : 0;
+                case 5 -> SteamTurbineControllerBlockEntity.this.lastFeGenerated;
                 default -> 0;
             };
         }
@@ -81,13 +85,16 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
             switch (index) {
                 case 0 -> SteamTurbineControllerBlockEntity.this.steamAmount = value;
                 case 1 -> SteamTurbineControllerBlockEntity.this.waterAmount = value;
+                case 2 -> SteamTurbineControllerBlockEntity.this.energy = value;
                 case 3 -> SteamTurbineControllerBlockEntity.this.assembled = (value != 0);
+                case 4 -> SteamTurbineControllerBlockEntity.this.activeTicks = (value != 0 ? 10 : 0);
+                case 5 -> SteamTurbineControllerBlockEntity.this.lastFeGenerated = value;
             }
         }
 
         @Override
         public int getCount() {
-            return 5;
+            return 6;
         }
     };
 
@@ -265,6 +272,8 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
 
                 addEnergy(feGenerated);
                 this.waterAmount += waterCondensed;
+                this.lastFeGenerated = feGenerated;
+                this.activeTicks = 10;
                 isActive = true;
 
                 // Turbine hum sound & spinning cloud particles
@@ -282,20 +291,23 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
             }
         }
 
+        if (!isActive) {
+            if (this.activeTicks > 0) {
+                this.activeTicks--;
+            }
+            if (this.activeTicks == 0) {
+                this.lastFeGenerated = 0;
+            }
+        }
+
         // Auto-transfer condensed water to adjacent pipes/handlers without requiring extraction pipes
         if (this.waterAmount > 0) {
             pushWaterFromPos(serverLevel, pos);
-            Direction facing = state.getValue(SteamTurbineControllerBlock.FACING);
-            BlockPos waterPortPos = getRelativePos(0, 0, 2, facing);
-            pushWaterFromPos(serverLevel, waterPortPos);
         }
 
         // Auto-transfer generated energy to adjacent consumers/pipes
         if (this.energy > 0) {
             pushEnergyFromPos(serverLevel, pos);
-            Direction facing = state.getValue(SteamTurbineControllerBlock.FACING);
-            BlockPos energyPortPos = getRelativePos(1, 0, 0, facing);
-            pushEnergyFromPos(serverLevel, energyPortPos);
         }
 
         if (wasActive != isActive) {
@@ -321,7 +333,7 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
 
             var handler = level.getCapability(Capabilities.Energy.BLOCK, target, dir.getOpposite());
             if (handler != null) {
-                int toPush = Math.min(this.energy, 50_000);
+                int toPush = Math.min(this.energy, ENERGY_PER_TICK);
                 try (Transaction tx = Transaction.openRoot()) {
                     int inserted = handler.insert(toPush, tx);
                     if (inserted > 0) {
@@ -373,9 +385,11 @@ public class SteamTurbineControllerBlockEntity extends BlockEntity implements IT
     }
 
     private void addEnergy(int amount) {
-        int toAdd = Math.min(amount, ENERGY_CAPACITY - this.energy);
+        int space = ENERGY_CAPACITY - this.energy;
+        int toAdd = Math.min(amount, space);
         if (toAdd > 0) {
-            this.energyStorage.set(this.energy + toAdd);
+            this.energy += toAdd;
+            this.energyStorage.set(this.energy);
             setChanged();
         }
     }

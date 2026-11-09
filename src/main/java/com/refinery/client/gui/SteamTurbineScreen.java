@@ -41,7 +41,8 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
         if (active) {
             graphics.text(this.font, "ONLINE", 83, 24, 0xFF22C55E, false);
             graphics.text(this.font, "1800 RPM", 79, 36, 0xFFFBBF24, false);
-            graphics.text(this.font, "+1000 FE", 80, 48, 0xFFF59E0B, false);
+            int fe = this.menu.getFeGenerated();
+            graphics.text(this.font, "+" + fe + " FE", 78, 48, 0xFFF59E0B, false);
         } else if (!assembled) {
             graphics.text(this.font, "UNFORMED", 79, 32, 0xFFEF4444, false);
             graphics.text(this.font, "INCOMPLETE", 78, 44, 0xFF71717A, false);
@@ -85,7 +86,7 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
         // 5. Energy Storage Battery (well interior x: 139, y: 28, w: 22, h: 38)
         int energy = this.menu.getEnergyStored();
         if (energy > 0) {
-            int fillH = Math.min(38, (int) ((energy / 1000000.0f) * 38));
+            int fillH = Math.min(38, (int) ((energy / 100000.0f) * 38));
             graphics.fill(RenderPipelines.GUI, xo + 139, yo + 28 + (38 - fillH), xo + 139 + 22, yo + 28 + 38, 0xFFEAB308);
             graphics.fill(RenderPipelines.GUI, xo + 139, yo + 28 + (38 - fillH), xo + 139 + 22, yo + 28 + (38 - fillH) + 1, 0xFFFEF08A);
         }
@@ -125,7 +126,7 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
                     Component.literal("High Pressure Steam Buffer").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     Component.literal(this.menu.getSteamAmount() + " / 32,000 mB").withStyle(ChatFormatting.GRAY),
                     Component.literal("Inflow: Connect to Steam Port").withStyle(ChatFormatting.DARK_AQUA),
-                    Component.literal("Consumes up to 100 mB/t at peak load").withStyle(ChatFormatting.WHITE)
+                    Component.literal("Consumes up to 300 mB/t at peak load").withStyle(ChatFormatting.WHITE)
             ), mouseX, mouseY);
             return;
         }
@@ -148,7 +149,7 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Steam Expansion Turbine").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD),
                     Component.literal("Turbine Speed: " + (active ? "1,800 RPM" : "0 RPM (Idle)")).withStyle(active ? ChatFormatting.YELLOW : ChatFormatting.GRAY),
-                    Component.literal("Thermodynamic Expansion: ACTIVE").withStyle(active ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY),
+                    Component.literal("Thermodynamic Expansion: " + (active ? "ACTIVE" : "IDLE")).withStyle(active ? ChatFormatting.GREEN : ChatFormatting.GRAY),
                     Component.literal("Converts enthalpy to rotational alternator power").withStyle(ChatFormatting.GRAY)
             ), mouseX, mouseY);
             return;
@@ -158,9 +159,9 @@ public class SteamTurbineScreen extends AbstractContainerScreen<SteamTurbineMenu
         if (mouseX >= xo + 137 && mouseX <= xo + 162 && mouseY >= yo + 27 && mouseY <= yo + 67) {
             graphics.setComponentTooltipForNextFrame(this.font, List.of(
                     Component.literal("Internal Energy Battery").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                    Component.literal(this.menu.getEnergyStored() + " / 1,000,000 FE").withStyle(ChatFormatting.GRAY),
-                    Component.literal("Generation: 10,000 FE/t").withStyle(ChatFormatting.YELLOW),
-                    Component.literal("Max Output: 50,000 FE/t").withStyle(ChatFormatting.GREEN)
+                    Component.literal(this.menu.getEnergyStored() + " / 100,000 FE").withStyle(ChatFormatting.GRAY),
+                    Component.literal("Generation: 10,000 FE/t (peak)").withStyle(ChatFormatting.YELLOW),
+                    Component.literal("Max Output: 10,000 FE/t").withStyle(ChatFormatting.GREEN)
             ), mouseX, mouseY);
         }
     }

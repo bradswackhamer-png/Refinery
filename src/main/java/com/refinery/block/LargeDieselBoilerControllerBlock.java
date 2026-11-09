@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
 
 public class LargeDieselBoilerControllerBlock extends Block implements EntityBlock {
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
-    public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
+    public static final BooleanProperty ASSEMBLED = SmallBoilerControllerBlock.ASSEMBLED;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     public static final BooleanProperty BLUEPRINT = BooleanProperty.create("blueprint");
 

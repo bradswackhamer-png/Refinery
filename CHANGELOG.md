@@ -4,6 +4,39 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.57] - 2026-11-08
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.57] - 2026-11-08
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.57] - 2026-11-08
+
+### Fixed
+- **Large Boiler & Diesel Boiler Multiblock Block Hiding (`LargeBoilerControllerBlock`, `LargeDieselBoilerControllerBlock`, `SmallDieselBoilerControllerBlock`, `SteelBoilerCasingBlock`)**:
+  - Unified the `ASSEMBLED` blockstate boolean property across all boiler controllers and member blocks (`SmallBoilerControllerBlock.ASSEMBLED`).
+  - Fixed an issue where the 124 member blocks (casings, pressure pipes, fireboxes, and ports) failed to hide their physical voxel models upon multiblock formation, obscuring the monolithic 5x5x5 3D boiler package model.
+  - Expanded `SteelBoilerCasingBlock.findNearbyController` search radius from 3 to 5 blocks to guarantee all blocks across 5x5x5 multiblocks properly discover and trigger their controller.
+- **Steam Turbine Generator Diagnostic Monitor & Operational State (`SteamTurbineControllerBlockEntity`, `SteamTurbineMenu`, `SteamTurbineScreen`)**:
+  - Fixed active generation state detection in ContainerData: the turbine no longer incorrectly reports `STANDBY / 0 RPM / 0 FE/t` when consuming steam every tick down to 0.
+  - Added live generated power sync (`menu.getFeGenerated()`), dynamically displaying actual power output (e.g. `+10,000 FE/t` or throttled load output) instead of static/idle text.
+  - Corrected steam buffer tooltip typo from `100 mB/t` to `300 mB/t` at peak load.
+  - Fixed rotor tooltip showing "ACTIVE" in dark gray during standby; now correctly shows `ACTIVE` (green) or `IDLE` (gray).
+- **Steam Turbine Generator Energy Sync & Dynamic Load Throttling (`SteamTurbineControllerBlockEntity`, `TurbinePortBlockEntity`)**:
+  - Fixed broken `energyStorage.extract(...)` logic that self-assigned `this.energy = this.energy;` instead of querying `getAmount()`, preventing external energy extraction from updating the block entity state.
+  - Removed duplicate energy and water auto-push logic from the controller BE that collided with the dedicated energy and water output ports.
+  - Capped auto-push rate to the rated `ENERGY_PER_TICK` (10,000 FE/t) and streamlined internal battery capacity to 100,000 FE so the turbine rapidly fills surplus storage and throttles steam consumption to match external cable/battery draw (e.g. 240 mB/t at 8,000 FE/t load, leaving 60 mB/t boiler surplus to accumulate in the steam buffer).
+
+---
+
 ## [1.11.54] - 2026-11-08
 
 ### Changed
@@ -15,6 +48,25 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ### Changed
 - Mod update
+
+---
+
+## [1.11.57] - 2026-11-08
+
+### Fixed
+- **Large Boiler & Diesel Boiler Multiblock Block Hiding (`LargeBoilerControllerBlock`, `LargeDieselBoilerControllerBlock`, `SmallDieselBoilerControllerBlock`, `SteelBoilerCasingBlock`)**:
+  - Unified the `ASSEMBLED` blockstate boolean property across all boiler controllers and member blocks (`SmallBoilerControllerBlock.ASSEMBLED`).
+  - Fixed an issue where the 124 member blocks (casings, pressure pipes, fireboxes, and ports) failed to hide their physical voxel models upon multiblock formation, obscuring the monolithic 5x5x5 3D boiler package model.
+  - Expanded `SteelBoilerCasingBlock.findNearbyController` search radius from 3 to 5 blocks to guarantee all blocks across 5x5x5 multiblocks properly discover and trigger their controller.
+- **Steam Turbine Generator Diagnostic Monitor & Operational State (`SteamTurbineControllerBlockEntity`, `SteamTurbineMenu`, `SteamTurbineScreen`)**:
+  - Fixed active generation state detection in ContainerData: the turbine no longer incorrectly reports `STANDBY / 0 RPM / 0 FE/t` when consuming steam every tick down to 0.
+  - Added live generated power sync (`menu.getFeGenerated()`), dynamically displaying actual power output (e.g. `+10,000 FE/t` or throttled load output) instead of static/idle text.
+  - Corrected steam buffer tooltip typo from `100 mB/t` to `300 mB/t` at peak load.
+  - Fixed rotor tooltip showing "ACTIVE" in dark gray during standby; now correctly shows `ACTIVE` (green) or `IDLE` (gray).
+- **Steam Turbine Generator Energy Sync & Dynamic Load Throttling (`SteamTurbineControllerBlockEntity`, `TurbinePortBlockEntity`)**:
+  - Fixed broken `energyStorage.extract(...)` logic that self-assigned `this.energy = this.energy;` instead of querying `getAmount()`, preventing external energy extraction from updating the block entity state.
+  - Removed duplicate energy and water auto-push logic from the controller BE that collided with the dedicated energy and water output ports.
+  - Capped auto-push rate to the rated `ENERGY_PER_TICK` (10,000 FE/t) and streamlined internal battery capacity to 100,000 FE so the turbine rapidly fills surplus storage and throttles steam consumption to match external cable/battery draw (e.g. 240 mB/t at 8,000 FE/t load, leaving 60 mB/t boiler surplus to accumulate in the steam buffer).
 
 ---
 

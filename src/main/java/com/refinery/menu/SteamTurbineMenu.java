@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class SteamTurbineMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 5;
+    public static final int DATA_COUNT = 6;
 
     private final ContainerData data;
 
@@ -56,6 +56,10 @@ public class SteamTurbineMenu extends AbstractContainerMenu {
 
     public boolean isActive() {
         return this.data.get(4) != 0;
+    }
+
+    public int getFeGenerated() {
+        return this.data.get(5);
     }
 
     @Override

@@ -145,7 +145,7 @@ public class TurbinePortBlockEntity extends BlockEntity {
 
                 var handler = level.getCapability(Capabilities.Energy.BLOCK, target, dir.getOpposite());
                 if (handler != null) {
-                    int toPush = Math.min(controller.getEnergyStored(), 50_000);
+                    int toPush = Math.min(controller.getEnergyStored(), SteamTurbineControllerBlockEntity.ENERGY_PER_TICK);
                     try (Transaction tx = Transaction.openRoot()) {
                         int inserted = handler.insert(toPush, tx);
                         if (inserted > 0) {

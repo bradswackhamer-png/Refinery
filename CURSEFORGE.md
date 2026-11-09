@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.54.jar`
+`refinery-1.11.57.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.54 (NeoForge 26.3)`
+`Industrial Refinery 1.11.57 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,24 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.57
+
+### What's New in v1.11.57:
+- **Large Boiler & Diesel Boiler Multiblock Block Hiding**:
+  - Unified the `ASSEMBLED` blockstate property across all boiler controllers and member blocks.
+  - Fixed an issue where the 124 member blocks failed to hide upon multiblock formation, obscuring the monolithic 5x5x5 3D boiler model.
+  - Expanded casing controller search radius from 3 to 5 blocks to guarantee full 5x5x5 structure coverage when clicked or broken.
+- **Steam Turbine Generator Diagnostic Monitor & Operational State**:
+  - Fixed active state detection in ContainerData: the turbine now correctly shows `ONLINE / 1,800 RPM` and live generated power (e.g. `+10,000 FE/t` or throttled load output) instead of `STANDBY / 0 RPM / 0 FE/t`.
+  - Fixed steam buffer tooltip typo (`300 mB/t` at peak load, previously stated `100 mB/t`).
+  - Fixed rotor expansion tooltip state (`ACTIVE` vs `IDLE`).
+- **Steam Turbine Generator Energy Sync & Dynamic Load Throttling**:
+  - Fixed `energyStorage.extract(...)` self-assignment bug so external energy extraction correctly synchronizes with the controller's energy level.
+  - Removed duplicate auto-push logic between the controller BE and dedicated output ports.
+  - Capped energy push rate to 10,000 FE/t and streamlined internal buffer to 100,000 FE, enabling prompt load-following throttling (e.g. at an 8,000 FE/t cable load, the turbine consumes 240 mB/t steam, allowing surplus steam from a Large Boiler to fill the 32,000 mB steam buffer).
+
+---
+
 # Industrial Refinery v1.11.54
 
 ### What's New in v1.11.54:

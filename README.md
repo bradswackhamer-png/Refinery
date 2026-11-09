@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)](#version-11157-large-boiler-3d-model-block-hiding-steam-turbine-dynamic-load-throttling--diagnostic-monitor-sync)
    - [Version 1.11.54 (Multi-Smelter Plank Pyrolysis: Planks to Charcoal)](#version-11154-multi-smelter-plank-pyrolysis-planks-to-charcoal)
    - [Version 1.11.51 (Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix)](#version-11151-iron-item-pipe--cast-iron-fluid-pipe-recipe-collision-fix)
    - [Version 1.11.49 (Industrial Diesel Generator Single-Item Drop Fix)](#version-11149-industrial-diesel-generator-single-item-drop-fix)
@@ -1858,6 +1859,22 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)
+- **Large Boiler & Diesel Boiler Multiblock Block Hiding (`LargeBoilerControllerBlock`, `LargeDieselBoilerControllerBlock`, `SmallDieselBoilerControllerBlock`, `SteelBoilerCasingBlock`)**:
+  - Unified the `ASSEMBLED` blockstate boolean property across all boiler controllers and member blocks using `SmallBoilerControllerBlock.ASSEMBLED`.
+  - Fixed an issue where the 124 member blocks (casing, pressure piping, fireboxes, and ports) did not hide upon assembly, obscuring the 5x5x5 3D monolithic boiler model.
+  - Expanded `SteelBoilerCasingBlock.findNearbyController` search radius from 3 to 5 blocks to guarantee full 5x5x5 structure coverage when clicked or broken.
+- **Steam Turbine Generator Diagnostic Monitor & Operational State (`SteamTurbineControllerBlockEntity`, `SteamTurbineMenu`, `SteamTurbineScreen`)**:
+  - Fixed active state detection in ContainerData: the turbine now correctly shows `ONLINE / 1,800 RPM` and live generated power (e.g. `+10,000 FE/t` or throttled load output) instead of `STANDBY / 0 RPM / 0 FE/t`.
+  - Fixed steam buffer tooltip typo (`300 mB/t` at peak load, previously stated `100 mB/t`).
+  - Fixed rotor expansion tooltip state (`ACTIVE` vs `IDLE`).
+- **Steam Turbine Generator Energy Sync & Dynamic Load Throttling (`SteamTurbineControllerBlockEntity`, `TurbinePortBlockEntity`)**:
+  - Fixed `energyStorage.extract(...)` self-assignment bug so external energy extraction correctly synchronizes with the controller's energy level.
+  - Removed duplicate auto-push logic between the controller BE and dedicated output ports.
+  - Capped energy push rate to 10,000 FE/t and streamlined internal buffer to 100,000 FE, enabling prompt load-following throttling (e.g. at an 8,000 FE/t cable load, the turbine consumes 240 mB/t steam, allowing surplus steam from a Large Boiler to fill the 32,000 mB steam buffer).
 
 ---
 
