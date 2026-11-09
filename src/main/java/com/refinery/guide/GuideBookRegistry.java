@@ -557,7 +557,11 @@ public class GuideBookRegistry {
                     new GuideRecipe("Parallel 8-Slot Smelting",
                             List.of(() -> new ItemStack(Items.RAW_COPPER, 8), () -> new ItemStack(Items.COAL)),
                             List.of(() -> new ItemStack(Items.COPPER_INGOT, 8)),
-                            "Smelts 8 items simultaneously in parallel, consuming fuel or RF evenly across all batches.")
+                            "Smelts 8 items simultaneously in parallel, consuming fuel or RF evenly across all batches."),
+                    new GuideRecipe("Plank Pyrolysis (Planks to Charcoal)",
+                            List.of(() -> new ItemStack(Items.OAK_PLANKS, 8)),
+                            List.of(() -> new ItemStack(Items.CHARCOAL, 8)),
+                            "Converts wooden planks directly into Charcoal in parallel at high temperatures.")
             );
 
             register(new GuideEntry(
@@ -570,7 +574,7 @@ public class GuideBookRegistry {
                     "• Dual Power Operation:\n" +
                     "  1. Electric Induction: Consumes 5,000 FE/t of RF/FE power via connected cables or the Fuel/Energy Port. Internal buffer: 1,000,000 FE (Max input: 50,000 FE/t).\n" +
                     "  2. Solid Fuel: Burns solid fuels (Coal, Charcoal, Bitumen) in its fuel slot (0 FE/t).\n" +
-                    "• Parallel Throughput: Smelts up to 8 batches simultaneously!",
+                    "• Parallel Throughput: Smelts up to 8 batches simultaneously (ores, metals, and converts wooden planks to Charcoal)!",
                     "Connect an Input Port on the left and Output Port on the right to fully automate your ore smelting pipeline!",
                     reqs,
                     layers,

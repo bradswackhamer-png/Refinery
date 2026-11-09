@@ -321,6 +321,9 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
 
     public ItemStack getSmeltingResult(ServerLevel level, ItemStack stack) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
+        if (stack.is(ItemTags.PLANKS)) {
+            return new ItemStack(Items.CHARCOAL);
+        }
         Optional<RecipeHolder<SmeltingRecipe>> recipe = level.recipeAccess().getRecipeFor(
                 RecipeType.SMELTING,
                 new SingleRecipeInput(stack),
@@ -331,6 +334,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
 
     public boolean canSmelt(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        if (stack.is(ItemTags.PLANKS)) return true;
         if (this.level instanceof ServerLevel serverLevel) {
             return !getSmeltingResult(serverLevel, stack).isEmpty();
         }
@@ -612,6 +616,13 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         } else {
             return new int[]{16}; // Sides accept fuel
         }
+    }
+
+    @Override
+    public boolean canPlaceItem(int index, ItemStack stack) {
+        if (index >= 0 && index < 8) return canSmelt(stack);
+        if (index == 16) return getFuelBurnDuration(stack) > 0;
+        return false;
     }
 
     @Override

@@ -205,10 +205,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.47.jar`
+`refinery-1.11.54.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.47 (NeoForge 26.3)`
+`Industrial Refinery 1.11.54 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -224,6 +224,39 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.54
+
+### What's New in v1.11.54:
+- **Multi-Smelter Plank Pyrolysis (Planks to Charcoal)**:
+  - Added support for converting any wooden planks (`#minecraft:planks`) directly into Charcoal (`minecraft:charcoal`) inside the 5x4x3 Heavy Multi-Smelter.
+  - Multi-Smelter input slots now accept planks and smelt them in parallel at full speed (5 seconds per batch) using electric induction or solid fuel.
+  - Shift-clicking in the Multi-Smelter GUI now prioritizes loading smeltable goods (planks, logs, ores) into input slots before overflowing to the combustion fuel slot.
+  - Updated the in-game Field Manual Guide Book with the Plank Pyrolysis recipe details.
+
+---
+
+# Industrial Refinery v1.11.51
+
+### What's New in v1.11.51:
+- **Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix (`cast_iron_fluid_pipe.json`)**:
+  - Resolved recipe conflict where Iron Item Pipes and Cast Iron Fluid Pipes shared the same shaped recipe (`iron_ingot + glass + iron_ingot`).
+  - Restored Iron Item Pipe as the exclusive owner of the classic horizontal `iron_ingot + glass + iron_ingot` recipe.
+  - Cast Iron Fluid Pipe now crafts using `iron_bars + glass + iron_bars` (`data/refinery/recipe/cast_iron_fluid_pipe.json`).
+  - Added an alternative metallurgical recipe using Iron Ingots and Coal/Charcoal (`data/refinery/recipe/cast_iron_fluid_pipe_from_coal.json`).
+
+---
+
+# Industrial Refinery v1.11.49
+
+### What's New in v1.11.49:
+- **Industrial Diesel Generator Single-Item Drop Fix (`DieselGeneratorBlock`)**:
+  - Fixed an issue where destroying a placed Industrial Diesel Generator in survival mode dropped two generator items.
+  - Overrode `getDrops` in Java so that only the master `LEFT` block drops the single generator item (`refinery:diesel_generator`) while the slave `RIGHT` block returns empty drops.
+  - Updated `playerWillDestroy` to safely drop and clear container contents, remove the partner block silently with flag 35 and break particles, and pop strictly 1 generator item only when a survival player breaks the non-master `RIGHT` block.
+  - Added `data/refinery/loot_tables/blocks/diesel_generator.json` and ensured both `loot_table` and `loot_tables` enforce `part = left` state conditions.
+
+---
+
 # Industrial Refinery v1.11.47
 
 ### What's New in v1.11.47:

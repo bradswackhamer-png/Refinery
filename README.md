@@ -56,6 +56,9 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.54 (Multi-Smelter Plank Pyrolysis: Planks to Charcoal)](#version-11154-multi-smelter-plank-pyrolysis-planks-to-charcoal)
+   - [Version 1.11.51 (Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix)](#version-11151-iron-item-pipe--cast-iron-fluid-pipe-recipe-collision-fix)
+   - [Version 1.11.49 (Industrial Diesel Generator Single-Item Drop Fix)](#version-11149-industrial-diesel-generator-single-item-drop-fix)
    - [Version 1.11.47 (Autarchic Chipset 4x Recipe Output)](#version-11147-autarchic-chipset-4x-recipe-output)
    - [Version 1.11.45 (Per-Tick Machine Energy Requirements, 4x Faster Casting Channel Flow, & Anti-Bounce-Back)](#version-11145-per-tick-machine-energy-requirements-4x-faster-casting-channel-flow--anti-bounce-back)
    - [Version 1.11.44 (Arc Melter 50k FE Start Threshold, Ground-Level Casting Input Port, 1:1 Water Quenching & JEI Hologram Name Parity)](#version-11144-arc-melter-50k-fe-start-threshold-ground-level-casting-input-port-11-water-quenching--jei-hologram-name-parity)
@@ -1855,6 +1858,33 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.54 (Multi-Smelter Plank Pyrolysis: Planks to Charcoal)
+- **Multi-Smelter Plank Pyrolysis (Planks to Charcoal) (`MultiSmelterControllerBlockEntity`, `MultiSmelterMenu`, `GuideBookRegistry`)**:
+  - Added support for converting any wooden planks (`#minecraft:planks`) directly into Charcoal (`minecraft:charcoal`) inside the 5x4x3 Heavy Multi-Smelter.
+  - Multi-Smelter input slots accept wooden planks and smelt them in parallel at full speed (5 seconds per batch) using electric induction or solid fuel.
+  - Shift-clicking in the Multi-Smelter GUI now prioritizes loading smeltable goods (planks, logs, ores) into input slots before overflowing to the combustion fuel slot.
+  - Updated the in-game Field Manual Guide Book with the Plank Pyrolysis recipe details.
+
+---
+
+### Version 1.11.51 (Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix)
+- **Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix (`cast_iron_fluid_pipe.json`)**:
+  - Resolved recipe collision where Iron Item Pipes and Cast Iron Fluid Pipes shared the same shaped recipe (`iron_ingot + glass + iron_ingot`).
+  - Restored Iron Item Pipe as the exclusive owner of the classic horizontal `iron_ingot + glass + iron_ingot` recipe.
+  - Cast Iron Fluid Pipe now crafts using `iron_bars + glass + iron_bars` (`data/refinery/recipe/cast_iron_fluid_pipe.json`).
+  - Added an alternative metallurgical recipe using Iron Ingots and Coal/Charcoal (`data/refinery/recipe/cast_iron_fluid_pipe_from_coal.json`).
+
+---
+
+### Version 1.11.49 (Industrial Diesel Generator Single-Item Drop Fix)
+- **Industrial Diesel Generator Single-Item Drop Fix (`DieselGeneratorBlock`)**:
+  - Resolved an issue where destroying a placed Industrial Diesel Generator (`refinery:diesel_generator`) in survival dropped two generator items.
+  - Overrode `getDrops` in `DieselGeneratorBlock` so only the master `LEFT` block drops the single generator item (`refinery:diesel_generator`) while the slave `RIGHT` block strictly returns an empty list `List.of()`.
+  - Updated `playerWillDestroy` to safely clear and drop container items, silently remove the partner block with flag 35 and break particles, and pop strictly 1 generator item only when a survival player breaks the non-master `RIGHT` block.
+  - Added `data/refinery/loot_tables/blocks/diesel_generator.json` and ensured both `loot_table` and `loot_tables` enforce `part = left` state conditions.
 
 ---
 

@@ -563,10 +563,10 @@ public class PipeAssetGenerator {
         writeRecipe("cast_iron_fluid_pipe", "{\n" +
                 "  \"type\": \"minecraft:crafting_shaped\",\n" +
                 "  \"pattern\": [\n" +
-                "    \"IGI\"\n" +
+                "    \"BGB\"\n" +
                 "  ],\n" +
                 "  \"key\": {\n" +
-                "    \"I\": \"minecraft:iron_ingot\",\n" +
+                "    \"B\": \"minecraft:iron_bars\",\n" +
                 "    \"G\": \"minecraft:glass\"\n" +
                 "  },\n" +
                 "  \"result\": {\n" +

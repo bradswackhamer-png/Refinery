@@ -1,10 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "IGI"
+    "BGB"
   ],
   "key": {
-    "I": "minecraft:iron_ingot",
+    "B": "minecraft:iron_bars",
     "G": "minecraft:glass"
   },
   "result": {

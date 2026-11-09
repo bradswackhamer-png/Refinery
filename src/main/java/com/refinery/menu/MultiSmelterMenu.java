@@ -2,6 +2,8 @@ package com.refinery.menu;
 
 import com.refinery.RefineryMod;
 import com.refinery.block.entity.MultiSmelterControllerBlockEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,6 +13,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 
 public class MultiSmelterMenu extends AbstractContainerMenu {
     public static final int CONTAINER_SIZE = MultiSmelterControllerBlockEntity.INVENTORY_SIZE; // 17
@@ -138,6 +142,18 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
         return getActiveSlotsMask() != 0 || getBurnTime() > 0;
     }
 
+    public boolean isSmeltable(ItemStack stack, Player player) {
+        if (stack.isEmpty()) return false;
+        if (stack.is(ItemTags.PLANKS)) return true;
+        if (this.container instanceof MultiSmelterControllerBlockEntity be) {
+            return be.canSmelt(stack);
+        }
+        if (player.level() instanceof ServerLevel serverLevel) {
+            return serverLevel.recipeAccess().getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(stack), serverLevel).isPresent();
+        }
+        return true;
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
@@ -153,13 +169,21 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
                 }
             } else {
                 // Moving from player inventory to machine
-                if (MultiSmelterControllerBlockEntity.getFuelBurnDuration(stackInSlot) > 0) {
-                    if (!this.moveItemStackTo(stackInSlot, 16, 17, false)) {
-                        if (!this.moveItemStackTo(stackInSlot, 0, 8, false)) {
+                if (isSmeltable(stackInSlot, player)) {
+                    if (!this.moveItemStackTo(stackInSlot, 0, 8, false)) {
+                        if (MultiSmelterControllerBlockEntity.getFuelBurnDuration(stackInSlot) > 0) {
+                            if (!this.moveItemStackTo(stackInSlot, 16, 17, false)) {
+                                return ItemStack.EMPTY;
+                            }
+                        } else {
                             return ItemStack.EMPTY;
                         }
                     }
-                } else if (!this.moveItemStackTo(stackInSlot, 0, 8, false)) {
+                } else if (MultiSmelterControllerBlockEntity.getFuelBurnDuration(stackInSlot) > 0) {
+                    if (!this.moveItemStackTo(stackInSlot, 16, 17, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else {
                     return ItemStack.EMPTY;
                 }
             }

@@ -37,7 +37,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.storage.loot.LootParams;
 import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 public class DieselGeneratorBlock extends Block implements EntityBlock {
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -143,21 +146,31 @@ public class DieselGeneratorBlock extends Block implements EntityBlock {
             BlockPos partnerPos = (part == GeneratorPart.LEFT) ? pos.relative(facing.getClockWise()) : pos.relative(facing.getCounterClockWise());
             BlockState partnerState = level.getBlockState(partnerPos);
 
-            if (partnerState.is(this) && partnerState.getValue(PART) != part) {
-                if (player.isCreative()) {
-                    level.setBlock(partnerPos, Blocks.AIR.defaultBlockState(), 35);
-                    level.levelEvent(player, 2001, partnerPos, Block.getId(partnerState));
-                } else if (part == GeneratorPart.RIGHT) {
-                    level.destroyBlock(partnerPos, true, player);
-                }
+            DieselGeneratorBlockEntity master = getMaster(level, pos, state);
+            if (master != null) {
+                Containers.dropContents(level, pos, master.getInventory());
+                master.clearContent();
             }
 
-            DieselGeneratorBlockEntity master = getMaster(level, pos, state);
-            if (master != null && part == GeneratorPart.LEFT) {
-                Containers.dropContents(level, pos, master.getInventory());
+            if (partnerState.is(this) && partnerState.getValue(PART) != part) {
+                level.setBlock(partnerPos, Blocks.AIR.defaultBlockState(), 35);
+                level.levelEvent(player, 2001, partnerPos, Block.getId(partnerState));
+            }
+
+            // If the player destroyed the non-master RIGHT part in survival, drop the single item
+            if (!player.isCreative() && part == GeneratorPart.RIGHT) {
+                Block.popResource(level, pos, new ItemStack(this));
             }
         }
         return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        if (state.getValue(PART) == GeneratorPart.LEFT) {
+            return List.of(new ItemStack(this));
+        }
+        return List.of();
     }
 
     @Override

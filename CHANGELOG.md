@@ -4,6 +4,54 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.54] - 2026-11-08
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.53] - 2026-11-08
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.54] - 2026-11-08
+
+### Added
+- **Multi-Smelter Plank Pyrolysis (Planks to Charcoal) (`MultiSmelterControllerBlockEntity`, `MultiSmelterMenu`, `GuideBookRegistry`)**:
+  - Added support for converting any wooden planks (`#minecraft:planks`) directly into Charcoal (`minecraft:charcoal`) inside the 5x4x3 Heavy Multi-Smelter.
+  - Planks in any of the 8 parallel input slots are now smelted into Charcoal at full speed (5s / 100 ticks per batch) using electric induction or solid fuel.
+  - Updated `canPlaceItem` and `canPlaceItemThroughFace` so hoppers, conveyors, and pipe logistics feeding the top face or input ports smoothly load wooden planks.
+  - Enhanced GUI shift-click routing in `MultiSmelterMenu` to prioritize smeltable materials (including planks and logs) into available input slots before routing overflow to the fuel combustion slot.
+  - Added Plank Pyrolysis to the in-game Field Manual Guide Book under the Heavy Multi-Smelter section.
+
+---
+
+## [1.11.51] - 2026-11-08
+
+### Fixed
+- **Iron Item Pipe & Cast Iron Fluid Pipe Recipe Collision Fix (`cast_iron_fluid_pipe.json`)**:
+  - Resolved crafting recipe collision where Iron Item Pipes (`refinery:iron_item_pipe`) and Cast Iron Fluid Pipes (`refinery:cast_iron_fluid_pipe`) both required the identical recipe (`iron_ingot + glass + iron_ingot`).
+  - Restored Iron Item Pipe as the exclusive owner of the standard horizontal `iron_ingot + glass + iron_ingot` recipe.
+  - Changed Cast Iron Fluid Pipe to craft from `minecraft:iron_bars + minecraft:glass + minecraft:iron_bars` (`data/refinery/recipe/cast_iron_fluid_pipe.json`), perfectly matching the heavy cast lattice profile of iron bars.
+  - Added an alternative smelting/alloy shaped recipe (`data/refinery/recipe/cast_iron_fluid_pipe_from_coal.json`) crafting from `iron_ingot + glass + iron_ingot` with Coal/Charcoal (`#minecraft:coals`) above the glass.
+
+---
+
+## [1.11.49] - 2026-11-08
+
+### Fixed
+- **Industrial Diesel Generator Single-Item Drop Fix (`DieselGeneratorBlock`)**:
+  - Resolved an issue where destroying a placed Industrial Diesel Generator (`refinery:diesel_generator`) in survival dropped two generator items.
+  - Overrode `getDrops` in `DieselGeneratorBlock` so only the master `LEFT` part returns `List.of(new ItemStack(this))` while the slave `RIGHT` part strictly returns an empty list `List.of()`.
+  - Updated `playerWillDestroy` to safely clear and drop container items, silently remove the partner block with flag 35 and break particles, and pop strictly 1 generator item only when a survival player breaks the non-master `RIGHT` block.
+  - Added `data/refinery/loot_tables/blocks/diesel_generator.json` and ensured both `loot_table` and `loot_tables` enforce `part = left` state conditions.
+
+---
+
 ## [1.11.47] - 2026-11-08
 
 ### Changed

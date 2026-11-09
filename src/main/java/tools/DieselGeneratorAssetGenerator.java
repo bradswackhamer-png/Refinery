@@ -682,6 +682,13 @@ public class DieselGeneratorAssetGenerator {
                       "conditions": [
                         {
                           "condition": "minecraft:survives_explosion"
+                        },
+                        {
+                          "condition": "minecraft:block_state_property",
+                          "block": "refinery:diesel_generator",
+                          "properties": {
+                            "part": "left"
+                          }
                         }
                       ],
                       "entries": [

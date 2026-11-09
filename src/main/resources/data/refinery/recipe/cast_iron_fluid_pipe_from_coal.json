@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "IGI"
+  ],
+  "key": {
+    "C": "#minecraft:coals",
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "refinery:cast_iron_fluid_pipe",
+    "count": 10
+  }
+}
