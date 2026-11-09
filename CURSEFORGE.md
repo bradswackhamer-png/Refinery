@@ -232,10 +232,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.60.jar`
+`refinery-1.11.62.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.60 (NeoForge 26.3)`
+`Industrial Refinery 1.11.62 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,23 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.62
+
+### What's New in v1.11.62:
+- **Multi-Smelter 8-Slot Parallel Input Load Balancing**:
+  - Fixed an issue where items entering the Industrial Multi-Smelter via conveyors or pipes filled slot 0 to a full stack (64 items) before utilizing slots 1..7, stalling parallel smelting throughput.
+  - Implemented transactional `SmelterItemHandler` using NeoForge's item transfer capabilities: incoming items now distribute evenly across all 8 input slots (prioritizing empty slots and lowest current stack sizes), allowing all 8 slots to smelt concurrently in parallel.
+  - Updated `WorldlyContainer.getSlotsForFace` on both `SmelterPortBlockEntity` (INPUT) and `MultiSmelterControllerBlockEntity` (UP) to dynamically sort input slots in ascending item count order, ensuring vanilla hoppers also balance items across all 8 slots.
+  - Enforced strict port isolation on `SmelterPortBlockEntity` so input ports reject extraction and output ports reject insertion.
+- **Multi-Smelter Auto-Fuel Retention Reserve Setting**:
+  - Added an interactive "Auto-Fuel Reserve" button (`Fuel: OFF`, `Keep: 8`, `Keep: 16`, `Keep: 24`, `Keep: 32`, `Keep: 48`, `Keep: 64`) to the Multi-Smelter GUI directly adjacent to the combustion firebox.
+  - Left-Click cycles the reserve forward and Right-Click decreases.
+  - Automatically diverts produced solid fuels (such as Charcoal from smelting logs or planks) from output directly into combustion fuel slot 16 up to the configured limit, creating completely self-fueling closed-loop smelting setups.
+  - Any surplus produced fuel beyond the reserve threshold remains in output slots and is exported normally to conveyors, pipes, and chests.
+  - Saved to world NBT (`FuelReserve`) and synced across client-server container data access.
+
+---
+
 # Industrial Refinery v1.11.60
 
 ### What's New in v1.11.60:

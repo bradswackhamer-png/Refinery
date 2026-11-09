@@ -56,6 +56,7 @@
    - [Industrial Fermenter](#industrial-fermenter)
    - [Ethanol Biofuel & Crop Fermentation Codex](#ethanol-biofuel--crop-fermentation-codex)
 13. [Engineering Changelog & Version History](#13-engineering-changelog--version-history)
+   - [Version 1.11.62 (Multi-Smelter 8-Slot Parallel Load Balancing & Auto-Fuel Retention Option)](#version-11162-multi-smelter-8-slot-parallel-load-balancing--auto-fuel-retention-option)
    - [Version 1.11.60 (Thermodynamic Rebalance: 500 & 1,500 mB/s Boilers, 1,450 mB/s Turbine, 3,000 RPM Scaling & Fluid Pipe Flow Fix)](#version-11160-thermodynamic-rebalance-500--1500-mbs-boilers-1450-mbs-turbine-3000-rpm-scaling--fluid-pipe-flow-fix)
    - [Version 1.11.58 (In-Game Field Manual Boiler Guide Pages: Small & Large Steam and Diesel Boilers)](#version-11158-in-game-field-manual-boiler-guide-pages-small--large-steam-and-diesel-boilers)
    - [Version 1.11.57 (Large Boiler 3D Model Block Hiding, Steam Turbine Dynamic Load Throttling & Diagnostic Monitor Sync)](#version-11157-large-boiler-3d-model-block-hiding-steam-turbine-dynamic-load-throttling--diagnostic-monitor-sync)
@@ -409,10 +410,15 @@ An early-to-midgame high-throughput industrial smelting array that unifies **8 i
     - **Electric RF Induction**: When running on RF/FE, 3 glowing orange electric induction coils illuminate the chamber.
     - **Live Cooking Items**: All items actively being smelted float inside the chamber in an organized 4Ã—2 floating matrix, gently bobbing and spinning smoothly in the heat haze!
     - Emits server-side flame particles, smoke trails, and realistic furnace crackle audio.
-- **8 Parallel Smelting Slots**:
+- **8 Parallel Smelting Slots & Automatic Load Balancing**:
   - Contains **8 Input Slots** (slots 0..7), **8 Output Slots** (slots 8..15), and **1 Solid Fuel Slot** (slot 16).
   - Automatically identifies and smelts any valid Minecraft or modded smelting recipe in parallel.
+  - **Dynamic Load Balancing**: Items arriving via Conveyor Belts, Industrial Item Pipes, or Hoppers automatically distribute across all 8 input slots (prioritizing empty slots and slots with lowest stack count) instead of filling one slot to 64 items first. All 8 slots cook simultaneously in parallel!
   - Smelting speed: **100 ticks (5.0 seconds)** per item (standard blast furnace speed).
+- **Auto-Fuel Retention Reserve Option**:
+  - Features an interactive GUI button (`Fuel: OFF`, `Keep: 8`, `Keep: 16`, `Keep: 24`, `Keep: 32`, `Keep: 48`, `Keep: 64`) to reserve a desired threshold of produced solid fuel (such as Charcoal from planks or logs) directly into combustion fuel slot 16.
+  - Left-Click to cycle reserve forward, Right-Click to decrease. Enables self-sustaining, closed-loop smelting operations.
+  - Any surplus produced fuel beyond the reserve threshold is placed in output slots (8..15) and exported normally to conveyors or pipes.
 - **Dual-Power System (Solid Fuel OR RF/FE)**:
   - **Burnt Material / Solid Fuel Mode**: Powers all 8 parallel smelting slots simultaneously from a single piece of fuel. Accepts Coal, Charcoal (1,600t), Coal Blocks (16,000t), Lava Buckets (20,000t), Blaze Rods (2,400t), Logs/Planks (300t), Sticks (100t), Petroleum Tar (1,600t), Bitumen (1,600t), or Ethanol Buckets (4,000t). 1 piece of Coal can smelt up to 16 items when all 8 slots are active!
   - **Electric / RF Mode**: Integrated 1,000,000 FE energy storage buffer. Consumes **5,000 FE/t** total while cooking items without burning any solid fuel.
@@ -1861,6 +1867,21 @@ The **Industrial Fermenter** bridges the agricultural progression (Automated Pla
 - **Ethanol Biofuel**:
   - Registered `refinery:ethanol` fluid and bucket items.
   - 4,000 tick burn duration in Boilers and Combustion Chambers.
+
+---
+
+### Version 1.11.62 (Multi-Smelter 8-Slot Parallel Load Balancing & Auto-Fuel Retention Option)
+- **Multi-Smelter 8-Slot Parallel Input Load Balancing (`SmelterItemHandler`, `SmelterPortBlockEntity`, `MultiSmelterControllerBlockEntity`, `RefineryMod`)**:
+  - Fixed an issue where items piped or conveyed into the Industrial Multi-Smelter filled slot 0 to a full stack (64 items) before utilizing slots 1..7, bottlenecking parallel smelting throughput.
+  - Implemented transactional `SmelterItemHandler` conforming to NeoForge item transfer capabilities: incoming items now distribute evenly across all 8 input smelting slots (prioritizing empty slots and slots with lowest current stack sizes) so all 8 slots cook simultaneously in parallel.
+  - Updated `WorldlyContainer.getSlotsForFace` on both `SmelterPortBlockEntity` (INPUT) and `MultiSmelterControllerBlockEntity` (UP) to dynamically sort input slots in ascending item count order, ensuring vanilla hoppers and third-party logistics also balance items across all 8 slots.
+  - Enforced strict port isolation so input ports reject extraction and output ports reject insertion.
+- **Multi-Smelter Auto-Fuel Retention Reserve Setting (`MultiSmelterControllerBlockEntity`, `MultiSmelterMenu`, `MultiSmelterScreen`)**:
+  - Added an interactive "Auto-Fuel Reserve" button (`Fuel: OFF`, `Keep: 8`, `Keep: 16`, `Keep: 24`, `Keep: 32`, `Keep: 48`, `Keep: 64`) to the Multi-Smelter GUI next to the combustion firebox.
+  - Left-Click cycles the reserve forward and Right-Click decreases.
+  - Automatically diverts produced solid fuel (such as Charcoal from planks/logs) directly from output into combustion fuel slot 16 up to the configured limit, creating completely self-fueling closed-loop smelting setups.
+  - Any surplus produced fuel beyond the reserve threshold remains in output slots and is exported normally to conveyors, pipes, and chests.
+  - Saved to world NBT (`FuelReserve`) and synced across client-server container data access.
 
 ---
 

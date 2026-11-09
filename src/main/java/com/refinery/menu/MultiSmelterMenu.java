@@ -18,7 +18,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 
 public class MultiSmelterMenu extends AbstractContainerMenu {
     public static final int CONTAINER_SIZE = MultiSmelterControllerBlockEntity.INVENTORY_SIZE; // 17
-    public static final int DATA_COUNT = 7 + MultiSmelterControllerBlockEntity.INPUT_SLOTS_COUNT; // 15
+    public static final int DATA_COUNT = 8 + MultiSmelterControllerBlockEntity.INPUT_SLOTS_COUNT; // 16
 
     private final Container container;
     private final ContainerData data;
@@ -152,6 +152,24 @@ public class MultiSmelterMenu extends AbstractContainerMenu {
             return serverLevel.recipeAccess().getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(stack), serverLevel).isPresent();
         }
         return true;
+    }
+
+    public int getFuelReserve() {
+        return this.data.get(15);
+    }
+
+    @Override
+    public boolean clickMenuButton(Player player, int id) {
+        if (this.container instanceof MultiSmelterControllerBlockEntity be) {
+            if (id == 0) {
+                be.cycleFuelReserve(false); // cycle forward (increase)
+                return true;
+            } else if (id == 1) {
+                be.cycleFuelReserve(true); // cycle reverse (decrease)
+                return true;
+            }
+        }
+        return super.clickMenuButton(player, id);
     }
 
     @Override

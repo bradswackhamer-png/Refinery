@@ -205,10 +205,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.60.jar`
+`refinery-1.11.62.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.60 (NeoForge 26.3)`
+`Industrial Refinery 1.11.62 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -224,6 +224,16 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.62
+
+### What's New in v1.11.62:
+- **Multi-Smelter 8-Slot Parallel Input Load Balancing**:
+  - Piped, conveyed, and hopper-fed items now balance evenly across all 8 input slots instead of filling one slot stack full first. All 8 slots smelt in parallel!
+- **Multi-Smelter Auto-Fuel Retention Reserve Option**:
+  - Interactive GUI button allows setting a target fuel reserve (0..64) in the fuel slot; produced solid fuels (Charcoal) automatically replenish the furnace before excess is exported.
+
+---
+
 # Industrial Refinery v1.11.54
 
 ### What's New in v1.11.54:

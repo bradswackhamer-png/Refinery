@@ -82,14 +82,14 @@ public class SmelterPortBlockEntity extends BlockEntity implements WorldlyContai
         MultiSmelterControllerBlockEntity controller = getController();
         if (controller == null) return new int[0];
         return switch (this.portType) {
-            case INPUT -> new int[]{0, 1, 2, 3, 4, 5, 6, 7};
+            case INPUT -> controller.getBalancedInputSlots();
             case OUTPUT -> new int[]{8, 9, 10, 11, 12, 13, 14, 15};
             case ENERGY_FUEL -> new int[]{16};
         };
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int index, ItemStack stack, @Nullable Direction direction) {
+    public boolean canPlaceItem(int index, ItemStack stack) {
         MultiSmelterControllerBlockEntity controller = getController();
         if (controller == null) return false;
         if (this.portType == SmelterPortBlock.PortType.INPUT && index >= 0 && index < 8) {
@@ -99,6 +99,11 @@ public class SmelterPortBlockEntity extends BlockEntity implements WorldlyContai
             return MultiSmelterControllerBlockEntity.getFuelBurnDuration(stack) > 0;
         }
         return false;
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int index, ItemStack stack, @Nullable Direction direction) {
+        return canPlaceItem(index, stack);
     }
 
     @Override

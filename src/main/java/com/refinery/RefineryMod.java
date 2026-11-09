@@ -1915,13 +1915,16 @@ public class RefineryMod {
                 (be, side) -> be.energyStorage);
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, MULTI_SMELTER_CONTROLLER_BE.get(),
-                (be, side) -> VanillaContainerWrapper.of(be));
+                (be, side) -> {
+                    if (!be.isAssembled()) return null;
+                    return SmelterItemHandler.forControllerSide(be, side);
+                });
 
         event.registerBlockEntity(Capabilities.Item.BLOCK, SMELTER_PORT_BE.get(),
                 (be, side) -> {
                     var controller = be.getController();
                     if (controller == null) return null;
-                    return VanillaContainerWrapper.of(be);
+                    return SmelterItemHandler.forPort(controller, be.getPortType());
                 });
 
         event.registerBlockEntity(Capabilities.Energy.BLOCK, SMELTER_PORT_BE.get(),

@@ -4,6 +4,32 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.62] - 2026-11-08
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.62] - 2026-11-08
+
+### Added
+- **Multi-Smelter Auto-Fuel Retention Reserve Option (`MultiSmelterControllerBlockEntity`, `MultiSmelterMenu`, `MultiSmelterScreen`)**:
+  - Added an interactive "Auto-Fuel Reserve" button (`Fuel: OFF`, `Keep: 8`, `Keep: 16`, `Keep: 24`, `Keep: 32`, `Keep: 48`, `Keep: 64`) positioned directly adjacent to the combustion chamber in the Multi-Smelter GUI.
+  - Left-Click to cycle the reserve forward and Right-Click to decrease.
+  - Automatically diverts produced solid fuels (such as Charcoal from smelting logs or planks) from output directly into combustion fuel slot 16 up to the configured reserve limit, enabling self-fueling smelting setups.
+  - Any surplus produced fuel beyond the reserve threshold remains in output slots and is exported normally to conveyors, pipes, or downstream storage.
+  - Fully saved to world NBT (`FuelReserve`) and synced across client-server container data access.
+
+### Fixed
+- **Multi-Smelter 8-Slot Parallel Input Load Balancing (`SmelterItemHandler`, `SmelterPortBlockEntity`, `MultiSmelterControllerBlockEntity`, `RefineryMod`)**:
+  - Fixed an issue where items entering the Multi-Smelter via conveyors, pipes, or hoppers filled slot 0 to a full stack (64 items) before utilizing slots 1..7, stalling parallel smelting throughput.
+  - Implemented transactional `SmelterItemHandler` using NeoForge's item transfer capabilities: incoming items now distribute evenly across all 8 input slots (prioritizing empty slots and lowest current stack sizes), allowing all 8 slots to smelt concurrently in parallel.
+  - Updated `WorldlyContainer.getSlotsForFace` on both `SmelterPortBlockEntity` (INPUT) and `MultiSmelterControllerBlockEntity` (UP) to return input slots ordered by current item count ascending, ensuring vanilla hoppers also balance items across all 8 slots.
+  - Enforced strict port isolation on `SmelterPortBlockEntity` so input ports reject extraction and output ports reject insertion.
+
+---
+
 ## [1.11.60] - 2026-11-08
 
 ### Changed

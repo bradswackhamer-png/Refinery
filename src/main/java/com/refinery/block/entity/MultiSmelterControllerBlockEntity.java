@@ -68,6 +68,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
     private int energy = 0;
     private int burnTime = 0;
     private int maxBurnTime = 0;
+    private int fuelReserve = 0; // Number of produced solid fuel items to reserve in the fuel slot (0 = disabled)
     private final int[] cookProgress = new int[INPUT_SLOTS_COUNT];
 
     private int blueprintProjectionTicks = 0;
@@ -104,6 +105,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                 case 4 -> MultiSmelterControllerBlockEntity.this.maxBurnTime;
                 case 5 -> MultiSmelterControllerBlockEntity.this.assembled ? 1 : 0;
                 case 6 -> MultiSmelterControllerBlockEntity.this.getActiveSlotsMask();
+                case 15 -> MultiSmelterControllerBlockEntity.this.fuelReserve;
                 default -> {
                     if (index >= 7 && index < 7 + INPUT_SLOTS_COUNT) {
                         yield MultiSmelterControllerBlockEntity.this.cookProgress[index - 7];
@@ -121,6 +123,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                 case 3 -> MultiSmelterControllerBlockEntity.this.burnTime = value;
                 case 4 -> MultiSmelterControllerBlockEntity.this.maxBurnTime = value;
                 case 5 -> MultiSmelterControllerBlockEntity.this.assembled = (value != 0);
+                case 15 -> MultiSmelterControllerBlockEntity.this.fuelReserve = value;
                 default -> {
                     if (index >= 7 && index < 7 + INPUT_SLOTS_COUNT) {
                         MultiSmelterControllerBlockEntity.this.cookProgress[index - 7] = value;
@@ -131,7 +134,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
 
         @Override
         public int getCount() {
-            return 7 + INPUT_SLOTS_COUNT; // 15
+            return 8 + INPUT_SLOTS_COUNT; // 16 (0..6 core, 7..14 slot cook progresses, 15 fuel reserve)
         }
     };
 
@@ -170,6 +173,74 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
             }
         }
         return mask;
+    }
+
+    public int getFuelReserve() {
+        return this.fuelReserve;
+    }
+
+    public void setFuelReserve(int amount) {
+        this.fuelReserve = Math.max(0, Math.min(64, amount));
+        setChanged();
+        syncToClient();
+    }
+
+    public void cycleFuelReserve(boolean reverse) {
+        int[] presets = {0, 8, 16, 24, 32, 48, 64};
+        int currentIndex = 0;
+        for (int i = 0; i < presets.length; i++) {
+            if (presets[i] == this.fuelReserve) {
+                currentIndex = i;
+                break;
+            }
+        }
+        int nextIndex;
+        if (reverse) {
+            nextIndex = (currentIndex - 1 + presets.length) % presets.length;
+        } else {
+            nextIndex = (currentIndex + 1) % presets.length;
+        }
+        setFuelReserve(presets[nextIndex]);
+    }
+
+    public void replenishFuelFromOutput() {
+        if (this.fuelReserve <= 0) return;
+        ItemStack currentFuel = this.items.get(FUEL_SLOT_INDEX);
+        int currentCount = currentFuel.isEmpty() ? 0 : currentFuel.getCount();
+        if (currentCount >= this.fuelReserve) return;
+        int needed = this.fuelReserve - currentCount;
+
+        for (int slot = 8; slot <= 15 && needed > 0; slot++) {
+            ItemStack outStack = this.items.get(slot);
+            if (outStack.isEmpty() || getFuelBurnDuration(outStack) <= 0) continue;
+
+            if (currentFuel.isEmpty()) {
+                int toMove = Math.min(needed, outStack.getCount());
+                this.items.set(FUEL_SLOT_INDEX, outStack.split(toMove));
+                currentFuel = this.items.get(FUEL_SLOT_INDEX);
+                needed -= toMove;
+                setChanged();
+            } else if (ItemStack.isSameItemSameComponents(currentFuel, outStack)) {
+                int space = Math.min(needed, currentFuel.getMaxStackSize() - currentFuel.getCount());
+                int toMove = Math.min(space, outStack.getCount());
+                if (toMove > 0) {
+                    currentFuel.grow(toMove);
+                    outStack.shrink(toMove);
+                    needed -= toMove;
+                    setChanged();
+                }
+            }
+        }
+    }
+
+    public int[] getBalancedInputSlots() {
+        Integer[] slots = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7};
+        Arrays.sort(slots, (a, b) -> Integer.compare(this.items.get(a).getCount(), this.items.get(b).getCount()));
+        int[] result = new int[8];
+        for (int i = 0; i < 8; i++) {
+            result[i] = slots[i];
+        }
+        return result;
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, MultiSmelterControllerBlockEntity be) {
@@ -278,6 +349,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                             be.cookProgress[i] = 0;
                             be.items.get(i).shrink(1);
                             be.addOutput(i + 8, results[i].copy());
+                            be.replenishFuelFromOutput();
 
                             // Clink sound on completion
                             Direction facing = state.getValue(MultiSmelterControllerBlock.FACING);
@@ -582,6 +654,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         output.putInt("Energy", this.energy);
         output.putInt("BurnTime", this.burnTime);
         output.putInt("MaxBurnTime", this.maxBurnTime);
+        output.putInt("FuelReserve", this.fuelReserve);
         output.putInt("ExportCooldown", this.exportCooldown);
         output.putInt("LastExportSlot", this.lastExportSlot);
         for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
@@ -597,6 +670,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         this.energy = input.getIntOr("Energy", 0);
         this.burnTime = input.getIntOr("BurnTime", 0);
         this.maxBurnTime = input.getIntOr("MaxBurnTime", 0);
+        this.fuelReserve = input.getIntOr("FuelReserve", 0);
         this.exportCooldown = input.getIntOr("ExportCooldown", 0);
         this.lastExportSlot = input.getIntOr("LastExportSlot", 0);
         for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
@@ -610,7 +684,7 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
     @Override
     public int[] getSlotsForFace(Direction side) {
         if (side == Direction.UP) {
-            return new int[]{0, 1, 2, 3, 4, 5, 6, 7};
+            return getBalancedInputSlots();
         } else if (side == Direction.DOWN) {
             return new int[]{8, 9, 10, 11, 12, 13, 14, 15};
         } else {
@@ -726,6 +800,9 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
     }
 
     private void tryExportOutput(ServerLevel level) {
+        // First satisfy any configured fuel reserve before exporting to external conveyors/pipes
+        replenishFuelFromOutput();
+
         Direction facing = getBlockState().getValue(MultiSmelterControllerBlock.FACING);
         Direction right = facing.getClockWise();
 
