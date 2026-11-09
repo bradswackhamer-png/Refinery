@@ -208,7 +208,7 @@ When uploading your `.jar` file to CurseForge, use these values:
 `refinery-1.11.60.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.58 (NeoForge 26.3)`
+`Industrial Refinery 1.11.60 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*

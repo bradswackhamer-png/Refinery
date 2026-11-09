@@ -235,7 +235,7 @@ When uploading your `.jar` file to CurseForge, use these values:
 `refinery-1.11.60.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.58 (NeoForge 26.3)`
+`Industrial Refinery 1.11.60 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -251,6 +251,24 @@ When uploading your `.jar` file to CurseForge, use these values:
 
 ### Changelog / Release Notes
 ```markdown
+# Industrial Refinery v1.11.60
+
+### What's New in v1.11.60:
+- **Boiler & Steam Turbine Thermodynamic Balance Rebalancing**:
+  - **Small Boilers**: Rebalanced solid fuel steam production to **500 mB/s** (25 mB/t, consuming 12 mB/t water).
+  - **Large Boilers**: Rebalanced solid fuel steam production to **1,500 mB/s** (75 mB/t, consuming 37 mB/t water).
+  - **Steam Turbine Steam Requirement**: Tuned steam intake to **1,450 mB/s** (72.5 mB/t average) at peak generation (10,000 FE/t). 1 Large Boiler or 3 Small Boilers (1,500 mB/s) provide a steady 50 mB/s surplus to keep the 32,000 mB steam buffer saturated.
+- **Dynamic Turbine RPM Scaling & Centered Diagnostic Readout**:
+  - Turbine speed now dynamically scales with power generation up to **3,000 RPM at peak generation** (10,000 FE/t; 0 RPM when idle).
+  - Diagnostic monitor now displays centered text showing exact live RPM (`3000 RPM`) and generation (`+10000 FE/t`).
+  - Active turbine blade indicator animation speed and hum sound pitch dynamically increase with RPM.
+- **Fluid Pipe Pipeline Flow Bottleneck & Directional Momentum Fix**:
+  - Fixed an issue where pipes equalized fluid using naive half-difference division (`(diff + 1) / 2`), halving throughput across every pipe block and throttling long pipelines down to ~24 mB/t.
+  - Implemented directional flow momentum: pipes actively push fluid forward along the pipeline into downstream pipes and connected machine ports at the full material transfer rate (Iron: 500 mB/t, Steel: 1,500 mB/t) without distance attenuation or backward sloshing.
+  - Steam turbine steam input port now immediately notifies the controller on fluid insertion for real-time sync.
+
+---
+
 # Industrial Refinery v1.11.58
 
 ### What's New in v1.11.58:
