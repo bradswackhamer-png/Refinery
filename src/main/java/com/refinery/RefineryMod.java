@@ -504,6 +504,10 @@ public class RefineryMod {
             p -> new RightAngleConveyorBeltBlock(p.noOcclusion()));
     public static final DeferredItem<BlockItem> RIGHT_ANGLE_CONVEYOR_BELT_ITEM = ITEMS.registerSimpleBlockItem("right_angle_conveyor_belt", RIGHT_ANGLE_CONVEYOR_BELT);
 
+    public static final DeferredBlock<com.refinery.block.SortingConveyorBeltBlock> SORTING_CONVEYOR_BELT = BLOCKS.registerBlock("sorting_conveyor_belt",
+            p -> new com.refinery.block.SortingConveyorBeltBlock(p.noOcclusion()));
+    public static final DeferredItem<BlockItem> SORTING_CONVEYOR_BELT_ITEM = ITEMS.registerSimpleBlockItem("sorting_conveyor_belt", SORTING_CONVEYOR_BELT);
+
     // === Livestock Feeding Trough (2-Block Multiblock) ===
     public static final DeferredBlock<FeedingTroughBlock> FEEDING_TROUGH = BLOCKS.registerBlock("feeding_trough",
             FeedingTroughBlock::new);
@@ -979,6 +983,10 @@ public class RefineryMod {
             BLOCK_ENTITY_TYPES.register("right_angle_conveyor_belt",
                     () -> new BlockEntityType<>(RightAngleConveyorBeltBlockEntity::new, RIGHT_ANGLE_CONVEYOR_BELT.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.refinery.block.entity.SortingConveyorBeltBlockEntity>> SORTING_CONVEYOR_BELT_BE =
+            BLOCK_ENTITY_TYPES.register("sorting_conveyor_belt",
+                    () -> new BlockEntityType<>(com.refinery.block.entity.SortingConveyorBeltBlockEntity::new, SORTING_CONVEYOR_BELT.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FeedingTroughBlockEntity>> FEEDING_TROUGH_BE =
             BLOCK_ENTITY_TYPES.register("feeding_trough",
                     () -> new BlockEntityType<>(FeedingTroughBlockEntity::new, FEEDING_TROUGH.get()));
@@ -1126,6 +1134,9 @@ public class RefineryMod {
     public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.BufferPipeMenu>> BUFFER_PIPE_MENU =
             MENUS.register("buffer_pipe", () -> new MenuType<>(com.refinery.menu.BufferPipeMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<com.refinery.menu.SortingConveyorMenu>> SORTING_CONVEYOR_MENU =
+            MENUS.register("sorting_conveyor", () -> new MenuType<>(com.refinery.menu.SortingConveyorMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     // === Creative Tab ===
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> REFINERY_TAB = CREATIVE_MODE_TABS.register("refinery_tab",
             () -> CreativeModeTab.builder()
@@ -1202,6 +1213,7 @@ public class RefineryMod {
                         output.accept(CONVEYOR_BELT_ITEM.get());
                         output.accept(SLOPED_CONVEYOR_BELT_ITEM.get());
                         output.accept(RIGHT_ANGLE_CONVEYOR_BELT_ITEM.get());
+                        output.accept(SORTING_CONVEYOR_BELT_ITEM.get());
                         output.accept(FEEDING_TROUGH_ITEM.get());
                         output.accept(BITUMEN_PILE_ITEM.get());
                         output.accept(CRUDE_PUMP_JACK_ITEM.get());
@@ -1870,6 +1882,8 @@ public class RefineryMod {
                 (be, side) -> VanillaContainerWrapper.of(be));
         event.registerBlockEntity(Capabilities.Item.BLOCK, RIGHT_ANGLE_CONVEYOR_BELT_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, SORTING_CONVEYOR_BELT_BE.get(),
+                (be, side) -> VanillaContainerWrapper.of(be.getInputContainer()));
         event.registerBlockEntity(Capabilities.Item.BLOCK, FEEDING_TROUGH_BE.get(),
                 (be, side) -> VanillaContainerWrapper.of(be.getMaster()));
 

@@ -1,12 +1,62 @@
 {
-  "parent": "minecraft:block/cube",
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "refinery:block/blast_furnace_casing",
-    "down": "refinery:block/blast_furnace_casing",
-    "up": "refinery:block/blast_furnace_casing",
-    "north": "refinery:block/foundry_port_input",
-    "south": "refinery:block/blast_furnace_casing",
-    "east": "refinery:block/blast_furnace_casing",
-    "west": "refinery:block/blast_furnace_casing"
-  }
+    "casing": "refinery:block/blast_furnace_casing",
+    "port": "refinery:block/foundry_port_input"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 2],
+      "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#casing", "cullface": "down" },
+        "up": { "texture": "#casing", "cullface": "up" },
+        "north": { "texture": "#port", "uv": [0, 0, 16, 16] },
+        "south": { "texture": "#casing", "cullface": "south" },
+        "west": { "texture": "#casing", "cullface": "west" },
+        "east": { "texture": "#casing", "cullface": "east" }
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [3, 16, 2],
+      "faces": {
+        "down": { "texture": "#casing", "cullface": "down" },
+        "up": { "texture": "#casing", "cullface": "up" },
+        "north": { "texture": "#casing", "cullface": "north" },
+        "east": { "texture": "#casing" },
+        "west": { "texture": "#casing", "cullface": "west" }
+      }
+    },
+    {
+      "from": [13, 0, 0],
+      "to": [16, 16, 2],
+      "faces": {
+        "down": { "texture": "#casing", "cullface": "down" },
+        "up": { "texture": "#casing", "cullface": "up" },
+        "north": { "texture": "#casing", "cullface": "north" },
+        "east": { "texture": "#casing", "cullface": "east" },
+        "west": { "texture": "#casing" }
+      }
+    },
+    {
+      "from": [3, 13, 0],
+      "to": [13, 16, 2],
+      "faces": {
+        "up": { "texture": "#casing", "cullface": "up" },
+        "north": { "texture": "#casing", "cullface": "north" },
+        "down": { "texture": "#casing" }
+      }
+    },
+    {
+      "from": [3, 0, 0],
+      "to": [13, 3, 2],
+      "faces": {
+        "down": { "texture": "#casing", "cullface": "down" },
+        "north": { "texture": "#casing", "cullface": "north" },
+        "up": { "texture": "#casing" }
+      }
+    }
+  ]
 }

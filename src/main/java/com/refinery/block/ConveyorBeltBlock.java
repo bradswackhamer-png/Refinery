@@ -220,7 +220,8 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         if (state == null || state.isAir()) return false;
         if (state.getBlock() instanceof ConveyorBeltBlock
                 || state.getBlock() instanceof SlopedConveyorBeltBlock
-                || state.getBlock() instanceof RightAngleConveyorBeltBlock) {
+                || state.getBlock() instanceof RightAngleConveyorBeltBlock
+                || state.getBlock() instanceof SortingConveyorBeltBlock) {
             return true;
         }
         Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
@@ -235,6 +236,10 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         BlockState sideState = level.getBlockState(sidePos);
         if (sideState.getBlock() instanceof ConveyorBeltBlock) {
             return sideState.getValue(FACING) == requiredFacing;
+        }
+        if (sideState.getBlock() instanceof SortingConveyorBeltBlock) {
+            Direction scFacing = sideState.getValue(SortingConveyorBeltBlock.FACING);
+            return scFacing == requiredFacing || scFacing.getClockWise() == requiredFacing || scFacing.getCounterClockWise() == requiredFacing;
         }
         if (sideState.getBlock() instanceof RightAngleConveyorBeltBlock) {
             return RightAngleConveyorBeltBlock.getExitDirection(sideState) == requiredFacing;
@@ -263,6 +268,9 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         BlockState neighbor = level.getBlockState(frontPos);
         if (neighbor.getBlock() instanceof ConveyorBeltBlock) {
             return neighbor.getValue(FACING) != facing.getOpposite();
+        }
+        if (neighbor.getBlock() instanceof SortingConveyorBeltBlock) {
+            return neighbor.getValue(SortingConveyorBeltBlock.FACING) != facing.getOpposite();
         }
         if (neighbor.getBlock() instanceof RightAngleConveyorBeltBlock && neighbor.getValue(RightAngleConveyorBeltBlock.FACING) == facing) {
             return true;
@@ -294,6 +302,10 @@ public class ConveyorBeltBlock extends Block implements EntityBlock {
         BlockState neighbor = level.getBlockState(backPos);
         if (neighbor.getBlock() instanceof ConveyorBeltBlock && neighbor.getValue(FACING) == facing) {
             return true;
+        }
+        if (neighbor.getBlock() instanceof SortingConveyorBeltBlock) {
+            Direction scFacing = neighbor.getValue(SortingConveyorBeltBlock.FACING);
+            return scFacing == facing || scFacing.getClockWise() == facing || scFacing.getCounterClockWise() == facing;
         }
         if (neighbor.getBlock() instanceof RightAngleConveyorBeltBlock && RightAngleConveyorBeltBlock.getExitDirection(neighbor) == facing) {
             return true;

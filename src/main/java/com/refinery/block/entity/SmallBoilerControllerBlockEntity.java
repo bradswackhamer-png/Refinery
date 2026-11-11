@@ -438,15 +438,16 @@ public class SmallBoilerControllerBlockEntity extends BlockEntity implements IBo
 
     public static int getFuelDuration(ItemStack stack) {
         if (stack.isEmpty()) return 0;
-        if (stack.is(ItemTags.COALS)) return 1600;
-        if (stack.is(Items.COAL_BLOCK)) return 16000;
+        if (stack.is(ItemTags.COALS)) return 600; // 30 seconds (600 ticks)
+        if (stack.is(Items.COAL_BLOCK)) return 6000; // 300 seconds (5 minutes, 10x coal)
         if (stack.is(Items.LAVA_BUCKET)) return 20000;
-        if (stack.is(Items.BLAZE_ROD)) return 2400;
-        if (stack.is(RefineryMod.TAR_ITEM.get())) return 1600;
-        if (stack.is(RefineryMod.BITUMEN.get())) return 1600;
+        if (stack.is(Items.BLAZE_ROD)) return 900; // 45 seconds (1.5x coal)
+        if (stack.is(RefineryMod.TAR_ITEM.get())) return 600;
+        if (stack.is(RefineryMod.BITUMEN.get())) return 600;
+        if (stack.is(RefineryMod.COAL_DUST.get())) return 600;
         net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
-        if (id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"))) return 1600;
-        if (stack.is(ItemTags.LOGS) || stack.is(ItemTags.PLANKS)) return 300;
+        if (id != null && (id.getPath().contains("tar") || id.getPath().contains("bitumen"))) return 600;
+        if (stack.is(ItemTags.LOGS) || stack.is(ItemTags.PLANKS)) return 150;
         return 0;
     }
 

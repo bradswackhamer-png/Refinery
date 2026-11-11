@@ -1,12 +1,53 @@
 {
-  "parent": "minecraft:block/cube",
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "refinery:block/blast_furnace_casing",
-    "down": "refinery:block/blast_furnace_casing",
-    "up": "refinery:block/blast_furnace_casing",
-    "north": "refinery:block/foundry_port_output",
-    "south": "refinery:block/blast_furnace_casing",
-    "east": "refinery:block/blast_furnace_casing",
-    "west": "refinery:block/blast_furnace_casing"
-  }
+    "casing": "refinery:block/blast_furnace_casing",
+    "port": "refinery:block/foundry_port_output"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#casing", "cullface": "down" },
+        "up": { "texture": "#casing", "cullface": "up" },
+        "north": { "texture": "#port", "cullface": "north" },
+        "south": { "texture": "#casing", "cullface": "south" },
+        "west": { "texture": "#casing", "cullface": "west" },
+        "east": { "texture": "#casing", "cullface": "east" }
+      }
+    },
+    {
+      "from": [3, 1, -2.5],
+      "to": [13, 3, 0],
+      "faces": {
+        "down": { "texture": "#casing" },
+        "up": { "texture": "#port" },
+        "north": { "texture": "#casing" },
+        "west": { "texture": "#casing" },
+        "east": { "texture": "#casing" }
+      }
+    },
+    {
+      "from": [3, 3, -2.5],
+      "to": [5, 6, 0],
+      "faces": {
+        "up": { "texture": "#casing" },
+        "north": { "texture": "#casing" },
+        "west": { "texture": "#casing" },
+        "east": { "texture": "#casing" }
+      }
+    },
+    {
+      "from": [11, 3, -2.5],
+      "to": [13, 6, 0],
+      "faces": {
+        "up": { "texture": "#casing" },
+        "north": { "texture": "#casing" },
+        "west": { "texture": "#casing" },
+        "east": { "texture": "#casing" }
+      }
+    }
+  ]
 }

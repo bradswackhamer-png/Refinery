@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "refinery:block/sorting_conveyor_belt"
+    }
+  }
+}

@@ -559,9 +559,9 @@ public class GuideBookRegistry {
                             List.of(() -> new ItemStack(Items.COPPER_INGOT, 8)),
                             "Smelts 8 items simultaneously in parallel, consuming fuel or RF evenly across all batches."),
                     new GuideRecipe("Plank Pyrolysis (Planks to Charcoal)",
-                            List.of(() -> new ItemStack(Items.OAK_PLANKS, 8)),
+                            List.of(() -> new ItemStack(Items.OAK_PLANKS, 32)),
                             List.of(() -> new ItemStack(Items.CHARCOAL, 8)),
-                            "Converts wooden planks directly into Charcoal in parallel at high temperatures.")
+                            "Converts 4 wooden planks into 1 Charcoal in parallel at high temperatures (4:1 ratio matching logs).")
             );
 
             register(new GuideEntry(
@@ -1151,6 +1151,25 @@ public class GuideBookRegistry {
                 null,
                 List.of(),
                 "⚡ Power: Unpowered (0 FE/t)"
+        ));
+
+        register(new GuideEntry(
+                "sorting_conveyor",
+                "Sorting Conveyor Belt",
+                "Filtered 3-Way Item Diverter",
+                GuideCategory.LOGISTICS,
+                () -> new ItemStack(RefineryMod.SORTING_CONVEYOR_BELT.get()),
+                "The Sorting Conveyor Belt is an advanced 3-way routing conveyor featuring an overhead optical scanner arch and 3 color-coded routing channels:\n\n" +
+                "• Left Channel (Blue): 9-slot filter bank routing items to the left\n" +
+                "• Forward Channel (Green): 9-slot filter bank routing items straight ahead\n" +
+                "• Right Channel (Orange): 9-slot filter bank routing items to the right\n" +
+                "• Default Overflow: Items matching no filter pass straight through uninterrupted\n" +
+                "• Seamless Handoff: Diverted items slide smoothly into adjacent conveyors, chutes, or chests!",
+                "Right-click with an empty hand to configure the 27 filter slots. Rotate orientation with the Refinery Wrench!",
+                null,
+                null,
+                List.of(),
+                "⚡ Power: Unpowered (0 FE/t) | Redstone: Stops belt when powered"
         ));
 
         register(new GuideEntry(

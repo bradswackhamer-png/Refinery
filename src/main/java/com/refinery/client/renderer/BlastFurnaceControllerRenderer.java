@@ -1,6 +1,7 @@
 package com.refinery.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.refinery.block.BlastFurnaceControllerBlock;
 import com.refinery.block.entity.BlastFurnaceControllerBlockEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -20,6 +21,8 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<BlastFurnaceControllerBlockEntity, BlastFurnaceControllerRenderState> {
 
+    private final BlastFurnaceModel model = new BlastFurnaceModel();
+
     public BlastFurnaceControllerRenderer(BlockEntityRendererProvider.Context context) {
     }
 
@@ -35,11 +38,17 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
 
     @Override
     public AABB getRenderBoundingBox(BlastFurnaceControllerBlockEntity blockEntity) {
-        return new AABB(blockEntity.getBlockPos()).inflate(4.0);
+        return new AABB(blockEntity.getBlockPos()).inflate(6.0);
     }
 
     @Override
-    public void extractRenderState(BlastFurnaceControllerBlockEntity be, BlastFurnaceControllerRenderState state, float partialTicks, Vec3 cameraPosition, net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+    public void extractRenderState(
+            BlastFurnaceControllerBlockEntity be,
+            BlastFurnaceControllerRenderState state,
+            float partialTicks,
+            Vec3 cameraPosition,
+            net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay breakProgress
+    ) {
         net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState.extractBase(be, state, breakProgress);
 
         var blockState = be.getBlockState();
@@ -48,6 +57,9 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
         state.isActive = blockState.hasProperty(BlastFurnaceControllerBlock.ACTIVE) && blockState.getValue(BlastFurnaceControllerBlock.ACTIVE);
         state.facing = blockState.getValue(BlastFurnaceControllerBlock.FACING);
         state.controllerPos = be.getBlockPos();
+        state.progress = be.getProgress();
+        state.gameTime = be.getLevel() != null ? be.getLevel().getGameTime() : 0;
+        state.partialTicks = partialTicks;
         state.missingComponents.clear();
 
         if (state.isBlueprintActive && be.getLevel() != null) {
@@ -72,31 +84,35 @@ public class BlastFurnaceControllerRenderer implements BlockEntityRenderer<Blast
         Direction right = state.facing.getClockWise();
         Direction back = state.facing.getOpposite();
 
-        // 1. Single Large Panoramic Window Bezel (when assembled)
+        // 1. High-Fidelity 3D Multiblock Model (when assembled)
         if (state.isAssembled) {
             poseStack.pushPose();
-            poseStack.translate(0.5, 0.0, 0.5);
-            poseStack.rotateDegrees(com.mojang.math.Axis.YP, -state.facing.toYRot());
-            poseStack.translate(-0.5, 0.0, -0.5);
 
-            // Single unified heavy steel border around the 3x3 panoramic window
-            submitNodeCollector.submitShapeOutline(
-                    poseStack,
-                    Shapes.box(-1.002, 0.998, -0.003, 2.002, 4.002, 0.003),
-                    RenderTypes.lines(),
-                    0xFF1E293B,
-                    3.0f,
-                    false
-            );
+            switch (state.facing) {
+                case NORTH -> {}
+                case SOUTH -> {
+                    poseStack.translate(1.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 180.0f);
+                }
+                case EAST -> {
+                    poseStack.translate(1.0, 0.0, 0.0);
+                    poseStack.rotateDegrees(Axis.YP, 270.0f);
+                }
+                case WEST -> {
+                    poseStack.translate(0.0, 0.0, 1.0);
+                    poseStack.rotateDegrees(Axis.YP, 90.0f);
+                }
+                default -> {}
+            }
 
-            // Inner chamfer highlight around the 3x3 window frame
-            submitNodeCollector.submitShapeOutline(
+            this.model.render(
                     poseStack,
-                    Shapes.box(-0.99, 1.01, -0.002, 1.99, 3.99, 0.002),
-                    RenderTypes.lines(),
-                    state.isActive ? 0xFFF59E0B : 0xFF64748B,
-                    1.5f,
-                    false
+                    submitNodeCollector,
+                    state.lightCoords,
+                    state.isActive,
+                    state.progress,
+                    state.gameTime,
+                    state.partialTicks
             );
 
             poseStack.popPose();

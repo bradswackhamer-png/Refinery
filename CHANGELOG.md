@@ -4,6 +4,114 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.71] - 2026-11-10
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.71] - 2026-11-10
+
+### Added
+- **Monolithic 3D Multiblock Blast Furnace Model (`BlastFurnaceModel`, `BlastFurnaceControllerRenderer`, `BlastFurnaceControllerRenderState`)**:
+  - Implemented high-fidelity in-world 3D rendering for the assembled 5x5x5 Multiblock Blast Furnace:
+    - **Structural Steel Panoramic Window Bezel & Truss**: Heavy industrial I-beam lintel, sill, and jamb girders boxing the 3x3 front viewing window, reinforced by 4 riveted corner gusset bracket plates and a center mullion cross-strut with a circular connection rosette hub.
+    - **Foundry Ingot Rating Emblem**: Heavy embossed steel rating nameplate badge mounted above the front window lintel.
+    - **Stepped Refractory Crucible Hearth Basin**: Multi-tier magnesia-carbon firebrick refractory hearth lining the bottom layer of the 3x3x3 interior chamber, complete with a tapping drainage launder notch.
+    - **Dynamic Molten Pig Iron / Steel Bath**: Fully animated undulating incandescent molten metal bath glowing fiercely in fullbright (`15728880`) with wave height oscillation and floating dark metallurgical slag crust rafts.
+    - **Superheated Hot Blast Tuyeres**: 6 water-cooled cast copper blowpipe nozzles projecting from the refractory walls into the hearth.
+    - **Active Smelting Hot Blast Flame Jets**: Roaring high-temperature oxygen-enriched flame plasma streams blasting from the tuyere nozzles directly into the molten hearth during active smelting.
+    - **Overhead Bustle Pipe Ring Manifold & Downcomers**: Suspended insulated toroidal dark steel hot blast distribution pipe with 4 vertical gooseneck downcomers feeding the tuyere cooling jackets.
+    - **Conical Charge Throat & Distribution Bell Valve**: Suspended conical hopper throat and heavy cast distribution bell valve at the ceiling center.
+- **Dedicated 256x256 Blast Furnace Entity Texture Atlas (`assets/refinery/textures/entity/blast_furnace.png`)**:
+  - Generated via `BlastFurnaceAssetGenerator` featuring high-definition regions for structural steel girders, refractory hearth firebrick, incandescent molten bath, slag crust, copper tuyeres, bustle piping, and blast flame jets.
+
+### Changed
+- **3D Block Models for Blast Furnace Components**:
+  - `blast_furnace_controller`: Overhauled block model with a recessed operator instrument panel (set back 2 pixels), heavy protective overhead hood, side casing pillars, and lower foundation sill.
+  - `foundry_input_port`: Overhauled block model with a recessed pneumatic feed intake hopper throat and circular mounting flange.
+  - `foundry_output_port`: Overhauled block model featuring a protruding physical cast iron casting spout and tapping launder trough extending forward.
+- **16x16 Industrial Block Textures Overhaul**:
+  - `blast_furnace_casing.png`: High-definition dark gunmetal refractory casing with chamfered perimeter bevels, 4 heavy corner hex-head bolts, and an embossed center refractory ceramic heat-shield plate.
+  - `blast_furnace_controller_off.png`: Recessed operator console featuring a brass-rimmed analog pyrometer dial, multi-tier status LED cluster, and horizontal telemetry CRT monitor.
+  - `blast_furnace_controller_on.png`: Active operator console with the pyrometer dial pegged into the glowing 1600°C+ red zone, bright active green/yellow status LEDs, and glowing cyan telemetry diagnostics.
+  - `foundry_port_input.png`: High-detail pneumatic hopper intake with circular flange bolts and blue directional feed chevrons.
+  - `foundry_port_output.png`: Heavy refractory taphole opening with slag-resistant collar and glowing amber exit chevrons.
+  - `foundry_glass.png`: Clear high-temperature quartz glass with embedded diamond steel wire-mesh reinforcement and crisp specular gleams.
+
+---
+
+## [1.11.69] - 2026-11-10
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.69] - 2026-11-10
+
+### Changed
+- Mod update
+
+---
+
+## [1.11.69] - 2026-11-10
+
+### Added
+- **Sorting Conveyor Belt (Diverter Conveyor) (`SortingConveyorBeltBlock`, `SortingConveyorBeltBlockEntity`, `SortingConveyorMenu`, `SortingConveyorScreen`, `SortingConveyorBeltRenderer`, `SortingConveyorBeltModel`)**:
+  - Implemented the 3-Way Sorting Conveyor Belt for automated open-air factory item logistics.
+  - **Dynamic In-World 3-Way Diverting**:
+    - Incoming items smoothly traverse the extruded aluminum conveyor bed toward the center decision point.
+    - Real-time optical scanner evaluates items against 3 directional filter channels: **Left** (`facing.getCounterClockWise()`), **Straight/Forward** (`facing`), and **Right** (`facing.getClockWise()`).
+    - Redirects traveling items smoothly without speed loss or clipping, featuring physical centering forces and boundary handoff into adjacent conveyors (flat, sloped, right-angle, or sorting).
+    - Unmatched items continue straight through as overflow to prevent line blockages.
+    - Automatically injects into adjacent target inventories (chests, hoppers, machines) when reaching a terminal exit without another conveyor.
+  - **Interactive 27-Slot Configuration GUI**:
+    - Right-click with an empty hand (or any non-wrench item) opens the custom industrial gunmetal Sorting Conveyor interface (`SortingConveyorScreen`).
+    - Color-coded channel headers and slot wells:
+      - **Left Channel (Blue)**: 9 filter slots with blue accent badge and left arrow indicator.
+      - **Forward Channel (Green)**: 9 filter slots with emerald accent badge and up arrow indicator.
+      - **Right Channel (Orange)**: 9 filter slots with amber accent badge and right arrow indicator.
+    - Dropping or breaking the block safely returns all placed filter items.
+  - **High-Fidelity 3D Monolithic Model & Overhead Scanner Gantry**:
+    - Rendered with an extruded aluminum low-profile bed, open lateral exit ramps with stainless steel deflection rollers, and an overhead optical scanner bridge.
+    - Features downward glowing blue laser scanner beam and tri-color indicator status LEDs (Left Cyan/Blue, Center Green, Right Orange/Amber) on the crossbeam that dynamically pulse when items are diverted.
+    - Subtle mechanical pneumatic deflector sound effect played when items divert laterally.
+  - **Automation & Capabilities**:
+    - Fully supports items inserted from hoppers, droppers, and item pipes directly onto the conveyor surface via NeoForge `Capabilities.Item.BLOCK`, while keeping internal filter slots protected from external extraction.
+    - Supports redstone pausing (`POWERED=true` stops conveyor movement).
+    - Can be reoriented using the Refinery Wrench (clockwise on normal right-click, counter-clockwise on sneak-right-click).
+  - **Field Manual Guide Book Entry**: Added dedicated guide documentation under the Logistics section detailing filter setup and routing mechanics.
+  - **Crafting Recipe**: 1x Industrial Conveyor Belt + 1x Diamond Item Pipe + 2x Iron Ingots.
+
+---
+
+## [1.11.66] - 2026-11-09
+
+### Changed
+- **Multi-Smelter 4:1 Plank Pyrolysis & Batch Load Balancing (`MultiSmelterControllerBlockEntity`, `SmelterItemHandler`, `GuideBookRegistry`)**:
+  - Rebalanced the Multi-Smelter wooden plank pyrolysis recipe to require **4 Planks $\rightarrow$ 1 Charcoal** (eliminating the 4:1 log advantage and aligning plank smelting with logs).
+  - Implemented recipe batch-aware parallel load balancing in `SmelterItemHandler` (pipes/conveyors) and `getBalancedInputSlots` (vanilla hoppers):
+    - Incomplete recipe batches (e.g. 1..3 planks) take top priority so incoming items immediately fill the slot to 4 and trigger active cooking.
+    - Full recipe batches distribute evenly across all 8 input smelting slots (e.g. 4 planks per slot across all 8 slots), enabling all 8 parallel slots to start smelting immediately without requiring full stacks.
+    - Updated Field Manual Guide Book entry to reflect the 4:1 plank-to-charcoal ratio (32 planks $\rightarrow$ 8 charcoal).
+
+---
+
+## [1.11.64] - 2026-11-09
+
+### Changed
+- **Steam Boiler Solid Fuel Burn Duration Tuning (`SmallBoilerControllerBlockEntity`)**:
+  - Rebalanced the burn duration of coal and charcoal in both Small and Large Steam Boilers to **30 seconds** (600 ticks, tuned down from 80s / 1,600 ticks).
+  - Scaled related solid fuel durations proportionally:
+    - Coal Block: 6,000 ticks (300 seconds / 5 minutes)
+    - Tar, Bitumen, and Coal Dust: 600 ticks (30 seconds)
+    - Blaze Rod: 900 ticks (45 seconds)
+    - Logs / Planks: 150 ticks (7.5 seconds)
+
+---
+
 ## [1.11.62] - 2026-11-08
 
 ### Changed

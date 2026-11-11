@@ -233,9 +233,39 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         }
     }
 
+    public int getRequiredInputCount(ItemStack stack) {
+        if (stack.is(ItemTags.PLANKS)) return 4;
+        return 1;
+    }
+
     public int[] getBalancedInputSlots() {
         Integer[] slots = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7};
-        Arrays.sort(slots, (a, b) -> Integer.compare(this.items.get(a).getCount(), this.items.get(b).getCount()));
+        Arrays.sort(slots, (a, b) -> {
+            ItemStack stackA = this.items.get(a);
+            ItemStack stackB = this.items.get(b);
+            int countA = stackA.getCount();
+            int countB = stackB.getCount();
+            int reqA = getRequiredInputCount(stackA);
+            int reqB = getRequiredInputCount(stackB);
+
+            int remA = (countA > 0 && countA % reqA != 0) ? (reqA - (countA % reqA)) : 0;
+            int remB = (countB > 0 && countB % reqB != 0) ? (reqB - (countB % reqB)) : 0;
+
+            // Slots with an incomplete batch need more items to start cooking: prioritize them
+            if (remA > 0 && remB == 0) return -1;
+            if (remB > 0 && remA == 0) return 1;
+            if (remA > 0 && remB > 0) {
+                int cmp = Integer.compare(remA, remB);
+                if (cmp != 0) return cmp;
+            }
+
+            int batchesA = reqA > 0 ? countA / reqA : countA;
+            int batchesB = reqB > 0 ? countB / reqB : countB;
+            if (batchesA != batchesB) {
+                return Integer.compare(batchesA, batchesB);
+            }
+            return Integer.compare(a, b);
+        });
         int[] result = new int[8];
         for (int i = 0; i < 8; i++) {
             result[i] = slots[i];
@@ -297,11 +327,14 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
         for (int i = 0; i < INPUT_SLOTS_COUNT; i++) {
             ItemStack input = be.items.get(i);
             if (!input.isEmpty()) {
-                ItemStack res = be.getSmeltingResult(serverLevel, input);
-                if (!res.isEmpty() && be.canFitOutput(i + 8, res)) {
-                    canCook[i] = true;
-                    results[i] = res;
-                    activeCount++;
+                int req = be.getRequiredInputCount(input);
+                if (input.getCount() >= req) {
+                    ItemStack res = be.getSmeltingResult(serverLevel, input);
+                    if (!res.isEmpty() && be.canFitOutput(i + 8, res)) {
+                        canCook[i] = true;
+                        results[i] = res;
+                        activeCount++;
+                    }
                 }
             }
             if (!canCook[i] && be.cookProgress[i] > 0) {
@@ -347,7 +380,8 @@ public class MultiSmelterControllerBlockEntity extends BlockEntity implements Me
                         be.cookProgress[i]++;
                         if (be.cookProgress[i] >= PROCESS_TIME) {
                             be.cookProgress[i] = 0;
-                            be.items.get(i).shrink(1);
+                            int req = be.getRequiredInputCount(be.items.get(i));
+                            be.items.get(i).shrink(req);
                             be.addOutput(i + 8, results[i].copy());
                             be.replenishFuelFromOutput();
 

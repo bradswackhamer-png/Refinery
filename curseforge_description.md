@@ -205,10 +205,10 @@ Industrial Refinery is built with zero hard dependencies:
 When uploading your `.jar` file to CurseForge, use these values:
 
 ### File
-`refinery-1.11.62.jar`
+`refinery-1.11.71.jar`
 
 ### Display Name
-`Industrial Refinery 1.11.62 (NeoForge 26.3)`
+`Industrial Refinery 1.11.71 (NeoForge 26.3)`
 
 ### Release Type
 `Release` *(or Beta if preferred for initial testing)*
@@ -223,6 +223,37 @@ When uploading your `.jar` file to CurseForge, use these values:
 - `NeoForge`
 
 ### Changelog / Release Notes
+```markdown
+# Industrial Refinery v1.11.71
+
+### What's New in v1.11.71:
+- **Monolithic 3D Multiblock Blast Furnace Model & In-World Rendering**:
+  - Implemented high-fidelity in-world 3D model rendering for the assembled 5x5x5 Multiblock Blast Furnace:
+    - **Structural Steel Panoramic Window Bezel & Truss**: Heavy industrial I-beam lintel, sill, and jamb girders boxing the 3x3 front viewing window, reinforced by 4 riveted corner gusset bracket plates and a center mullion cross-strut with a circular connection rosette hub.
+    - **Foundry Ingot Rating Emblem**: Heavy embossed steel rating nameplate badge mounted above the front window lintel.
+    - **Stepped Refractory Crucible Hearth Basin**: Multi-tier magnesia-carbon firebrick refractory hearth lining the bottom layer of the 3x3x3 interior chamber, complete with a tapping drainage launder notch.
+    - **Dynamic Molten Pig Iron / Steel Bath**: Fully animated undulating incandescent molten metal bath glowing fiercely in fullbright (`15728880`) with wave height oscillation and floating dark metallurgical slag crust rafts.
+    - **Superheated Hot Blast Tuyeres**: 6 water-cooled cast copper blowpipe nozzles projecting from the refractory walls into the hearth.
+    - **Active Smelting Hot Blast Flame Jets**: Roaring high-temperature oxygen-enriched flame plasma streams blasting from the tuyere nozzles directly into the molten hearth during active smelting.
+    - **Overhead Bustle Pipe Ring Manifold & Downcomers**: Suspended insulated toroidal dark steel hot blast distribution pipe with 4 vertical gooseneck downcomers feeding the tuyere cooling jackets.
+    - **Conical Charge Throat & Distribution Bell Valve**: Suspended conical hopper throat and heavy cast distribution bell valve at the ceiling center.
+- **Dedicated 256x256 Blast Furnace Entity Texture Atlas (`assets/refinery/textures/entity/blast_furnace.png`)**:
+  - High-definition textures for structural steel girders, refractory hearth firebrick, incandescent molten bath, slag crust, copper tuyeres, bustle piping, and blast flame jets.
+- **3D Block Models for Blast Furnace Components**:
+  - `blast_furnace_controller`: Overhauled block model with a recessed operator instrument panel (set back 2 pixels), heavy protective overhead hood, side casing pillars, and lower foundation sill.
+  - `foundry_input_port`: Overhauled block model with a recessed pneumatic feed intake hopper throat and circular mounting flange.
+  - `foundry_output_port`: Overhauled block model featuring a protruding physical cast iron casting spout and tapping launder trough extending forward.
+- **16x16 Industrial Block Textures Overhaul**:
+  - `blast_furnace_casing.png`: High-definition dark gunmetal refractory casing with chamfered perimeter bevels, 4 heavy corner hex-head bolts, and an embossed center refractory ceramic heat-shield plate.
+  - `blast_furnace_controller_off.png`: Recessed operator console featuring a brass-rimmed analog pyrometer dial, multi-tier status LED cluster, and horizontal telemetry CRT monitor.
+  - `blast_furnace_controller_on.png`: Active operator console with the pyrometer dial pegged into the glowing 1600°C+ red zone, bright active green/yellow status LEDs, and glowing cyan telemetry diagnostics.
+  - `foundry_port_input.png`: High-detail pneumatic hopper intake with circular flange bolts and blue directional feed chevrons.
+  - `foundry_port_output.png`: Heavy refractory taphole opening with slag-resistant collar and glowing amber exit chevrons.
+  - `foundry_glass.png`: Clear high-temperature quartz glass with embedded diamond steel wire-mesh reinforcement and crisp specular gleams.
+```
+
+---
+
 ```markdown
 # Industrial Refinery v1.11.62
 

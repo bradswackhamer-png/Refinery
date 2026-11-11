@@ -141,6 +141,8 @@
   "item.refinery.sloped_conveyor_belt": "Sloped Conveyor Belt",
   "block.refinery.right_angle_conveyor_belt": "Right-Angle Conveyor Belt",
   "item.refinery.right_angle_conveyor_belt": "Right-Angle Conveyor Belt",
+  "block.refinery.sorting_conveyor_belt": "Sorting Conveyor Belt",
+  "item.refinery.sorting_conveyor_belt": "Sorting Conveyor Belt",
   "block.refinery.feeding_trough": "Livestock Feeding Trough",
   "item.refinery.feeding_trough": "Livestock Feeding Trough",
   "block.refinery.storage_tank_casing": "Liquid Storage Tank Casing",

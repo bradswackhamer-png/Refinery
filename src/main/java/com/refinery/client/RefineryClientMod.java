@@ -72,6 +72,7 @@ public class RefineryClientMod {
         event.register((MenuType) RefineryMod.WOOD_PIPE_MENU.get(), WoodPipeScreen::new);
         event.register((MenuType) RefineryMod.DIESEL_GENERATOR_MENU.get(), DieselGeneratorScreen::new);
         event.register((MenuType) RefineryMod.BUFFER_PIPE_MENU.get(), BufferPipeScreen::new);
+        event.register((MenuType) RefineryMod.SORTING_CONVEYOR_MENU.get(), SortingConveyorScreen::new);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -100,6 +101,7 @@ public class RefineryClientMod {
         event.registerBlockEntityRenderer(RefineryMod.CONVEYOR_BELT_BE.get(), ConveyorBeltRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.SLOPED_CONVEYOR_BELT_BE.get(), SlopedConveyorBeltRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.RIGHT_ANGLE_CONVEYOR_BELT_BE.get(), RightAngleConveyorBeltRenderer::new);
+        event.registerBlockEntityRenderer(RefineryMod.SORTING_CONVEYOR_BELT_BE.get(), SortingConveyorBeltRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.FEEDING_TROUGH_BE.get(), FeedingTroughRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.BITUMEN_PILE_BE.get(), BitumenPileRenderer::new);
         event.registerBlockEntityRenderer(RefineryMod.CRUDE_PUMP_JACK_BE.get(), CrudePumpJackRenderer::new);

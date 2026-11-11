@@ -11,6 +11,9 @@ public class BlastFurnaceControllerRenderState extends BlockEntityRenderState {
     public boolean isBlueprintActive;
     public boolean isAssembled;
     public boolean isActive;
+    public int progress;
+    public long gameTime;
+    public float partialTicks;
     public Direction facing = Direction.NORTH;
     public BlockPos controllerPos = BlockPos.ZERO;
 

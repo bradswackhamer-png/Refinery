@@ -138,20 +138,27 @@ public class SmelterItemHandler implements ResourceHandler<ItemResource> {
         }
 
         // Automatic load-balanced parallel distribution across the 8 input smelting slots (0..7)
+        int req = controller.getRequiredInputCount(stack);
         int remaining = amount;
         int totalInserted = 0;
 
         while (remaining > 0) {
             int bestSlot = -1;
-            long minCount = Long.MAX_VALUE;
+            int bestPriority = Integer.MAX_VALUE; // 0 = incomplete batch, 1 = complete batch
+            long bestKey = Long.MAX_VALUE;
 
             for (int i = 0; i < MultiSmelterControllerBlockEntity.INPUT_SLOTS_COUNT; i++) {
                 ItemResource current = wrapper.getResource(i);
                 long count = wrapper.getAmountAsLong(i);
                 long cap = wrapper.getCapacityAsLong(i, resource);
                 if (count < cap && (current.isEmpty() || current.equals(resource))) {
-                    if (count < minCount) {
-                        minCount = count;
+                    int rem = (count > 0 && count % req != 0) ? (int)(req - (count % req)) : 0;
+                    int priority = (rem > 0) ? 0 : 1;
+                    long sortKey = (rem > 0) ? rem : (count / req);
+
+                    if (priority < bestPriority || (priority == bestPriority && sortKey < bestKey)) {
+                        bestPriority = priority;
+                        bestKey = sortKey;
                         bestSlot = i;
                     }
                 }
@@ -161,26 +168,21 @@ public class SmelterItemHandler implements ResourceHandler<ItemResource> {
                 break; // All input slots full or incompatible
             }
 
-            // Find next lowest count among candidate slots to batch transfer
-            long nextMinCount = Long.MAX_VALUE;
-            for (int i = 0; i < MultiSmelterControllerBlockEntity.INPUT_SLOTS_COUNT; i++) {
-                if (i == bestSlot) continue;
-                ItemResource current = wrapper.getResource(i);
-                long count = wrapper.getAmountAsLong(i);
-                long cap = wrapper.getCapacityAsLong(i, resource);
-                if (count < cap && (current.isEmpty() || current.equals(resource))) {
-                    if (count > minCount && count < nextMinCount) {
-                        nextMinCount = count;
-                    }
-                }
+            long currentCount = wrapper.getAmountAsLong(bestSlot);
+            long cap = wrapper.getCapacityAsLong(bestSlot, resource);
+            int maxSpace = (int) Math.min(cap - currentCount, Integer.MAX_VALUE);
+
+            int targetAmount;
+            if (bestPriority == 0) {
+                // Incomplete batch: insert what is needed to complete this batch and start cooking
+                int needed = (int)(req - (currentCount % req));
+                targetAmount = Math.min(remaining, needed);
+            } else {
+                // Complete batch: insert 1 full recipe batch (or remaining)
+                targetAmount = Math.min(remaining, req);
             }
 
-            int canTake = (int) Math.min(
-                    nextMinCount != Long.MAX_VALUE ? (nextMinCount - minCount) : remaining,
-                    wrapper.getCapacityAsLong(bestSlot, resource) - minCount
-            );
-            int toInsert = Math.max(1, Math.min(remaining, canTake));
-
+            int toInsert = Math.max(1, Math.min(targetAmount, maxSpace));
             int inserted = wrapper.insert(bestSlot, resource, toInsert, transaction);
             if (inserted <= 0) {
                 break;
