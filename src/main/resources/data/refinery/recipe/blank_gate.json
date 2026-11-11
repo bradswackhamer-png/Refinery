@@ -1,8 +1,12 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    "minecraft:iron_ingot"
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NN",
+    "NN"
   ],
+  "key": {
+    "N": "#c:nuggets/iron"
+  },
   "result": {
     "id": "refinery:blank_gate",
     "count": 4

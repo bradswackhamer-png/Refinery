@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "#c:ingots/steel",
+  "result": {
+    "id": "refinery:steel_plate",
+    "count": 1
+  }
+}

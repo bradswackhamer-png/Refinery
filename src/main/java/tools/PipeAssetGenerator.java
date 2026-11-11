@@ -518,7 +518,17 @@ public class PipeAssetGenerator {
         writeItemPipeRecipe("diamond_item_pipe", "minecraft:diamond");
         writeItemPipeRecipe("emerald_item_pipe", "minecraft:emerald");
         writeItemPipeRecipe("merge_pipe", "minecraft:quartz");
-        writeItemPipeRecipe("merge_item_pipe", "minecraft:quartz");
+        // merge_item_pipe converts 1:1 to merge_pipe
+        writeRecipe("merge_item_pipe", "{\\n" +
+                "  \\\"type\\\": \\\"minecraft:crafting_shapeless\\\",\\n" +
+                "  \\\"ingredients\\\": [\\n" +
+                "    \\\"refinery:merge_item_pipe\\\"\\n" +
+                "  ],\\n" +
+                "  \\\"result\\\": {\\n" +
+                "    \\\"id\\\": \\\"refinery:merge_pipe\\\",\\n" +
+                "    \\\"count\\\": 1\\n" +
+                "  }\\n" +
+                "}");
 
         // Fluid conversion recipes: [Item Pipe] + [Tar OR Slime Ball] -> Fluid Pipe
         String[] fluidMaterials = {"wood", "copper", "iron", "steel", "gold", "diamond", "merge"};
@@ -536,7 +546,7 @@ public class PipeAssetGenerator {
                 "    \"BGB\"\n" +
                 "  ],\n" +
                 "  \"key\": {\n" +
-                "    \"B\": \"minecraft:gold_ingot\",\n" +
+                "    \"B\": \"#c:ingots/brass\",\n" +
                 "    \"G\": \"minecraft:glass\"\n" +
                 "  },\n" +
                 "  \"result\": {\n" +

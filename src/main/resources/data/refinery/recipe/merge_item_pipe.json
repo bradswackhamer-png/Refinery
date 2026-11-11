@@ -1,14 +1,10 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "MGM"
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "refinery:merge_item_pipe"
   ],
-  "key": {
-    "M": "minecraft:quartz",
-    "G": "minecraft:glass"
-  },
   "result": {
-    "id": "refinery:merge_item_pipe"
-,    "count": 10
+    "id": "refinery:merge_pipe",
+    "count": 1
   }
 }

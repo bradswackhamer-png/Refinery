@@ -1,8 +1,6 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    "#c:ingots/gold"
-  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "#c:ingots/gold",
   "result": {
     "id": "refinery:gold_plate",
     "count": 1

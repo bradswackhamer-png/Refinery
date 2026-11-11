@@ -552,7 +552,7 @@ public class CorrugatedPanelAssetGenerator {
 
     private static void generateRecipes(ColorScheme s, File dataDir) throws Exception {
         if (s.dyeItem() == null) {
-            // Raw panel crafted from 4 Iron Ingots in 2x2 grid -> 4 panels
+            // Raw panel crafted from 3 Iron Ingots in horizontal row -> 6 panels
             String json = "{\n" +
                     "  \"type\": \"minecraft:crafting_shaped\",\n" +
                     "  \"category\": \"building\",\n" +
@@ -560,11 +560,10 @@ public class CorrugatedPanelAssetGenerator {
                     "    \"#\": \"#c:ingots/iron\"\n" +
                     "  },\n" +
                     "  \"pattern\": [\n" +
-                    "    \"##\",\n" +
-                    "    \"##\"\n" +
+                    "    \"###\"\n" +
                     "  ],\n" +
                     "  \"result\": {\n" +
-                    "    \"count\": 4,\n" +
+                    "    \"count\": 6,\n" +
                     "    \"id\": \"refinery:corrugated_steel_panel\"\n" +
                     "  }\n" +
                     "}\n";

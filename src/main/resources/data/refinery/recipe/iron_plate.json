@@ -1,8 +1,6 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    "#c:ingots/iron"
-  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "#c:ingots/iron",
   "result": {
     "id": "refinery:iron_plate",
     "count": 1

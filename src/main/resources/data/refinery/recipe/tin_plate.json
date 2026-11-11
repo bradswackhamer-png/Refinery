@@ -1,8 +1,6 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    "#c:ingots/tin"
-  ],
+  "type": "minecraft:stonecutting",
+  "ingredient": "#c:ingots/tin",
   "result": {
     "id": "refinery:tin_plate",
     "count": 1

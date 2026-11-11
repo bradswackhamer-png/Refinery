@@ -4,10 +4,20 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
-## [1.11.71] - 2026-11-10
+## [1.11.72] - 2026-11-11
 
-### Changed
-- Mod update
+### Fixed
+- **Pipe Gate Crafting Collision Fix (`blank_gate.json`)**:
+  - Changed Blank Pipe Gate recipe from shapeless 1 Iron Ingot to shaped 2x2 Iron Nuggets (`"NN"`, `"NN"`, `#c:nuggets/iron`) yielding 4 Blank Pipe Gates.
+  - Resolves crafting grid recipe collision with vanilla Minecraft 1 Iron Ingot -> 9 Iron Nuggets, and fits directly in the player's 2x2 inventory crafting grid.
+- **Recipe Collision Audit & Comprehensive Fixes**:
+  - Conducted a full automated audit of all 230 Refinery recipes against all vanilla Minecraft 26.3 recipes, resolving all detected conflicts:
+  - **Brass Item Pipe (`brass_item_pipe.json`)**: Fixed material ingredient key `"B"` from `"minecraft:gold_ingot"` to `"#c:ingots/brass"`. Resolves duplicate recipe collision with Gold Item Pipe (`gold_item_pipe.json`).
+  - **Quartz Merger Item Pipe (`merge_item_pipe.json`)**: Converted `merge_item_pipe.json` into a 1:1 shapeless conversion into canonical `refinery:merge_pipe`, resolving the duplicate quartz pipe crafting recipe while preserving legacy item conversion.
+  - **Corrugated Steel Panel (`corrugated_steel_panel.json`)**: Changed shaped pattern from 2x2 square to 1x3 horizontal row (`"###"`, `#c:ingots/iron`) yielding 6 panels (matching the 1 ingot : 2 panels stonecutting ratio). Resolves recipe collision with vanilla `minecraft:iron_trapdoor` (2x2 iron ingots).
+  - **Metal Plate Recipes Stonecutting Conversion (`iron_plate.json`, `gold_plate.json`, `copper_plate.json`, `tin_plate.json`, `bronze_plate.json`, `steel_plate.json`)**: Converted 1-ingot shapeless crafting recipes to Stonecutter recipes (1 ingot -> 1 plate in Stonecutter, alongside automated high-throughput stamping in the Hydraulic Metal Press with `plate_die`). Eliminates recipe conflicts with vanilla iron nuggets, gold nuggets, and copper nuggets.
+  - **Cross-Mod Nugget Convention Tag**: Added `data/c/tags/item/nuggets/iron.json` tagging `minecraft:iron_nugget` under `#c:nuggets/iron`.
+  - **Asset Generator Consistency**: Updated `PipeAssetGenerator.java` and `CorrugatedPanelAssetGenerator.java` so re-generating pipe or panel recipes preserves the collision-free patterns.
 
 ---
 
