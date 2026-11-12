@@ -579,7 +579,7 @@ public class IndustrialGrinderControllerBlockEntity extends BlockEntity implemen
         if (input.is(INGOTS_TIN) || path.equals("tin_ingot")) {
             return new ItemStack(RefineryMod.TIN_DUST.get(), 1);
         }
-        if (input.is(INGOTS_BRONZE) || path.equals("bronze_ingot")) {
+        if (input.is(INGOTS_BRONZE) || input.is(RefineryMod.BRASS_INGOT.get()) || path.equals("bronze_ingot") || path.equals("brass_ingot")) {
             return new ItemStack(RefineryMod.BRONZE_DUST.get(), 1);
         }
         if (path.equals("caterium_ingot")) {

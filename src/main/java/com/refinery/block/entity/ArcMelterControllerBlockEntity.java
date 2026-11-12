@@ -479,8 +479,8 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
                 || path.contains("tin_dust") || path.contains("raw_tin") || path.contains("tin_ingot") || path.contains("tin_ore")) {
             return RefineryFluids.MOLTEN_TIN_SOURCE.get();
         }
-        // 5. Bronze Dust -> Molten Bronze
-        if (input.is(RefineryMod.BRONZE_DUST.get()) || input.is(RefineryMod.BRONZE_INGOT.get()) || path.contains("bronze_dust") || path.contains("bronze_ingot")) {
+        // 5. Bronze / Brass Ingot or Dust -> Molten Bronze
+        if (input.is(RefineryMod.BRONZE_DUST.get()) || input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(RefineryMod.BRASS_INGOT.get()) || path.contains("bronze_dust") || path.contains("bronze_ingot") || path.contains("brass_ingot")) {
             return RefineryFluids.MOLTEN_BRONZE_SOURCE.get();
         }
         // 6. Sand & Quartz -> Molten Glass
@@ -494,7 +494,7 @@ public class ArcMelterControllerBlockEntity extends BlockEntity implements MenuP
     public static boolean isIngot(ItemStack stack) {
         if (stack.isEmpty()) return false;
         if (stack.is(Items.IRON_INGOT) || stack.is(Items.GOLD_INGOT) || stack.is(Items.COPPER_INGOT)
-                || stack.is(RefineryMod.TIN_INGOT.get()) || stack.is(RefineryMod.BRONZE_INGOT.get())
+                || stack.is(RefineryMod.TIN_INGOT.get()) || stack.is(RefineryMod.BRONZE_INGOT.get()) || stack.is(RefineryMod.BRASS_INGOT.get())
                 || stack.is(Blocks.GLASS.asItem())) {
             return true;
         }

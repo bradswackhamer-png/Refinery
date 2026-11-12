@@ -1,6 +1,7 @@
 {
   "values": [
     "refinery:bronze_ingot",
+    {"id": "refinery:brass_ingot", "required": false},
     {"id": "logistics:core/bronze_ingot", "required": false}
   ]
 }

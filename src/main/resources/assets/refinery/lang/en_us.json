@@ -271,6 +271,8 @@
   "item.refinery.tin_plate": "Tin Plate",
   "item.refinery.bronze_dust": "Bronze Dust",
   "item.refinery.bronze_ingot": "Bronze Ingot",
+  "item.refinery.brass_ingot": "Brass Ingot",
+  "tooltip.refinery.brass_ingot.desc": "§eMachinable corrosion-resistant alloy crafted from copper and tin.",
   "item.refinery.bronze_plate": "Bronze Plate",
   "item.refinery.coal_dust": "Coal Dust",
   "item.refinery.steel_ingot": "Steel Ingot",
@@ -366,7 +368,6 @@
   "item.refinery.tin_ingot": "Tin Ingot",
   "item.refinery.tin_dust": "Tin Dust",
   "item.refinery.tin_plate": "Tin Plate",
-  "item.refinery.bronze_ingot": "Bronze Ingot",
   "item.refinery.bronze_dust": "Bronze Dust",
   "item.refinery.bronze_plate": "Bronze Plate",
 

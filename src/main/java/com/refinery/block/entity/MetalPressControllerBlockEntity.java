@@ -363,7 +363,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             if (input.is(RefineryMod.TIN_INGOT.get()) || input.is(INGOTS_TIN) || path.equals("tin_ingot")) {
                 return new ItemStack(RefineryMod.TIN_PLATE.get(), 1);
             }
-            if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(INGOTS_BRONZE) || path.equals("bronze_ingot")) {
+            if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(RefineryMod.BRASS_INGOT.get()) || input.is(INGOTS_BRONZE) || path.equals("bronze_ingot") || path.equals("brass_ingot")) {
                 return new ItemStack(RefineryMod.BRONZE_PLATE.get(), 1);
             }
             return ItemStack.EMPTY;
@@ -380,7 +380,7 @@ public class MetalPressControllerBlockEntity extends BlockEntity implements Menu
             if (input.is(Items.COPPER_INGOT) || input.is(INGOTS_COPPER) || input.is(RefineryMod.COPPER_PLATE.get()) || input.is(PLATES_COPPER) || path.contains("copper")) {
                 return new ItemStack(RefineryMod.COPPER_GEAR.get(), 1);
             }
-            if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(INGOTS_BRONZE) || input.is(RefineryMod.BRONZE_PLATE.get()) || input.is(PLATES_BRONZE) || path.contains("bronze")) {
+            if (input.is(RefineryMod.BRONZE_INGOT.get()) || input.is(RefineryMod.BRASS_INGOT.get()) || input.is(INGOTS_BRONZE) || input.is(RefineryMod.BRONZE_PLATE.get()) || input.is(PLATES_BRONZE) || path.contains("bronze") || path.contains("brass")) {
                 return new ItemStack(RefineryMod.BRONZE_GEAR.get(), 1);
             }
             if (input.is(Items.GOLD_INGOT) || input.is(INGOTS_GOLD) || input.is(RefineryMod.GOLD_PLATE.get()) || input.is(PLATES_GOLD) || path.contains("gold")) {

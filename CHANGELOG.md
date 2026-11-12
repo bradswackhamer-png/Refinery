@@ -4,6 +4,32 @@ All notable changes to the **Industrial Refinery** mod are documented in this fi
 
 ---
 
+## [1.11.73] - 2026-11-11
+
+### Added
+- **Brass Ingot (`refinery:brass_ingot`)**:
+  - Added native industrial Brass Ingot to the game, featuring a dedicated high-definition polished yellow-brass metallic sprite (`textures/item/brass_ingot.png`), 1.21.4+ item model architecture, descriptive tooltip, and Creative Tab registration.
+- **Brass Crafting & Alloying Recipes**:
+  - `brass_ingot_from_alloying.json`: Alloy 3 Copper Ingots + 1 Tin Ingot $\rightarrow$ 4 Brass Ingots (shapeless).
+  - `brass_ingot_from_copper_gold.json`: Alloy 1 Copper Ingot + 1 Gold Ingot $\rightarrow$ 2 Brass Ingots (shapeless).
+  - `brass_ingot_from_bronze.json`: 1:1 interchangeability conversion of 1 Bronze Ingot $\rightarrow$ 1 Brass Ingot (shapeless).
+  - `bronze_ingot_from_brass.json`: 1:1 interchangeability conversion of 1 Brass Ingot $\rightarrow$ 1 Bronze Ingot (shapeless).
+- **Standard Convention Tags (`#c:ingots/brass`)**:
+  - Registered `data/c/tags/item/ingots/brass.json` containing both `refinery:brass_ingot` and `refinery:bronze_ingot`.
+  - Added `#c:ingots/brass` to the root `data/c/tags/item/ingots.json` tag list.
+  - Linked `refinery:brass_ingot` into `data/c/tags/item/ingots/bronze.json` for universal cross-alloy compatibility.
+- **Machine Processing Support for Brass**:
+  - Arc Melter: Brass ingots melt smoothly into Molten Bronze at 250 mB per ingot.
+  - Hydraulic Metal Press: Brass ingots can be stamped directly into industrial plates and gears.
+  - Industrial Grinder: Brass ingots can be pulverized into alloy dust.
+
+### Fixed
+- **Missing Tag Datapack Crash (`Missing tag: 'c:ingots/brass'`)**:
+  - Resolved fatal server startup crash `java.lang.IllegalStateException: Map entry 'B' : Missing tag: 'c:ingots/brass'` by providing the official `#c:ingots/brass` tag definition.
+  - Removed obsolete duplicate recipe file `brass_item_pipe_from_bronze.json` since `brass_item_pipe.json` seamlessly accepts both Brass and Bronze via `#c:ingots/brass`.
+
+---
+
 ## [1.11.72] - 2026-11-11
 
 ### Fixed

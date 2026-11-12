@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:ingots/copper",
+    "#c:ingots/gold"
+  ],
+  "result": {
+    "id": "refinery:brass_ingot",
+    "count": 2
+  }
+}

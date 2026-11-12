@@ -555,21 +555,6 @@ public class PipeAssetGenerator {
                 "  }\n" +
                 "}");
 
-        writeRecipe("brass_item_pipe_from_bronze", "{\n" +
-                "  \"type\": \"minecraft:crafting_shaped\",\n" +
-                "  \"pattern\": [\n" +
-                "    \"BGB\"\n" +
-                "  ],\n" +
-                "  \"key\": {\n" +
-                "    \"B\": \"refinery:bronze_ingot\",\n" +
-                "    \"G\": \"minecraft:glass\"\n" +
-                "  },\n" +
-                "  \"result\": {\n" +
-                "    \"id\": \"refinery:brass_item_pipe\",\n" +
-                "    \"count\": 10\n" +
-                "  }\n" +
-                "}");
-
         writeRecipe("cast_iron_fluid_pipe", "{\n" +
                 "  \"type\": \"minecraft:crafting_shaped\",\n" +
                 "  \"pattern\": [\n" +

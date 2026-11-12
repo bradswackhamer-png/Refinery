@@ -795,6 +795,8 @@ public class RefineryMod {
             p -> new MaterialItem(p, "tooltip.refinery.bronze_dust.desc"), Item.Properties::new);
     public static final DeferredItem<MaterialItem> BRONZE_INGOT = ITEMS.registerItem("bronze_ingot",
             p -> new MaterialItem(p, "tooltip.refinery.bronze_ingot.desc"), Item.Properties::new);
+    public static final DeferredItem<MaterialItem> BRASS_INGOT = ITEMS.registerItem("brass_ingot",
+            p -> new MaterialItem(p, "tooltip.refinery.brass_ingot.desc"), Item.Properties::new);
     public static final DeferredItem<MaterialItem> BRONZE_PLATE = ITEMS.registerItem("bronze_plate",
             p -> new MaterialItem(p, "tooltip.refinery.bronze_plate.desc"), Item.Properties::new);
     public static final DeferredItem<MaterialItem> COAL_DUST = ITEMS.registerItem("coal_dust",
@@ -1304,6 +1306,7 @@ public class RefineryMod {
                         output.accept(TIN_PLATE.get());
                         output.accept(BRONZE_DUST.get());
                         output.accept(BRONZE_INGOT.get());
+                        output.accept(BRASS_INGOT.get());
                         output.accept(BRONZE_PLATE.get());
                         output.accept(COAL_DUST.get());
                         output.accept(IRON_PLATE.get());
